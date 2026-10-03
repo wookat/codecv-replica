@@ -1,0 +1,18 @@
+@import url("../../common.css");
+.markdown-transform-html {
+    font-weight: 500;
+    padding: 40px 50px;
+}
+.markdown-transform-html h1, .markdown-transform-html h2, .markdown-transform-html h3 {
+    font-weight: 800;
+    color: var(--markdown-primary-bg-color);
+}
+.markdown-transform-html p, .markdown-transform-html li {
+    font-size: 14px;
+}
+.markdown-transform-html p i:not(.iconfont) {
+    font-size: 16px;
+}
+.markdown-transform-html .flex-layout {
+    align-items: center;
+}

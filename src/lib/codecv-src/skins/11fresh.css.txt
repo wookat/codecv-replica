@@ -1,0 +1,54 @@
+@charset "UTF-8";
+@import url("../../common.css");
+.markdown-transform-html img[alt='个人头像'] {
+    width: 28mm;
+    height: 28mm;
+    border-radius: 50%;
+}
+.markdown-transform-html h1, .markdown-transform-html h2, .markdown-transform-html h3, .markdown-transform-html h4, .markdown-transform-html h5, .markdown-transform-html h6, .markdown-transform-html strong, .markdown-transform-html b, .markdown-transform-html a {
+    color: var(--markdown-primary-bg-color);
+}
+.markdown-transform-html .resume-module h2 {
+    font-size: 17px;
+    position: relative;
+    color: var(--markdown-primary-bg-color);
+    height: 40px;
+    line-height: 40px !important;
+    position: relative;
+}
+.markdown-transform-html .resume-module h2 i.iconfont {
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    line-height: 30px !important;
+    font-size: 16px;
+    text-align: center;
+    background: var(--markdown-primary-bg-color);
+}
+.markdown-transform-html .resume-module h2::before {
+    background: white;
+    position: absolute;
+    content: '';
+    top: 0;
+    left: 0;
+    width: 100px;
+    z-index: -1;
+    height: 100%;
+}
+.markdown-transform-html .resume-module h2::after {
+    content: '';
+    position: absolute;
+    height: 1px;
+    width: 100%;
+    background: var(--markdown-primary-bg-color);
+    top: 50%;
+    left: 0;
+    z-index: -2;
+    border-radius: 3px;
+    opacity: 0.3;
+    transform: translateY(-50%);
+}
+.markdown-transform-html i.icon-fillstar, .markdown-transform-html i.icon-star {
+    color: #efdd15;
+}

@@ -1,0 +1,49 @@
+@import url("../../common.css");
+.markdown-transform-html h1, .markdown-transform-html h2 {
+    color: var(--markdown-primary-bg-color);
+}
+.markdown-transform-html h2 {
+    font-size: 20px;
+    margin: 10px 0 8px 0;
+    padding-bottom: 2px;
+    border-bottom: 3px solid var(--markdown-primary-bg-color);
+}
+.markdown-transform-html h2 i.iconfont {
+    font-size: 23px;
+}
+.markdown-transform-html h3, .markdown-transform-html h4 {
+    font-size: 16px;
+}
+.markdown-transform-html h5, .markdown-transform-html h6, .markdown-transform-html strong, .markdown-transform-html b {
+    font-size: 14px;
+}
+.markdown-transform-html a {
+    color: var(--markdown-primary-color);
+    text-decoration: none;
+}
+.markdown-transform-html .iconfont {
+    margin-right: 5px;
+    font-size: 20px;
+}
+.markdown-transform-html ul, .markdown-transform-html ol {
+    padding-left: 20px;
+}
+.markdown-transform-html ul li {
+    list-style: square;
+}
+.markdown-transform-html strong a, .markdown-transform-html b a {
+    display: block;
+    margin-top: 8px;
+}
+.markdown-transform-html .head-layout {
+    padding-top: 15px;
+}
+.markdown-transform-html .head-layout h1 {
+    letter-spacing: 5px;
+}
+.markdown-transform-html .head-layout i {
+    margin-right: 8px;
+}
+.markdown-transform-html p {
+    margin-top: 8px;
+}

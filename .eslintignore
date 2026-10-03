@@ -7,3 +7,4 @@ service
 **/*.scss
 **/*.css
 index.html
+src/templates/modules/*/index.ts

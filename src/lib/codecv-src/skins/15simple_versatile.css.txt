@@ -1,0 +1,73 @@
+
+@import url("../../common.css");
+.markdown-transform-html {
+    color: var(--markdown-primary-color);
+}
+.markdown-transform-html i.iconfont {
+    font-size: 18px;
+    margin-right: 5px;
+}
+.markdown-transform-html .resume-module > h2 {
+    color: var(--markdown-primary-bg-color);
+    border-left: 4px solid var(--markdown-primary-bg-color) !important;
+    padding: 3px 10px;
+    position: relative;
+    font-size: 16px;
+}
+.markdown-transform-html .resume-module > h2 i.iconfont {
+    font-size: 20px;
+}
+.markdown-transform-html .resume-module > h2::after {
+    content: '';
+    width: 100%;
+    height: 100%;
+    background: var(--markdown-primary-bg-color);
+    opacity: 0.1;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: -1;
+}
+.markdown-transform-html h2 {
+    color: var(--markdown-primary-bg-color);
+    margin: 10px 0 5px 0;
+}
+.markdown-transform-html h3 {
+    font-size: 15px;
+    margin-bottom: 4px;
+}
+.markdown-transform-html .head-layout img[alt*='个人头像'] {
+    width: 95px;
+    height: 95px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+.markdown-transform-html .head-layout .flex-layout-item {
+    margin-right: 10px;
+}
+.markdown-transform-html .head-layout .flex-layout-item:last-child {
+    margin-right: 0;
+}
+.markdown-transform-html .head-layout h2 {
+    color: var(--markdown-primary-color);
+}
+.markdown-transform-html .head-layout strong, .markdown-transform-html .head-layout b {
+    margin-left: 10px;
+}
+.markdown-transform-html ul, .markdown-transform-html ol {
+    padding-left: 20px;
+}
+.markdown-transform-html ul + ol {
+    padding-left: 30px;
+}
+.markdown-transform-html ul li::marker {
+    font-size: 18px;
+}
+.markdown-transform-html a {
+    color: var(--markdown-primary-bg-color);
+    text-decoration: none;
+    border-bottom: 1px solid var(--markdown-primary-bg-color);
+}
+.markdown-transform-html p, .markdown-transform-html li {
+    margin-top: 7px;
+}

@@ -1,0 +1,46 @@
+@import url("../../common.css");
+.markdown-transform-html {
+    font-size: 16px;
+    color: var(--markdown-primary-color);
+}
+.markdown-transform-html .iconfont {
+    margin-right: 5px;
+    font-size: 21px;
+    color: var(--markdown-primary-color);
+}
+.markdown-transform-html h2 {
+    margin-top: 20px;
+    padding: 0 15px;
+    background: linear-gradient(to right, var(--markdown-primary-bg-color), white, white);
+    color: white !important;
+    position: relative;
+    z-index: 99;
+    line-height: 35px;
+}
+.markdown-transform-html h2::before, .markdown-transform-html h2::after {
+    content: '';
+    position: absolute;
+    border: 20px solid transparent;
+    border-top-color: var(--markdown-primary-bg-color);
+    left: -20px;
+    z-index: -1;
+}
+.markdown-transform-html h2::after {
+    top: 15px;
+}
+.markdown-transform-html ul, .markdown-transform-html ol {
+    padding-left: 20px;
+}
+.markdown-transform-html ul li, .markdown-transform-html ol li {
+    margin-top: 6px;
+    color: var(--markdown-primary-color);
+}
+.markdown-transform-html ol {
+    padding-left: 30px;
+}
+.markdown-transform-html p {
+    margin-top: 8px;
+}
+.markdown-transform-html strong, .markdown-transform-html b {
+    color: var(--markdown-primary-color);
+}

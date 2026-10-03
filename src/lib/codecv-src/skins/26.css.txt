@@ -1,0 +1,59 @@
+@import url("../../common.css");
+.markdown-transform-html {
+    font-size: 13px;
+    padding: 30px 45px;
+}
+.markdown-transform-html::before {
+    content: '';
+    width: 100%;
+    height: 20px;
+    background: var(--markdown-primary-bg-color);
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+.markdown-transform-html img[alt='个人头像'] {
+    width: 21mm;
+    height: 25mm;
+    border-radius: 5px;
+}
+.markdown-transform-html .head-layout {
+    margin-top: 20px;
+}
+.markdown-transform-html .head-layout .flex-layout {
+    text-align: center;
+}
+.markdown-transform-html .head-layout .flex-layout .flex-layout-item {
+    margin-right: 20px;
+    flex: 1;
+    align-self: flex-start;
+}
+.markdown-transform-html .head-layout .flex-layout .flex-layout-item:last-child {
+    flex: none;
+    margin-right: 0;
+}
+.markdown-transform-html .head-layout .flex-layout h2, .markdown-transform-html .head-layout .flex-layout h3 {
+    padding-bottom: 5px;
+}
+.markdown-transform-html h2 {
+    color: var(--markdown-primary-bg-color);
+    border-left: 4px solid var(--markdown-primary-bg-color) !important;
+    padding: 1px 10px;
+    position: relative;
+    font-size: 15px;
+    margin-bottom: 5px;
+}
+.markdown-transform-html h2 i.iconfont {
+    font-size: 20px;
+}
+.markdown-transform-html h2::after {
+    content: '';
+    width: 100%;
+    height: 100%;
+    background: var(--markdown-primary-bg-color);
+    opacity: 0.05;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: -1;
+}

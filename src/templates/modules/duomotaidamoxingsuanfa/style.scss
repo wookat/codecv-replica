@@ -1,0 +1,69 @@
+@import url("../../common.css");
+.markdown-transform-html {
+  padding: 30px 45px;
+}
+
+.markdown-transform-html h1 {
+  font-size: 20px;
+}
+
+.markdown-transform-html a {
+  color: var(--markdown-primary-bg-color);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.markdown-transform-html h1,
+.markdown-transform-html h3,
+.markdown-transform-html h4,
+.markdown-transform-html h5,
+.markdown-transform-html h6,
+.markdown-transform-html b,
+.markdown-transform-html strong,
+.markdown-transform-html li::marker {
+  color: #000;
+}
+
+.markdown-transform-html h2 {
+  font-size: 16px;
+  color: var(--markdown-primary-bg-color);
+  border-bottom: 1.5px solid var(--markdown-primary-bg-color);
+}
+
+.markdown-transform-html .flex-layout-item {
+  flex: 1;
+  text-align: left;
+}
+
+.markdown-transform-html .flex-layout-item:last-child {
+  text-align: right;
+}
+
+.markdown-transform-html ul,
+.markdown-transform-html ol {
+  margin-bottom: 5px;
+}
+
+.markdown-transform-html code.single-code {
+  color: var(--markdown-primary-bg-color);
+  padding: 3px 5px;
+  line-height: 18px;
+  background: transparent;
+  position: relative;
+  border-radius: 5px;
+  font-size: 13px;
+  margin-left: 1px;
+}
+
+.markdown-transform-html .single-code::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  border-radius: 4px;
+  background: var(--markdown-primary-bg-color);
+  z-index: 0;
+  opacity: 0.1;
+}

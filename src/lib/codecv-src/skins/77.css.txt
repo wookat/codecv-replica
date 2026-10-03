@@ -1,0 +1,19 @@
+@charset "UTF-8";
+@import url("../../common.css");
+.markdown-transform-html {
+    padding: 30px 45px;
+    min-height: 297mm;
+}
+.markdown-transform-html h1, .markdown-transform-html h3 {
+    border-bottom: none;
+    padding-bottom: 10px;
+}
+.markdown-transform-html strong, .markdown-transform-html b, .markdown-transform-html h1, .markdown-transform-html h3, .markdown-transform-html h4, .markdown-transform-html h5, .markdown-transform-html h6, .markdown-transform-html li::marker {
+    color: #000;
+}
+.markdown-transform-html .resume-module h2 {
+    font-size: 16px;
+    padding-bottom: 3px;
+    border-bottom: 2px solid var(--markdown-primary-bg-color);
+    color: var(--markdown-primary-bg-color);
+}

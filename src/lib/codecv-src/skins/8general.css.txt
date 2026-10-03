@@ -1,0 +1,66 @@
+@import url("../../common.css");
+.markdown-transform-html {
+    padding-top: 15px;
+    font-size: 15px;
+    color: var(--markdown-primary-color);
+}
+.markdown-transform-html i.iconfont {
+    margin-right: 10px;
+}
+.markdown-transform-html h2 {
+    background: var(--markdown-primary-bg-color);
+    padding: 5px 10px;
+    color: white !important;
+    font-size: 18px;
+    margin-top: 10px;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
+.markdown-transform-html .head-layout .flex-layout-item {
+    margin-right: 10px;
+}
+.markdown-transform-html .head-layout .flex-layout-item:last-child {
+    margin-right: 0;
+}
+.markdown-transform-html .head-layout h1, .markdown-transform-html .head-layout h2 {
+    position: relative;
+    border-radius: 0;
+    padding: 10px 10px;
+    line-height: 30px;
+    position: relative;
+    color: white !important;
+    background: var(--markdown-primary-bg-color);
+    width: calc(100% - 50px);
+    border-right: 1px solid var(--markdown-primary-bg-color);
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+}
+.markdown-transform-html .head-layout h1::after, .markdown-transform-html .head-layout h1::before, .markdown-transform-html .head-layout h2::after, .markdown-transform-html .head-layout h2::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    width: 0;
+    height: 0;
+    border: 25px solid transparent;
+    border-right-color: var(--markdown-primary-bg-color);
+    right: -50px;
+    transform: rotate(180deg) translateY(-50%);
+}
+.markdown-transform-html .head-layout h1::before, .markdown-transform-html .head-layout h2::before {
+    top: 0;
+    transform: rotate(90deg);
+}
+.markdown-transform-html .head-layout h1 strong, .markdown-transform-html .head-layout h1 b, .markdown-transform-html .head-layout h2 strong, .markdown-transform-html .head-layout h2 b {
+    margin-left: 20px;
+}
+.markdown-transform-html p {
+    margin-top: 8px;
+}
+.markdown-transform-html ul, .markdown-transform-html ol {
+    padding-left: 20px;
+    margin-top: 5px;
+}
+.markdown-transform-html a {
+    color: var(--markdown-primary-color);
+    text-decoration: none;
+}

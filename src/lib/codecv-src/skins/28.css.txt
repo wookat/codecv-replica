@@ -1,0 +1,31 @@
+@import url("../../common.css");
+.markdown-transform-html {
+    padding: 25px 50px;
+}
+.markdown-transform-html h2 {
+    margin: 10px 0;
+    font-size: 18px;
+    display: inline-block;
+    padding: 6px 20px 6px 15px;
+    border-radius: 30px;
+    border-top-left-radius: 45px;
+    border-bottom-left-radius: 0;
+    position: relative;
+    color: white;
+    background: var(--markdown-primary-bg-color);
+}
+.markdown-transform-html h2::after {
+    position: absolute;
+    content: '';
+    width: calc(210mm - 100px);
+    bottom: 0;
+    height: 2px;
+    background: var(--markdown-primary-bg-color);
+    left: 0;
+}
+.markdown-transform-html .flex-layout {
+    align-items: center;
+}
+.markdown-transform-html .flex-layout p, .markdown-transform-html .flex-layout li {
+    line-height: 30px;
+}

@@ -1,0 +1,9 @@
+@import url("../../common.css");
+.markdown-transform-html h1, .markdown-transform-html h2 {
+    color: var(--markdown-primary-bg-color);
+    margin: 10px 0;
+    font-size: 20px;
+}
+.markdown-transform-html strong, .markdown-transform-html b {
+    color: var(--markdown-primary-bg-color);
+}

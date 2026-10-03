@@ -1,0 +1,93 @@
+@charset "UTF-8";
+@import url("../../common.css");
+.markdown-transform-html {
+    font-size: 14px;
+    padding: 20px 40px;
+}
+.markdown-transform-html a {
+    color: var(--markdown-primary-bg-color);
+}
+.markdown-transform-html .head-layout {
+    padding: 10px 0px 30px 0px;
+    position: relative;
+    font-size: 14px;
+    color: white;
+}
+.markdown-transform-html .head-layout img[alt*='个人头像'] {
+    width: 26mm;
+    height: 26mm;
+    border-radius: 10px;
+}
+.markdown-transform-html .head-layout h1, .markdown-transform-html .head-layout h2, .markdown-transform-html .head-layout h3 {
+    padding-bottom: 10px;
+}
+.markdown-transform-html .head-layout .flex-layout {
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+.markdown-transform-html .head-layout .flex-layout .flex-layout-item {
+    margin-right: 30px;
+}
+.markdown-transform-html .head-layout .flex-layout .flex-layout-item:last-child {
+    margin-right: 0;
+}
+.markdown-transform-html .head-layout::after {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: -40px;
+    z-index: -1;
+    width: calc(100% + 80px);
+    height: calc(100% + 20px);
+    background: var(--markdown-primary-bg-color);
+}
+.markdown-transform-html .main-layout {
+    padding: 0 5px 0 40px;
+    margin-top: 15px;
+}
+.markdown-transform-html .main-layout .resume-module {
+    position: relative;
+}
+.markdown-transform-html .main-layout .resume-module::before {
+    position: absolute;
+    content: '';
+    width: 1px;
+    height: calc(100% + 15px);
+    top: 20px;
+    left: -23px;
+    z-index: -1;
+    opacity: 0.3;
+    background: var(--markdown-primary-bg-color);
+}
+.markdown-transform-html .main-layout .resume-module:last-child::before {
+    height: 0;
+}
+.markdown-transform-html .main-layout h2 {
+    color: var(--markdown-primary-bg-color);
+    position: relative;
+    margin-left: -40px;
+    font-size: 17px;
+}
+.markdown-transform-html .main-layout h2 i.iconfont {
+    margin-right: 6px;
+    display: inline-block;
+    height: 35px;
+    width: 35px;
+    line-height: 35px !important;
+    color: white;
+    background: var(--markdown-primary-bg-color);
+    padding: 0 7px;
+    border-radius: 50%;
+}
+.markdown-transform-html .main-layout h2::before {
+    width: 100%;
+    height: 1px;
+    right: 0;
+    content: '';
+    position: absolute;
+    opacity: 0.1;
+    text-shadow: 0 0 1px var(--markdown-primary-bg-color);
+}
+.markdown-transform-html i.iconfont {
+    margin-right: 5px;
+}

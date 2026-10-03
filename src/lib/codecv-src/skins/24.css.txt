@@ -1,0 +1,23 @@
+@import url("../../common.css");
+.markdown-transform-html {
+    padding: 30px 50px;
+    font-weight: 500;
+}
+.markdown-transform-html .head-layout {
+    padding-top: 30px;
+    text-align: center;
+}
+.markdown-transform-html h1, .markdown-transform-html h2, .markdown-transform-html h3, .markdown-transform-html h4 {
+    font-weight: 800;
+    color: var(--markdown-primary-bg-color);
+}
+.markdown-transform-html h2 {
+    font-size: 18px;
+    border-bottom: 2px solid var(--markdown-primary-bg-color);
+}
+.markdown-transform-html p i:not(.iconfont) {
+    font-size: 15px;
+}
+.markdown-transform-html .flex-layout {
+    align-items: center;
+}

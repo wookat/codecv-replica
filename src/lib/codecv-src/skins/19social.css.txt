@@ -1,0 +1,15 @@
+@import url("../../common.css");
+.markdown-transform-html {
+    font-size: 15px;
+    color: var(--markdown-primary-color);
+}
+.markdown-transform-html h2 {
+    position: relative;
+    margin-top: 20px;
+}
+.markdown-transform-html p {
+    margin-top: 8px;
+}
+.markdown-transform-html ol, .markdown-transform-html ul {
+    margin-top: 10px;
+}
