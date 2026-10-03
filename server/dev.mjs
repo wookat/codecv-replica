@@ -32,6 +32,15 @@ if (!store.templateData) {
 store.count ??= '0'
 save()
 
+// ===== 站点种子数据（codecvcv.com 爬取快照；大文件放仓库外，SEEDS_DIR 可配） =====
+const SEEDS_DIR = process.env.SEEDS_DIR || '/home/ubuntu/codecv-replica-data/seeds'
+const loadSeed = (name, fallback) => {
+  const p = resolve(SEEDS_DIR, name)
+  return existsSync(p) ? JSON.parse(readFileSync(p, 'utf8')) : fallback
+}
+let _jobs = null
+const jobs = () => (_jobs ??= loadSeed('jobs.json', []))
+
 // playwright-core 懒加载（放在 resume-forge 测试目录的可用安装上；缺失时导出端点报 503）
 let chromium = null
 async function getBrowser() {
@@ -82,6 +91,101 @@ createServer(async (req, res) => {
     }
   }
   if (url.pathname === '/gitee') return json(res, [])
+
+  // ===== 校招岗位 API（契约对齐 codecvcv.com） =====
+  if (url.pathname === '/api/job/page' && req.method === 'POST') {
+    const q = JSON.parse(await readBody(req) || '{}')
+    const { batch, channel, title, company, workLocation, industry, positions, current = 1, pageSize = 25 } = q
+    const sub = (field, v) => !v || String(field ?? '').toLowerCase().includes(String(v).toLowerCase())
+    const filtered = jobs().filter((j) => {
+      if (batch && String(j.graduationYear ?? '') !== String(batch)) return false
+      if (channel && j.channel !== channel) return false
+      if (!sub(j.title, title)) return false
+      if (!sub(j.company, company)) return false
+      if (
+        workLocation &&
+        !sub(j.workLocation, workLocation) &&
+        !(j.normalizedWorkLocations || []).some((l) => sub(l, workLocation))
+      )
+        return false
+      if (!sub(j.industry, industry)) return false
+      if (!sub(j.positions, positions)) return false
+      return true
+    })
+    filtered.sort((a, b) => (b.createTime || 0) - (a.createTime || 0))
+    const start = (current - 1) * pageSize
+    return json(res, {
+      code: 200,
+      data: filtered.slice(start, start + pageSize),
+      total: filtered.length,
+      message: '获取招聘岗位列表成功',
+    })
+  }
+  if (url.pathname === '/api/job/today' && req.method === 'POST') {
+    const dayStart = new Date()
+    dayStart.setHours(0, 0, 0, 0)
+    const n = jobs().filter((j) => (j.createTime || 0) >= dayStart.getTime()).length
+    return json(res, { code: 200, data: n, message: '获取当日新增岗位数量成功' })
+  }
+
+  // ===== 面经 API（与线上一致：GET） =====
+  if (url.pathname === '/api/mianjing/list') {
+    const q = req.method === 'POST' ? JSON.parse(await readBody(req) || '{}') : Object.fromEntries(url.searchParams)
+    const { current, page = 1, pageSize = 20, company, position, grade, batch, round, keyword } = q
+    const cur = +(current ?? page ?? 1)
+    const sub = (field, v) => !v || String(field ?? '').toLowerCase().includes(String(v).toLowerCase())
+    const filtered = loadSeed('mianjing-list.json', []).filter((m) => {
+      if (company && m.companySlug !== company && m.companyName !== company) return false
+      if (position && m.positionSlug !== position && m.positionName !== position) return false
+      if (grade && String(m.grade) !== String(grade)) return false
+      const BATCH_MAP = { 秋招: 'qiuzhao', 春招: 'chunzhao', 暑期实习: 'shuqi', 日常实习: 'richang', 社招: 'shezhao' }
+      if (batch && m.batch !== batch && m.batch !== (BATCH_MAP[batch] ?? batch)) return false
+      if (round && m.round !== round) return false
+      if (keyword && !sub(m.title, keyword) && !sub(m.summary, keyword) && !sub(m.companyName, keyword) && !sub(m.positionName, keyword)) return false
+      return true
+    })
+    filtered.sort((a, b) => (b.publishTime || 0) - (a.publishTime || 0))
+    const start = (cur - 1) * pageSize
+    return json(res, { code: 200, data: filtered.slice(start, start + +pageSize), total: filtered.length, message: '查询成功' })
+  }
+  const mjMeta = url.pathname.match(/^\/api\/mianjing\/(companies|positions|topics|stats|company-facets|topic-facets)$/)
+  if (mjMeta) {
+    const meta = loadSeed('mianjing-meta.json', {})
+    return json(res, { code: 200, data: meta[mjMeta[1]] ?? (mjMeta[1] === 'stats' ? {} : []), message: '获取成功' })
+  }
+  if (url.pathname === '/api/mianjing/detail') {
+    const q = req.method === 'POST' ? JSON.parse(await readBody(req) || '{}') : Object.fromEntries(url.searchParams)
+    const details = loadSeed('mianjing-detail.json', {})
+    const hit = details[q.id || q._id]
+    return json(res, hit ? { code: 200, data: hit, message: '查询成功' } : { code: 404, data: null, message: '面经不存在' })
+  }
+
+  // ===== 求职攻略文章 =====
+  if (url.pathname === '/api/post/page' && req.method === 'POST') {
+    const q = JSON.parse(await readBody(req) || '{}')
+    const { current = 1, pageSize = 12, keyword } = q
+    const sub = (field, v) => !v || String(field ?? '').toLowerCase().includes(String(v).toLowerCase())
+    const filtered = loadSeed('posts.json', []).filter(
+      (p) => sub(p.title, keyword) || sub(p.description, keyword)
+    )
+    filtered.sort((a, b) => (b.create_time || 0) - (a.create_time || 0))
+    const start = (current - 1) * pageSize
+    return json(res, {
+      code: 200,
+      data: filtered.slice(start, start + pageSize).map((p) => ({ ...p, content: undefined })),
+      total: filtered.length,
+      message: '查询成功',
+    })
+  }
+  if (url.pathname === '/api/post/detail') {
+    const q = req.method === 'POST' ? JSON.parse(await readBody(req) || '{}') : Object.fromEntries(url.searchParams)
+    const hit = loadSeed('posts.json', []).find((p) => p._id === q.id)
+    const body = loadSeed('post-detail.json', {})[q.id]
+    return json(
+      res,
+      hit ? { code: 200, data: { ...hit, contentMd: body?.contentMd }, message: '查询成功' } : { code: 404, data: null, message: '文章不存在' },
+    )
+  }
 
   if (url.pathname === '/export' && req.method === 'POST') {
     try {

@@ -12,7 +12,10 @@ function toOutNav(path: string) {
     <Logo />
     <ul class="nav" data-aos="zoom-out-right">
       <li v-for="(navItem, idx) in homeNav" :key="idx">
-        <router-link v-if="!navItem.tooltip" :to="navItem.path || ''">{{
+        <a v-if="navItem.external" :href="navItem.path" target="_blank" rel="noopener noreferrer">{{
+          navItem.name
+        }}</a>
+        <router-link v-else-if="!navItem.tooltip" :to="navItem.path || ''">{{
           navItem.name
         }}</router-link>
       </li>

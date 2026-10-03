@@ -20,6 +20,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/download/index.vue')
   },
   {
+    // 复刻线上版分类落地页，须位于具名路由之后、NotFound 之前
+    path: '/:templateCategory',
+    name: 'template-category',
+    component: () => import('@/views/jianlimoban/category.vue')
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: () => import('@/views/404/index.vue')

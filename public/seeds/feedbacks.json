@@ -1,0 +1,38 @@
+[
+ {
+  "content": "校招信息可以设置每条可以加个收藏/喜欢吗，我这样还没写完简历的人也想先提前看看要准备投递哪些，给标出来",
+  "reply": "作者回复：已经支持啦！",
+  "avatar": "/static/png/avatar1-155VfYeO.png",
+  "field": "产品"
+ },
+ {
+  "content": "为什么现在编辑的时候明明是一页，导出的PDF就只有一页呢",
+  "reply": "作者回复：可以先将行距调整低1px，然后用智能一页功能再导出就没有了。",
+  "avatar": "/static/png/avatar1-155VfYeO.png",
+  "field": "it"
+ },
+ {
+  "content": "md模式下出现无法正常使用输入法的情况。切换到所见即所得模式，有时会出现输入法失灵的情况",
+  "reply": "",
+  "avatar": "/static/png/avatar1-155VfYeO.png",
+  "field": "前端"
+ },
+ {
+  "content": "可以开发一键转英文简历吗",
+  "reply": "作者回复：已经有了这类功能，可以转换多种语言，在右侧工具栏的语言转换里",
+  "avatar": "/static/png/avatar1-155VfYeO.png",
+  "field": "IT"
+ },
+ {
+  "content": "预览是1页（用智能一页的情况下），导出PDF就是两页（第二页有内容），导出png就是1页",
+  "reply": "作者回复：这种情况调整一下上下页边距就好了",
+  "avatar": "/static/png/avatar1-155VfYeO.png",
+  "field": "学生"
+ },
+ {
+  "content": "怎么不能转word？",
+  "reply": "作者回复：word不支持的",
+  "avatar": "/static/png/avatar1-155VfYeO.png",
+  "field": "计算机"
+ }
+]

@@ -1,0 +1,394 @@
+<script setup lang="ts">
+import { computed, onMounted, ref } from 'vue'
+import { mianjingList, mianjingMeta, MianjingCompany, MianjingItem } from '@/api/modules/site'
+import { localAsset, logoColor } from '@/utils/article'
+
+const loading = ref(false)
+const list = ref<MianjingItem[]>([])
+const total = ref(0)
+const companies = ref<(MianjingCompany & { count?: number })[]>([])
+const stats = ref<{
+  total?: number
+  companyCount?: number
+  positionCount?: number
+  questionCount?: number
+}>({})
+const positions = ref<{ slug?: string; name: string }[]>([])
+
+const batch = ref('')
+const position = ref('')
+const keyword = ref('')
+const sort = ref<'new' | 'hot'>('new')
+const current = ref(1)
+const pageSize = 20
+
+const batchOptions = ['秋招', '春招', '暑期实习', '日常实习', '社招']
+
+const batchLabel = (m: MianjingItem) => {
+  const g = m.grade ? `${String(m.grade).slice(2)}届` : ''
+  const b =
+    { qiuzhao: '秋招', chunzhao: '春招', shuqi: '暑期实习', richang: '日常实习', shezhao: '社招' }[
+      m.batch as string
+    ] ?? m.batch
+  return `${g}${b}`
+}
+
+const resultClass = (r?: string) =>
+  r === '已offer' || r === 'offer'
+    ? 'mj-chip--green'
+    : r === '已挂' || r === '淘汰'
+    ? 'mj-chip--gray'
+    : 'mj-chip--amber'
+
+async function load() {
+  try {
+    loading.value = true
+    const res = await mianjingList({
+      current: current.value,
+      pageSize,
+      keyword: keyword.value || undefined,
+      batch: batch.value || undefined,
+      position: position.value || undefined
+    })
+    list.value = res?.data ?? []
+    total.value = res?.total ?? 0
+  } catch (e) {
+    console.error('获取面经列表失败:', e)
+  } finally {
+    loading.value = false
+  }
+}
+
+const hotList = computed(() =>
+  [...list.value].sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0)).slice(0, 8)
+)
+const shown = computed(() =>
+  sort.value === 'hot'
+    ? [...list.value].sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0))
+    : list.value
+)
+
+function pick(key: 'batch' | 'position', v: string) {
+  if (key === 'batch') batch.value = batch.value === v ? '' : v
+  else position.value = position.value === v ? '' : v
+  current.value = 1
+  load()
+}
+
+let debounce: ReturnType<typeof setTimeout> | null = null
+function onKeyword(v: string) {
+  if (debounce) clearTimeout(debounce)
+  debounce = setTimeout(() => {
+    keyword.value = v
+    current.value = 1
+    load()
+  }, 300)
+}
+
+const fmtTime = (ts?: number) => {
+  if (!ts) return ''
+  const d = new Date(ts)
+  return `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(
+    2,
+    '0'
+  )} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}
+
+const companyOf = (m: MianjingItem) => companies.value.find(c => c.slug === m.companySlug)
+const isHot = (m: MianjingItem) => (m.viewCount ?? 0) >= 100
+
+onMounted(async () => {
+  load()
+  try {
+    const [cs, st, ps] = await Promise.all([
+      mianjingMeta('companies'),
+      mianjingMeta('stats'),
+      mianjingMeta('positions')
+    ])
+    stats.value = st?.data ?? {}
+    positions.value = Array.isArray(ps?.data) ? ps.data : []
+    const facets = await mianjingMeta('company-facets').catch(() => null)
+    const counts: Record<string, number> = {}
+    const facetArr = facets?.data
+    if (Array.isArray(facetArr))
+      facetArr.forEach((f: any) => (counts[f.slug ?? f._id ?? f.name] = f.count ?? f.value ?? 0))
+    companies.value = (Array.isArray(cs?.data) ? cs.data : []).map((c: any) => ({
+      ...c,
+      count: counts[c.slug] ?? 0
+    }))
+  } catch (e) {
+    console.error('获取面经元数据失败:', e)
+  }
+})
+</script>
+
+<template>
+  <div class="mj-page">
+    <header class="mj-head">
+      <div>
+        <h1>面经大全</h1>
+        <p class="mj-stats">
+          <b>{{ stats.total ?? total }}</b> 篇面经 · 覆盖
+          {{ stats.companyCount ?? companies.length }} 家公司 ·
+          {{ stats.positionCount ?? positions.length }} 个岗位方向 ·
+          {{ stats.questionCount ?? '-' }} 道面试题
+        </p>
+      </div>
+      <div class="mj-head-right">
+        <div class="mj-search">
+          <svg
+            class="ic"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="m21 21-4.34-4.34" />
+            <circle cx="11" cy="11" r="8" />
+          </svg>
+          <input
+            type="text"
+            placeholder="搜公司、岗位或关键词"
+            @input="onKeyword(($event.target as HTMLInputElement).value)"
+          />
+        </div>
+        <router-link to="/mianjing/write" class="mj-btn">
+          <svg
+            class="ic"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M13 21h8" />
+            <path d="m15 5 4 4" />
+            <path
+              d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"
+            />
+          </svg>
+          投稿面经
+        </router-link>
+      </div>
+    </header>
+
+    <section class="mj-card filters">
+      <div class="frow">
+        <span class="flabel">批次</span>
+        <div class="pills">
+          <button class="mj-pill" :class="{ active: !batch }" @click="pick('batch', '')">
+            全部
+          </button>
+          <button
+            v-for="b in batchOptions"
+            :key="b"
+            class="mj-pill"
+            :class="{ active: batch === b }"
+            @click="pick('batch', b)"
+          >
+            {{ b }}
+          </button>
+        </div>
+      </div>
+      <div class="frow">
+        <span class="flabel">岗位</span>
+        <div class="pills">
+          <button class="mj-pill" :class="{ active: !position }" @click="pick('position', '')">
+            全部
+          </button>
+          <button
+            v-for="p in positions"
+            :key="p.slug ?? p.name"
+            class="mj-pill"
+            :class="{ active: position === (p.slug ?? p.name) }"
+            @click="pick('position', p.slug ?? p.name)"
+          >
+            {{ p.name }}
+          </button>
+        </div>
+      </div>
+      <div class="frow">
+        <span class="flabel">公司</span>
+        <div class="comps">
+          <router-link
+            v-for="c in companies"
+            :key="c.slug"
+            :to="`/mianjing/c/${c.slug}`"
+            class="comp-pill"
+            :title="c.name"
+          >
+            <span class="mj-logo" :style="{ '--mj-logo-bg': logoColor(c.slug) } as any">
+              <img
+                v-if="c.logo"
+                :src="localAsset(c.logo)"
+                :alt="c.name"
+                class="mj-logo-img"
+                draggable="false"
+              />
+              <template v-else>{{ c.name?.[0] }}</template>
+            </span>
+            <span class="cn">{{ c.name }}</span>
+            <span class="cc">{{ c.count ?? '' }}</span>
+          </router-link>
+        </div>
+      </div>
+    </section>
+
+    <div class="mj-main">
+      <main class="mj-list">
+        <div class="list-head">
+          <h2>最新面经</h2>
+          <div class="sort-pills">
+            <button class="mj-pill sm" :class="{ active: sort === 'new' }" @click="sort = 'new'">
+              最新
+            </button>
+            <button class="mj-pill sm" :class="{ active: sort === 'hot' }" @click="sort = 'hot'">
+              最热
+            </button>
+          </div>
+        </div>
+        <div v-loading="loading" class="items">
+          <router-link v-for="m in shown" :key="m._id" :to="`/mianjing/p/${m._id}`" class="mj-item">
+            <div class="item-top">
+              <span
+                class="mj-logo lg"
+                :style="{ '--mj-logo-bg': logoColor(m.companySlug || m.companyName || '') } as any"
+              >
+                <img
+                  v-if="companyOf(m)?.logo"
+                  :src="localAsset(companyOf(m)!.logo)"
+                  :alt="m.companyName"
+                  class="mj-logo-img"
+                  draggable="false"
+                />
+                <template v-else>{{ (m.companyName || '?')[0] }}</template>
+              </span>
+              <div class="item-head">
+                <div class="item-title-row">
+                  <h3>{{ m.title }}</h3>
+                  <span v-if="isHot(m)" class="hot-badge">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path
+                        d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4"
+                      />
+                    </svg>
+                    HOT
+                  </span>
+                </div>
+                <div class="item-chips">
+                  <span class="mj-chip mj-chip--gray">{{ batchLabel(m) }}</span>
+                  <span class="mj-chip mj-chip--gray">{{ m.round }}</span>
+                  <span class="mj-chip" :class="resultClass(m.result)">{{ m.result }}</span>
+                  <span class="pos">{{ m.positionName }}</span>
+                </div>
+              </div>
+            </div>
+            <p class="item-sum">{{ m.summary }}</p>
+            <div class="item-foot">
+              <span class="f-ic"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 6v6h4" /></svg
+                >{{ fmtTime(m.publishTime) }}</span
+              >
+              <span class="f-ic"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M13 5h8" />
+                  <path d="M13 12h8" />
+                  <path d="M13 19h8" />
+                  <path d="m3 17 2 2 4-4" />
+                  <path d="m3 7 2 2 4-4" /></svg
+                >{{ m.questionCount ?? '—' }} 题</span
+              >
+              <span class="f-ic grow"></span>
+              <span class="f-ic"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"
+                  />
+                  <circle cx="12" cy="12" r="3" /></svg
+                >{{ m.viewCount ?? 0 }}</span
+              >
+            </div>
+          </router-link>
+          <el-empty v-if="!loading && !shown.length" description="暂无面经" />
+        </div>
+        <div class="pager" v-if="total > pageSize">
+          <el-pagination
+            v-model:current-page="current"
+            :page-size="pageSize"
+            :total="total"
+            background
+            layout="prev, pager, next"
+            @current-change="load"
+          />
+        </div>
+      </main>
+
+      <aside class="mj-aside">
+        <div class="aside-card">
+          <strong class="aside-title">热门面经</strong>
+          <ul>
+            <li v-for="(m, i) in hotList" :key="m._id">
+              <router-link :to="`/mianjing/p/${m._id}`" class="hot-row">
+                <span class="rank" :class="{ top: i < 3 }">{{ i + 1 }}</span>
+                <span class="t">{{ m.title }}</span>
+                <span class="v">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"
+                    />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                  {{ m.viewCount ?? 0 }}
+                </span>
+              </router-link>
+            </li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </div>
+</template>
+
+<style lang="scss">
+@import './mianjing.scss';
+</style>

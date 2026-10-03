@@ -28,6 +28,8 @@
     "element-plus": "^2.2.19",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",
+    "markdown-it": "^14.1.0",
+    "markdown-it-task-lists": "^2.1.1",
     "markdown-transform-html": "^1.7.2",
     "nprogress": "^0.2.0",
     "picture-verification-code": "^1.1.0",
@@ -42,6 +44,7 @@
   "devDependencies": {
     "@types/ali-oss": "^6.16.6",
     "@types/aos": "^3.0.4",
+    "@types/markdown-it": "^14.2.0",
     "@types/node": "^18.11.7",
     "@types/nprogress": "^0.2.0",
     "@typescript-eslint/eslint-plugin": "^5.58.0",
