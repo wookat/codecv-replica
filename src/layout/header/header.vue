@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import Logo from '@/components/logo.vue'
-import User from './components/user.vue'
 import Nav from './components/nav.vue'
+import User from './components/user.vue'
 import NavMoblie from './components/navMoblie.vue'
 </script>
 
 <template>
   <div class="header-out noto-sans-sc">
     <div class="header">
-      <Logo />
+      <div class="nav-left" @click="$router.push('/home')">
+        <img src="/prod-assets/logo.svg" alt="CodeCV 简历" draggable="false" />
+      </div>
       <Nav />
       <User />
     </div>
@@ -32,11 +33,27 @@ import NavMoblie from './components/navMoblie.vue'
 
   .header {
     max-width: var(--max-width);
+    height: 60px;
     margin: 0 auto;
+    padding: 0 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    text-align: center;
+    gap: 12px;
+  }
+
+  .nav-left {
+    width: 64px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    cursor: pointer;
+    img {
+      width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
   }
 
   .header-800 {
@@ -44,7 +61,7 @@ import NavMoblie from './components/navMoblie.vue'
   }
 }
 
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 1024px) {
   .header-out .header {
     display: none;
   }

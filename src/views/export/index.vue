@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { convertDOM } from '@/utils/moduleCombine'
+import { importCSS } from '@/utils'
 
 const route = useRoute()
 const router = useRouter()
@@ -11,6 +12,7 @@ const type = ref('')
 onMounted(() => {
   const id = route.params.id as string
   type.value = id
+  importCSS(id)
   let md = ''
   try {
     const raw = localStorage.getItem(`markdown-content-${id}`)
@@ -36,7 +38,7 @@ function printPdf() {
           <button class="ex-btn ghost" @click="router.push(`/editor/${type}`)">返回编辑</button>
         </div>
       </div>
-      <div class="ex-paper" v-html="html"></div>
+      <div class="ex-paper markdown-transform-html jufe" v-html="html"></div>
     </div>
     <div v-else class="ex-empty">
       <h2>简历不存在</h2>

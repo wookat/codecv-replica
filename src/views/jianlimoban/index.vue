@@ -96,6 +96,9 @@ const TAG_TABS = [
 
 const tplTags = (t: any): string[] => (Array.isArray(t.tags) ? t.tags : [])
 
+const sort = ref<'综合排序' | '最新上架' | '最多下载'>('综合排序')
+const SORTS = ['综合排序', '最新上架', '最多下载'] as const
+
 const shown = computed(() => {
   let rows = templates.value
   const t = tag.value
@@ -106,8 +109,21 @@ const shown = computed(() => {
   }
   const kw = keyword.value.trim()
   if (kw) rows = rows.filter(r => r.name.includes(kw) || tplTags(r).some(x => x.includes(kw)))
-  return [...rows].sort((a, b) => +(b.hot || 0) - +(a.hot || 0))
+  const sorted = [...rows]
+  // 综合排序=生产热度序；最新上架=配置插入序（新模板在前）；最多下载=hot 降序
+  if (sort.value === '最多下载') sorted.sort((a, b) => +(b.hot || 0) - +(a.hot || 0))
+  else if (sort.value === '综合排序') sorted.sort((a, b) => +(b.hot || 0) - +(a.hot || 0))
+  return sorted
 })
+
+// 生产 NEW 角标只出现在最近上架的一批：取 cv-* 序列尾部 12 套
+const newTypes = new Set(
+  templates.value
+    .filter(t => String(t.type).startsWith('cv-'))
+    .slice(-12)
+    .map(t => t.type)
+)
+const isNew = (t: any) => newTypes.has(t.type)
 
 const tplSlug = (t: any) => t.type
 
@@ -126,15 +142,30 @@ watch(
   <div class="jl-page">
     <h1 class="sr-only">简历模板免费下载_个人简历模板在线制作</h1>
 
-    <!-- 分类行（生产同款五组） -->
-    <div class="cat-card">
-      <div v-for="g in GROUPS" :key="g.label" class="cat-row">
-        <div class="cat-label">{{ g.label }}</div>
-        <div class="cat-items">
-          <router-link v-for="c in g.items" :key="c.slug" :to="`/${c.slug}`" class="cat-link">{{
-            c.name
-          }}</router-link>
+    <!-- 顶部：左分类行 + 右侧双推广位（生产布局） -->
+    <div class="jl-top">
+      <div class="cat-card">
+        <div v-for="g in GROUPS" :key="g.label" class="cat-row">
+          <div class="cat-label">{{ g.label }}</div>
+          <div class="cat-items">
+            <router-link v-for="c in g.items" :key="c.slug" :to="`/${c.slug}`" class="cat-link">{{
+              c.name
+            }}</router-link>
+          </div>
         </div>
+      </div>
+      <div class="promo-col">
+        <router-link to="/jobs" class="promo banner-jobs">
+          <img src="/prod-assets/offerstar-recruit.webp" alt="2027校招信息汇总" draggable="false" />
+        </router-link>
+        <router-link to="/mianjing" class="promo banner-mj">
+          <div class="bm">
+            <p class="bm-badge">面经广场</p>
+            <p class="bm-t">最高可得<b>终身会员</b></p>
+            <p class="bm-s">分享你的笔面经验 让更多人少走弯路</p>
+            <span class="bm-btn">立即查看</span>
+          </div>
+        </router-link>
       </div>
     </div>
 
@@ -147,6 +178,18 @@ watch(
 
     <!-- 模板区 -->
     <div class="tpl-card">
+      <div class="sort-row">
+        <div class="sort-tabs">
+          <span
+            v-for="s in SORTS"
+            :key="s"
+            class="sort-tab"
+            :class="{ checked: sort === s }"
+            @click="sort = s"
+            >{{ s }}</span
+          >
+        </div>
+      </div>
       <div class="tpl-head">
         <ul class="tag-tabs">
           <li v-for="t in TAG_TABS" :key="t">
@@ -178,6 +221,7 @@ watch(
         >
           <div class="rc-top">
             <p class="use">{{ t.hot ?? 0 }}人使用过</p>
+            <sup v-if="isNew(t)" class="new-badge">NEW</sup>
           </div>
           <div class="rc-img">
             <div class="mask"><button class="use-btn">使用模板</button></div>
@@ -186,6 +230,9 @@ watch(
               :alt="`CodeCV简历在线简历制作工具 - ${t.name}简历模板`"
               loading="lazy"
             />
+          </div>
+          <div v-if="tplTags(t).length" class="rc-tags">
+            <span v-for="x in tplTags(t).slice(0, 4)" :key="x" class="rc-tag">{{ x }}</span>
           </div>
           <div class="rc-bottom">
             <span class="rc-name">{{ t.name }}</span>
@@ -205,13 +252,109 @@ watch(
   color: var(--font-color);
   font-family: var(--font-noto-sans-sc);
 }
+.jl-top {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+}
 .cat-card {
+  flex: 1;
+  min-width: 0;
   background: var(--background);
   border-radius: 8px;
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+.promo-col {
+  display: flex;
+  gap: 16px;
+  flex-shrink: 0;
+}
+.promo {
+  display: block;
+  border-radius: 12px;
+  overflow: hidden;
+  text-decoration: none;
+  transition: transform 0.3s;
+  &:hover {
+    transform: scale(1.03);
+  }
+}
+.banner-jobs img {
+  display: block;
+  width: 280px;
+  height: 100%;
+  object-fit: cover;
+}
+.banner-mj {
+  width: 210px;
+  background: linear-gradient(135deg, #1f2937, #374151);
+  .bm {
+    padding: 18px 16px;
+    color: #fff;
+    .bm-badge {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(255, 116, 73, 0.9);
+      margin: 0 0 10px;
+    }
+    .bm-t {
+      font-size: 17px;
+      font-weight: 800;
+      margin: 0 0 6px;
+      b {
+        color: #ffb25e;
+      }
+    }
+    .bm-s {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.75);
+      margin: 0 0 14px;
+    }
+    .bm-btn {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      background: linear-gradient(90deg, #ff7449, #ff9a44);
+    }
+  }
+}
+@media (max-width: 1024px) {
+  .jl-top {
+    flex-direction: column;
+  }
+  .promo-col {
+    display: none;
+  }
+}
+.sort-row {
+  margin-top: 16px;
+  padding: 0 8px;
+  .sort-tabs {
+    display: flex;
+    gap: 18px;
+  }
+  .sort-tab {
+    font-size: 14px;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    white-space: nowrap;
+    &.checked {
+      color: var(--theme);
+      font-weight: 700;
+    }
+    &:hover {
+      color: var(--theme);
+    }
+  }
 }
 .cat-row {
   display: flex;
@@ -393,6 +536,29 @@ watch(
       margin: 0;
       overflow: hidden;
       text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .new-badge {
+      background: #22c55e;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 6px 0 6px 0;
+      line-height: 1;
+    }
+  }
+  .rc-tags {
+    display: flex;
+    gap: 4px;
+    margin: 6px 0 0;
+    overflow: hidden;
+    .rc-tag {
+      font-size: 11px;
+      color: #6b7280;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 4px;
+      padding: 1px 6px;
       white-space: nowrap;
     }
   }

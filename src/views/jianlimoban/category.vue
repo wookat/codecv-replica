@@ -144,6 +144,25 @@ const GROUPS: { label: string; icon: string; slugs: string[] }[] = [
 ]
 const catName = (s: string) => TEMPLATE_CATEGORIES.find(c => c.slug === s)?.name ?? s
 
+// 生产每组默认收起，超过阈值给「展开全部」按钮
+const expanded = ref<Record<string, boolean>>({})
+const CAP = 12
+const shownSlugs = (g: (typeof GROUPS)[number]) =>
+  expanded.value[g.label] ? g.slugs : g.slugs.slice(0, CAP)
+const toggleGroup = (label: string) => {
+  expanded.value[label] = !expanded.value[label]
+}
+
+// 生产标题：分类名本身带「简历模板」则只加「汇总」
+const sumTitle = computed(() => {
+  const n = cat.value?.name ?? String(slug.value)
+  return n.includes('简历模板') ? `${n}汇总` : `${n}简历模板汇总`
+})
+
+const hotRank = computed(() =>
+  [...templates.value].sort((a, b) => +(b.hot || 0) - +(a.hot || 0)).slice(0, 15)
+)
+
 const shown = computed(() => {
   if (!cat.value) return []
   const set = new Set(cat.value.cards)
@@ -164,59 +183,98 @@ const shown = computed(() => {
       <el-breadcrumb-item>{{ cat?.name ?? slug }}</el-breadcrumb-item>
     </el-breadcrumb>
 
-    <section class="main-card">
-      <form class="search-form" @submit.prevent>
-        <svg class="s-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+    <div class="cat-cols">
+      <section class="main-card">
+        <form class="search-form" @submit.prevent>
+          <svg class="s-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+          <input
+            v-model="keyword"
+            type="text"
+            placeholder="通过关键词搜索相关简历模板"
+            aria-label="搜索简历模板"
           />
-        </svg>
-        <input
-          v-model="keyword"
-          type="text"
-          placeholder="通过关键词搜索相关简历模板"
-          aria-label="搜索简历模板"
-        />
-        <button type="submit" class="go">搜索</button>
-      </form>
+          <button type="submit" class="go">搜索</button>
+        </form>
 
-      <div v-for="g in GROUPS" :key="g.label" class="tag-row">
-        <span class="tag-label"
-          ><span aria-hidden="true">{{ g.icon }}</span> {{ g.label }}</span
-        >
-        <div class="tag-flow">
-          <router-link
-            v-for="s in g.slugs"
-            :key="s"
-            :to="`/${s}`"
-            class="tag-pill"
-            :class="{ active: slug === s }"
-            >{{ catName(s) }}</router-link
+        <div v-for="g in GROUPS" :key="g.label" class="tag-row">
+          <span class="tag-label"
+            ><span aria-hidden="true">{{ g.icon }}</span> {{ g.label }}</span
           >
-        </div>
-      </div>
-
-      <div class="resumes">
-        <router-link
-          v-for="t in shown"
-          :key="t.type"
-          :to="`/jianlimoban/${t.type}`"
-          class="resume-card"
-        >
-          <div class="rc-img">
-            <div class="mask"><button class="use-btn">使用模板</button></div>
-            <img :src="t.img" :alt="`${t.name}简历模板`" loading="lazy" />
+          <div class="tag-flow">
+            <router-link
+              v-for="s in shownSlugs(g)"
+              :key="s"
+              :to="`/${s}`"
+              class="tag-pill"
+              :class="{ active: slug === s }"
+              >{{ catName(s) }}</router-link
+            >
+            <button
+              v-if="g.slugs.length > CAP"
+              class="tag-pill more"
+              type="button"
+              @click="toggleGroup(g.label)"
+            >
+              {{ expanded[g.label] ? '收起' : `展开全部 ${g.slugs.length} 个` }}
+            </button>
           </div>
-          <span class="rc-name">{{ t.name }}</span>
+        </div>
+
+        <h1 class="sum-title">
+          {{ sumTitle }}<span class="sum-count">共 {{ shown.length }} 个模板</span>
+        </h1>
+
+        <div class="resumes">
+          <router-link
+            v-for="t in shown"
+            :key="t.type"
+            :to="`/jianlimoban/${t.type}`"
+            class="resume-card"
+          >
+            <div class="rc-img">
+              <span class="hot-badge">热门</span>
+              <div class="mask"><button class="use-btn">使用模板</button></div>
+              <img :src="t.img" :alt="`${t.name}简历模板`" loading="lazy" />
+            </div>
+            <span class="rc-name">{{ t.name }}</span>
+            <div class="rc-info">
+              <div class="rc-tags">
+                <span v-for="x in (t.tags ?? []).slice(0, 3)" :key="x">{{ x }}</span>
+              </div>
+              <p class="rc-meta">{{ t.hot ?? 0 }}人使用</p>
+            </div>
+          </router-link>
+          <el-empty
+            v-if="!shown.length"
+            :description="keyword ? '未找到匹配模板' : '该分类暂无模板'"
+          />
+        </div>
+      </section>
+      <aside class="cat-aside">
+        <router-link to="/jobs" class="aside-jobs">
+          <img src="/prod-assets/offerstar-recruit.webp" alt="2027校招信息汇总" />
+          <p class="aj-cap">打破信息差，早就是机会 🎈</p>
         </router-link>
-        <el-empty
-          v-if="!shown.length"
-          :description="keyword ? '未找到匹配模板' : '该分类暂无模板'"
-        />
-      </div>
-    </section>
+        <div class="aside-rank">
+          <p class="ar-title">简历模板热度排行榜</p>
+          <ol class="ar-list">
+            <li v-for="(t, i) in hotRank" :key="t.type">
+              <router-link :to="`/jianlimoban/${t.type}`">
+                <span class="rk" :class="{ top: i < 3 }">{{ i + 1 }}</span>
+                <span class="rt">{{ (t.tags ?? []).slice(0, 6).join('/') || t.name }}</span>
+                <span class="rh">🔥{{ t.hot }}</span>
+              </router-link>
+            </li>
+          </ol>
+        </div>
+      </aside>
+    </div>
   </div>
 </template>
 
@@ -227,7 +285,14 @@ const shown = computed(() => {
   padding: 12px 16px;
   color: var(--font-color);
 }
+.cat-cols {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
 .main-card {
+  flex: 1;
+  min-width: 0;
   margin-top: 12px;
   border-radius: 16px;
   background: var(--background);
@@ -344,6 +409,25 @@ const shown = computed(() => {
     grid-template-columns: repeat(5, 1fr);
   }
 }
+.sum-title {
+  margin: 22px 0 4px;
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  .sum-count {
+    font-size: 12px;
+    font-weight: 400;
+    color: #9ca3af;
+  }
+}
+.tag-pill.more {
+  border: none;
+  cursor: pointer;
+  color: var(--theme);
+  background: color-mix(in srgb, var(--theme) 8%, transparent);
+}
 .resume-card {
   text-decoration: none;
   color: var(--font-color);
@@ -351,6 +435,18 @@ const shown = computed(() => {
     position: relative;
     border-radius: 6px;
     overflow: hidden;
+    .hot-badge {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 2;
+      background: linear-gradient(90deg, #ff7449, #ff9a44);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 7px;
+      border-radius: 6px 0 6px 0;
+    }
     img {
       width: 100%;
       border-radius: 6px;
@@ -388,8 +484,110 @@ const shown = computed(() => {
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+  .rc-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 6px;
+    .rc-tags {
+      display: flex;
+      gap: 4px;
+      overflow: hidden;
+      span {
+        font-size: 11px;
+        color: #6b7280;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 4px;
+        padding: 1px 5px;
+        white-space: nowrap;
+      }
+    }
+    .rc-meta {
+      flex-shrink: 0;
+      font-size: 11px;
+      color: #9ca3af;
+      margin: 0;
+    }
+  }
   &:hover .rc-name {
     color: var(--theme);
+  }
+}
+.cat-aside {
+  width: 260px;
+  flex-shrink: 0;
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  @media (max-width: 900px) {
+    display: none;
+  }
+  .aside-jobs {
+    border-radius: 12px;
+    overflow: hidden;
+    display: block;
+    background: var(--background);
+    img {
+      width: 100%;
+      display: block;
+    }
+    .aj-cap {
+      margin: 0;
+      padding: 10px;
+      font-size: 12px;
+      color: #6b7280;
+      text-align: center;
+    }
+  }
+  .aside-rank {
+    background: var(--background);
+    border-radius: 12px;
+    padding: 14px;
+    .ar-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--theme);
+      margin: 0 0 10px;
+    }
+    .ar-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      li a {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 0;
+        font-size: 12px;
+        color: var(--font-color);
+        text-decoration: none;
+        .rk {
+          width: 16px;
+          flex-shrink: 0;
+          font-weight: 700;
+          color: #9ca3af;
+          &.top {
+            color: var(--theme);
+          }
+        }
+        .rt {
+          flex: 1;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          color: #6b7280;
+        }
+        .rh {
+          flex-shrink: 0;
+          color: #9ca3af;
+          font-size: 11px;
+        }
+        &:hover .rt {
+          color: var(--theme);
+        }
+      }
+    }
   }
 }
 </style>

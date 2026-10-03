@@ -54,10 +54,12 @@ async function getBrowser() {
   return chromium
 }
 
-const json = (res, obj, code = 200) => {
+const json = (res, obj, code = 200, req) => {
+  // 前端 axios 带 withCredentials，不能用 '*'，需回显 Origin + Allow-Credentials
   res.writeHead(code, {
     'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': req?.headers?.origin || '*',
+    'Access-Control-Allow-Credentials': 'true',
     'Access-Control-Allow-Headers': '*',
     'Access-Control-Allow-Methods': '*',
   })
@@ -73,13 +75,13 @@ const readBody = (req) =>
 
 createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x')
-  if (req.method === 'OPTIONS') return json(res, {})
+  if (req.method === 'OPTIONS') return json(res, {}, undefined, req)
 
   // Upstash 兼容层
   const m = url.pathname.match(/^\/upstash\/(get|set)\/([^/]+)(?:\/(.*))?$/)
   if (m) {
     const [, op, key, val] = m
-    if (op === 'get') return json(res, { result: store[key] ?? null })
+    if (op === 'get') return json(res, { result: store[key] ?? null }, undefined, req)
     if (op === 'set') {
       if (val !== undefined) {
         store[key] = decodeURIComponent(val)
@@ -87,10 +89,10 @@ createServer(async (req, res) => {
         store[key] = await readBody(req)
       }
       save()
-      return json(res, { result: 'OK' })
+      return json(res, { result: 'OK' }, undefined, req)
     }
   }
-  if (url.pathname === '/gitee') return json(res, [])
+  if (url.pathname === '/gitee') return json(res, [], undefined, req)
 
   // ===== 校招岗位 API（契约对齐 codecvcv.com） =====
   if (url.pathname === '/api/job/page' && req.method === 'POST') {
@@ -119,13 +121,13 @@ createServer(async (req, res) => {
       data: filtered.slice(start, start + pageSize),
       total: filtered.length,
       message: '获取招聘岗位列表成功',
-    })
+    }, undefined, req)
   }
   if (url.pathname === '/api/job/today' && req.method === 'POST') {
     const dayStart = new Date()
     dayStart.setHours(0, 0, 0, 0)
     const n = jobs().filter((j) => (j.createTime || 0) >= dayStart.getTime()).length
-    return json(res, { code: 200, data: n, message: '获取当日新增岗位数量成功' })
+    return json(res, { code: 200, data: n, message: '获取当日新增岗位数量成功' }, undefined, req)
   }
 
   // ===== 面经 API（与线上一致：GET） =====
@@ -146,18 +148,18 @@ createServer(async (req, res) => {
     })
     filtered.sort((a, b) => (b.publishTime || 0) - (a.publishTime || 0))
     const start = (cur - 1) * pageSize
-    return json(res, { code: 200, data: filtered.slice(start, start + +pageSize), total: filtered.length, message: '查询成功' })
+    return json(res, { code: 200, data: filtered.slice(start, start + +pageSize), total: filtered.length, message: '查询成功' }, undefined, req)
   }
   const mjMeta = url.pathname.match(/^\/api\/mianjing\/(companies|positions|topics|stats|company-facets|topic-facets)$/)
   if (mjMeta) {
     const meta = loadSeed('mianjing-meta.json', {})
-    return json(res, { code: 200, data: meta[mjMeta[1]] ?? (mjMeta[1] === 'stats' ? {} : []), message: '获取成功' })
+    return json(res, { code: 200, data: meta[mjMeta[1]] ?? (mjMeta[1] === 'stats' ? {} : []), message: '获取成功' }, undefined, req)
   }
   if (url.pathname === '/api/mianjing/detail') {
     const q = req.method === 'POST' ? JSON.parse(await readBody(req) || '{}') : Object.fromEntries(url.searchParams)
     const details = loadSeed('mianjing-detail.json', {})
     const hit = details[q.id || q._id]
-    return json(res, hit ? { code: 200, data: hit, message: '查询成功' } : { code: 404, data: null, message: '面经不存在' })
+    return json(res, hit ? { code: 200, data: hit, message: '查询成功' } : { code: 404, data: null, message: '面经不存在' }, undefined, req)
   }
 
   // ===== 求职攻略文章 =====
@@ -175,7 +177,7 @@ createServer(async (req, res) => {
       data: filtered.slice(start, start + pageSize).map((p) => ({ ...p, content: undefined })),
       total: filtered.length,
       message: '查询成功',
-    })
+    }, undefined, req)
   }
   if (url.pathname === '/api/post/detail') {
     const q = req.method === 'POST' ? JSON.parse(await readBody(req) || '{}') : Object.fromEntries(url.searchParams)
@@ -184,6 +186,7 @@ createServer(async (req, res) => {
     return json(
       res,
       hit ? { code: 200, data: { ...hit, contentMd: body?.contentMd }, message: '查询成功' } : { code: 404, data: null, message: '文章不存在' },
+      undefined, req,
     )
   }
 
@@ -203,11 +206,11 @@ createServer(async (req, res) => {
         ? await page.pdf({ width: '794px', height: '1123px', printBackground: true, pageRanges: '' })
         : await page.locator('.jufe-wrapper-page').first().screenshot()
       await page.close()
-      return json(res, isPdf ? { pdf: { data: [...buf] } } : { picture: { data: [...buf] } })
+      return json(res, isPdf ? { pdf: { data: [...buf] } } : { picture: { data: [...buf] } }, undefined, req)
     } catch (e) {
-      return json(res, { msg: String(e?.message || e) }, 503)
+      return json(res, { msg: String(e?.message || e) }, 503, req)
     }
   }
 
-  json(res, { msg: 'not found' }, 404)
+  json(res, { msg: 'not found' }, 404, req)
 }).listen(8787, () => console.log('dev backend on :8787'))

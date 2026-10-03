@@ -176,3 +176,15 @@
     padding: 0;
   }
 }
+
+/* CodeCV 生产方言 !bg 背景色标记（标题内为整条色带，正文内为行内高亮） */
+.markdown-transform-html .font-bg {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 4px;
+}
+.markdown-transform-html h3 .font-bg,
+.markdown-transform-html h2 .font-bg {
+  display: block;
+  padding: 6px 14px;
+}

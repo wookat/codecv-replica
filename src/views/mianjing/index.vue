@@ -100,22 +100,30 @@ const isHot = (m: MianjingItem) => (m.viewCount ?? 0) >= 100
 onMounted(async () => {
   load()
   try {
-    const [cs, st, ps] = await Promise.all([
+    const [cs, st, ps, all] = await Promise.all([
       mianjingMeta('companies'),
       mianjingMeta('stats'),
-      mianjingMeta('positions')
+      mianjingMeta('positions'),
+      mianjingList({ current: 1, pageSize: 100 }).catch(() => null)
     ])
     stats.value = st?.data ?? {}
-    positions.value = Array.isArray(ps?.data) ? ps.data : []
-    const facets = await mianjingMeta('company-facets').catch(() => null)
-    const counts: Record<string, number> = {}
-    const facetArr = facets?.data
-    if (Array.isArray(facetArr))
-      facetArr.forEach((f: any) => (counts[f.slug ?? f._id ?? f.name] = f.count ?? f.value ?? 0))
-    companies.value = (Array.isArray(cs?.data) ? cs.data : []).map((c: any) => ({
-      ...c,
-      count: counts[c.slug] ?? 0
-    }))
+    // 生产只展示有内容的岗位/公司（岗位5个/公司9家），按面经数排序
+    const allItems: MianjingItem[] = all?.data ?? []
+    const pCount: Record<string, number> = {}
+    const cCount: Record<string, number> = {}
+    allItems.forEach(i => {
+      if (i.positionSlug) pCount[i.positionSlug] = (pCount[i.positionSlug] ?? 0) + 1
+      if (i.positionName) pCount[i.positionName] = (pCount[i.positionName] ?? 0) + 1
+      if (i.companySlug) cCount[i.companySlug] = (cCount[i.companySlug] ?? 0) + 1
+      if (i.companyName) cCount[i.companyName] = (cCount[i.companyName] ?? 0) + 1
+    })
+    positions.value = (Array.isArray(ps?.data) ? ps.data : []).filter(
+      (p: any) => (pCount[p.slug] ?? pCount[p.name] ?? 0) > 0
+    )
+    companies.value = (Array.isArray(cs?.data) ? cs.data : [])
+      .map((c: any) => ({ ...c, count: cCount[c.slug] ?? cCount[c.name] ?? 0 }))
+      .filter(c => c.count > 0)
+      .sort((a, b) => b.count - a.count)
   } catch (e) {
     console.error('获取面经元数据失败:', e)
   }

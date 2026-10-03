@@ -1,330 +1,446 @@
 <script setup lang="ts">
-import { useGiteeRepoStars, useRecentTemplate, useTypeNet, useUserComments } from './hook'
-import Header from './components/header.vue'
-import Presentation from './components/presentation.vue'
-import { useDark } from '@vueuse/core'
+import { computed } from 'vue'
 import { templates } from '@/templates/config'
 
-const animate = ['fade-right', 'fade-up', 'fade-up', 'fade-left']
-const isDark = useDark()
-useTypeNet()
-useRecentTemplate()
-const { comments } = useUserComments()
-const { repoStars, createAnimateEffect } = useGiteeRepoStars()
+const FEATURES = [
+  { icon: '🎈', name: '不设限', desc: '简历模板中一切都是可控的 不被默认简历排版限制～' },
+  { icon: '✨', name: '自动排版', desc: '只需关注简历内容本身 分页/排版自动生成～' },
+  { icon: '✌🏻', name: '两种编辑模式', desc: '可选择适合自己的编写方式～' },
+  { icon: '🔒', name: '隐私安全', desc: '不用担心个人信息泄露～' },
+  { icon: '🌴', name: '所见即所得', desc: '简历导出效果与预览效果高度一致～' },
+  { icon: '🎁', name: '至今已免费导出', strong: '20万+', desc: ' 简历!' }
+]
+
+// 生产首页右侧扇形简历图（抓取自线上静态资源）
+const FAN = [
+  { src: '/prod-assets/hero-18.webp', rotate: -24, x: -120, y: 24 },
+  { src: '/prod-assets/hero-17.webp', rotate: -12, x: -60, y: 0 },
+  { src: '/prod-assets/hero-16.webp', rotate: 0, x: 0, y: -12 },
+  { src: '/prod-assets/hero-15.webp', rotate: 12, x: 60, y: 0 },
+  { src: '/prod-assets/hero-14.webp', rotate: 24, x: 120, y: 24 }
+]
+
+const newest = computed(() =>
+  [...templates.value].sort((a, b) => +(b.hot || 0) - +(a.hot || 0)).slice(0, 6)
+)
+
+const AI_CARDS = [
+  {
+    icon: '✨',
+    title: '简历润色',
+    desc: '给出需要润色的内容，自动识别并突出显示最相关的信息，让你的简历更加突出和吸引人，在求职过程中脱颖而出！'
+  },
+  {
+    icon: '♻️',
+    title: '中英互译',
+    desc: '快速、精准的AI简历内容中英互译，助您轻松应对跨国求职～'
+  },
+  {
+    icon: '✍🏻',
+    title: '简历生成',
+    desc: '让AI帮您撰写精美简历，通过强大的GPT生成，突出优势，脱颖而出！'
+  },
+  {
+    icon: '✌🏻',
+    title: '支持多文件导出',
+    desc: '除了 PDF 格式，我们还支持 Markdown、PNG格式的文件导出，基本涵盖大部分的使用场景',
+    badges: ['.PDF', '.MD', '.PNG']
+  }
+]
+
+const COMMENTS = [
+  {
+    content: '使用体验还不错呀，UI 做的也蛮好的，加油！',
+    avatar: '/prod-assets/avatar1.png',
+    profession: '阿里巴巴前端'
+  },
+  {
+    content:
+      '在nk推荐中看到了这个工具，非常感谢作者大大的开发，虽然我不是前后端开发，但是直观感觉这玩意真好～',
+    avatar: '/prod-assets/avatar2.png',
+    profession: '嵌入式开发工程师'
+  },
+  {
+    content: '这个简历工具实在是泰库辣！真的节省了我很多时间，简历模板也很实用，发现了宝藏工具！！',
+    avatar: '/prod-assets/avatar3.png',
+    profession: 'Java开发工程师'
+  },
+  {
+    content:
+      '简历写起来真的非常方便，因为我不懂UP说的markdown，所以我使用所见即所得方式编写，感觉就和写word一样简单，墙裂推荐～',
+    avatar: '/prod-assets/avatar4.png',
+    profession: '用户运营'
+  },
+  {
+    content:
+      '周末在家搞网站发现的这个宝藏资源，写简历就跟写笔记一样简单了，所见即所得，以后写简历就在这上面了～',
+    avatar: '/prod-assets/avatar5.png',
+    profession: '产品经理'
+  }
+]
 </script>
 
 <template>
-  <div class="tip">
-    您正在访问备用网址，请前往主站获取更加完善的功能及简历模板
-    <a class="pointer hover" href="https://wuxiancv.com">点击访问</a>
-  </div>
   <div id="home">
-    <Header />
-    <div class="introduce flex flex-space-around flex-align-around flex-align-center noto-sans-sc">
-      <div class="introduce-l" data-aos="fade-right">
-        <div class="typenet-text"></div>
-        <button
-          @click="$router.push('/template')"
-          :class="['start btn pointer', { 'dark-start': isDark }]"
-        >
-          快速开始 <i class="iconfont icon-goto"></i>
-        </button>
+    <!-- Hero：与线上版一致 -->
+    <section class="hero noto-sans-sc">
+      <div class="hero-l">
+        <h1 class="sr-only">
+          免费在线Markdown简历制作工具，专业中英文简历模板免费下载，涵盖前后端、产品、运营等岗位
+        </h1>
+        <p class="hero-title">互联网从业者都在用的专业简历工具</p>
+        <ul class="hero-feats">
+          <li v-for="f in FEATURES" :key="f.name">
+            <span class="fi">{{ f.icon }}</span>
+            <b>{{ f.name }}</b>
+            <span class="fd"
+              ><b v-if="f.strong" class="fstrong">{{ f.strong }}</b
+              >{{ f.desc }}</span
+            >
+          </li>
+        </ul>
+        <div class="hero-cta">
+          <router-link to="/jianlimoban" class="cta primary">免费生成专业简历</router-link>
+          <a href="https://www.offerstar.cn" target="_blank" rel="noopener" class="cta ghost"
+            >Ai笔试面试神器</a
+          >
+        </div>
       </div>
-      <div class="introduce-r">
-        <Presentation />
+      <div class="hero-r">
+        <img
+          v-for="(f, i) in FAN"
+          :key="i"
+          :src="f.src"
+          :style="{ transform: `translate(${f.x}px, ${f.y}px) rotate(${f.rotate}deg)` }"
+          alt="简历模板"
+          draggable="false"
+        />
       </div>
-    </div>
+    </section>
 
-    <div class="user-comments noto-sans-sc">
-      <div class="intro">
-        <h1 data-aos="zoom-in">😍 来自用户的声音</h1>
-        <p class="sub-intro" data-aos="zoom-in">
-          CodeCV 简历上线后得到了许多用户的喜欢，同时也收获了一些用户的反馈，看看他们是怎么说的吧～
-        </p>
-      </div>
-      <ul class="flex presentation-module">
-        <li class="pointer" v-for="(comment, idx) in comments" :key="idx" data-aos="zoom-in">
-          <p>{{ comment.content }}</p>
-          <p class="user-comment-info">
-            <img :src="comment.avatar" alt="头像" />
-            <sub>{{ comment.profession }}</sub>
+    <!-- 最新模板 -->
+    <section class="sec noto-sans-sc">
+      <h2>🤩 最新模板</h2>
+      <p class="sub">
+        主打一个实用！如果你有喜欢的模板在这里没有，记得告诉我哦～
+        等你下次再来的时候就能看到了，你永远可以相信作者的速度！
+      </p>
+      <ul class="tpl-grid">
+        <li v-for="t in newest" :key="t.type">
+          <router-link :to="`/jianlimoban/${t.type}`" class="tpl-card">
+            <div class="tc-img">
+              <span class="use-badge">999+ 人使用过</span>
+              <img :src="t.img" :alt="`${t.name}简历模板`" loading="lazy" />
+            </div>
+            <p class="tc-name">{{ t.name }}简历模板</p>
+          </router-link>
+        </li>
+      </ul>
+    </section>
+
+    <!-- AI 辅助写简历 -->
+    <section class="sec ai noto-sans-sc">
+      <h2>👋 AI 辅助写简历</h2>
+      <p class="sub">
+        简历内容不够丰富不知道如何下手？自己翻译简历觉得很困难？没关系，找 AI 这些都能解决～
+      </p>
+      <ul class="ai-grid">
+        <li v-for="c in AI_CARDS" :key="c.title" class="ai-card">
+          <p class="ai-title">
+            <span>{{ c.icon }}</span> {{ c.title }}
+          </p>
+          <p class="ai-desc">{{ c.desc }}</p>
+          <div v-if="c.badges" class="ai-badges">
+            <span v-for="b in c.badges" :key="b">{{ b }}</span>
+          </div>
+        </li>
+      </ul>
+      <p class="ai-foot">
+        🚀 我们推出了多种导出方式，无论是制作图片还是 PDF ，您只需编写简单的 MD 文本或者 Word
+        ，其他的我们都助您轻松生成！快来尝试吧！✨
+      </p>
+    </section>
+
+    <!-- 好评如潮 -->
+    <section class="sec comments noto-sans-sc">
+      <h2>😍 好评如潮</h2>
+      <p class="sub">
+        CodeCV简历上线后得到了许多用户的喜欢，同时也收获了一些用户的反馈，看看他们是怎么说的吧～
+      </p>
+      <ul class="cm-grid">
+        <li v-for="c in COMMENTS" :key="c.profession" class="cm-card">
+          <p class="cm-content">{{ c.content }}</p>
+          <p class="cm-info">
+            <img :src="c.avatar" alt="头像" /><sub>{{ c.profession }}</sub>
           </p>
         </li>
       </ul>
-      <div class="gitee-repo-stars">
-        <a
-          v-for="user in repoStars"
-          :key="user.login"
-          target="_blank"
-          :href="user.html_url"
-          :data-aos="createAnimateEffect()"
-        >
-          <img :src="user.avatar_url" :alt="user.name" />
-          <sub class="line-1">{{ user.name }}</sub>
-        </a>
-        <br />
-        <a href="https://gitee.com/codeleilei/markdown2pdf/stargazers" target="_blank">...</a>
-      </div>
-    </div>
-
-    <div class="recent-template noto-sans-sc">
-      <div class="intro">
-        <h1 data-aos="zoom-in">🤩 最新模板</h1>
-        <p class="sub-intro" data-aos="zoom-in">
-          如果你有喜欢的模板在这里没有，记得告诉我哦～
-          等你下次再来的时候就能看到了，你永远可以相信作者的速度！
-        </p>
-      </div>
-      <ul class="flex presentation-module">
-        <li
-          class="pointer"
-          v-for="(t, idx) in templates.slice(0, 4)"
-          :key="idx"
-          :data-aos="animate[idx]"
-          @click="$router.push({ path: '/editor', query: { type: t.type } })"
-        >
-          <img :src="t.img" alt="" />
-          <span>{{ t.hot }}+使用</span>
-          <p>{{ t.name }}</p>
-        </li>
-      </ul>
-    </div>
+    </section>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.tip {
-  font-size: 13px;
-  color: var(--writable-font-color);
-  text-align: center;
-  a {
-    color: var(--strong-color);
-  }
-}
 #home {
-  height: 100%;
   width: 100%;
+  color: var(--font-color);
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
   overflow: hidden;
-
-  // 首页公共样式
-  .presentation-module {
-    color: var(--writable-font-color);
-    max-width: var(--max-width);
-    margin: 0 auto;
-    list-style: none;
-    padding: 50px 0;
-  }
-  .intro {
-    padding-bottom: 20px;
-    padding-top: 10px;
-    background: var(--body-background);
-    .sub-intro {
-      text-align: center;
-      color: #999;
+  clip: rect(0 0 0 0);
+}
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 90px 20px 70px;
+  background: linear-gradient(120deg, var(--background) 55%, rgba(255, 116, 73, 0.07));
+}
+.hero-l {
+  max-width: 560px;
+}
+.hero-title {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1.3;
+  margin: 0 0 30px;
+}
+.hero-feats {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 36px;
+  li {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-size: 15px;
+    line-height: 2.1;
+    .fi {
+      width: 24px;
+    }
+    b {
+      font-weight: 700;
+    }
+    .fd {
+      color: #6b7280;
       font-size: 14px;
     }
-  }
-
-  .introduce {
-    color: var(--font-color);
-    height: 100vh;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-
-    background: linear-gradient(
-      30deg,
-      var(--background),
-      var(--background),
-      var(--linear-background) 100%
-    );
-    .introduce-l {
-      z-index: 2;
-      .typenet-text {
-        width: 500px;
-        height: 300px;
-      }
-      .start {
-        font-size: 1.1rem;
-        padding: 10px 20px 10px 25px;
-        border-radius: 40px;
-        background: #000;
-        margin-top: 10px;
-        color: white;
-        &:hover {
-          transition: transform 0.4s;
-          transform: translateY(5px);
-          opacity: 0.8;
-        }
-      }
-      .dark-start {
-        background: #ff7449;
-      }
-    }
-  }
-
-  .user-comments {
-    background: var(--background);
-
-    h1 {
-      text-align: center;
-      padding: 20px 0;
-      background: var(--body-background);
-    }
-    ul {
-      li {
-        position: relative;
-        margin-right: 20px;
-        background: var(--body-background);
-        padding: 20px 20px 60px 20px;
-        border-radius: 10px;
-        font-family: 'Noto Sans SC';
-        font-size: 14px;
-        min-width: 220px;
-
-        &:last-child {
-          margin-right: 0;
-        }
-
-        p {
-          line-height: 25px;
-          sub {
-            color: #999;
-          }
-        }
-        .user-comment-info {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          height: 60px;
-          text-align: right;
-          width: 100%;
-          padding: 0 0 10px 20px;
-          display: flex;
-          align-items: center;
-          sub {
-            margin-top: 20px;
-          }
-          img {
-            user-select: none;
-            -webkit-user-drag: none;
-            width: 40px;
-            margin-right: 10px;
-          }
-        }
-      }
-    }
-  }
-
-  .gitee-repo-stars {
-    margin: 0 auto;
-    padding: 0 20px 50px 20px;
-    text-align: center;
-    max-width: var(--max-width);
-    p {
-      color: var(--writable-font-color);
-    }
-    a {
-      margin: 5px;
-      text-decoration: none;
-      color: var(--writable-font-color);
-      display: inline-flex;
-      flex-direction: column;
-      max-width: 50px;
-      sub {
-        font-size: 12px;
-        margin-top: 5px;
-      }
-      .no-avatar,
-      img {
-        width: 40px;
-        border-radius: 50%;
-      }
-      .no-avatar {
-        height: 40px;
-        background: var(--theme);
-        color: var(--font-color);
-        padding: 10px;
-        margin-bottom: 10px;
-      }
-      &:hover {
-        opacity: 0.6;
-      }
-    }
-  }
-
-  .recent-template {
-    background: var(--background);
-    h1 {
-      text-align: center;
-      padding: 20px 0;
-      background: var(--body-background);
-    }
-    ul {
-      justify-content: space-around;
-      list-style: none;
-      li {
-        flex: 1;
-        margin: 0 20px 20px 20px;
-        transition: transform 0.5s;
-        text-align: center;
-        position: relative;
-        max-width: 250px;
-
-        span {
-          position: absolute;
-          top: 0;
-          left: 0;
-          letter-spacing: 1px;
-          padding: 5px 10px;
-          background: var(--theme);
-          color: #f8f8f8;
-          font-size: 12px;
-          border-bottom-right-radius: 10px;
-          border-top-left-radius: 10px;
-        }
-        &:hover {
-          transform: translateY(20px);
-        }
-        img {
-          width: 100%;
-          box-shadow: 0 0 30px var(--body-background);
-          border-radius: 10px;
-        }
-      }
+    .fstrong {
+      color: var(--theme);
+      font-size: 18px;
     }
   }
 }
-
-@media screen and (max-width: 800px) {
-  .introduce {
-    .introduce-r {
-      display: none;
+.hero-cta {
+  display: flex;
+  gap: 16px;
+}
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 46px;
+  padding: 0 30px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+  &.primary {
+    background: linear-gradient(90deg, #ff7449, #ff9a44);
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(255, 116, 73, 0.35);
+  }
+  &.ghost {
+    background: var(--background);
+    color: var(--font-color);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  &:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.04);
+  }
+}
+.hero-r {
+  position: relative;
+  flex-shrink: 0;
+  width: 460px;
+  height: 460px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  img {
+    position: absolute;
+    width: 190px;
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+    transition: transform 0.4s;
+  }
+}
+.sec {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 60px 20px 30px;
+  text-align: center;
+  h2 {
+    font-size: 28px;
+    font-weight: 800;
+    margin: 0 0 12px;
+  }
+  .sub {
+    color: #9ca3af;
+    font-size: 14px;
+    margin: 0 0 34px;
+  }
+}
+.tpl-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 18px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  @media (max-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.tpl-card {
+  display: block;
+  text-decoration: none;
+  color: var(--font-color);
+  .tc-img {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    img {
+      width: 100%;
+      display: block;
+    }
+    .use-badge {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 2;
+      padding: 4px 8px;
+      border-radius: 0 0 8px 0;
+      background: linear-gradient(90deg, #ff7449, #ff9a44);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
     }
   }
-  .user-comments {
-    ul {
-      flex-direction: column;
-      li {
-        margin-left: 20px;
-        margin-bottom: 20px;
-        &:last-child {
-          margin-bottom: 0;
-        }
-      }
+  .tc-name {
+    margin: 10px 0 0;
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  &:hover .tc-name {
+    color: var(--theme);
+  }
+}
+.ai-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+.ai-card {
+  background: var(--background);
+  border-radius: 14px;
+  padding: 26px 28px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  .ai-title {
+    font-size: 17px;
+    font-weight: 700;
+    margin: 0 0 10px;
+  }
+  .ai-desc {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #6b7280;
+    margin: 0;
+  }
+  .ai-badges {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+    span {
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--theme);
+      background: rgba(255, 116, 73, 0.1);
     }
   }
-  .recent-template {
-    ul {
-      flex-wrap: wrap;
-      li {
-        margin-left: 20px;
-        text-align: center;
-        img {
-          width: 70%;
-          min-width: 200px;
-        }
-      }
+}
+.ai-foot {
+  margin: 30px auto 0;
+  max-width: 760px;
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.9;
+}
+.cm-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+.cm-card {
+  background: var(--background);
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 150px;
+  .cm-content {
+    font-size: 13px;
+    line-height: 1.8;
+    color: #4b5563;
+    margin: 0 0 14px;
+  }
+  .cm-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+    }
+    sub {
+      font-size: 12px;
+      color: #9ca3af;
     }
   }
 }

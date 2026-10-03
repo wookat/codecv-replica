@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { convertDOM } from '@/utils/moduleCombine'
 import { templates } from '@/templates/config'
+import { importCSS } from '@/utils'
 
 const route = useRoute()
 const html = ref('')
@@ -20,6 +21,7 @@ onMounted(() => {
   if (!s) return
   type.value = s.type
   name.value = s.name
+  importCSS(s.type)
   const raw = localStorage.getItem(`markdown-content-${s.type}`)
   const md = raw ? JSON.parse(raw).value ?? '' : ''
   if (md) html.value = convertDOM(md).innerHTML
@@ -35,7 +37,7 @@ const tpl = computed(() => templates.value.find(t => t.type === type.value))
         <h1>{{ name || tpl?.name || '分享的简历' }}</h1>
         <router-link :to="`/editor/${type}`" class="sh-btn">用同款模板</router-link>
       </div>
-      <div class="cv-preview" v-html="html"></div>
+      <div class="cv-preview markdown-transform-html jufe" v-html="html"></div>
     </div>
     <div v-else class="sh-empty">
       <h2>分享不存在或已过期</h2>

@@ -20,6 +20,11 @@ type SubModule = {
   primaryBackground: string
   img: string
   hot?: number | string
+  slug?: string
+  description?: string
+  tags?: string[]
+  level?: string
+  avatar?: string
 }
 export type TemplateType = SubModule
 

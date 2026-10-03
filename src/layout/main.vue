@@ -4,7 +4,8 @@ import Footer from './footer.vue'
 </script>
 
 <template>
-  <Header v-if="!['/editor', '/home'].includes($route.path)" />
+  <!-- 生产 /login 为独立全屏页：无头无脚 -->
+  <Header v-if="!['/editor', '/login'].includes($route.path)" />
   <div id="main">
     <el-tooltip placement="bottom" content="返回顶部">
       <el-backtop :bottom="100" />
@@ -18,7 +19,7 @@ import Footer from './footer.vue'
       </keep-alive>
     </router-view>
   </div>
-  <Footer v-if="!['/editor'].includes($route.path)" />
+  <Footer v-if="!['/editor', '/login'].includes($route.path)" />
 </template>
 
 <style lang="scss" scoped>

@@ -17,6 +17,7 @@ const outNav = [
   {
     name: '面经',
     path: '/mianjing',
+    badge: 'NEW',
     tooltip: false
   },
   {
@@ -25,13 +26,14 @@ const outNav = [
     tooltip: false
   },
   {
-    name: '校招信息汇总',
-    path: '/jobs',
+    name: 'AI笔试面试',
+    path: 'https://www.offerstar.cn',
+    external: true,
     tooltip: false
   },
   {
-    name: '语法助手',
-    path: '/syntax/helper',
+    name: '校招信息汇总',
+    path: '/jobs',
     tooltip: false
   }
 ]

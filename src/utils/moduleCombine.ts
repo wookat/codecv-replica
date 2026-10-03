@@ -34,6 +34,17 @@ function moduleCombine(DOMStr: string) {
   return result
 }
 
+// CodeCV 生产方言：!c[文本](#颜色)=前景色、!bg[文本](#颜色)=背景色
+// v1 解析器会先按超链接产出 `!c<a href=#hex>文本</a>`，这里还原为带色 span
+const FONT_MARK = /!(bg|c)<a href=(#[0-9a-fA-F]{3,8})>([\s\S]*?)<\/a>/g
+function fontMark(html: string) {
+  return html.replace(FONT_MARK, (_, kind, color, text) =>
+    kind === 'bg'
+      ? `<span class="font-bg" style="background:${color}">${text}</span>`
+      : `<span style="color:${color}">${text}</span>`
+  )
+}
+
 export function convertDOM(DOMStr: string) {
-  return moduleCombine(markdownToHTML(DOMStr))
+  return moduleCombine(fontMark(markdownToHTML(DOMStr)))
 }

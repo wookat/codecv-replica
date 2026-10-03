@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { convertDOM } from '@/utils/moduleCombine'
 import { templates } from '@/templates/config'
+import { importCSS } from '@/utils'
 
 const route = useRoute()
 const html = ref('')
@@ -11,6 +12,7 @@ const tpl = computed(() => templates.value.find(t => t.type === (route.params.ty
 onMounted(() => {
   const type = route.params.type as string
   const t = templates.value.find(x => x.type === type)
+  importCSS(type)
   // 公开简历页：优先取本地已存内容，否则展示模板原文
   let md = ''
   try {
@@ -31,7 +33,7 @@ onMounted(() => {
         <h1>{{ tpl?.name ?? '简历' }}</h1>
         <router-link :to="`/editor/${route.params.type}`" class="cvv-btn">用此模板</router-link>
       </div>
-      <div class="cv-paper" v-html="html"></div>
+      <div class="cv-paper markdown-transform-html jufe" v-html="html"></div>
     </div>
     <div v-else class="cvv-empty">
       <h2>简历不存在</h2>
