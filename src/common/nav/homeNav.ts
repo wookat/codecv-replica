@@ -24,14 +24,8 @@ const homeNav = [
 const homeOutNav = [
   {
     name: 'GitHub',
-    path: 'https://github.com/acmenlei/markdown-resume-to-pdf',
+    path: 'https://github.com/acmenlei/codecv',
     icon: 'iconfont icon-github'
-  },
-  {
-    name: 'Gitee',
-    path: 'https://gitee.com/codeleilei/markdown2pdf',
-    icon: 'iconfont icon-gitee',
-    color: '#d90013'
   }
 ]
 export { homeNav, homeOutNav }

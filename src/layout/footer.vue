@@ -13,51 +13,20 @@
       </li>
     </ul>
     <ul class="flex" data-aos="fade-right">
-      <strong class="title">作者</strong>
+      <strong class="title">致谢</strong>
       <li>
-        <a href="https://coderlei.netlify.app" target="_blank">个人博客</a>
+        <a href="https://github.com/acmenlei/codecv" target="_blank">codecv 上游项目</a>
       </li>
       <li>
         <a href="https://github.com/acmenlei" target="_blank"
-          ><i class="iconfont icon-github"></i> GitHub</a
-        >
-      </li>
-      <li>
-        <a href="https://gitee.com/codeleilei" target="_blank"
-          ><i class="iconfont icon-gitee"></i> Gitee</a
+          ><i class="iconfont icon-github"></i> 原作者 GitHub</a
         >
       </li>
     </ul>
     <ul class="flex" data-aos="fade-left">
-      <strong class="title">社交媒体</strong>
-      <li>
-        <a href="https://juejin.cn/user/2586468969632445" target="_blank"
-          ><i class="iconfont icon-juejin"></i> 掘金</a
-        >
-      </li>
-      <li>
-        <a href="https://space.bilibili.com/455695921" target="_blank">
-          <i class="iconfont icon-bilibili"></i> bilibili</a
-        >
-      </li>
-      <li>
-        <a href="https://zhihu.com/people/kuai-le-vans" target="_blank"
-          ><i class="iconfont icon-zhihu"></i> 知乎</a
-        >
-      </li>
-    </ul>
-    <ul data-aos="fade-left">
-      <strong class="title">联系方式</strong>
-      <ul class="flex row">
-        <li>
-          <img src="@/assets/img/wechat.jpg" alt="作者微信" />
-          <strong>作者微信</strong>
-        </li>
-        <li>
-          <img src="@/assets/img/qqgroup.jpeg" alt="QQ群问题咨询" />
-          <strong>QQ群交流</strong>
-        </li>
-      </ul>
+      <strong class="title">说明</strong>
+      <li>模板与排版引擎基于 codecv 授权复刻</li>
+      <li>数据默认保存在本地浏览器</li>
     </ul>
   </div>
 </template>

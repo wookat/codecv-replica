@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import navMenu from './nav.vue'
-import Reward from '@/components/reward.vue'
 import ThemeToggle from '@/components/themeToggle.vue'
 import { wOpen } from '@/utils'
 import { useSwitch } from '@/common/global'
@@ -32,7 +31,6 @@ const { open, toggle } = useSwitch()
       @export-picture="exportFile('picture')"
     />
     <ExportTotal />
-    <Reward />
     <button class="exporter server-export btn" @click="exportFile('dynamic')">导出PDF</button>
     <button class="exporter local-export btn" @click="exportFile('native')">备用导出</button>
     <div class="operator">
