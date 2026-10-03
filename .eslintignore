@@ -1,0 +1,9 @@
+public
+node_modules
+dist
+src/assets/*
+build/*
+service
+**/*.scss
+**/*.css
+index.html
