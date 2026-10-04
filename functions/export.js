@@ -30,6 +30,10 @@ async function fontCss(origin, families) {
   const bufs = await Promise.all(
     urls.map(async u => new Uint8Array(await (await fetch(new URL(u, origin))).arrayBuffer()))
   )
+  // debug: 取得バイト列が本物の woff2 か検査（先頭マジック wOF2=77 4F 46 32）
+  const dbgHeads = bufs
+    .map(b => b.slice(0, 4).reduce((s, x) => s + x.toString(16) + ' ', ''))
+    .join('|')
   let out = keptCss
   urls.forEach((u, i) => {
     let bin = ''
@@ -40,7 +44,7 @@ async function fontCss(origin, families) {
     out = out.replace(u, `data:font/woff2;base64,${btoa(bin)}`)
   })
   fontCssCache.set(key, out)
-  return out
+  return { css: out, dbgHeads }
 }
 
 export async function onRequestPost(context) {
@@ -66,7 +70,7 @@ export async function onRequestPost(context) {
   if (scan.includes('noto-serif-sc') || scan.includes('noto serif sc')) {
     families.push('Noto Serif SC')
   }
-  const fonts = await fontCss(origin, families)
+  const { css: fonts, dbgHeads } = await fontCss(origin, families)
   const html = `<!doctype html><html><head><meta charset="utf-8">${iconfont}${linkTag}<style>${fonts}${
     style || ''
   }</style></head><body>${content}</body></html>`
@@ -104,7 +108,7 @@ export async function onRequestPost(context) {
     const buf = new Uint8Array(await r.arrayBuffer())
     return json(
       request,
-      Object.assign({ fontsLen: fonts.length }, isPdf ? { pdf: { data: [...buf] } } : { picture: { data: [...buf] } })
+      Object.assign({ fontsLen: fonts.length, dbgHeads }, isPdf ? { pdf: { data: [...buf] } } : { picture: { data: [...buf] } })
     )
   } catch (e) {
     return json(request, { msg: String(e?.message || e) }, 503)
