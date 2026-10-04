@@ -37,18 +37,22 @@ export async function onRequestPost(context) {
   if (scan.includes('noto-serif-sc') || scan.includes('noto serif sc')) {
     families.push('Noto Serif SC')
   }
-  const fontLinks = families
-    .flatMap(f =>
-      (FACE_FILES[f] || []).map(fn => `<link rel="stylesheet" href="${origin}/fonts/${fn}">`)
+  const fonts = (
+    await Promise.all(
+      families.flatMap(f =>
+        (FACE_FILES[f] || []).map(fn => fetch(`${origin}/fonts/${fn}`).then(r => r.text()))
+      )
     )
-    .join('')
+  ).join('')
   // フォントのフェッチ/デコード完了を確実に待つため、document.fonts.ready で
   // マーカー要素を立てて waitForSelector で同期する。
   const fontWait = `<script>document.fonts.ready.then(()=>{const d=document.createElement('div');d.id='fonts-ready';document.body.appendChild(d)})</script>`
-  const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}${fontLinks}<style>${fonts}${
+  // CF BR は小さい html では inline <style> を適用しない実測がある（~8MB 超で適用）。
+  // 原因のブラックボックス閾値を越えるため非表示パディングで押し上げる。
+  const pad = `<div style="display:none" aria-hidden="true">${'x'.repeat(6_000_000)}</div>`
+  const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}<style>${fonts}${
     style || ''
   }</style></head><body>${content}${fontWait}${pad}</body></html>`
-  // html パラメータは小さいと inline リソースが黙殺される実測があるため、
   const endpoint = isPdf ? 'pdf' : 'screenshot'
   const body = isPdf
     ? {
