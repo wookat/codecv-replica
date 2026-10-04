@@ -58,7 +58,15 @@ export async function onRequestPost(context) {
     `<svg xmlns="http://www.w3.org/2000/svg" width="340" height="220"><text x="170" y="110" font-size="17" fill="rgba(0,0,0,0.07)" transform="rotate(-30 170 110)" text-anchor="middle" font-family="sans-serif">CodeCV简历  codecv.zalize.com</text></svg>`
   )}`
   const watermark = `<div style="position:fixed;inset:0;z-index:2147483000;pointer-events:none;background-image:url('${wmSvg}');background-repeat:repeat"></div>`
-  const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}<style>${fonts}${
+  // prod の export リクエスト style フィールドに同梱される正規化ルールを同じく
+  // 同梱（mark 内の色/背景を outer 側に正規化・全要素 line-height:20px 強制）
+  const markNormalize = `.markdown-transform-html mark { color: inherit; }
+.markdown-transform-html span[data-color] :not([data-color]),
+.markdown-transform-html mark[data-color] :not([data-color]) { color: inherit !important; }
+.markdown-transform-html mark code { background: transparent !important; }
+.markdown-transform-html mark:has(code) { border-radius: 5px; }
+.markdown-transform-html * { line-height: 20px; }`
+  const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}<style>${fonts}${markNormalize}${
     style || ''
   }</style></head><body>${content}${watermark}${fontWait}</body></html>`
   const endpoint = isPdf ? 'pdf' : 'screenshot'
