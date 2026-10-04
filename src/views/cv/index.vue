@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { convertDOM } from '@/utils/moduleCombine'
+import { avatarOverlayHTML, convertDOM } from '@/utils/moduleCombine'
 import { resolveTemplateType, templates } from '@/templates/config'
 import { applyTemplateTheme, importCSS } from '@/utils'
 
@@ -25,7 +25,7 @@ onMounted(() => {
     /* ignore */
   }
   if (!md) md = t?.content ?? ''
-  if (md) html.value = convertDOM(md).innerHTML
+  if (md) html.value = convertDOM(md).innerHTML + avatarOverlayHTML(type)
 })
 </script>
 

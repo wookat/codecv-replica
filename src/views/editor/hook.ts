@@ -8,7 +8,7 @@ import { download, downloadOfBuffer, importCSS, isDev, queryDOM, useLoading } fr
 import { ensureEmptyPreWhiteSpace, splitPage } from './components/tabbar/hook'
 import useEditorStore from '@/store/modules/editor'
 import { resolveTemplateType } from '@/templates/config'
-import { convertDOM } from '@/utils/moduleCombine'
+import { avatarOverlayHTML, convertDOM } from '@/utils/moduleCombine'
 import { resumeExport } from '@/api/modules/resume'
 import {
   CUSTOM_CSS_STYLE,
@@ -37,7 +37,8 @@ export function useRenderHTML(resumeType: Ref<string>) {
 
   onActivated(() => {
     importCSS(resumeType.value)
-    renderDOM.value.innerHTML = convertDOM(editorStore.MDContent).innerHTML
+    renderDOM.value.innerHTML =
+      convertDOM(editorStore.MDContent).innerHTML + avatarOverlayHTML(resumeType.value)
     setTimeout(() => splitPage(renderDOM.value), 100)
   })
 
@@ -46,7 +47,7 @@ export function useRenderHTML(resumeType: Ref<string>) {
   watch(
     () => editorStore.MDContent,
     v => {
-      renderDOM.value.innerHTML = convertDOM(v).innerHTML
+      renderDOM.value.innerHTML = convertDOM(v).innerHTML + avatarOverlayHTML(resumeType.value)
       lazySplitPage()
     }
   )
@@ -113,6 +114,11 @@ export function useDownLoad(type: Ref<string>) {
   const downloadDynamic = async (isPDF: boolean, fileName?: string) => {
     const { content: html, style, link } = await exportPreHandler()
     const content = html.cloneNode(true) as HTMLElement
+    // 相对路径的图片在远端无站点 base URL 的环境下无法加载，导出前统一绝对化
+    content.querySelectorAll('img').forEach(img => {
+      const src = img.getAttribute('src')
+      if (src && !/^(https?:|data:|blob:)/.test(src)) img.src = new URL(src, location.origin).href
+    })
     !isPDF && ensureEmptyPreWhiteSpace(content)
     showLoading('正在导出请耐心等待...')
     try {
@@ -125,7 +131,7 @@ export function useDownLoad(type: Ref<string>) {
       })
       const buffer = isPDF ? pdfData.pdf.data : pdfData.picture.data
       const _fileName = (fileName || document.title) + (isPDF ? '.pdf' : '.png')
-      const fileType = 'application/' + isPDF ? 'pdf' : 'png'
+      const fileType = isPDF ? 'application/pdf' : 'image/png'
       downloadOfBuffer(buffer, _fileName, fileType)
       successMessage('导出成功～')
     } catch (e: any) {

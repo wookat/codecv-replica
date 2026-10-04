@@ -1,4 +1,5 @@
 import { markdownToHTML } from 'markdown-transform-html'
+import { getAvatarConfig } from '@/templates/config'
 
 // 简历模块拆分 将每个子模块内容进行整合
 function moduleCombine(DOMStr: string) {
@@ -47,4 +48,16 @@ function fontMark(html: string) {
 
 export function convertDOM(DOMStr: string) {
   return moduleCombine(fontMark(markdownToHTML(DOMStr)))
+}
+
+// 证件照覆盖层：尺寸沿用 common.css 的 img[alt*=个人头像] 规则，
+// src 绝对化以便服务端导出环境（无站点 base URL）也能加载图片
+export function avatarOverlayHTML(type: string) {
+  const av = getAvatarConfig(type)
+  if (!av) return ''
+  const src = /^(https?:|data:|blob:)/.test(av.url)
+    ? av.url
+    : `${location.origin}${av.url.startsWith('/') ? '' : '/'}${av.url}`
+  const radius = av.type === 'circle' ? 'border-radius:50%;' : ''
+  return `<img alt="个人头像" class="cv-avatar-overlay" src="${src}" style="position:absolute;top:${av.top}px;left:${av.left}px;z-index:3;${radius}">`
 }

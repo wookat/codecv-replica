@@ -34,7 +34,7 @@ const { open, toggle } = useSwitch()
     />
     <ExportTotal />
     <button class="exporter server-export btn" @click="exportFile('dynamic')">导出PDF</button>
-    <button class="exporter local-export btn" @click="exportFile('native')">备用导出</button>
+    <button class="exporter local-export btn" @click="exportFile('native')">打印机导出PDF</button>
     <div class="operator">
       <i
         class="iconfont icon-github github font-25"

@@ -65,6 +65,15 @@ export function resolveTemplateType(param: string): string {
   return hit?.type ?? param
 }
 
+export type AvatarConfig = { url: string; top: number; left: number; type?: string }
+
+// 生产数据把证件照作为模板层配置（url/top/left）下发，不属于 md 内容
+export function getAvatarConfig(type: string): AvatarConfig | null {
+  const av = templates.value.find(t => t.type === type)?.avatar
+  if (!av) return null
+  return typeof av === 'string' ? { url: av, top: 30, left: 660, type: 'square' } : av
+}
+
 export function getPrimaryBGColor(type: string) {
   return initialCVState.get(type)?.[1] ?? '#333'
 }

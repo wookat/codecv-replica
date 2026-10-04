@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { convertDOM } from '@/utils/moduleCombine'
+import { avatarOverlayHTML, convertDOM } from '@/utils/moduleCombine'
 import { templates } from '@/templates/config'
 import { applyTemplateTheme, importCSS } from '@/utils'
 import { getShare } from '@/api/modules/share'
@@ -18,7 +18,7 @@ function render(type_: string, name_: string, md: string) {
   name.value = name_
   importCSS(type_)
   applyTemplateTheme(type_)
-  html.value = convertDOM(md).innerHTML
+  html.value = convertDOM(md).innerHTML + avatarOverlayHTML(type_)
 }
 
 onMounted(async () => {
