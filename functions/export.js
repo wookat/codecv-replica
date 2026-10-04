@@ -45,16 +45,14 @@ export async function onRequestPost(context) {
   // フォントのフェッチ/デコード完了を確実に待つため、document.fonts.ready で
   // マーカー要素を立てて waitForSelector で同期する。
   const fontWait = `<script>document.fonts.ready.then(()=>{const d=document.createElement('div');d.id='fonts-ready';document.body.appendChild(d)})</script>`
-  const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}${fontLinks}<style>${
+  const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}${fontLinks}<style>${fonts}${
     style || ''
-  }</style></head><body>${content}${fontWait}</body></html>`
+  }</style></head><body>${content}${fontWait}${pad}</body></html>`
   // html パラメータは小さいと inline リソースが黙殺される実測があるため、
-  // data: URL で url ナビゲーション経路を明示的に使う。
-  const dataUrl = `data:text/html;base64,${btoa(unescape(encodeURIComponent(html)))}`
   const endpoint = isPdf ? 'pdf' : 'screenshot'
   const body = isPdf
     ? {
-        url: dataUrl,
+        html,
         waitForSelector: { selector: '#fonts-ready', timeout: 10000 },
         pdfOptions: {
           // width/height は CF BR では無視され Letter に落ちるため format 指定が必須（小文字のみ受理）
@@ -65,7 +63,7 @@ export async function onRequestPost(context) {
         gotoOptions: { waitUntil: 'networkidle0' }
       }
     : {
-        url: dataUrl,
+        html,
         waitForSelector: { selector: '#fonts-ready', timeout: 10000 },
         screenshotOptions: { fullPage: false },
         viewport: { width: 794, height: 1123 },
