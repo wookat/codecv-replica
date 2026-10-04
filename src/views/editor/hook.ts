@@ -7,6 +7,7 @@ import { errorMessage, successMessage, warningMessage } from '@/common/message'
 import { download, downloadOfBuffer, importCSS, isDev, queryDOM, useLoading } from '@/utils'
 import { ensureEmptyPreWhiteSpace, splitPage } from './components/tabbar/hook'
 import useEditorStore from '@/store/modules/editor'
+import { resolveTemplateType } from '@/templates/config'
 import { convertDOM } from '@/utils/moduleCombine'
 import { resumeExport } from '@/api/modules/resume'
 import {
@@ -64,9 +65,13 @@ export function useRenderHTML(resumeType: Ref<string>) {
 export function useResumeType() {
   const route = useRoute()
   //初始化也需要填上值 否则后续更新不一致会导致刷新死循环
-  const resumeType = ref(route.query.type ? String(route.query.type) : '10front_end')
+  const resumeType = ref(
+    route.query.type ? resolveTemplateType(String(route.query.type)) : '10front_end'
+  )
   onActivated(() => {
-    resumeType.value = route.query.type ? String(route.query.type) : '10front_end'
+    resumeType.value = route.query.type
+      ? resolveTemplateType(String(route.query.type))
+      : '10front_end'
   })
   return {
     resumeType

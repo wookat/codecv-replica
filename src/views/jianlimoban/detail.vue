@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { templates } from '@/templates/config'
+import { resolveTemplateType, templates } from '@/templates/config'
 import { convertDOM } from '@/utils/moduleCombine'
 
 const route = useRoute()
 const router = useRouter()
 const zoom = ref(false)
 
-const type = computed(() => route.params.type as string)
+const type = computed(() => resolveTemplateType(route.params.type as string))
 const tpl = computed<any>(() => templates.value.find(t => t.type === type.value))
 const related = computed<any[]>(() => {
   if (!tpl.value) return []

@@ -2,15 +2,17 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { convertDOM } from '@/utils/moduleCombine'
-import { templates } from '@/templates/config'
+import { resolveTemplateType, templates } from '@/templates/config'
 import { applyTemplateTheme, importCSS } from '@/utils'
 
 const route = useRoute()
 const html = ref('')
-const tpl = computed(() => templates.value.find(t => t.type === (route.params.type as string)))
+const tpl = computed(() =>
+  templates.value.find(t => t.type === resolveTemplateType(route.params.type as string))
+)
 
 onMounted(() => {
-  const type = route.params.type as string
+  const type = resolveTemplateType(route.params.type as string)
   const t = templates.value.find(x => x.type === type)
   importCSS(type)
   applyTemplateTheme(type)
@@ -32,7 +34,11 @@ onMounted(() => {
     <div v-if="html" class="cvv-wrap">
       <div class="cvv-head">
         <h1>{{ tpl?.name ?? '简历' }}</h1>
-        <router-link :to="`/editor/${route.params.type}`" class="cvv-btn">用此模板</router-link>
+        <router-link
+          :to="`/editor/${resolveTemplateType(route.params.type as string)}`"
+          class="cvv-btn"
+          >用此模板</router-link
+        >
       </div>
       <div class="cv-paper markdown-transform-html jufe" v-html="html"></div>
     </div>

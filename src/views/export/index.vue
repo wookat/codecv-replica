@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { convertDOM } from '@/utils/moduleCombine'
 import { applyTemplateTheme, importCSS } from '@/utils'
 import { getCurrentTypeContent } from '@/store/modules/editor'
+import { resolveTemplateType } from '@/templates/config'
 
 const route = useRoute()
 const router = useRouter()
@@ -11,7 +12,7 @@ const html = ref('')
 const type = ref('')
 
 onMounted(() => {
-  const id = route.params.id as string
+  const id = resolveTemplateType(route.params.id as string)
   type.value = id
   importCSS(id)
   applyTemplateTheme(id)

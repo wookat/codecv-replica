@@ -1,15 +1,53 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import ThemeToggle from '@/components/themeToggle.vue'
 import AccountSettings from '@/components/AccountSettings.vue'
 import useUserStore from '@/store/modules/user'
 import { currentUser, logoutLocal, type LocalUser } from '@/utils/auth'
+import { getLocalStorage } from '@/common/localstorage'
 
 const router = useRouter()
 const store = useUserStore()
 const user = ref<LocalUser | null>(null)
 const settings = ref(false)
+const redeemOpen = ref(false)
+const redeemCode = ref('')
+const redeemMsg = ref('')
+
+// 与生产一致的用户菜单项
+const menuItems = [
+  { title: '个人资料', act: () => (settings.value = true) },
+  { title: '我的简历', act: () => router.push('/profile') },
+  { title: '我的投递', act: () => router.push('/progress') },
+  { title: '我的面经', act: () => router.push('/mianjing/mine') },
+  { title: '我的订单', act: () => router.push('/order') },
+  { title: '会员中心', act: () => router.push('/member') },
+  { title: '我的邀请', act: () => router.push('/user/invite') },
+  { title: '兑换码', act: () => (redeemOpen.value = true) }
+]
+
+const nickName = computed(() => store.userInfo.nickName || user.value?.name || '')
+const avatarLetter = computed(() => (nickName.value || 'U').slice(0, 1).toUpperCase())
+
+async function redeem() {
+  redeemMsg.value = ''
+  const code = redeemCode.value.trim()
+  if (code.length < 6) {
+    redeemMsg.value = '兑换码格式不正确'
+    return
+  }
+  try {
+    const res: any = await fetch('/user/redeem', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: getLocalStorage('USERNAME'), code })
+    }).then(r => r.json())
+    redeemMsg.value = res?.msg || '兑换失败'
+  } catch {
+    redeemMsg.value = '网络异常，请稍后再试'
+  }
+}
 onMounted(() => {
   user.value = currentUser()
 })
@@ -53,17 +91,34 @@ function logout() {
     </el-popover>
     <div class="divider"></div>
     <el-dropdown v-if="user">
-      <button class="login-btn">{{ user.name }}</button>
+      <span class="u-entry">
+        <img v-if="store.userInfo.avatar" :src="store.userInfo.avatar" class="u-avatar" />
+        <span v-else class="u-avatar u-letter">{{ avatarLetter }}</span>
+        <span class="u-name">{{ nickName }}</span>
+      </span>
       <template #dropdown>
         <el-dropdown-menu>
-          <el-dropdown-item @click="router.push('/profile')">我的简历</el-dropdown-item>
-          <el-dropdown-item @click="settings = true">账号设置</el-dropdown-item>
-          <el-dropdown-item @click="logout">退出登录</el-dropdown-item>
+          <el-dropdown-item v-for="m in menuItems" :key="m.title" @click="m.act">{{
+            m.title
+          }}</el-dropdown-item>
+          <el-dropdown-item divided @click="logout">退出登录</el-dropdown-item>
         </el-dropdown-menu>
       </template>
     </el-dropdown>
     <button v-else class="login-btn" @click="router.push('/login')">登录 / 注册</button>
     <AccountSettings v-model="settings" />
+    <el-dialog v-model="redeemOpen" title="兑换码" width="380px">
+      <div class="redeem-box">
+        <input
+          v-model="redeemCode"
+          class="redeem-input"
+          placeholder="请输入兑换码"
+          maxLength="32"
+        />
+        <p v-if="redeemMsg" class="redeem-msg">{{ redeemMsg }}</p>
+        <button class="save-btn" @click="redeem">立即兑换</button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -123,6 +178,70 @@ function logout() {
   transition: opacity 0.2s;
   &:hover {
     opacity: 0.88;
+  }
+}
+.u-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  .u-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .u-letter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--theme);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .u-name {
+    font-size: 14px;
+    color: var(--font-color);
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+.redeem-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  .redeem-input {
+    height: 38px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    background: var(--body-background);
+    color: var(--font-color);
+    font-size: 14px;
+    outline: none;
+    &:focus {
+      border-color: var(--theme);
+    }
+  }
+  .redeem-msg {
+    font-size: 13px;
+    color: #e6a23c;
+    margin: 0;
+  }
+  .save-btn {
+    height: 38px;
+    border: none;
+    border-radius: 8px;
+    background: var(--theme);
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    &:hover {
+      opacity: 0.9;
+    }
   }
 }
 </style>

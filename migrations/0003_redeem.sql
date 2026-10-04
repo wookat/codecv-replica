@@ -1,0 +1,7 @@
+ALTER TABLE users ADD COLUMN vip_expire INTEGER NOT NULL DEFAULT 0;
+CREATE TABLE IF NOT EXISTS redeem_codes (
+  code TEXT PRIMARY KEY,
+  days INTEGER NOT NULL,
+  used_by INTEGER,
+  used_at INTEGER
+);

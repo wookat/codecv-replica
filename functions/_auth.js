@@ -73,5 +73,6 @@ export const publicUser = row => ({
   graduation: row.graduation,
   school: row.school,
   avatar: row.avatar,
-  origin: row.origin
+  origin: row.origin,
+  vipExpire: row.vip_expire ?? 0
 })

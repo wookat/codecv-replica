@@ -108,5 +108,31 @@ export async function onRequest(context) {
     return json(request, { code: 200, msg: '密码修改成功' })
   }
 
+  if (route === 'redeem') {
+    const { username, code } = q
+    if (!username || !code || String(code).length < 6) {
+      return json(request, { code: 400, msg: '兑换码格式不正确' })
+    }
+    const u = await db
+      .prepare('SELECT id, vip_expire FROM users WHERE username = ?')
+      .bind(username)
+      .first()
+    if (!u) return json(request, { code: 404, msg: '用户不存在' })
+    const c = await db
+      .prepare('SELECT code, days, used_by FROM redeem_codes WHERE code = ?')
+      .bind(String(code))
+      .first()
+    if (!c || c.used_by) return json(request, { code: 400, msg: '兑换码无效或已被使用' })
+    const base = Math.max(Date.now(), Number(u.vip_expire) || 0)
+    const expire = base + Number(c.days) * 86400 * 1000
+    await db.batch([
+      db
+        .prepare('UPDATE redeem_codes SET used_by=?, used_at=? WHERE code=?')
+        .bind(u.id, Date.now(), c.code),
+      db.prepare('UPDATE users SET vip_expire=? WHERE id=?').bind(expire, u.id)
+    ])
+    return json(request, { code: 200, msg: `兑换成功，会员有效期延长 ${c.days} 天` })
+  }
+
   return json(request, { code: 404, msg: 'not found' }, 404)
 }
