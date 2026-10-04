@@ -14,6 +14,8 @@ const FACE_FILES = {
   'Noto Sans SC': ['face-noto-sans-sc-400.css', 'face-noto-sans-sc-700.css'],
   'Noto Serif SC': ['face-noto-serif-sc-400.css', 'face-noto-serif-sc-700.css'],
   Nunito: ['face-nunito-400.css', 'face-nunito-700.css'],
+  // prod の Latin 数字は TimesNewRomanPS —— メトリック互換の無償代替 Tinos を同姓で供給
+  'Times New Roman': ['face-times-new-roman-400.css', 'face-times-new-roman-700.css'],
   // @font-face 本体と ~200 個の .icon-* クラス規則の2ファイル
   iconfont: ['face-iconfont-400.css', 'face-iconfont.css']
 }
@@ -31,7 +33,7 @@ export async function onRequestPost(context) {
   // レンダ側にもフォントを届けないとフォールバック書体で折返し位置がずれる。
   // googleapis は CF BR から到達不可のため本站自ホストの css を link で渡す。
   const scan = `${content || ''}${style || ''}${link || ''}`.toLowerCase()
-  const families = ['Noto Sans SC', 'iconfont', 'Nunito']
+  const families = ['Noto Sans SC', 'iconfont', 'Nunito', 'Times New Roman']
   if (scan.includes('noto-serif-sc') || scan.includes('noto serif sc')) {
     families.push('Noto Serif SC')
   }
@@ -49,9 +51,16 @@ export async function onRequestPost(context) {
   // フォントのフェッチ/デコード完了を確実に待つため、document.fonts.ready で
   // マーカー要素を立てて waitForSelector で同期する。
   const fontWait = `<script>document.fonts.ready.then(()=>{const d=document.createElement('div');d.id='fonts-ready';document.body.appendChild(d)})</script>`
+  // prod PDF は全ページに斜めタイルの薄グレー透かし（「CodeCV简历 www.codecvcv.com」、
+  // 有償解除機能）が入る。こちらは本站ドメインで同型を複製 —— position:fixed は印刷時
+  // 全ページに繰り返し描画されるためタイル層1枚で済む。
+  const wmSvg = `data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="340" height="220"><text x="170" y="110" font-size="17" fill="rgba(0,0,0,0.07)" transform="rotate(-30 170 110)" text-anchor="middle" font-family="sans-serif">CodeCV简历  codecv.zalize.com</text></svg>`
+  )}`
+  const watermark = `<div style="position:fixed;inset:0;z-index:2147483000;pointer-events:none;background-image:url('${wmSvg}');background-repeat:repeat"></div>`
   const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}<style>${fonts}${
     style || ''
-  }</style></head><body>${content}${fontWait}</body></html>`
+  }</style></head><body>${content}${watermark}${fontWait}</body></html>`
   const endpoint = isPdf ? 'pdf' : 'screenshot'
   const body = isPdf
     ? {
