@@ -32,7 +32,9 @@ export async function onRequest(context) {
     if (String(content).length > 500) return json(request, { code: 400, msg: '评论最多 500 字' })
     const nickname = auth.row.nickname || auth.row.username
     const r = await db
-      .prepare('INSERT INTO comments (doc_id, user_id, nickname, content, created_at) VALUES (?,?,?,?,?)')
+      .prepare(
+        'INSERT INTO comments (doc_id, user_id, nickname, content, created_at) VALUES (?,?,?,?,?)'
+      )
       .bind(String(doc), auth.row.id, nickname, String(content).trim(), Date.now())
       .run()
     return json(request, {

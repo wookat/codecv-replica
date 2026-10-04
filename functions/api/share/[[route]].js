@@ -28,7 +28,15 @@ export async function onRequest(context) {
       .prepare(
         'INSERT INTO shares (id, user_id, type, name, content, style, created_at) VALUES (?,?,?,?,?,?,?)'
       )
-      .bind(id, auth.row.id, String(type), String(name || ''), String(content), String(style || ''), Date.now())
+      .bind(
+        id,
+        auth.row.id,
+        String(type),
+        String(name || ''),
+        String(content),
+        String(style || ''),
+        Date.now()
+      )
       .run()
     return json(request, { code: 200, data: { id }, message: '分享链接已生成' })
   }
