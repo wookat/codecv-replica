@@ -158,11 +158,11 @@ export function useCustomFont(resumeType: string) {
   const fontOptions = [
     {
       value: 'Noto Serif SC',
-      label: 'Noto Serif SC'
+      label: '思源宋体'
     },
     {
       value: 'Noto Sans SC',
-      label: 'Noto Sans SC'
+      label: '思源黑体'
     },
     {
       value: 'Nunito',
@@ -313,7 +313,8 @@ export function useJustify(resumeType: string) {
 
 // 智能一页：逐级缩字号+行距直到装进一页
 export function useOnePage(resumeType: string) {
-  const cacheKey = AUTO_ONE_PAGE + '-' + resumeType
+  const cacheKey = AUTO_ONE_PAGE + '-' + resumeType,
+    onePageApplied = ref(!!query(cacheKey) || !!get(cacheKey))
 
   function applyShrink(baseSize: number) {
     upsertPersistStyle(
@@ -328,15 +329,33 @@ export function useOnePage(resumeType: string) {
   function smartOnePage() {
     const renderCV = queryRenderCV()
     if (!renderCV) return
-    if (pageSize.value <= 1) return
+    if (pageSize.value <= 1) {
+      onePageApplied.value = true
+      return
+    }
     const cur = parseFloat(getComputedStyle(renderCV).fontSize) || 15
     for (let size = cur - 0.5; size >= 10; size -= 0.5) {
       applyShrink(size)
-      if (pageSize.value <= 1) return
+      if (pageSize.value <= 1) {
+        onePageApplied.value = true
+        return
+      }
     }
   }
+
+  function toggleOnePage() {
+    if (onePageApplied.value) {
+      upsertPersistStyle(cacheKey, '')
+      set(cacheKey, '')
+      removeLocalStorage(cacheKey)
+      onePageApplied.value = false
+      reSplit()
+      return
+    }
+    smartOnePage()
+  }
   onActivated(() => restorePersistStyle(cacheKey))
-  return { smartOnePage }
+  return { smartOnePage, toggleOnePage, onePageApplied }
 }
 
 // 校徽：上传图片叠加到头部区域 可拖拽定位

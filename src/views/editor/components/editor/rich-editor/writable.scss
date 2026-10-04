@@ -162,3 +162,43 @@
     }
   }
 }
+
+/* ===== 生产版编辑模式卡片皮肤：字段行渲染为灰底胶囊卡 ===== */
+.writable-edit-mode {
+  .flex-layout-item {
+    background: #f3f4f6;
+    border-radius: 8px;
+    padding: 8px 14px;
+    margin-right: 10px;
+    line-height: 1.6;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  h1, h2, h3 {
+    font-weight: 600;
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  ul, ol {
+    li {
+      list-style: none;
+      position: relative;
+      padding-left: 14px;
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0.65em;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: #9ca3af;
+      }
+    }
+  }
+}

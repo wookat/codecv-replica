@@ -42,7 +42,7 @@ const { lineHeight, applyLineHeight } = useLineHeight(resumeType.value)
 const { paraSpacing, applyParaSpacing } = useParaSpacing(resumeType.value)
 const { fontSize, fontSizeOptions, applyFontSize } = useFontSize(resumeType.value)
 const { justified, toggleJustify } = useJustify(resumeType.value)
-const { smartOnePage } = useOnePage(resumeType.value)
+const { toggleOnePage, onePageApplied } = useOnePage(resumeType.value)
 const { setBadge } = useBadge(resumeType.value)
 const { isDark } = useThemeConfig()
 
@@ -61,12 +61,18 @@ const proofreadVisible = ref(false)
       show-stops
     />
     <div class="operator-level2">
-      <el-tooltip content="调整元素上下边距" effect="light">
-        <i class="iconfont icon-adjust operator-item" @click="adjustMargin"></i>
-      </el-tooltip>
+      <div class="operator-item font-color-picker">
+        <el-color-picker @change="setColor" size="small" v-model="color" />
+      </div>
       <el-tooltip content="编写CSS" effect="light">
         <i class="operator-item iconfont icon-diy" @click="toggleDialog"></i
       ></el-tooltip>
+      <el-tooltip content="调整元素上下边距" effect="light">
+        <i class="iconfont icon-adjust operator-item" @click="adjustMargin"></i>
+      </el-tooltip>
+      <div class="operator-item main-color-picker">
+        <el-color-picker @change="setPrimaryColor" size="small" v-model="primaryColor" />
+      </div>
       <el-tooltip
         content="上传前请确保你想上传的位置在编辑器中存在 ![个人头像](...) 此占位符"
         effect="light"
@@ -78,8 +84,17 @@ const proofreadVisible = ref(false)
         <label for="upload-badge" class="operator-item text-btn">校徽</label>
       </el-tooltip>
       <input type="file" id="upload-badge" accept=".png,.jpg,.jpeg" @change="setBadge" />
-      <el-tooltip content="自动缩小字号行距装进一页" effect="light">
-        <button class="operator-item text-btn" @click="smartOnePage">智能一页</button>
+      <el-tooltip
+        :content="onePageApplied ? '恢复多页排版' : '自动缩小字号行距装进一页'"
+        effect="light"
+      >
+        <button
+          class="operator-item text-btn"
+          :class="{ 'onepage-active': onePageApplied }"
+          @click="toggleOnePage"
+        >
+          {{ onePageApplied ? '取消一页' : '智能一页' }}
+        </button>
       </el-tooltip>
       <el-tooltip content="段落两端对齐" effect="light">
         <button
@@ -128,12 +143,6 @@ const proofreadVisible = ref(false)
           :value="item.value"
         />
       </el-select>
-      <div class="operator-item font-color-picker">
-        <el-color-picker @change="setColor" size="small" v-model="color" />
-      </div>
-      <div class="operator-item main-color-picker">
-        <el-color-picker @change="setPrimaryColor" size="small" v-model="primaryColor" />
-      </div>
       <el-popconfirm
         width="240"
         confirm-button-text="是的"
@@ -255,6 +264,11 @@ const proofreadVisible = ref(false)
       }
       &.active {
         color: var(--theme);
+      }
+      &.onepage-active {
+        color: var(--theme);
+        border: 1px solid var(--theme);
+        border-radius: 6px;
       }
     }
     .num-step {
