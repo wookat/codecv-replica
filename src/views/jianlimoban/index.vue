@@ -347,6 +347,10 @@ watch(
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  @media (max-width: 767px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
   .sort-tabs {
     display: flex;
     gap: 18px;

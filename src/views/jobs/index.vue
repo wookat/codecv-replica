@@ -516,6 +516,7 @@ onMounted(() => {
   padding: 0 20px 40px;
   font-family: var(--font-noto-sans-sc);
   color: var(--font-color);
+  overflow-x: clip;
 }
 
 .crumb {

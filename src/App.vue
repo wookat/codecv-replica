@@ -19,6 +19,11 @@ onMounted(() => AOS.init({ once: true }))
   margin: 0;
 }
 
+html,
+body {
+  overflow-x: clip;
+}
+
 body {
   background: var(--body-background);
 }

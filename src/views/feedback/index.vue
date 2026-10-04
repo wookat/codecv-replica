@@ -111,8 +111,10 @@ function submit() {
             <el-pagination
               v-model:current-page="current"
               :page-size="PAGE_SIZE"
+              :pager-count="5"
               :total="list.length"
               background
+              small
               layout="prev, pager, next"
             />
           </div>

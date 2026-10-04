@@ -515,4 +515,38 @@ const COMMENTS = [
     }
   }
 }
+@media (max-width: 1024px) {
+  .hero {
+    padding: 44px 20px 36px;
+  }
+  .hero-r {
+    display: none;
+  }
+  .hero-title {
+    font-size: 30px;
+  }
+}
+@media (max-width: 640px) {
+  .hero-title {
+    font-size: 26px;
+  }
+  .hero-cta {
+    flex-wrap: wrap;
+    gap: 12px;
+    .cta {
+      height: 42px;
+      padding: 0 22px;
+      font-size: 14px;
+    }
+  }
+  .sec {
+    padding: 40px 16px 20px;
+    h2 {
+      font-size: 22px;
+    }
+  }
+  .ext-illust {
+    max-width: 100%;
+  }
+}
 </style>

@@ -8,3 +8,4 @@ service
 **/*.css
 index.html
 src/templates/modules/*/index.ts
+auto-imports.d.ts

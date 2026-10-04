@@ -26,7 +26,7 @@ function logout() {
 
 <template>
   <div class="nav-right">
-    <theme-toggle />
+    <span class="tt-wrap"><theme-toggle /></span>
     <!-- 小程序：hover 出二维码弹层（与线上一致的入口形态） -->
     <el-popover placement="bottom-end" :width="170" trigger="hover">
       <template #reference>
