@@ -48,10 +48,13 @@ export async function onRequestPost(context) {
   const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}${fontLinks}<style>${
     style || ''
   }</style></head><body>${content}${fontWait}</body></html>`
+  // html パラメータは小さいと inline リソースが黙殺される実測があるため、
+  // data: URL で url ナビゲーション経路を明示的に使う。
+  const dataUrl = `data:text/html;base64,${btoa(unescape(encodeURIComponent(html)))}`
   const endpoint = isPdf ? 'pdf' : 'screenshot'
   const body = isPdf
     ? {
-        html,
+        url: dataUrl,
         waitForSelector: { selector: '#fonts-ready', timeout: 10000 },
         pdfOptions: {
           // width/height は CF BR では無視され Letter に落ちるため format 指定が必須（小文字のみ受理）
@@ -62,7 +65,7 @@ export async function onRequestPost(context) {
         gotoOptions: { waitUntil: 'networkidle0' }
       }
     : {
-        html,
+        url: dataUrl,
         waitForSelector: { selector: '#fonts-ready', timeout: 10000 },
         screenshotOptions: { fullPage: false },
         viewport: { width: 794, height: 1123 },
