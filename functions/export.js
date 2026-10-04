@@ -27,8 +27,8 @@ export async function onRequestPost(context) {
     ? {
         html,
         pdfOptions: {
-          // width/height は CF BR では無視され Letter に落ちるため format 指定が必須
-          format: 'A4',
+          // width/height は CF BR では無視され Letter に落ちるため format 指定が必須（小文字のみ受理）
+          format: 'a4',
           printBackground: true,
           margin: { top: 0, right: 0, bottom: 0, left: 0 }
         },
