@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import Header from './header/header.vue'
 import Footer from './footer.vue'
+import FloatTools from '@/components/FloatTools.vue'
 </script>
 
 <template>
   <!-- 生产 /login 为独立全屏页：无头无脚 -->
   <Header v-if="!['/editor', '/login'].includes($route.path)" />
   <div id="main">
-    <el-tooltip placement="bottom" content="返回顶部">
-      <el-backtop :bottom="100" />
-    </el-tooltip>
+    <FloatTools v-if="!['/editor', '/login'].includes($route.path)" />
     <router-view v-slot="{ Component }">
       <keep-alive
         :max="10"

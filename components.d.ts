@@ -7,12 +7,12 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    AsideRail: typeof import('./src/components/AsideRail.vue')['default']
     BrowseHistory: typeof import('./src/components/browse-history/browseHistory.vue')['default']
     Chat: typeof import('./src/components/chat-room/chat.vue')['default']
     Comments: typeof import('./src/components/comments/comments.vue')['default']
     Contact: typeof import('./src/components/contact.vue')['default']
     Crm: typeof import('./src/components/comment-reply-msg/crm.vue')['default']
-    ElBacktop: typeof import('element-plus/es')['ElBacktop']
     ElBadge: typeof import('element-plus/es')['ElBadge']
     ElBreadcrumb: typeof import('element-plus/es')['ElBreadcrumb']
     ElBreadcrumbItem: typeof import('element-plus/es')['ElBreadcrumbItem']
@@ -43,7 +43,9 @@ declare module '@vue/runtime-core' {
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
     Empty: typeof import('./src/components/empty.vue')['default']
     ExportTotal: typeof import('./src/components/exportTotal.vue')['default']
+    FloatTools: typeof import('./src/components/FloatTools.vue')['default']
     HotList: typeof import('./src/components/hot-rank/hotList.vue')['default']
+    LoginModal: typeof import('./src/components/LoginModal.vue')['default']
     Logo: typeof import('./src/components/logo.vue')['default']
     MenuBar: typeof import('./src/components/menu-bar/menu-bar/MenuBar.vue')['default']
     MenuBarItem: typeof import('./src/components/menu-bar/menu-bar-item/menuBarItem.vue')['default']

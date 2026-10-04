@@ -9,6 +9,9 @@ const link = `${location.origin}/?invite=${user.value ? 'u' : 'guest'}`
 function copy() {
   navigator.clipboard?.writeText(link).then(() => ElMessage.success('邀请链接已复制'))
 }
+function goLogin() {
+  location.hash = '#/login'
+}
 </script>
 
 <template>
@@ -21,7 +24,8 @@ function copy() {
           感谢您喜欢我们的产品，如果您觉得好用的话，可以分享给您的同学朋友使用，邀请新人首次开通会员你将得到订单
           <span class="hl">10% 的佣金</span>（非优惠券/代金券）。
         </p>
-        <button class="iv-btn" @click="copy">复制我的邀请链接</button>
+        <button v-if="user" class="iv-btn" @click="copy">复制我的邀请链接</button>
+        <button v-else class="iv-btn" @click="goLogin">登录后查看我的邀请链接</button>
       </div>
     </div>
 
@@ -32,56 +36,32 @@ function copy() {
       </p>
       <div class="steps">
         <div class="step">
-          <svg
+          <img
             class="s-ic"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <circle cx="18" cy="5" r="3" />
-            <circle cx="6" cy="12" r="3" />
-            <circle cx="18" cy="19" r="3" />
-            <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" />
-            <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" />
-          </svg>
+            src="/prod-assets/invite-share.svg"
+            alt="一、分享链接 - 邀请奖励说明图"
+            draggable="false"
+          />
           <div class="st">一、分享链接</div>
           <div class="sd">分享邀请链接给好友，注册登录</div>
         </div>
         <div class="step">
-          <svg
+          <img
             class="s-ic"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-            <circle cx="9" cy="7" r="4" />
-            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-          </svg>
+            src="/prod-assets/invite-join.svg"
+            alt="二、加入会员 - 邀请奖励说明图"
+            draggable="false"
+          />
           <div class="st">二、加入会员</div>
           <div class="sd">好友开通了任意会员</div>
         </div>
         <div class="step">
-          <svg
+          <img
             class="s-ic"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
-            <path d="M12 18V6" />
-          </svg>
+            src="/prod-assets/invite-money.svg"
+            alt="三、获得佣金 - 邀请奖励说明图"
+            draggable="false"
+          />
           <div class="st">三、获得佣金</div>
           <div class="sd">你获得该笔订单 10% 的佣金（仅限好友首次开通）</div>
         </div>
@@ -160,9 +140,13 @@ function copy() {
     justify-content: space-between;
     align-items: center;
     .s-ic {
-      width: 80px;
-      height: 80px;
-      color: var(--theme);
+      width: 96px;
+      height: 96px;
+      object-fit: contain;
+      @media (max-width: 767px) {
+        width: 50%;
+        height: auto;
+      }
     }
     .st {
       font-size: 18px;

@@ -4,6 +4,7 @@
       <ul>
         <strong class="title">友情链接</strong>
         <li><a href="https://markdown.com.cn" target="_blank" rel="noopener">markdown教程</a></li>
+        <li><a href="https://shenqiji.com" target="_blank" rel="noopener">神器集</a></li>
         <li>
           <a href="https://github.com/acmenlei/codecv" target="_blank" rel="noopener">开源代码</a>
         </li>
@@ -31,13 +32,16 @@
       </ul>
       <ul>
         <strong class="title">联系方式/小程序</strong>
-        <li class="mp-line">
-          <el-popover placement="top" :width="150" trigger="hover">
-            <template #reference><span class="mp-ref">客服微信</span></template>
-            <img src="/prod-assets/wechat.jpg" alt="客服微信" class="mp-img" />
-          </el-popover>
+        <li class="mp-imgs">
+          <div class="mp-one">
+            <img src="/prod-assets/wechat.jpg" alt="客服微信" />
+            <span>客服微信</span>
+          </div>
+          <router-link to="/progress" class="mp-one">
+            <img src="/prod-assets/miniprogram.webp" alt="投递进度管理" />
+            <span>投递进度管理</span>
+          </router-link>
         </li>
-        <li><router-link to="/progress">投递进度管理</router-link></li>
       </ul>
     </div>
     <div class="copyright">CopyRight © 2023 CodeCV简历 | 赣ICP备2023009154号</div>
@@ -82,9 +86,27 @@
           opacity: 0.6;
         }
       }
-      .mp-img {
-        width: 130px;
-        display: block;
+      &.mp-imgs {
+        flex-direction: row;
+        gap: 10px;
+        .mp-one {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-decoration: none;
+          img {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            display: block;
+          }
+          span {
+            margin-top: 4px;
+            font-size: 11px;
+            color: #999;
+            white-space: nowrap;
+          }
+        }
       }
     }
   }

@@ -1,9 +1,17 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { currentUser } from '@/utils/auth'
+import LoginModal from '@/components/LoginModal.vue'
 
+const router = useRouter()
 const user = ref(currentUser())
+const loginModal = ref(!user.value)
 const orders = ref<any[]>(JSON.parse(localStorage.getItem('codecv-orders') || '[]'))
+function onClose() {
+  loginModal.value = false
+  if (!user.value) router.push('/profile')
+}
 </script>
 
 <template>
@@ -21,24 +29,14 @@ const orders = ref<any[]>(JSON.parse(localStorage.getItem('codecv-orders') || '[
         <el-table-column prop="time" label="下单时间" min-width="160" />
       </el-table>
       <div v-else class="empty">
-        <svg
-          class="e-ic"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
-          <path d="M3 6h18" />
-          <path d="M16 10a4 4 0 0 1-8 0" />
-        </svg>
+        <img class="e-img" src="/prod-assets/empty.svg" alt="暂无订单" />
         <h3>暂无订单</h3>
         <p>{{ user ? '开通会员可解锁全部高级功能' : '登录后可查看订单记录' }}</p>
-        <router-link to="/member" class="od-btn">去看会员</router-link>
+        <router-link v-if="user" to="/member" class="od-btn">去看会员</router-link>
+        <button v-else class="od-btn" @click="loginModal = true">去登录</button>
       </div>
     </div>
+    <LoginModal v-if="loginModal" @close="onClose" />
   </div>
 </template>
 
@@ -63,11 +61,11 @@ const orders = ref<any[]>(JSON.parse(localStorage.getItem('codecv-orders') || '[
 .empty {
   padding: 48px 0;
   text-align: center;
-  .e-ic {
-    width: 48px;
-    height: 48px;
-    color: #d1d5db;
+  .e-img {
+    width: 120px;
+    user-select: none;
     margin: 0 auto;
+    display: block;
   }
   h3 {
     margin: 16px 0 8px;
@@ -81,11 +79,13 @@ const orders = ref<any[]>(JSON.parse(localStorage.getItem('codecv-orders') || '[
 }
 .od-btn {
   display: inline-flex;
+  border: none;
   border-radius: 999px;
   background: var(--theme);
   color: #fff;
   font-size: 13px;
   padding: 9px 20px;
   text-decoration: none;
+  cursor: pointer;
 }
 </style>

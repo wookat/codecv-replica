@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { postPage, PostItem } from '@/api/modules/site'
 import { localAsset } from '@/utils/article'
+import AsideRail from '@/components/AsideRail.vue'
 
 const list = ref<PostItem[]>([])
 const total = ref(0)
@@ -47,45 +48,54 @@ onMounted(load)
 <template>
   <div class="st-page">
     <h1 class="sr-only">求职攻略_面试技巧_简历优化建议_求职经验分享_程序员求职指南</h1>
-    <div class="st-main">
-      <div class="st-card list-card">
-        <div class="hd">
-          <h2>求职攻略</h2>
-          <input v-model="keyword" class="kw" type="text" placeholder="使用关键词搜索" />
-        </div>
-        <div v-loading="loading" class="items">
-          <router-link v-for="p in shown" :key="p._id" :to="`/post/${p._id}`" class="post-card">
-            <img
-              :src="localAsset(p.cover)"
-              :alt="`${p.title} - 文章封面图`"
-              class="cover"
-              loading="lazy"
-            />
-            <div class="pc-body">
-              <h3>{{ p.title }}</h3>
-              <p class="desc">{{ p.description }}</p>
-              <div class="pc-foot">
-                <div class="tags">
-                  <span v-for="t in p.tags" :key="t" class="tag">{{ t }}</span>
+    <div class="st-cols">
+      <div class="st-main">
+        <div class="st-card list-card">
+          <div class="hd">
+            <h2>求职攻略</h2>
+            <input v-model="keyword" class="kw" type="text" placeholder="使用关键词搜索" />
+          </div>
+          <div v-loading="loading" class="items">
+            <router-link v-for="p in shown" :key="p._id" :to="`/post/${p._id}`" class="post-card">
+              <img
+                :src="localAsset(p.cover)"
+                :alt="`${p.title} - 文章封面图`"
+                class="cover"
+                loading="lazy"
+              />
+              <div class="pc-body">
+                <h3>{{ p.title }}</h3>
+                <p class="desc">{{ p.description }}</p>
+                <div class="pc-foot">
+                  <div class="tags">
+                    <span v-for="t in p.tags" :key="t" class="tag">{{ t }}</span>
+                  </div>
+                  <span class="meta">{{ p.viewNum }} 浏览</span>
+                  <span class="meta tm">{{ rel(p.create_time) }}</span>
                 </div>
-                <span class="meta">{{ p.viewNum }} 浏览</span>
-                <span class="meta tm">{{ rel(p.create_time) }}</span>
               </div>
-            </div>
-          </router-link>
-          <el-empty v-if="!loading && !shown.length" description="暂无文章" />
-        </div>
-        <div v-if="total > pageSize" class="pager">
-          <el-pagination
-            v-model:current-page="current"
-            :page-size="pageSize"
-            :total="total"
-            background
-            layout="prev, pager, next"
-            @current-change="load"
-          />
+            </router-link>
+            <el-empty v-if="!loading && !shown.length" description="暂无文章" />
+          </div>
+          <div v-if="total > pageSize" class="pager">
+            <el-pagination
+              v-model:current-page="current"
+              :page-size="pageSize"
+              :total="total"
+              background
+              layout="prev, pager, next"
+              @current-change="load"
+            />
+          </div>
         </div>
       </div>
+      <AsideRail>
+        <div class="mp-card">
+          <p class="mp-title">小程序功能上新</p>
+          <img src="/prod-assets/miniprogram-feature.webp" alt="小程序功能上新" />
+          <p class="mp-cap">🌟 小程序也能导出简历啦！</p>
+        </div>
+      </AsideRail>
     </div>
   </div>
 </template>
@@ -98,10 +108,41 @@ onMounted(load)
   color: var(--font-color);
   font-family: var(--font-noto-sans-sc);
 }
+.st-cols {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+.st-main {
+  flex: 1;
+  min-width: 0;
+}
 .st-card {
   background: var(--background);
   border-radius: 12px;
   padding: 20px;
+}
+.mp-card {
+  background: var(--background);
+  border-radius: 12px;
+  padding: 14px;
+  .mp-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--theme);
+    margin: 0;
+  }
+  img {
+    width: 100%;
+    display: block;
+    border-radius: 8px;
+    margin-top: 8px;
+  }
+  .mp-cap {
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: var(--font-color);
+  }
 }
 .hd {
   display: flex;

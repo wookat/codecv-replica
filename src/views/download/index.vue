@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { setExportCount, setTemplateCondition } from '@/api/modules/resume'
 import { importCSS } from '@/utils'
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import useEditorStore from '@/store/modules/editor'
+import { currentUser } from '@/utils/auth'
+import LoginModal from '@/components/LoginModal.vue'
 
 const route = useRoute()
 const router = useRouter()
 const editorStore = useEditorStore()
+const showLogin = ref(!route.query.type && !currentUser())
 onMounted(() => {
   if (!route.query.type) return
   importCSS(String(route.query.type))
@@ -22,6 +25,11 @@ onMounted(() => {
   }, 100)
 })
 
+function onLoginClose() {
+  showLogin.value = false
+  router.push('/profile')
+}
+
 onUnmounted(() => {
   localStorage.removeItem('download')
 })
@@ -29,6 +37,7 @@ onUnmounted(() => {
 
 <template>
   <div class="markdown-transform-html jufe"></div>
+  <LoginModal v-if="showLogin" @close="onLoginClose" />
 </template>
 
 <style lang="scss" scoped>

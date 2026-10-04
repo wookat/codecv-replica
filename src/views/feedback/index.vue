@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import AsideRail from '@/components/AsideRail.vue'
 
 interface FeedbackItem {
   content: string
   reply?: string
   avatar: string
   field: string
-  time?: number
+  time?: number | string
   mine?: boolean
 }
 
@@ -57,49 +58,59 @@ function submit() {
 <template>
   <div class="fb-page">
     <h1 class="sr-only">用户反馈_使用体验_产品建议_简历制作工具评价_用户评价</h1>
-    <div class="fb-main">
-      <div class="edit">
-        <textarea
-          v-model="content"
-          placeholder="您的意见是我们慢慢改进的关键～"
-          maxlength="500"
-          class="ta"
-        ></textarea>
-        <input
-          v-model="field"
-          type="text"
-          maxlength="20"
-          class="fi"
-          placeholder="您属于什么专业领域"
-        />
-        <div class="avatars">
-          <img
-            v-for="a in AVATARS"
-            :key="a"
-            :src="a"
-            alt="用户头像"
-            :class="{ picked: avatar === a }"
-            @click="avatar = a"
+    <div class="fb-cols">
+      <div class="fb-main">
+        <div class="edit">
+          <textarea
+            v-model="content"
+            placeholder="您的意见是我们慢慢改进的关键～"
+            maxlength="500"
+            class="ta"
+          ></textarea>
+          <input
+            v-model="field"
+            type="text"
+            maxlength="20"
+            class="fi"
+            placeholder="您属于什么专业领域"
           />
+          <div class="avatars">
+            <img
+              v-for="a in AVATARS"
+              :key="a"
+              :src="a"
+              alt="用户头像"
+              :class="{ picked: avatar === a }"
+              @click="avatar = a"
+            />
+          </div>
+          <button class="submit" :disabled="!content.trim()" @click="submit">我要反馈</button>
         </div>
-        <button class="submit" :disabled="!content.trim()" @click="submit">我要反馈</button>
-      </div>
 
-      <div class="said">
-        <h3>✨ 看看大家都说了什么</h3>
-        <ul class="suggests">
-          <li v-for="(f, i) in list" :key="i">
-            <p class="fc">{{ f.content }}</p>
-            <p v-if="f.reply" class="fr">
-              <sub>{{ f.reply }}</sub>
-            </p>
-            <p class="fu">
-              <img :src="f.avatar" alt="评论用户头像" loading="lazy" />
-              <sub>{{ f.field }}<template v-if="f.mine"> · 刚刚</template></sub>
-            </p>
-          </li>
-        </ul>
+        <div class="said">
+          <h3>✨ 看看大家都说了什么</h3>
+          <ul class="suggests">
+            <li v-for="(f, i) in list" :key="i">
+              <p class="fc">{{ f.content }}</p>
+              <p v-if="f.reply" class="fr">
+                <sub>{{ f.reply }}</sub>
+              </p>
+              <p class="fu">
+                <img :src="f.avatar" alt="评论用户头像" loading="lazy" />
+                <sub>{{ f.field }}</sub>
+                <sub>{{ f.mine ? '刚刚' : f.time }}</sub>
+              </p>
+            </li>
+          </ul>
+        </div>
       </div>
+      <AsideRail>
+        <div class="qr-card">
+          <p class="qr-title">问题反馈微信群</p>
+          <img src="/prod-assets/feedback-qr.png" alt="问题反馈微信群" />
+          <p class="qr-cap">有遇到问题可以加群反馈，客服24h在线</p>
+        </div>
+      </AsideRail>
     </div>
   </div>
 </template>
@@ -111,10 +122,40 @@ function submit() {
   padding: 20px;
   color: var(--font-color);
 }
+.fb-cols {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
 .fb-main {
+  flex: 1;
+  min-width: 0;
   background: var(--background);
   border-radius: 12px;
   padding: 20px;
+}
+.qr-card {
+  background: var(--background);
+  border-radius: 12px;
+  padding: 14px;
+  .qr-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--theme);
+    margin: 0;
+  }
+  img {
+    width: 100%;
+    display: block;
+    border-radius: 8px;
+    margin-top: 8px;
+  }
+  .qr-cap {
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: #6b7280;
+    text-align: center;
+  }
 }
 .edit {
   .ta {

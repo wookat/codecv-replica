@@ -5,7 +5,7 @@ import { mianjingList, mianjingMeta, MianjingCompany, MianjingItem } from '@/api
 import { localAsset, logoColor } from '@/utils/article'
 
 const route = useRoute()
-const slug = computed(() => route.params.companySlug as string)
+const slug = computed(() => (route.params.slug ?? route.params.companySlug) as string)
 const combo = computed(() => route.params.combo as string | undefined)
 
 const company = ref<MianjingCompany | null>(null)
@@ -71,6 +71,9 @@ const shown = computed(() => {
 
 const questionTotal = computed(() =>
   all.value.reduce((s, m) => s + ((m as any).questionCount ?? 0), 0)
+)
+const hotList = computed(() =>
+  [...all.value].sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0)).slice(0, 5)
 )
 const isHot = (m: MianjingItem) => (m.viewCount ?? 0) >= 100
 const fmtTime = (ts?: number) => {
@@ -222,7 +225,7 @@ onMounted(async () => {
       </div>
     </section>
 
-    <div class="mj-main">
+    <div class="mj-main mj-cols">
       <main class="mj-list">
         <div class="list-head">
           <h2>{{ company?.name ?? slug }}最新面经</h2>
@@ -317,6 +320,29 @@ onMounted(async () => {
           <el-empty v-if="!loading && !shown.length" description="暂无面经" />
         </div>
       </main>
+      <aside class="mj-rail">
+        <div class="mj-card rail-card">
+          <h4>{{ company?.name ?? slug }}热门面经</h4>
+          <router-link
+            v-for="(m, i) in hotList"
+            :key="m._id"
+            :to="`/mianjing/p/${m._id}`"
+            class="hot-row"
+          >
+            <span class="rk" :class="{ top: i < 3 }">{{ i + 1 }}</span>
+            <span class="t">{{ m.title }}</span>
+            <span class="v">👁 {{ m.viewCount ?? 0 }}</span>
+          </router-link>
+        </div>
+        <div class="mj-card rail-card share-card">
+          <h4>分享你的面经</h4>
+          <p>
+            记录真实面试问题与流程，帮下一届少走弯路，同一家公司可按轮次（一面/二面/HR面）拆多篇
+          </p>
+          <p>支持关联你的投递记录，把面试过程串成一条线</p>
+          <router-link to="/mianjing/write" class="mj-btn block">立即投稿</router-link>
+        </div>
+      </aside>
     </div>
   </div>
 </template>
@@ -404,6 +430,76 @@ onMounted(async () => {
   .mj-pill .n {
     opacity: 0.6;
     font-size: 12px;
+  }
+  .mj-cols {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    .mj-list {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+  .mj-rail {
+    width: 260px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    @media (max-width: 900px) {
+      display: none;
+    }
+    .rail-card {
+      padding: 16px;
+      h4 {
+        margin: 0 0 12px;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--theme);
+      }
+      .hot-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 0;
+        font-size: 13px;
+        color: var(--font-color);
+        text-decoration: none;
+        .rk {
+          width: 16px;
+          font-size: 12px;
+          color: #999;
+          &.top {
+            color: var(--theme);
+            font-weight: 700;
+          }
+        }
+        .t {
+          flex: 1;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .v {
+          font-size: 12px;
+          color: #bbb;
+        }
+        &:hover .t {
+          color: var(--theme);
+        }
+      }
+      &.share-card p {
+        font-size: 13px;
+        color: #888;
+        line-height: 1.7;
+        margin: 0 0 8px;
+      }
+      .mj-btn.block {
+        display: block;
+        text-align: center;
+        margin-top: 8px;
+      }
+    }
   }
 }
 </style>

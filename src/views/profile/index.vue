@@ -4,12 +4,25 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { templates } from '@/templates/config'
 import { currentUser, logoutLocal } from '@/utils/auth'
+import LoginModal from '@/components/LoginModal.vue'
 
 const router = useRouter()
 const user = ref(currentUser())
+const loginModal = ref(false)
 const resumes = ref<
   { type: string; name: string; tplName: string; img: string; content: string }[]
 >([])
+
+const guides = [
+  {
+    url: 'https://www.yuque.com/xiongleixin/saqnu1/rxhlykmem82qbb8m',
+    title: '所见即所得模式简历制作指南'
+  },
+  {
+    url: 'https://www.yuque.com/xiongleixin/saqnu1/sl2ai75t6xgbhg86',
+    title: 'Markdown模式简历制作指南'
+  }
+]
 
 function scan() {
   const list: typeof resumes.value = []
@@ -63,67 +76,78 @@ onMounted(scan)
 <template>
   <div class="pf-page">
     <h1 class="sr-only">我的简历_简历管理_在线简历列表</h1>
-
-    <div class="pf-head">
-      <div class="u-card">
-        <img class="avatar" src="/static/png/avatar1-155VfYeO.png" alt="用户头像" />
-        <div>
-          <p class="un">{{ user?.name ?? '未登录' }}</p>
-          <p class="us">{{ user ? '普通用户' : '登录后可管理云端简历' }}</p>
+    <div class="pf-cols">
+      <!-- 左侧小程序卡 -->
+      <aside class="pf-aside">
+        <h4>🎉 使用小程序管理投递进度</h4>
+        <div class="qr-wrap">
+          <img src="/prod-assets/miniprogram.webp" alt="小程序投递进度管理" />
         </div>
-        <div class="u-actions">
-          <router-link v-if="!user" to="/login?redirect=/profile" class="pf-btn"
-            >去登录</router-link
-          >
-          <button v-else class="pf-btn ghost" @click="logout">退出登录</button>
-        </div>
-      </div>
-    </div>
+        <ul>
+          <li>1. ✨ 无需制作烦琐的Excel表格</li>
+          <li>2. 😎 投递状态手机随查随改</li>
+          <li>3. 🎈 不怕忘记投了哪些公司</li>
+          <li>4. 🔒 隐私保护保证信息不泄漏</li>
+        </ul>
+        <h4 class="mt">🌈 保姆级简历工具指南</h4>
+        <a
+          v-for="g in guides"
+          :key="g.url"
+          class="guide"
+          :href="g.url"
+          target="_blank"
+          rel="noopener"
+          >{{ g.title }}</a
+        >
+        <button v-if="user" class="pf-logout" @click="logout">退出登录</button>
+      </aside>
 
-    <div class="sec-head">
-      <h2>
-        我的简历 <span class="n">{{ resumes.length }}</span>
-      </h2>
-      <router-link to="/jianlimoban" class="pf-btn">新建简历</router-link>
-    </div>
-
-    <div v-if="has" class="grid">
-      <div v-for="r in resumes" :key="r.type" class="rv-card">
-        <div class="rv-img" @click="edit(r.type)">
-          <img v-if="r.img" :src="r.img" :alt="r.tplName" loading="lazy" />
-          <div class="rv-mask"><span>继续编辑</span></div>
+      <!-- 右侧简历卡 -->
+      <div class="pf-main">
+        <div class="pm-head">
+          <h1>
+            我的简历
+            <span v-if="user" class="cnt">{{ resumes.length }}/{{ '无限制' }}</span>
+          </h1>
+          <router-link to="/invite" class="invite-btn">🎁 邀请赚佣金</router-link>
         </div>
-        <div class="rv-info">
-          <p class="rn">{{ r.name }}</p>
-          <p class="rt">模板：{{ r.tplName }}</p>
-          <div class="rv-actions">
-            <button class="a" @click="edit(r.type)">编辑</button>
-            <button class="a danger" @click="remove(r.type)">删除</button>
+
+        <div v-if="user && has" class="rv-grid">
+          <div v-for="r in resumes" :key="r.type" class="rv-card">
+            <div class="rv-img" @click="edit(r.type)">
+              <img v-if="r.img" :src="r.img" :alt="r.tplName" loading="lazy" />
+              <div class="rv-mask"><span>继续编辑</span></div>
+            </div>
+            <div class="rv-info">
+              <p class="rn">{{ r.name }}</p>
+              <p class="rt">模板：{{ r.tplName }}</p>
+              <div class="rv-actions">
+                <button class="a" @click="edit(r.type)">编辑</button>
+                <button class="a danger" @click="remove(r.type)">删除</button>
+              </div>
+            </div>
           </div>
         </div>
+
+        <div v-else class="pf-empty">
+          <img class="pe-img" src="/prod-assets/empty.svg" alt="啊哦～当前搜索结果为空" />
+          <p class="pe-title">
+            {{ user ? '这里空空如也，您还没有创建过简历～' : '您还没有登录请先登录再查看' }}
+          </p>
+          <div v-if="user" class="pe-acts">
+            <router-link to="/jianlimoban" class="pf-btn">手动创建</router-link>
+            <router-link to="/resume/import" class="pf-btn ghost">导入简历</router-link>
+          </div>
+          <button v-else class="pf-btn" @click="loginModal = true">去登录</button>
+        </div>
+
+        <p v-if="user" class="pf-quota">
+          <b>温馨提示</b>：您还可以再创建 <span>无限</span>份简历
+          ，如果您在编写简历过程中遇到任何使用上的问题，都可以通过右下角方式联系网站客服，我们会尽快解决。
+        </p>
       </div>
     </div>
-
-    <div v-else class="empty-card">
-      <svg
-        class="e-ic"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-        <path d="M14 2v6h6" />
-        <path d="M16 13H8" />
-        <path d="M16 17H8" />
-        <path d="M10 9H8" />
-      </svg>
-      <h3>还没有简历</h3>
-      <p>去模板中心挑一份模板，开始制作你的简历吧</p>
-      <router-link to="/jianlimoban" class="pf-btn">去挑模板</router-link>
-    </div>
+    <LoginModal v-if="loginModal" @close="loginModal = false" />
   </div>
 </template>
 
@@ -133,86 +157,128 @@ onMounted(scan)
   margin: 0 auto;
   padding: 20px;
   color: var(--font-color);
+  font-family: var(--font-noto-sans-sc);
 }
-.u-card {
+.pf-cols {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+.pf-aside {
+  width: 240px;
+  flex-shrink: 0;
   background: var(--background);
-  border-radius: 16px;
-  padding: 20px 24px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  .avatar {
-    width: 56px;
-    height: 56px;
-    border-radius: 999px;
-  }
-  .un {
-    font-size: 17px;
+  border-radius: 12px;
+  padding: 20px;
+  line-height: 2;
+  h4 {
+    font-size: 14px;
     font-weight: 700;
-    margin: 0;
+    &.mt {
+      margin-top: 16px;
+    }
   }
-  .us {
-    margin-top: 4px;
-    font-size: 13px;
-    color: #9ca3af;
+  .qr-wrap {
+    width: 144px;
+    height: 144px;
+    margin: 20px auto;
+    padding: 4px;
+    background: #fff;
+    border-radius: 999px;
+    img {
+      width: 100%;
+      border-radius: 999px;
+      display: block;
+      user-select: none;
+    }
   }
-  .u-actions {
-    margin-left: auto;
+  ul {
+    margin-top: 8px;
+    font-size: 14px;
+    list-style: none;
+    padding: 0;
   }
-}
-.pf-btn {
-  display: inline-flex;
-  align-items: center;
-  border: none;
-  border-radius: 999px;
-  background: var(--theme);
-  color: #fff;
-  font-size: 13px;
-  padding: 9px 20px;
-  cursor: pointer;
-  text-decoration: none;
-  &:hover {
-    opacity: 0.9;
-  }
-  &.ghost {
-    background: transparent;
+  .guide {
+    display: block;
     color: var(--theme);
-    border: 1px solid var(--theme);
+    font-size: 14px;
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  .pf-logout {
+    margin-top: 16px;
+    border: none;
+    background: rgba(0, 0, 0, 0.05);
+    color: #888;
+    font-size: 12px;
+    border-radius: 6px;
+    padding: 6px 14px;
+    cursor: pointer;
+    &:hover {
+      color: var(--theme);
+    }
+  }
+  @media (max-width: 768px) {
+    display: none;
   }
 }
-.sec-head {
-  margin: 28px 0 16px;
+.pf-main {
+  flex: 1;
+  min-width: 0;
+  background: var(--background);
+  border-radius: 12px;
+  padding: 20px;
+}
+.pm-head {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  h2 {
+  align-items: center;
+  margin-bottom: 16px;
+  h1 {
     margin: 0;
     font-size: 18px;
     font-weight: 700;
-    .n {
+    .cnt {
       color: var(--theme);
       font-size: 14px;
+      font-weight: 500;
       margin-left: 4px;
     }
   }
+  .invite-btn {
+    background: var(--theme);
+    color: #fff;
+    font-size: 13px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    text-decoration: none;
+    &:hover {
+      opacity: 0.9;
+    }
+  }
 }
-.grid {
+.rv-grid {
   display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(2, 1fr);
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  grid-template-columns: 1fr;
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 .rv-card {
-  background: var(--background);
+  background: var(--body-background);
   border-radius: 12px;
   overflow: hidden;
+  display: flex;
   .rv-img {
     position: relative;
+    width: 150px;
     aspect-ratio: 210 / 230;
     overflow: hidden;
     cursor: pointer;
+    flex-shrink: 0;
     img {
       width: 100%;
       height: 100%;
@@ -243,6 +309,8 @@ onMounted(scan)
   }
   .rv-info {
     padding: 12px;
+    flex: 1;
+    min-width: 0;
     .rn {
       font-size: 14px;
       font-weight: 600;
@@ -278,25 +346,61 @@ onMounted(scan)
     }
   }
 }
-.empty-card {
-  background: var(--background);
-  border-radius: 16px;
-  padding: 56px 24px;
+.pf-empty {
+  padding: 48px 0 40px;
   text-align: center;
-  .e-ic {
-    width: 48px;
-    height: 48px;
-    color: #d1d5db;
-    margin: 0 auto;
+  .pe-img {
+    width: 150px;
+    user-select: none;
   }
-  h3 {
-    margin: 16px 0 8px;
-    font-size: 17px;
+  .pe-title {
+    margin-top: 16px;
+    font-size: 15px;
   }
-  p {
-    color: #9ca3af;
-    font-size: 14px;
-    margin-bottom: 20px;
+  .pe-acts {
+    margin-top: 20px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+  .pf-btn {
+    margin-top: 20px;
+  }
+  .pe-acts .pf-btn {
+    margin-top: 0;
+  }
+}
+.pf-btn {
+  display: inline-flex;
+  align-items: center;
+  border: none;
+  border-radius: 8px;
+  background: var(--theme);
+  color: #fff;
+  font-size: 14px;
+  padding: 9px 24px;
+  cursor: pointer;
+  text-decoration: none;
+  &:hover {
+    opacity: 0.9;
+  }
+  &.ghost {
+    background: transparent;
+    color: var(--theme);
+    border: 1px solid var(--theme);
+  }
+}
+.pf-quota {
+  margin-top: 20px;
+  font-size: 12px;
+  color: #999;
+  b {
+    color: var(--theme);
+    margin-right: 4px;
+  }
+  span {
+    color: var(--theme);
+    margin: 0 2px;
   }
 }
 </style>
