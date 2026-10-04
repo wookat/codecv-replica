@@ -8,10 +8,8 @@ export const onRequestOptions = context => json(context.request, {})
 // フォント提供方式の変遷（実測ベース）:
 // 1. 外部 woff2 URL 参照 —— BR の Chromium がデコードまで待たず適用されない（×）
 // 2. addStyleTag(url|content) —— CF BR が黙殺（×）
-// 3. data-URI @font-face の inline <style> —— html が小さいと適用されず、
-//    ~8MB 超に膨らむと適用される（ブラックボックス的なサイズ閾値が存在、×）
-// 4. data-URI @font-face を face 別ファイルに切り出して <link> で読ませる（採用）
-//    本站 origin の CSS フェッチは BR から到達可能（skin css が適用される実績）。
+// 3. data-URI @font-face の inline <style> —— これのみ確実に適用される（採用）
+// face 別ファイルに切り出し、テンプレが参照するファミリーだけ inline する。
 const FACE_FILES = {
   'Noto Sans SC': ['face-noto-sans-sc-400.css', 'face-noto-sans-sc-700.css'],
   'Noto Serif SC': ['face-noto-serif-sc-400.css', 'face-noto-serif-sc-700.css'],
@@ -53,7 +51,7 @@ export async function onRequestPost(context) {
   const fontWait = `<script>document.fonts.ready.then(()=>{const d=document.createElement('div');d.id='fonts-ready';document.body.appendChild(d)})</script>`
   const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}<style>${fonts}${
     style || ''
-  }${stylePad}</style></head><body>${content}${fontWait}</body></html>`
+  }</style></head><body>${content}${fontWait}</body></html>`
   const endpoint = isPdf ? 'pdf' : 'screenshot'
   const body = isPdf
     ? {
@@ -88,13 +86,7 @@ export async function onRequestPost(context) {
     )
     if (!r.ok) return json(request, { msg: `browser-rendering ${r.status}` }, 503)
     const buf = new Uint8Array(await r.arrayBuffer())
-    return json(
-      request,
-      Object.assign(
-        { fontsLen: fonts.length, fontsHead: fonts.slice(0, 30) },
-        isPdf ? { pdf: { data: [...buf] } } : { picture: { data: [...buf] } }
-      )
-    )
+    return json(request, isPdf ? { pdf: { data: [...buf] } } : { picture: { data: [...buf] } })
   } catch (e) {
     return json(request, { msg: String(e?.message || e) }, 503)
   }
