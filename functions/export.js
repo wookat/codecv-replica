@@ -40,7 +40,11 @@ export async function onRequestPost(context) {
   const fonts = (
     await Promise.all(
       families.flatMap(f =>
-        (FACE_FILES[f] || []).map(fn => fetch(`${origin}/fonts/${fn}`).then(r => r.text()))
+        (FACE_FILES[f] || []).map(fn =>
+          fetch(`${origin}/fonts/${fn}`, { headers: { 'accept-encoding': 'identity' } }).then(r =>
+            r.text()
+          )
+        )
       )
     )
   ).join('')
@@ -88,7 +92,13 @@ export async function onRequestPost(context) {
     )
     if (!r.ok) return json(request, { msg: `browser-rendering ${r.status}` }, 503)
     const buf = new Uint8Array(await r.arrayBuffer())
-    return json(request, isPdf ? { pdf: { data: [...buf] } } : { picture: { data: [...buf] } })
+    return json(
+      request,
+      Object.assign(
+        { fontsLen: fonts.length, fontsHead: fonts.slice(0, 30) },
+        isPdf ? { pdf: { data: [...buf] } } : { picture: { data: [...buf] } }
+      )
+    )
   } catch (e) {
     return json(request, { msg: String(e?.message || e) }, 503)
   }
