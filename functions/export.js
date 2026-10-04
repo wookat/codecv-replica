@@ -102,7 +102,10 @@ export async function onRequestPost(context) {
     )
     if (!r.ok) return json(request, { msg: `browser-rendering ${r.status}` }, 503)
     const buf = new Uint8Array(await r.arrayBuffer())
-    return json(request, isPdf ? { pdf: { data: [...buf] } } : { picture: { data: [...buf] } })
+    return json(
+      request,
+      Object.assign({ fontsLen: fonts.length }, isPdf ? { pdf: { data: [...buf] } } : { picture: { data: [...buf] } })
+    )
   } catch (e) {
     return json(request, { msg: String(e?.message || e) }, 503)
   }
