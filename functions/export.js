@@ -17,8 +17,11 @@ export async function onRequestPost(context) {
     new URL(request.url).origin
   }/fonts/iconfont.css">`
   // .jufe の font-family が Noto Sans SC/Noto Serif SC/Nunito を指すため、
-  // レンダ側にもフォントを届けないとフォールバック書体で折返し位置がずれる
-  const fonts = `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@100;300;400;500;700;900&family=Noto+Serif+SC:wght@200;300;400;500;600;700;900&family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap">`
+  // レンダ側にもフォントを届けないとフォールバック書体で折返し位置がずれる。
+  // googleapis は CF BR から到達不可のため本站自ホストの resume-fonts.css を参照する
+  const fonts = `<link rel="stylesheet" href="${
+    new URL(request.url).origin
+  }/fonts/resume-fonts.css">`
   const html = `<!doctype html><html><head><meta charset="utf-8">${iconfont}${fonts}${linkTag}<style>${
     style || ''
   }</style></head><body>${content}</body></html>`
