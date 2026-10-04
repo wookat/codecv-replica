@@ -14,10 +14,8 @@ const fontCssCache = new Map()
 async function fontCss(origin, families) {
   const key = families.join(',')
   if (fontCssCache.has(key)) return fontCssCache.get(key)
-  const css =
-    (await (await fetch(`${origin}/fonts/resume-fonts.css`)).text()) +
-    '\n' +
-    (await (await fetch(`${origin}/fonts/iconfont.css`)).text())
+  // 構築時に data-URI 焼き込み済みの export-fonts.css（実行時 btoa を排除）
+  const css = await (await fetch(`${origin}/fonts/export-fonts.css`)).text()
   // @font-face ブロックを family 名で選別
   const blocks = css.match(/@font-face\s*{[^}]+}|(?!@font-face)[^@]+/g) || []
   const kept = blocks.filter(b => {
@@ -25,26 +23,9 @@ async function fontCss(origin, families) {
     if (!m) return true // クラス規則等非 @font-face は全て残す
     return families.includes(m[1])
   })
-  const keptCss = kept.join('\n')
-  const urls = [...keptCss.matchAll(/url\('([^']+)'\)/g)].map(m => m[1])
-  const bufs = await Promise.all(
-    urls.map(async u => new Uint8Array(await (await fetch(new URL(u, origin))).arrayBuffer()))
-  )
-  // debug: 取得バイト列が本物の woff2 か検査（先頭マジック wOF2=77 4F 46 32）
-  const dbgHeads = bufs
-    .map(b => b.slice(0, 4).reduce((s, x) => s + x.toString(16) + ' ', ''))
-    .join('|')
-  let out = keptCss
-  urls.forEach((u, i) => {
-    let bin = ''
-    const bytes = bufs[i]
-    for (let j = 0; j < bytes.length; j += 0x8000) {
-      bin += String.fromCharCode.apply(null, bytes.subarray(j, j + 0x8000))
-    }
-    out = out.replace(u, `data:font/woff2;base64,${btoa(bin)}`)
-  })
+  const out = kept.join('\n')
   fontCssCache.set(key, out)
-  return { css: out, dbgHeads }
+  return { css: out, dbgHeads: '' }
 }
 
 export async function onRequestPost(context) {
