@@ -4,643 +4,919 @@
   "reply": "作者回复：已经支持啦！",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "产品",
-  "time": "1 个月前"
+  "time": "1 个月前",
+  "t": 1787554968336,
+  "av": 0,
+  "au": "3dcd4ae66a8bcc160060097141c1d58c"
  },
  {
   "content": "为什么现在编辑的时候明明是一页，导出的PDF就只有一页呢",
   "reply": "作者回复：可以先将行距调整低1px，然后用智能一页功能再导出就没有了。",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "it",
-  "time": "4 个月前"
+  "time": "4 个月前",
+  "t": 1780310320843,
+  "av": 0,
+  "au": "dab5292a69247ba704df7cde2c5240aa"
  },
  {
   "content": "md模式下出现无法正常使用输入法的情况。切换到所见即所得模式，有时会出现输入法失灵的情况",
   "reply": "",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "前端",
-  "time": "5 个月前"
+  "time": "5 个月前",
+  "t": 1776840389139,
+  "av": 0,
+  "au": "97843aa265c5dbfc015ebfdb744ae1ac"
  },
  {
   "content": "可以开发一键转英文简历吗",
   "reply": "作者回复：已经有了这类功能，可以转换多种语言，在右侧工具栏的语言转换里",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "IT",
-  "time": "5 个月前"
+  "time": "5 个月前",
+  "t": 1776141100160,
+  "av": 0,
+  "au": "8656c024693cdefc07810e8947aff042"
  },
  {
   "content": "预览是1页（用智能一页的情况下），导出PDF就是两页（第二页有内容），导出png就是1页",
   "reply": "作者回复：这种情况调整一下上下页边距就好了",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "学生",
-  "time": "6 个月前"
+  "time": "6 个月前",
+  "t": 1774603813099,
+  "av": 0,
+  "au": "93abbbd769c231fc0160746327f696cb"
  },
  {
   "content": "怎么不能转word？",
   "reply": "作者回复：word不支持的",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "6 个月前"
+  "time": "6 个月前",
+  "t": 1774070969345,
+  "av": 0,
+  "au": "f6fcfb9c69bd138d00e02ede1c1cbd60"
  },
  {
   "content": "导出缺少内容\n",
   "reply": "作者回复：可以和客服反馈一下",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "质量",
-  "time": "7 个月前"
+  "time": "7 个月前",
+  "t": 1770974700425,
+  "av": 0,
+  "au": "f97e292f68a572f902a5662c2df8e695"
  },
  {
   "content": "怎么不支持修改字体颜色啊，只能全局修改，想要部分字体换颜色就不可以，写css也不行",
   "reply": "作者回复：部分修改的话目前确实不行，可以加粗后单独修改这块颜色",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "后端工程师",
-  "time": "8 个月前"
+  "time": "8 个月前",
+  "t": 1769882858280,
+  "av": 0,
+  "au": "2cf12107697e1ac800636f6d214db6fe"
  },
  {
   "content": "每次上传了校徽之后保存得好好的，过一两分钟之后再打开那个校徽自己就变扁了！！！！！",
   "reply": "作者回复：你好同学，没有复现这个问题，可以添加右下角客服微信反馈一下",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "学生",
-  "time": "9 个月前"
+  "time": "9 个月前",
+  "t": 1766646593911,
+  "av": 0,
+  "au": "cd349d8f694a771908f147ff54daea7a"
  },
  {
   "content": "空格失效了，在编辑栏里文字行中间添加空格，简历栏显示不了空格\n",
   "reply": "作者回复：空格使用 &nbsp; 空白字符代替就不会被合并了",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "11 个月前"
+  "time": "11 个月前",
+  "t": 1761813279139,
+  "av": 0,
+  "au": "33c5161d66fff0640df64ee36eb17f93"
  },
  {
   "content": "空格失效了，在编辑栏里文字行中间添加空格，简历栏显示不了空格",
   "reply": "作者回复：空格使用 &nbsp; 空白字符代替就不会被合并了",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "11 个月前"
+  "time": "11 个月前",
+  "t": 1761796017030,
+  "av": 0,
+  "au": "1e69f97f6896d3f1012d8f577a0f615d"
  },
  {
   "content": "为什么每次再加入&emsp这种空格或者换行之类的，下次打开修改一些简历内容他会自动消失",
   "reply": "作者回复：使用 &nbsp; 空格虽然会被转为空格显示，但是空格效果是在的，但如果直接通过Space键输入空格就会被合并为一个空格。",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "C++",
-  "time": "11 个月前"
+  "time": "11 个月前",
+  "t": 1760665425580,
+  "av": 0,
+  "au": "b013194767ea8f58003f804f6acbd463"
  },
  {
   "content": "我服了，我在两个电脑上登录，第二个电脑上的为什么不是最新版，导致旧的把新的给覆盖掉了，我的新的没了！！",
   "reply": "作者回复：是不是在两台电脑上都有编辑，有一台设备编辑了是没有保存的",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "12 个月前"
+  "time": "12 个月前",
+  "t": 1759652049683,
+  "av": 0,
+  "au": "faabc62d67d560f101134d810bf0433b"
  },
  {
   "content": "怎么局部左右两端对齐，尤其是有英文字符时，就会对不齐",
   "reply": "作者回复：有两端对齐功能的呀，右侧工具栏",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "算法",
-  "time": "1 年前"
+  "time": "1 年前",
+  "t": 1758018585030,
+  "av": 0,
+  "au": "a6ec304867e7d7cf0022233959dbcefe"
  },
  {
   "content": "证件照功能，导出pdf会损坏",
   "reply": "作者回复：重新尝试一下，如果还有相同的问题，建议跟客服反馈，复现一下问题",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "it",
-  "time": "1 年前"
+  "time": "1 年前",
+  "t": 1757865793249,
+  "av": 0,
+  "au": "b0131947680dd39b01f6f87e1b30a1df"
  },
  {
   "content": "图标没法压缩到10kb，能调大一些吗",
   "reply": "作者回复：已放宽到50kb，不建议太大，太大可能导致简历导出失败",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "1 年前"
+  "time": "1 年前",
+  "t": 1756729430861,
+  "av": 0,
+  "au": "0e7893fb67f4ca9b00b6135d69245de3"
  },
  {
   "content": "导出pdf下面的页边距特别大，和编辑的时候不一样",
   "reply": "作者回复：邮箱联系您了",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "1 年前"
+  "time": "1 年前",
+  "t": 1756514511833,
+  "av": 0,
+  "au": "11ad502367a84685025e5e8c4cca1cbc"
  },
  {
   "content": "如何换绑微信呢",
   "reply": "",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "1 年前"
+  "time": "1 年前",
+  "t": 1756453440178,
+  "av": 0,
+  "au": "b9fa7faa68ad20e3037581ad7812a2a9"
  },
  {
   "content": "图标可以支持多种格式吗？目前只有svg太鸡肋了！而且压缩才有10kb出来的图标会很小",
   "reply": "作者回复：其他格式图标渲染出来质量不是很好，很糊看不清，所以就没考虑，这边可以把大小限制调高一些，然后SVG可以在这个网站找一找https://iconfont.cn/",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "1 年前"
+  "time": "1 年前",
+  "t": 1756310046415,
+  "av": 0,
+  "au": "2b83cb1667fbd3b8010e7ba83880c73d"
  },
  {
   "content": "公司超出长度就自动换行了！这个可以解决一下吗？",
   "reply": "作者回复：可以编写CSS实现，让多列布局不换行",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "1 年前"
+  "time": "1 年前",
+  "t": 1756309881899,
+  "av": 0,
+  "au": "2b83cb1667fbd3b8010e7ba83880c73d"
  },
  {
   "content": "icon数量不够，小公司没有对应icon，能不能加一个自助上传icon的功能，只能自己用或者人工审核后加入公共库。",
   "reply": "作者回复：已支持自定义图标功能！在图标中可以进行上传！",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "java",
-  "time": "1 年前"
+  "time": "1 年前",
+  "t": 1755330110579,
+  "av": 0,
+  "au": "6c670e5d685e416403e95de772a887d1"
  },
  {
   "content": "需要一个哈啰出行的图标",
   "reply": "作者回复：好的，稍后加上。",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "1 年前"
+  "time": "1 年前",
+  "t": 1755319407128,
+  "av": 0,
+  "au": "b157edf0689ffeff0214ede675aff101"
  },
  {
   "content": "能不能加一个一键改成英文的按键\n",
   "reply": "作者回复：好的，该功能已添加，可在右侧工具栏第一个找到。",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "1 年前"
+  "time": "1 年前",
+  "t": 1753119623262,
+  "av": 0,
+  "au": "fbf3bf436860dfc204178a4b3d0c8577"
  },
  {
   "content": "编辑时不能用tab，按tab会跳到其他按钮上去",
   "reply": "作者回复：可以用空格代替tab",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "1 年前"
+  "time": "1 年前",
+  "t": 1748925994430,
+  "av": 0,
+  "au": "2b83cb1667f38e1800a87d5b79420631"
  },
  {
   "content": "作者您好，请问这个模板(https://codecv.top/preview/17business)左侧的蓝线可以一直延伸下来吗？\n目前的话是没有下一个图标就不会延伸，导致这个最后一项“自我评价”左侧会没有竖线。\n我对CSS还不是很熟悉，不清楚如何实现，求解答。",
   "reply": "作者回复：你好，技术上的问题可以联系右下角客服微信解决。",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "1 年前"
+  "time": "1 年前",
+  "t": 1748342137588,
+  "av": 0,
+  "au": "b7e94e9b6819e50b02819bac579e194d"
  },
  {
   "content": "校徽能放大、缩小吗？\n",
   "reply": "作者回复：可以的，这些功能后续会开发",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "1 年前"
+  "time": "1 年前",
+  "t": 1746680113697,
+  "av": 0,
+  "au": "5228cee767da1a1f0021bafe2015050a"
  },
  {
   "content": "使用智能一页，有时候保存成功但是刷新网页之后又回退到修改前的状态了，白写了。",
   "reply": "作者回复：非常抱歉，此问题已修复。",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "1 年前"
+  "time": "1 年前",
+  "t": 1745162342246,
+  "av": 0,
+  "au": "318e0c7e665d22a2022e7ab67d5061aa"
  },
  {
   "content": "1、上传简历证件照并拖拽到右上角保存后，重新进行编辑页面，简历证件照不见或者回到居中位置\n2、编辑好后保存并重新进入编辑页面，格式发生错乱，有时文字也不是保存时的文字，而是好几版之前的文字\n以上均是在使用了智能一页的情况下出现的，如果正常情况下，不能复现，尝试通过智能一页功能复现。",
   "reply": "作者回复：好的，感谢给出复现步骤，稍后会处理一下。",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "1 年前"
+  "time": "1 年前",
+  "t": 1744604829333,
+  "av": 0,
+  "au": "9bf3df1366c5d3e307e13f6a6b3db0e1"
  },
  {
   "content": "当前简历点击保存，退出之后名称经常会变回初始名称（母本名称）",
   "reply": "作者回复：这个我好像没有复现出来",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "1 年前"
+  "time": "1 年前",
+  "t": 1743426381657,
+  "av": 0,
+  "au": "073a77ac67e89f5e00285a6658af9d49"
  },
  {
   "content": "1. 导出之后图片模糊\n2. 退出重新进入编辑页面，变成一开始的模板内容了",
   "reply": "作者回复：好的，晚点我看看这个问题",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "程序员",
-  "time": "1 年前"
+  "time": "1 年前",
+  "t": 1742916916104,
+  "av": 0,
+  "au": "586080e067e2c93f008c2e554a7e0ce7"
  },
  {
   "content": "求求把水印这个功能从非会员去掉吧，孩子只是想写一份简单的简历",
   "reply": "",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "1 年前"
+  "time": "1 年前",
+  "t": 1742909174954,
+  "av": 0,
+  "au": "9bf3df1366bd8494070593665dcf4de2"
  },
  {
   "content": "水印可以去掉吗",
   "reply": "",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "1 年前"
+  "time": "1 年前",
+  "t": 1742371294639,
+  "av": 0,
+  "au": "5b79d91867d8c380000a27133dd06421"
  },
  {
   "content": "没办法导出，是因为用了别人的模板吗",
   "reply": "作者回复：可以多尝试几次，可能同一时间段人比较多在排队。",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "1 年前"
+  "time": "1 年前",
+  "t": 1741772656815,
+  "av": 0,
+  "au": "faabc62d67d076f900d5884772a138fe"
  },
  {
   "content": "为什么会有水印？",
   "reply": "作者回复：是的，默认是带水印的",
   "avatar": "/static/png/avatar2-Dk7PWhs9.png",
   "field": "程序员",
-  "time": "1 年前"
+  "time": "1 年前",
+  "t": 1741753831935,
+  "av": 1,
+  "au": "ce6b953c67526f9a01da820e001c744c"
  },
  {
   "content": "后端是不是炸了，我拉取docker后，网站发送的请求都是404",
   "reply": "作者回复：可能需要自己调试一下",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "1 年前"
+  "time": "1 年前",
+  "t": 1741286723818,
+  "av": 0,
+  "au": "e56745a06658b92d000c899569e7de68"
  },
  {
   "content": "您好啊，请问怎么联系，一起做东西啊",
   "reply": "",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "1 年前"
+  "time": "1 年前",
+  "t": 1736152848156,
+  "av": 0,
+  "au": "11ad5023677b94b400d88902306f4465"
  },
  {
   "content": "为什么切换MD的时候，微软输入法无法打字？",
   "reply": "作者回复：这个可能是电脑本身的问题？？",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "开发",
-  "time": "1 年前"
+  "time": "1 年前",
+  "t": 1731749349479,
+  "av": 0,
+  "au": "25e993b7672505e111f7afff087ebd33"
  },
  {
   "content": "icon太少了 微信图标是绿色 不是黑白 图标位置靠上 没法调整 ",
   "reply": "作者回复：有什么想要的图标可以通过右下角客服反馈，后面也可以添加上的。",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "开发",
-  "time": "1 年前"
+  "time": "1 年前",
+  "t": 1729575068812,
+  "av": 0,
+  "au": "ef45322e67172e45107f969f69849b06"
  },
  {
   "content": "请问下，换了台电脑登录，有提示没保存就点了保存，发现内容被老的覆盖了，最新的内容不见了，要疯了白写了，有什么办法还原吗，点了还原也还原不到之前的版本了",
   "reply": "作者回复：小伙伴可以联系右下角微信处理一下🙏",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "产品",
-  "time": "1 年前"
+  "time": "1 年前",
+  "t": 1728470392580,
+  "av": 0,
+  "au": "9bf3df1366d95a9709bc25a837ba5064"
  },
  {
   "content": "导出md后不识别其中的很多语法",
   "reply": "作者回复：这个是正常的，我们有扩展一些语法",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1727620933608,
+  "av": 0,
+  "au": "f380561066f9614d0d45102c15802566"
  },
  {
   "content": "1. 不能自动保存\n2. 排版问题，分栏布局如果先创建分栏再创建正文，删除一部分正文后，分栏会自动左对齐而不是两边对齐\n\n以上都是功能上的bug，产品是好产品，希望能改进～",
   "reply": "作者回复：感谢建议🙏",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "程序员",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1727159083787,
+  "av": 0,
+  "au": "9bf3df1366b5b306061f1a812cbafd3e"
  },
  {
   "content": "可以支持html嘛",
   "reply": "作者回复：后面可以考虑优化一下",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1726737492457,
+  "av": 0,
+  "au": "25e993b766eaadef0b99fb7b2a0b1d59"
  },
  {
   "content": "请问分割线是用“---”打出来嘛，我用“---”画了两次分割线，但是两次粗细不一样，请问该如何解决呢？",
   "reply": "作者回复：粗细不一样？不应该呀，可以右下角联系反馈一下效果图。",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1726408387336,
+  "av": 0,
+  "au": "34e8707565cb20ad006a89e9171d58bb"
  },
  {
   "content": "如何修改局部的右对齐啊\n",
   "reply": "作者回复：可以用左右布局，左边是空内容，右边写内容。",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1726303381205,
+  "av": 0,
+  "au": "8df0e92f66b425ad05f31cb70c15120d"
  },
  {
   "content": "为什么我在一台windows电脑上创建了简历，修改了内容。再另一台MAC电脑登陆相同账号，在我的简历当中可以看到创建好的简历，但是内容变为了默认内容，是因为我使用MAC的问题吗？",
   "reply": "作者回复：可能是因为你没有点保存，所以显示的是默认的内容",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "互联网",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1726120721060,
+  "av": 0,
+  "au": "9c1e6a3166cdffcb08aaecd6733e1b20"
  },
  {
   "content": "好用，爱用",
   "reply": "",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "程序员",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1725946271818,
+  "av": 0,
+  "au": "9582c0c265faefe70005b0001276891e"
  },
  {
   "content": "你好，有什么方法可以支持创建icon图标吗，现有的图标太少了",
   "reply": "作者回复：目前没有支持这个能力，只能用已经内置的",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "互联网",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1725526681081,
+  "av": 0,
+  "au": "9bf3df1366d95a9709bc25a837ba5064"
  },
  {
   "content": "照片上传不了，选完照片之后，没有确定键",
   "reply": "作者回复：已修复～",
   "avatar": "/static/png/avatar2-Dk7PWhs9.png",
   "field": "程序员",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1725263723881,
+  "av": 1,
+  "au": "9c1e6a3166caf9b60863d126738745c5"
  },
  {
   "content": "字体颜色和主题色调在哪里调整啊？",
   "reply": "作者回复：右侧预览区域顶部的工具栏有调整字体颜色和主题色的按钮的。",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "环境",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1725163376086,
+  "av": 0,
+  "au": "2ad666ce66d2c9270911b1cc2ccd15bc"
  },
  {
   "content": "整体来说是我使用过的绝对一流的简历制作工具，排版友好，制作方便，太值得推荐了！不过也有可以优化的地方：1.字体可选择性太少，我使用的这个模板里只有四种，而且还不是主流字体；2.更改字体颜色略显麻烦，我找了半天没找到最后还是用在css样式里写代码改的；3.最后还有一个撤销问题，我在撤销的时候有时候总是会崩溃，整页就变成空白了，这个问题遇到过几次。不过总体而言这绝对是一绝的简历制作工具，非常喜欢！",
   "reply": "作者回复：感谢小伙伴的建议✊🏻",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "研发",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1724742836206,
+  "av": 0,
+  "au": "25e993b766cc81c80880aa422be6cc28"
  },
  {
   "content": "每次都提示导出失败，用谷歌备用导出也显示的是当前的网页内容，而不是纯简历。。。",
   "reply": "作者回复：导出失败后应该有提示解决方案的，都可以尝试一下～",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "互联网",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1724565776264,
+  "av": 0,
+  "au": "3fa9b31265f4f50a028b72de358ce2eb"
  },
  {
   "content": "没有其他字体选择吗",
   "reply": "作者回复：暂时没有哈，有时间会优化一下",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "互联网",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1724030435550,
+  "av": 0,
+  "au": "25e993b766c1ec3a077e24325053b768"
  },
  {
   "content": "无法导出",
   "reply": "作者回复：我排查一下，感谢反馈",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1723044988363,
+  "av": 0,
+  "au": "0601950565e2e995005f6a7118f533be"
  },
  {
   "content": "为什么老是导出不了",
   "reply": "作者回复：我排查一下，感谢反馈",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "程序员",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1722864398547,
+  "av": 0,
+  "au": "8df0e92f66b0ce9305b881993dbe4406"
  },
  {
   "content": "简历导出pdf乱码\n",
   "reply": "作者回复：一般重新尝试就可以了",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "新媒体运营",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1722153272224,
+  "av": 0,
+  "au": "b787f7c3667ad55e039287851deab728"
  },
  {
   "content": "请问有两端对齐功能吗？",
   "reply": "作者回复：可以查看一下常见问题，有左右对齐的解决方案",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "贸易",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1721463079014,
+  "av": 0,
+  "au": "7f201d40669b2e5600c6147a0ddb5f07"
  },
  {
   "content": "请问可以增加一个上传图标的功能嘛",
   "reply": "作者回复：这个是有的，可以上传小图片，直接粘贴就行",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "JAVA",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1721292575290,
+  "av": 0,
+  "au": "f813f178668cc66500d56bc63160ae30"
  },
  {
   "content": "真的太棒啦！！以前用过很多制作简历的工具，但是都没这个好用。页面简洁且方便，功能完全，真的太棒啦。非常推荐大家使用，开发这个软件的人是个天才吧hhhhhh",
   "reply": "",
   "avatar": "/static/png/avatar4-D4xNvzs7.png",
   "field": "产品经理",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1718286868189,
+  "av": 3,
+  "au": "c45ba8cc666ae32d02d612527a82b6d8"
  },
  {
   "content": "登录网站没有特别清楚自已有没有在登录状态，然后点击创建模板，点击了之前用过的模板，打开之后提示保存，点击保存之后，覆盖了原来创建过的简历，并且撤销后无法找回原有简历",
   "reply": "作者回复：我按照你的操作好像没有复现你说的这些问题🥲",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1717842691928,
+  "av": 0,
+  "au": "addca5a166641ba002930afb130e0035"
  },
  {
   "content": "创建新简历的时候，如果使用用过的模板，不会提示超出次数限制，而是会打开之前已有的简历，在不知情的情况下，我的英文简历把中文简历覆盖了",
   "reply": "",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1717841721672,
+  "av": 0,
+  "au": "addca5a166641ba002930afb130e0035"
  },
  {
   "content": "中英互译提示操作失败",
   "reply": "",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1717839037482,
+  "av": 0,
+  "au": "addca5a166641ba002930afb130e0035"
  },
  {
   "content": "导出一直提示导出人太多",
   "reply": "",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "后端开发",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1716349149011,
+  "av": 0,
+  "au": "324d3339664c9b12014efb092460c95d"
  },
  {
   "content": "证件照的大小没办法调整吗？\n",
   "reply": "",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "互联网",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1714621673845,
+  "av": 0,
+  "au": "5ca5d2676602866a04884d260c640012"
  },
  {
   "content": "如果能有封面反馈会跟好",
   "reply": "作者回复：已修复",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "户外教育",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1714205590261,
+  "av": 0,
+  "au": "5ca5d267662c9a140923610b0870eec7"
  },
  {
   "content": "这个产品真好用这个产品真好用这个产品真好用这个产品真好用这个产品真好用这个产品真好用这个产品真好用",
   "reply": "作者回复：✊🏻",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "前端",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1714104408545,
+  "av": 0,
+  "au": "06019505662b23ea08feb30479447770"
  },
  {
   "content": "导出排版错乱，试了pdf和png都是乱的，完全不是“所见即所得”",
   "reply": "作者回复：出现这种问题可能需要关闭  idm 下载管理器再导出试试",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "运营",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1713444331582,
+  "av": 0,
+  "au": "5ca5d2676620cc2307cbb9577c728b10"
  },
  {
   "content": "[Feature]:支持在 MD 模式下的对选中文本进行加粗的功能\nhttps://github.com/acmenlei/codecv/issues/18",
   "reply": "",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "FE",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1713255336613,
+  "av": 0,
+  "au": "a72823ff6569d27001d7b21700127474"
  },
  {
   "content": "导出pdf乱码，导出四五遍了一直都是这样，作者不能想办法解决一下么",
   "reply": "作者回复：关闭 idm 再导出试试，可能存在缓存",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "电子",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1713079783439,
+  "av": 0,
+  "au": "0601950565eabcf7015312e17d0e8d6e"
  },
  {
   "content": "导出之后PDF是一堆乱码",
   "reply": "",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1713078096899,
+  "av": 0,
+  "au": "5ca5d267661b5600072836e873ecddcb"
  },
  {
   "content": "在第六行，第二列的那个蓝色模板有点bug，在左边每个大标题中间有一条连接线，但如果一个模块中内容过多时，会出现连接线丢失的情况。",
   "reply": "作者回复：ok，有时间我修一下，感谢反馈",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "运维工程师",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1712452504099,
+  "av": 0,
+  "au": "63ca5b13660d69c305b7643827f9664b"
  },
  {
   "content": "是否可以开启账号密码登陆，每次都要拿手机很麻烦的",
   "reply": "作者回复：可以采纳，以后会加上的",
   "avatar": "/static/png/avatar2-Dk7PWhs9.png",
   "field": "互联网",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1710853366009,
+  "av": 1,
+  "au": "3fa9b31265effd9a01f07406157f7c2f"
  },
  {
   "content": "无法导出PDF",
   "reply": "作者回复：一般重新导出就能解决，如果不行可以通过右下角的聊天反馈，这样好排查问题🙏。",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "互联网研发",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1710730575547,
+  "av": 0,
+  "au": "63ca5b1365f46268027dd9333848d73a"
  },
  {
   "content": "有bug\n\n多列第一列是标题，第二列是文本且刚好处于第二页的开头时会对不齐，第二列直接跑到第一列第二列交界去了\n\n可以在这之前加几个空的多列行让第二列慢慢对齐",
   "reply": "作者回复：okok，有时间会修一下，感谢～",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "互联网",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1710383277876,
+  "av": 0,
+  "au": "3fa9b31265effd9a01f07406157f7c2f"
  },
  {
   "content": "导出的时候一直提示太多人导出，无法导出\n",
   "reply": "作者回复：这种情况请使用备用导出好一些，记得勾选背景（推荐用chrome）",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "计算机",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1710228231012,
+  "av": 0,
+  "au": "09e7876865dca9760a53bb6c38d338d7"
  },
  {
   "content": "#号不能正常显示",
   "reply": "作者回复：ok，会尽快修复，感谢建议",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "C#开发",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1709529775848,
+  "av": 0,
+  "au": "3d662a9765d4b27000b01c4146ac4dc7"
  },
  {
   "content": "正常导出时显示没有权限，备用导出勾选背景也依旧没有背景色...哭了",
   "reply": "作者回复：导出失败的话重试就好啦。可以排除权限问题。",
   "avatar": "/static/png/avatar4-D4xNvzs7.png",
   "field": "互联网",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1709522823061,
+  "av": 3,
+  "au": "63ca5b1365e532e700a8a47874e204fd"
  },
  {
   "content": "感谢作者的编辑器，非常便捷好用，有两个问题想请教一下：\n1、怎么能加空格\n2、多列，每列怎么左对齐",
   "reply": "作者回复：可以查看 '/菜单'，有添加空格的功能，若是markdown模式的话就用 &nbsp; 即可。多列情况下默认都是居中对齐，左对齐方式已补充到 常见问题 中，可查看如何使用。",
   "avatar": "/static/png/avatar3-CKCfc60R.png",
   "field": "测试",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1709456385950,
+  "av": 2,
+  "au": "7488406c65d5721300b15a8210ffbdc3"
  },
  {
   "content": "编辑器确实很赞，支持用markdown非常棒，排版很舒服，要是能加上自动保存的功能就更好了。",
   "reply": "作者回复：🙏 自动保存是有的，只是时间设置的短了些，感谢建议，已延长！",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "互联网",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1709382508972,
+  "av": 0,
+  "au": "3bbc6ba865dafafe00d87edb711f6aef"
  },
  {
   "content": "能不能加一个自动保存的功能呢？辛辛苦苦写了一天的简历没点保存，结果下次进网页的时候写的东西全没了，还好导出了pdf，不然得哭死",
   "reply": "",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "互联网",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1709382417914,
+  "av": 0,
+  "au": "3bbc6ba865dafafe00d87edb711f6aef"
  },
  {
   "content": "图标语法都有哪些\n",
   "reply": "作者回复：所见即所得模式下按/icon + 回车弹出图标选择框，markdown模式下查看工具栏的图标列表",
   "avatar": "/static/png/avatar6-CPIstjYR.png",
   "field": "互联网",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1700016214316,
+  "av": 5,
+  "au": "2819d26a654c4997022318b6332e0deb"
  },
  {
   "content": "为什么我编辑完的简历，关掉网页以后重新进入，所有修改都丢失了呢？？",
   "reply": "作者回复：是不是写完超过6小时没点保存呢？默认编辑完会存在本地草稿中6小时，在这期间要尽快点击保存按钮来保存更改",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "CV",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1698029702212,
+  "av": 0,
+  "au": "41d77edc6534bd7707efa1cc75cc8520"
  },
  {
   "content": "图片上传显示空文件\n",
   "reply": "作者回复：图片上传暂不可用，大概一周左右恢复正常，在此期间可将图片上传至图床后将url粘贴过来即可🙏",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "Java",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1697086113445,
+  "av": 0,
+  "au": ""
  },
  {
   "content": "图片上传   给出 空文件 的警告",
   "reply": "作者回复：图片上传暂不可用，大概一周左右恢复正常，在此期间可将图片上传至图床后将url粘贴过来即可🙏",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "c++",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1696928971960,
+  "av": 0,
+  "au": ""
  },
  {
   "content": "导出永远失败啊啊啊啊",
   "reply": "作者回复：导出失败请请查看常见问题页进行排错，如未解决请前往群聊反馈问题或联系作者微信🙏",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "后端开发",
-  "time": "2 年前"
+  "time": "2 年前",
+  "t": 1696773122310,
+  "av": 0,
+  "au": ""
  },
  {
   "content": "B站来的，模板质量都挺不错的，不花里胡哨，感谢作者分享✌🏻",
   "reply": "",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "Java",
-  "time": "3 年前"
+  "time": "3 年前",
+  "t": 1695101162374,
+  "av": 0,
+  "au": ""
  },
  {
   "content": "很好的工具，谢谢作者大大的分享！",
   "reply": "",
   "avatar": "/static/png/avatar5-CkIdX3WU.png",
   "field": "前端开发",
-  "time": "3 年前"
+  "time": "3 年前",
+  "t": 1695095809152,
+  "av": 4,
+  "au": ""
  },
  {
   "content": "希望文档能完善一些，东西很好，就是自己摸索花了一些时间，支持！",
   "reply": "",
   "avatar": "/static/png/avatar3-CKCfc60R.png",
   "field": "前端",
-  "time": "3 年前"
+  "time": "3 年前",
+  "t": 1692872288273,
+  "av": 2,
+  "au": ""
  },
  {
   "content": "周末在家搞网站发现的这个宝藏资源，写简历就跟写笔记一样简单了，所见即所得，以后写简历就在这上面了～",
   "reply": "",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "产品经理",
-  "time": "3 年前"
+  "time": "3 年前",
+  "t": 1692431891291,
+  "av": "4",
+  "au": ""
  },
  {
   "content": "简历写起来真的非常方便，因为我不懂UP说的markdown，所以我使用富文本方式编写，感觉就和写word一样简单，墙裂推荐～",
   "reply": "",
   "avatar": "/static/png/avatar4-D4xNvzs7.png",
   "field": "用户运营",
-  "time": "3 年前"
+  "time": "3 年前",
+  "t": 1691999880324,
+  "av": 3,
+  "au": ""
  },
  {
   "content": "这个简历工具实在是泰库辣！真的节省了我很多时间，简历模板也很实用，发现了宝藏工具！！",
   "reply": "",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "Java开发工程师",
-  "time": "3 年前"
+  "time": "3 年前",
+  "t": 1691783867775,
+  "av": "2",
+  "au": ""
  },
  {
   "content": "在nk推荐中看到了这个工具，非常感谢作者大大的开发，虽然我不是前后端开发，但是直观感觉这玩意真好～",
   "reply": "",
   "avatar": "/static/png/avatar2-Dk7PWhs9.png",
   "field": "嵌入式开发工程师",
-  "time": "3 年前"
+  "time": "3 年前",
+  "t": 1690703858728,
+  "av": 1,
+  "au": ""
  },
  {
   "content": "使用体验还不错呀，UI 做的确实也蛮好的，小伙子继续加油！",
   "reply": "",
   "avatar": "/static/png/avatar1-155VfYeO.png",
   "field": "阿里巴巴-前端技术专家",
-  "time": "3 年前"
+  "time": "3 年前",
+  "t": 1688543845178,
+  "av": 0,
+  "au": ""
  }
 ]

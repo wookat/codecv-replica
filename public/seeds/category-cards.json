@@ -1,0 +1,854 @@
+{
+  "daxuesheng": {
+    "count": 6,
+    "cards": [
+      "32",
+      "71",
+      "73",
+      "75",
+      "74",
+      "72"
+    ]
+  },
+  "yingjiesheng": {
+    "count": 17,
+    "cards": [
+      "44",
+      "32",
+      "31",
+      "71",
+      "73",
+      "agent_development",
+      "76",
+      "75",
+      "80",
+      "77",
+      "74",
+      "72",
+      "yinhangguanpeisheng",
+      "duomotaidamoxingsuanfa",
+      "shuziic",
+      "youxikehuduankaifa",
+      "79"
+    ]
+  },
+  "qiuzhi": {
+    "count": 1,
+    "cards": [
+      "31"
+    ]
+  },
+  "liuxue": {
+    "count": 0,
+    "cards": [
+      "45",
+      "1internet_avatar",
+      "43",
+      "48",
+      "61",
+      "38",
+      "44",
+      "55",
+      "15simple_versatile",
+      "27",
+      "35",
+      "41",
+      "33",
+      "34",
+      "39"
+    ]
+  },
+  "qinghuadaxue": {
+    "count": 3,
+    "cards": [
+      "29",
+      "36",
+      "105"
+    ]
+  },
+  "beijingdaxue": {
+    "count": 2,
+    "cards": [
+      "56",
+      "109"
+    ]
+  },
+  "fudandaxue": {
+    "count": 1,
+    "cards": [
+      "72"
+    ]
+  },
+  "shanghaijiaotongdaxue": {
+    "count": 2,
+    "cards": [
+      "45",
+      "79"
+    ]
+  },
+  "zhejiangdaxue": {
+    "count": 1,
+    "cards": [
+      "74"
+    ]
+  },
+  "wuhandaxue": {
+    "count": 2,
+    "cards": [
+      "88",
+      "87"
+    ]
+  },
+  "zhongshandaxue": {
+    "count": 1,
+    "cards": [
+      "80"
+    ]
+  },
+  "hulianwang": {
+    "count": 31,
+    "cards": [
+      "1internet_avatar",
+      "43",
+      "38",
+      "44",
+      "15simple_versatile",
+      "35",
+      "34",
+      "39",
+      "46",
+      "28",
+      "8general",
+      "10front_end",
+      "11fresh",
+      "20campus_simple",
+      "37",
+      "6operation_avatar",
+      "24",
+      "17business",
+      "36",
+      "52",
+      "4internet",
+      "71",
+      "12internet_social",
+      "19social",
+      "73",
+      "23",
+      "3operation",
+      "75",
+      "80",
+      "74",
+      "72"
+    ]
+  },
+  "jinrong": {
+    "count": 5,
+    "cards": [
+      "52",
+      "51",
+      "yinhangguanpeisheng",
+      "78",
+      "79"
+    ]
+  },
+  "zixun": {
+    "count": 2,
+    "cards": [
+      "68",
+      "91"
+    ]
+  },
+  "yinhang": {
+    "count": 1,
+    "cards": [
+      "yinhangguanpeisheng"
+    ]
+  },
+  "wenhuachuanmei": {
+    "count": 1,
+    "cards": [
+      "102"
+    ]
+  },
+  "fangdichan": {
+    "count": 1,
+    "cards": [
+      "103"
+    ]
+  },
+  "dianzishangwu": {
+    "count": 1,
+    "cards": [
+      "104"
+    ]
+  },
+  "tongxin": {
+    "count": 1,
+    "cards": [
+      "83"
+    ]
+  },
+  "youxi": {
+    "count": 1,
+    "cards": [
+      "youxikehuduankaifa"
+    ]
+  },
+  "zhizaoye": {
+    "count": 1,
+    "cards": [
+      "105"
+    ]
+  },
+  "chanpinjingli": {
+    "count": 2,
+    "cards": [
+      "18art",
+      "72"
+    ]
+  },
+  "chengxuyuan": {
+    "count": 6,
+    "cards": [
+      "61",
+      "46",
+      "23",
+      "agent_development",
+      "13geek",
+      "25"
+    ]
+  },
+  "agentkaifa": {
+    "count": 2,
+    "cards": [
+      "61",
+      "agent_development"
+    ]
+  },
+  "yunying": {
+    "count": 20,
+    "cards": [
+      "45",
+      "43",
+      "38",
+      "44",
+      "41",
+      "39",
+      "46",
+      "28",
+      "40",
+      "42",
+      "6operation_avatar",
+      "9business",
+      "57",
+      "14heading",
+      "3operation",
+      "7simple_avatar",
+      "75",
+      "84",
+      "104",
+      "102"
+    ]
+  },
+  "xingzheng": {
+    "count": 1,
+    "cards": [
+      "49"
+    ]
+  },
+  "ruanjiangongcheng": {
+    "count": 2,
+    "cards": [
+      "61",
+      "80"
+    ]
+  },
+  "gongshangguanli": {
+    "count": 1,
+    "cards": [
+      "18art"
+    ]
+  },
+  "jinrongxue": {
+    "count": 1,
+    "cards": [
+      "78"
+    ]
+  },
+  "jisuanjikexue": {
+    "count": 3,
+    "cards": [
+      "55",
+      "58",
+      "60"
+    ]
+  },
+  "jingjixue": {
+    "count": 2,
+    "cards": [
+      "81",
+      "78"
+    ]
+  },
+  "chuanboxue": {
+    "count": 1,
+    "cards": [
+      "84"
+    ]
+  },
+  "shichangyingxiao": {
+    "count": 1,
+    "cards": [
+      "93"
+    ]
+  },
+  "kuaijixue": {
+    "count": 1,
+    "cards": [
+      "81"
+    ]
+  },
+  "shixisheng": {
+    "count": 5,
+    "cards": [
+      "29",
+      "20campus_simple",
+      "16prominent_content",
+      "36",
+      "75"
+    ]
+  },
+  "yingwen": {
+    "count": 4,
+    "cards": [
+      "24",
+      "53",
+      "23",
+      "25"
+    ]
+  },
+  "shuqishixi": {
+    "count": 2,
+    "cards": [
+      "61",
+      "73"
+    ]
+  },
+  "xiaozhao": {
+    "count": 76,
+    "cards": [
+      "45",
+      "1internet_avatar",
+      "43",
+      "48",
+      "38",
+      "44",
+      "55",
+      "27",
+      "35",
+      "41",
+      "33",
+      "34",
+      "39",
+      "46",
+      "42",
+      "32",
+      "8general",
+      "10front_end",
+      "31",
+      "29",
+      "11fresh",
+      "60",
+      "20campus_simple",
+      "37",
+      "22",
+      "24",
+      "47",
+      "17business",
+      "36",
+      "30",
+      "52",
+      "49",
+      "4internet",
+      "54",
+      "21it_campus",
+      "71",
+      "53",
+      "19social",
+      "83",
+      "14heading",
+      "73",
+      "50",
+      "2concise",
+      "agent_development",
+      "76",
+      "81",
+      "75",
+      "77",
+      "72",
+      "94",
+      "106",
+      "88",
+      "105",
+      "107",
+      "101",
+      "yinhangguanpeisheng",
+      "99",
+      "95",
+      "84",
+      "duomotaidamoxingsuanfa",
+      "104",
+      "108",
+      "102",
+      "109",
+      "103",
+      "86",
+      "85",
+      "82",
+      "100",
+      "78",
+      "shuziic",
+      "93",
+      "87",
+      "97",
+      "92",
+      "youxikehuduankaifa"
+    ]
+  },
+  "qiche": {
+    "count": 1,
+    "cards": [
+      "101"
+    ]
+  },
+  "cangchuwuliu": {
+    "count": 1,
+    "cards": [
+      "106"
+    ]
+  },
+  "jiaoyupeixun": {
+    "count": 1,
+    "cards": [
+      "107"
+    ]
+  },
+  "baoxian": {
+    "count": 1,
+    "cards": [
+      "108"
+    ]
+  },
+  "guanggao": {
+    "count": 3,
+    "cards": [
+      "89",
+      "99",
+      "109"
+    ]
+  },
+  "sheji": {
+    "count": 15,
+    "cards": [
+      "41",
+      "42",
+      "22",
+      "16prominent_content",
+      "17business",
+      "9business",
+      "14heading",
+      "18art",
+      "7simple_avatar",
+      "72",
+      "89",
+      "85",
+      "82",
+      "shuziic",
+      "69"
+    ]
+  },
+  "caiwu": {
+    "count": 3,
+    "cards": [
+      "81",
+      "yinhangguanpeisheng",
+      "78"
+    ]
+  },
+  "jiaoshi": {
+    "count": 1,
+    "cards": [
+      "85"
+    ]
+  },
+  "python": {
+    "count": 1,
+    "cards": [
+      "4internet"
+    ]
+  },
+  "webqianduan": {
+    "count": 4,
+    "cards": [
+      "10front_end",
+      "16prominent_content",
+      "14heading",
+      "2concise"
+    ]
+  },
+  "java": {
+    "count": 6,
+    "cards": [
+      "48",
+      "55",
+      "15simple_versatile",
+      "26",
+      "71",
+      "80"
+    ]
+  },
+  "android": {
+    "count": 1,
+    "cards": [
+      "88"
+    ]
+  },
+  "ios": {
+    "count": 1,
+    "cards": [
+      "87"
+    ]
+  },
+  "ceshi": {
+    "count": 4,
+    "cards": [
+      "35",
+      "34",
+      "36",
+      "67"
+    ]
+  },
+  "yunwei": {
+    "count": 1,
+    "cards": [
+      "67"
+    ]
+  },
+  "dashuju": {
+    "count": 2,
+    "cards": [
+      "1internet_avatar",
+      "8general"
+    ]
+  },
+  "uiux": {
+    "count": 0,
+    "cards": [
+      "45",
+      "1internet_avatar",
+      "43",
+      "48",
+      "61",
+      "38",
+      "44",
+      "55",
+      "15simple_versatile",
+      "27",
+      "35",
+      "41",
+      "33",
+      "34",
+      "39"
+    ]
+  },
+  "pingmiansheji": {
+    "count": 1,
+    "cards": [
+      "89"
+    ]
+  },
+  "renliziyuan": {
+    "count": 1,
+    "cards": [
+      "77"
+    ]
+  },
+  "huizhancehua": {
+    "count": 1,
+    "cards": [
+      "90"
+    ]
+  },
+  "yiliaojiankang": {
+    "count": 1,
+    "cards": [
+      "91"
+    ]
+  },
+  "pinpaigongguan": {
+    "count": 1,
+    "cards": [
+      "92"
+    ]
+  },
+  "suanfagongchengshi": {
+    "count": 3,
+    "cards": [
+      "74",
+      "65",
+      "duomotaidamoxingsuanfa"
+    ]
+  },
+  "kuaixiao": {
+    "count": 1,
+    "cards": [
+      "93"
+    ]
+  },
+  "javascript": {
+    "count": 0,
+    "cards": [
+      "45",
+      "1internet_avatar",
+      "43",
+      "48",
+      "61",
+      "38",
+      "44",
+      "55",
+      "15simple_versatile",
+      "27",
+      "35",
+      "41",
+      "33",
+      "34",
+      "39"
+    ]
+  },
+  "netgongchengshi": {
+    "count": 0,
+    "cards": [
+      "45",
+      "1internet_avatar",
+      "43",
+      "48",
+      "61",
+      "38",
+      "44",
+      "55",
+      "15simple_versatile",
+      "27",
+      "35",
+      "41",
+      "33",
+      "34",
+      "39"
+    ]
+  },
+  "cgongchengshi": {
+    "count": 0,
+    "cards": [
+      "45",
+      "1internet_avatar",
+      "43",
+      "48",
+      "61",
+      "38",
+      "44",
+      "55",
+      "15simple_versatile",
+      "27",
+      "35",
+      "41",
+      "33",
+      "34",
+      "39"
+    ]
+  },
+  "wangluoanquan": {
+    "count": 1,
+    "cards": [
+      "67"
+    ]
+  },
+  "shujufenxi": {
+    "count": 3,
+    "cards": [
+      "73",
+      "3operation",
+      "64"
+    ]
+  },
+  "qianrushi": {
+    "count": 2,
+    "cards": [
+      "9business",
+      "83"
+    ]
+  },
+  "caigoumaoyi": {
+    "count": 1,
+    "cards": [
+      "96"
+    ]
+  },
+  "shangwutuozhan": {
+    "count": 1,
+    "cards": [
+      "97"
+    ]
+  },
+  "waimao": {
+    "count": 1,
+    "cards": [
+      "98"
+    ]
+  },
+  "xiaoshou": {
+    "count": 1,
+    "cards": [
+      "59"
+    ]
+  },
+  "wenancehua": {
+    "count": 1,
+    "cards": [
+      "99"
+    ]
+  },
+  "seosem": {
+    "count": 1,
+    "cards": [
+      "100"
+    ]
+  },
+  "xinmeiti": {
+    "count": 7,
+    "cards": [
+      "43",
+      "44",
+      "41",
+      "42",
+      "75",
+      "84",
+      "102"
+    ]
+  },
+  "zhongguorenmindaxue": {
+    "count": 3,
+    "cards": [
+      "89",
+      "91",
+      "90"
+    ]
+  },
+  "duiwaijingmaodaxue": {
+    "count": 3,
+    "cards": [
+      "98",
+      "96",
+      "92"
+    ]
+  },
+  "xianggangdaxue": {
+    "count": 1,
+    "cards": [
+      "99"
+    ]
+  },
+  "sichuandaxue": {
+    "count": 1,
+    "cards": [
+      "100"
+    ]
+  },
+  "nankaidaxue": {
+    "count": 1,
+    "cards": [
+      "97"
+    ]
+  },
+  "nanjingdaxue": {
+    "count": 3,
+    "cards": [
+      "76",
+      "77",
+      "95"
+    ]
+  },
+  "jilindaxue": {
+    "count": 1,
+    "cards": [
+      "101"
+    ]
+  },
+  "zhongnandaxue": {
+    "count": 1,
+    "cards": [
+      "94"
+    ]
+  },
+  "shenzhendaxue": {
+    "count": 1,
+    "cards": [
+      "75"
+    ]
+  },
+  "jinandaxue": {
+    "count": 1,
+    "cards": [
+      "93"
+    ]
+  },
+  "zhongyangcaijingdaxue": {
+    "count": 3,
+    "cards": [
+      "81",
+      "108",
+      "78"
+    ]
+  },
+  "dianzikejidaxue": {
+    "count": 1,
+    "cards": [
+      "28"
+    ]
+  },
+  "zhongguochuanmeidaxue": {
+    "count": 1,
+    "cards": [
+      "102"
+    ]
+  },
+  "tongjidaxue": {
+    "count": 1,
+    "cards": [
+      "103"
+    ]
+  },
+  "yishusheji": {
+    "count": 1,
+    "cards": [
+      "82"
+    ]
+  },
+  "dianzixinxigongcheng": {
+    "count": 1,
+    "cards": [
+      "83"
+    ]
+  },
+  "jiaoyuxue": {
+    "count": 2,
+    "cards": [
+      "107",
+      "85"
+    ]
+  },
+  "yuyanzhuanye": {
+    "count": 1,
+    "cards": [
+      "86"
+    ]
+  }
+}

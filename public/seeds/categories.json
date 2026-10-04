@@ -1,0 +1,2520 @@
+{
+ "groups": {
+  "热门": [
+   {
+    "slug": "daxuesheng",
+    "name": "大学生简历模板"
+   },
+   {
+    "slug": "shixisheng",
+    "name": "实习生简历模板"
+   },
+   {
+    "slug": "yingjiesheng",
+    "name": "应届生简历模板"
+   },
+   {
+    "slug": "qiuzhi",
+    "name": "求职简历模板"
+   },
+   {
+    "slug": "liuxue",
+    "name": "留学简历模板"
+   },
+   {
+    "slug": "yingwen",
+    "name": "英文简历模板"
+   },
+   {
+    "slug": "shuqishixi",
+    "name": "暑期实习"
+   },
+   {
+    "slug": "xiaozhao",
+    "name": "校招简历"
+   }
+  ],
+  "行业": [
+   {
+    "slug": "hulianwang",
+    "name": "互联网"
+   },
+   {
+    "slug": "jinrong",
+    "name": "金融"
+   },
+   {
+    "slug": "zixun",
+    "name": "咨询"
+   },
+   {
+    "slug": "yinhang",
+    "name": "银行"
+   },
+   {
+    "slug": "wenhuachuanmei",
+    "name": "文化/传媒"
+   },
+   {
+    "slug": "fangdichan",
+    "name": "房地产"
+   },
+   {
+    "slug": "dianzishangwu",
+    "name": "电子商务"
+   },
+   {
+    "slug": "tongxin",
+    "name": "通信"
+   },
+   {
+    "slug": "youxi",
+    "name": "游戏"
+   },
+   {
+    "slug": "zhizaoye",
+    "name": "制造业"
+   },
+   {
+    "slug": "qiche",
+    "name": "汽车"
+   },
+   {
+    "slug": "cangchuwuliu",
+    "name": "仓储/物流"
+   },
+   {
+    "slug": "jiaoyupeixun",
+    "name": "教育培训"
+   },
+   {
+    "slug": "baoxian",
+    "name": "保险"
+   },
+   {
+    "slug": "guanggao",
+    "name": "广告"
+   }
+  ],
+  "职位": [
+   {
+    "slug": "chanpinjingli",
+    "name": "产品经理简历模板"
+   },
+   {
+    "slug": "chengxuyuan",
+    "name": "程序员简历模板"
+   },
+   {
+    "slug": "agentkaifa",
+    "name": "Agent开发"
+   },
+   {
+    "slug": "yunying",
+    "name": "运营简历模板"
+   },
+   {
+    "slug": "xingzheng",
+    "name": "行政简历模板"
+   },
+   {
+    "slug": "sheji",
+    "name": "设计简历模板"
+   },
+   {
+    "slug": "caiwu",
+    "name": "财务简历模板"
+   },
+   {
+    "slug": "jiaoshi",
+    "name": "教师简历模板"
+   },
+   {
+    "slug": "python",
+    "name": "python"
+   },
+   {
+    "slug": "webqianduan",
+    "name": "Web前端"
+   },
+   {
+    "slug": "java",
+    "name": "Java"
+   },
+   {
+    "slug": "android",
+    "name": "Andorid"
+   },
+   {
+    "slug": "ios",
+    "name": "iOS"
+   },
+   {
+    "slug": "ceshi",
+    "name": "测试"
+   },
+   {
+    "slug": "yunwei",
+    "name": "运维"
+   },
+   {
+    "slug": "dashuju",
+    "name": "大数据"
+   },
+   {
+    "slug": "uiux",
+    "name": "UI/UX"
+   },
+   {
+    "slug": "pingmiansheji",
+    "name": "平面设计/美工"
+   },
+   {
+    "slug": "renliziyuan",
+    "name": "人力资源"
+   },
+   {
+    "slug": "huizhancehua",
+    "name": "会展策划"
+   },
+   {
+    "slug": "yiliaojiankang",
+    "name": "医疗/健康"
+   },
+   {
+    "slug": "pinpaigongguan",
+    "name": "品牌公关"
+   },
+   {
+    "slug": "suanfagongchengshi",
+    "name": "算法工程师"
+   },
+   {
+    "slug": "kuaixiao",
+    "name": "快消"
+   },
+   {
+    "slug": "javascript",
+    "name": "JavaScript"
+   },
+   {
+    "slug": "netgongchengshi",
+    "name": ".NET工程师"
+   },
+   {
+    "slug": "cgongchengshi",
+    "name": "C#工程师"
+   },
+   {
+    "slug": "wangluoanquan",
+    "name": "网络安全"
+   },
+   {
+    "slug": "shujufenxi",
+    "name": "数据分析"
+   },
+   {
+    "slug": "qianrushi",
+    "name": "嵌入式"
+   },
+   {
+    "slug": "shichangyingxiao",
+    "name": "市场/营销"
+   },
+   {
+    "slug": "caigoumaoyi",
+    "name": "采购贸易"
+   },
+   {
+    "slug": "shangwutuozhan",
+    "name": "商务拓展"
+   },
+   {
+    "slug": "waimao",
+    "name": "外贸"
+   },
+   {
+    "slug": "xiaoshou",
+    "name": "销售"
+   },
+   {
+    "slug": "wenancehua",
+    "name": "文案/策划"
+   },
+   {
+    "slug": "seosem",
+    "name": "SEO/SEM"
+   },
+   {
+    "slug": "xinmeiti",
+    "name": "新媒体"
+   }
+  ],
+  "学校": [
+   {
+    "slug": "qinghuadaxue",
+    "name": "清华大学"
+   },
+   {
+    "slug": "beijingdaxue",
+    "name": "北京大学"
+   },
+   {
+    "slug": "fudandaxue",
+    "name": "复旦大学"
+   },
+   {
+    "slug": "shanghaijiaotongdaxue",
+    "name": "上海交通大学"
+   },
+   {
+    "slug": "zhejiangdaxue",
+    "name": "浙江大学"
+   },
+   {
+    "slug": "wuhandaxue",
+    "name": "武汉大学"
+   },
+   {
+    "slug": "zhongshandaxue",
+    "name": "中山大学"
+   },
+   {
+    "slug": "zhongguorenmindaxue",
+    "name": "中国人民大学"
+   },
+   {
+    "slug": "duiwaijingmaodaxue",
+    "name": "对外经贸大学"
+   },
+   {
+    "slug": "xianggangdaxue",
+    "name": "香港大学"
+   },
+   {
+    "slug": "sichuandaxue",
+    "name": "四川大学"
+   },
+   {
+    "slug": "nankaidaxue",
+    "name": "南开大学"
+   },
+   {
+    "slug": "nanjingdaxue",
+    "name": "南京大学"
+   },
+   {
+    "slug": "jilindaxue",
+    "name": "吉林大学"
+   },
+   {
+    "slug": "zhongnandaxue",
+    "name": "中南大学"
+   },
+   {
+    "slug": "shenzhendaxue",
+    "name": "深圳大学"
+   },
+   {
+    "slug": "jinandaxue",
+    "name": "暨南大学"
+   },
+   {
+    "slug": "zhongyangcaijingdaxue",
+    "name": "中央财经大学"
+   },
+   {
+    "slug": "dianzikejidaxue",
+    "name": "电子科技大学"
+   },
+   {
+    "slug": "zhongguochuanmeidaxue",
+    "name": "中国传媒大学"
+   },
+   {
+    "slug": "tongjidaxue",
+    "name": "同济大学"
+   }
+  ],
+  "专业": [
+   {
+    "slug": "ruanjiangongcheng",
+    "name": "软件工程"
+   },
+   {
+    "slug": "gongshangguanli",
+    "name": "工商管理"
+   },
+   {
+    "slug": "jinrongxue",
+    "name": "金融学"
+   },
+   {
+    "slug": "jisuanjikexue",
+    "name": "计算机科学与技术"
+   },
+   {
+    "slug": "jingjixue",
+    "name": "经济学"
+   },
+   {
+    "slug": "chuanboxue",
+    "name": "传播学"
+   },
+   {
+    "slug": "shichangyingxiao",
+    "name": "市场营销"
+   },
+   {
+    "slug": "kuaijixue",
+    "name": "会计学"
+   },
+   {
+    "slug": "yishusheji",
+    "name": "艺术与设计"
+   },
+   {
+    "slug": "dianzixinxigongcheng",
+    "name": "电子信息工程"
+   },
+   {
+    "slug": "jiaoyuxue",
+    "name": "教育学"
+   },
+   {
+    "slug": "yuyanzhuanye",
+    "name": "语言类专业"
+   }
+  ]
+ },
+ "categories": {
+  "daxuesheng": {
+   "name": "大学生简历模板",
+   "cards": [
+    "32",
+    "71",
+    "73",
+    "75",
+    "74",
+    "72",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "yingjiesheng": {
+   "name": "应届生简历模板",
+   "cards": [
+    "44",
+    "32",
+    "31",
+    "71",
+    "73",
+    "agent_development",
+    "76",
+    "75",
+    "80",
+    "77",
+    "74",
+    "72",
+    "yinhangguanpeisheng",
+    "duomotaidamoxingsuanfa",
+    "shuziic",
+    "youxikehuduankaifa",
+    "79",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "qiuzhi": {
+   "name": "求职简历模板",
+   "cards": [
+    "31",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "liuxue": {
+   "name": "留学简历模板",
+   "cards": [
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "qinghuadaxue": {
+   "name": "清华大学",
+   "cards": [
+    "29",
+    "36",
+    "105",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "beijingdaxue": {
+   "name": "北京大学",
+   "cards": [
+    "56",
+    "109",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "fudandaxue": {
+   "name": "复旦大学",
+   "cards": [
+    "72",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "shanghaijiaotongdaxue": {
+   "name": "上海交通大学",
+   "cards": [
+    "45",
+    "79",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "zhejiangdaxue": {
+   "name": "浙江大学",
+   "cards": [
+    "74",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "wuhandaxue": {
+   "name": "武汉大学",
+   "cards": [
+    "88",
+    "87",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "zhongshandaxue": {
+   "name": "中山大学",
+   "cards": [
+    "80",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "hulianwang": {
+   "name": "互联网",
+   "cards": [
+    "1internet_avatar",
+    "43",
+    "38",
+    "44",
+    "15simple_versatile",
+    "35",
+    "34",
+    "39",
+    "46",
+    "28",
+    "8general",
+    "10front_end",
+    "11fresh",
+    "20campus_simple",
+    "37",
+    "6operation_avatar",
+    "24",
+    "17business",
+    "36",
+    "52",
+    "4internet",
+    "71",
+    "12internet_social",
+    "19social",
+    "73",
+    "23",
+    "3operation",
+    "75",
+    "80",
+    "74",
+    "72",
+    "45",
+    "48",
+    "61",
+    "55",
+    "27",
+    "41",
+    "33"
+   ]
+  },
+  "jinrong": {
+   "name": "金融",
+   "cards": [
+    "52",
+    "51",
+    "yinhangguanpeisheng",
+    "78",
+    "79",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "zixun": {
+   "name": "咨询",
+   "cards": [
+    "68",
+    "91",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "yinhang": {
+   "name": "银行",
+   "cards": [
+    "yinhangguanpeisheng",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "wenhuachuanmei": {
+   "name": "文化/传媒",
+   "cards": [
+    "102",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "fangdichan": {
+   "name": "房地产",
+   "cards": [
+    "103",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "dianzishangwu": {
+   "name": "电子商务",
+   "cards": [
+    "104",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "tongxin": {
+   "name": "通信",
+   "cards": [
+    "83",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "youxi": {
+   "name": "游戏",
+   "cards": [
+    "youxikehuduankaifa",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "zhizaoye": {
+   "name": "制造业",
+   "cards": [
+    "105",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "chanpinjingli": {
+   "name": "产品经理简历模板",
+   "cards": [
+    "18art",
+    "72",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "chengxuyuan": {
+   "name": "程序员简历模板",
+   "cards": [
+    "61",
+    "46",
+    "23",
+    "agent_development",
+    "13geek",
+    "25",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "agentkaifa": {
+   "name": "Agent开发",
+   "cards": [
+    "61",
+    "agent_development",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "yunying": {
+   "name": "运营简历模板",
+   "cards": [
+    "45",
+    "43",
+    "38",
+    "44",
+    "41",
+    "39",
+    "46",
+    "28",
+    "40",
+    "42",
+    "6operation_avatar",
+    "9business",
+    "57",
+    "14heading",
+    "3operation",
+    "7simple_avatar",
+    "75",
+    "84",
+    "104",
+    "102",
+    "1internet_avatar",
+    "48",
+    "61",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "33",
+    "34"
+   ]
+  },
+  "xingzheng": {
+   "name": "行政简历模板",
+   "cards": [
+    "49",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "ruanjiangongcheng": {
+   "name": "软件工程",
+   "cards": [
+    "61",
+    "80",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "gongshangguanli": {
+   "name": "工商管理",
+   "cards": [
+    "18art",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "jinrongxue": {
+   "name": "金融学",
+   "cards": [
+    "78",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "jisuanjikexue": {
+   "name": "计算机科学与技术",
+   "cards": [
+    "55",
+    "58",
+    "60",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "jingjixue": {
+   "name": "经济学",
+   "cards": [
+    "81",
+    "78",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "chuanboxue": {
+   "name": "传播学",
+   "cards": [
+    "84",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "shichangyingxiao": {
+   "name": "市场营销",
+   "cards": [
+    "93",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "kuaijixue": {
+   "name": "会计学",
+   "cards": [
+    "81",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "shixisheng": {
+   "name": "实习生简历模板",
+   "cards": [
+    "29",
+    "20campus_simple",
+    "16prominent_content",
+    "36",
+    "75",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "yingwen": {
+   "name": "英文简历模板",
+   "cards": [
+    "24",
+    "53",
+    "23",
+    "25",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "shuqishixi": {
+   "name": "暑期实习",
+   "cards": [
+    "61",
+    "73",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "xiaozhao": {
+   "name": "校招简历",
+   "cards": [
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "38",
+    "44",
+    "55",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39",
+    "46",
+    "42",
+    "32",
+    "8general",
+    "10front_end",
+    "31",
+    "29",
+    "11fresh",
+    "60",
+    "20campus_simple",
+    "37",
+    "22",
+    "24",
+    "47",
+    "17business",
+    "36",
+    "30",
+    "52",
+    "49",
+    "4internet",
+    "54",
+    "21it_campus",
+    "71",
+    "53",
+    "19social",
+    "83",
+    "14heading",
+    "73",
+    "50",
+    "2concise",
+    "agent_development",
+    "76",
+    "81",
+    "75",
+    "77",
+    "72",
+    "94",
+    "106",
+    "88",
+    "105",
+    "107",
+    "101",
+    "99",
+    "yinhangguanpeisheng",
+    "95",
+    "84",
+    "duomotaidamoxingsuanfa",
+    "104",
+    "108",
+    "102",
+    "109",
+    "103",
+    "86",
+    "85",
+    "82",
+    "100",
+    "78",
+    "shuziic",
+    "93",
+    "87",
+    "97",
+    "92",
+    "youxikehuduankaifa",
+    "61",
+    "15simple_versatile"
+   ]
+  },
+  "qiche": {
+   "name": "汽车",
+   "cards": [
+    "101",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "cangchuwuliu": {
+   "name": "仓储/物流",
+   "cards": [
+    "106",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "jiaoyupeixun": {
+   "name": "教育培训",
+   "cards": [
+    "107",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "baoxian": {
+   "name": "保险",
+   "cards": [
+    "108",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "guanggao": {
+   "name": "广告",
+   "cards": [
+    "89",
+    "99",
+    "109",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "sheji": {
+   "name": "设计简历模板",
+   "cards": [
+    "41",
+    "42",
+    "22",
+    "16prominent_content",
+    "17business",
+    "9business",
+    "14heading",
+    "18art",
+    "7simple_avatar",
+    "72",
+    "89",
+    "85",
+    "82",
+    "shuziic",
+    "69",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "caiwu": {
+   "name": "财务简历模板",
+   "cards": [
+    "81",
+    "yinhangguanpeisheng",
+    "78",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "jiaoshi": {
+   "name": "教师简历模板",
+   "cards": [
+    "85",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "python": {
+   "name": "python",
+   "cards": [
+    "4internet",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "webqianduan": {
+   "name": "Web前端",
+   "cards": [
+    "10front_end",
+    "16prominent_content",
+    "14heading",
+    "2concise",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "java": {
+   "name": "Java",
+   "cards": [
+    "48",
+    "55",
+    "15simple_versatile",
+    "26",
+    "71",
+    "80",
+    "45",
+    "1internet_avatar",
+    "43",
+    "61",
+    "38",
+    "44",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "android": {
+   "name": "Andorid",
+   "cards": [
+    "88",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "ios": {
+   "name": "iOS",
+   "cards": [
+    "87",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "ceshi": {
+   "name": "测试",
+   "cards": [
+    "35",
+    "34",
+    "36",
+    "67",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "41",
+    "33",
+    "39"
+   ]
+  },
+  "yunwei": {
+   "name": "运维",
+   "cards": [
+    "67",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "dashuju": {
+   "name": "大数据",
+   "cards": [
+    "1internet_avatar",
+    "8general",
+    "45",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "uiux": {
+   "name": "UI/UX",
+   "cards": [
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "pingmiansheji": {
+   "name": "平面设计/美工",
+   "cards": [
+    "89",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "renliziyuan": {
+   "name": "人力资源",
+   "cards": [
+    "77",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "huizhancehua": {
+   "name": "会展策划",
+   "cards": [
+    "90",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "yiliaojiankang": {
+   "name": "医疗/健康",
+   "cards": [
+    "91",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "pinpaigongguan": {
+   "name": "品牌公关",
+   "cards": [
+    "92",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "suanfagongchengshi": {
+   "name": "算法工程师",
+   "cards": [
+    "74",
+    "65",
+    "duomotaidamoxingsuanfa",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "kuaixiao": {
+   "name": "快消",
+   "cards": [
+    "93",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "javascript": {
+   "name": "JavaScript",
+   "cards": [
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "netgongchengshi": {
+   "name": ".NET工程师",
+   "cards": [
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "cgongchengshi": {
+   "name": "C#工程师",
+   "cards": [
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "wangluoanquan": {
+   "name": "网络安全",
+   "cards": [
+    "67",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "shujufenxi": {
+   "name": "数据分析",
+   "cards": [
+    "73",
+    "3operation",
+    "64",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "qianrushi": {
+   "name": "嵌入式",
+   "cards": [
+    "9business",
+    "83",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "caigoumaoyi": {
+   "name": "采购贸易",
+   "cards": [
+    "96",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "shangwutuozhan": {
+   "name": "商务拓展",
+   "cards": [
+    "97",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "waimao": {
+   "name": "外贸",
+   "cards": [
+    "98",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "xiaoshou": {
+   "name": "销售",
+   "cards": [
+    "59",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "wenancehua": {
+   "name": "文案/策划",
+   "cards": [
+    "99",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "seosem": {
+   "name": "SEO/SEM",
+   "cards": [
+    "100",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "xinmeiti": {
+   "name": "新媒体",
+   "cards": [
+    "43",
+    "44",
+    "41",
+    "42",
+    "75",
+    "84",
+    "102",
+    "45",
+    "1internet_avatar",
+    "48",
+    "61",
+    "38",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "zhongguorenmindaxue": {
+   "name": "中国人民大学",
+   "cards": [
+    "89",
+    "91",
+    "90",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "duiwaijingmaodaxue": {
+   "name": "对外经贸大学",
+   "cards": [
+    "98",
+    "96",
+    "92",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "xianggangdaxue": {
+   "name": "香港大学",
+   "cards": [
+    "99",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "sichuandaxue": {
+   "name": "四川大学",
+   "cards": [
+    "100",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "nankaidaxue": {
+   "name": "南开大学",
+   "cards": [
+    "97",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "nanjingdaxue": {
+   "name": "南京大学",
+   "cards": [
+    "76",
+    "77",
+    "95",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "jilindaxue": {
+   "name": "吉林大学",
+   "cards": [
+    "101",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "zhongnandaxue": {
+   "name": "中南大学",
+   "cards": [
+    "94",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "shenzhendaxue": {
+   "name": "深圳大学",
+   "cards": [
+    "75",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "jinandaxue": {
+   "name": "暨南大学",
+   "cards": [
+    "93",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "zhongyangcaijingdaxue": {
+   "name": "中央财经大学",
+   "cards": [
+    "81",
+    "108",
+    "78",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "dianzikejidaxue": {
+   "name": "电子科技大学",
+   "cards": [
+    "28",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "zhongguochuanmeidaxue": {
+   "name": "中国传媒大学",
+   "cards": [
+    "102",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "tongjidaxue": {
+   "name": "同济大学",
+   "cards": [
+    "103",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "yishusheji": {
+   "name": "艺术与设计",
+   "cards": [
+    "82",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "dianzixinxigongcheng": {
+   "name": "电子信息工程",
+   "cards": [
+    "83",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "jiaoyuxue": {
+   "name": "教育学",
+   "cards": [
+    "107",
+    "85",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  },
+  "yuyanzhuanye": {
+   "name": "语言类专业",
+   "cards": [
+    "86",
+    "45",
+    "1internet_avatar",
+    "43",
+    "48",
+    "61",
+    "38",
+    "44",
+    "55",
+    "15simple_versatile",
+    "27",
+    "35",
+    "41",
+    "33",
+    "34",
+    "39"
+   ]
+  }
+ }
+}

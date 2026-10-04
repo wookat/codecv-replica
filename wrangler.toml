@@ -1,0 +1,7 @@
+name = "cv-replica"
+pages_build_output_dir = "./dist"
+compatibility_date = "2024-10-01"
+
+[[kv_namespaces]]
+binding = "UPSTASH_KV"
+id = "46c91ca210d1493b8a0861d993503840"

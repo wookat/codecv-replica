@@ -1,0 +1,987 @@
+{
+ "companies": [
+  {
+   "_id": "cd6888fc6a9f7b0202de07673f14a35d",
+   "slug": "alibaba",
+   "name": "阿里巴巴",
+   "aliases": [
+    "阿里",
+    "淘天",
+    "蚂蚁"
+   ],
+   "industry": "互联网",
+   "heat": 1,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/alibaba.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de076878401c41",
+   "slug": "tencent",
+   "name": "腾讯",
+   "aliases": [
+    "鹅厂",
+    "微信事业群"
+   ],
+   "industry": "互联网",
+   "heat": 2,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/tencent.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de0769040183e3",
+   "slug": "bytedance",
+   "name": "字节跳动",
+   "aliases": [
+    "字节",
+    "抖音",
+    "tiktok"
+   ],
+   "industry": "互联网",
+   "heat": 3,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/bytedance.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de076a1bacdde4",
+   "slug": "meituan",
+   "name": "美团",
+   "aliases": [
+    "美团点评",
+    "小美"
+   ],
+   "industry": "互联网",
+   "heat": 4,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/meituan-1789035258197.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de076b643f7043",
+   "slug": "pinduoduo",
+   "name": "拼多多",
+   "aliases": [
+    "PDD",
+    "多多"
+   ],
+   "industry": "互联网",
+   "heat": 5,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/pinduoduo-1789035290911.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de076c1c6b5dd4",
+   "slug": "baidu",
+   "name": "百度",
+   "aliases": [
+    "熊厂"
+   ],
+   "industry": "互联网",
+   "heat": 6,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/baidu.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de076d1afe3a8e",
+   "slug": "jd",
+   "name": "京东",
+   "aliases": [
+    "京东集团",
+    "东哥家"
+   ],
+   "industry": "互联网",
+   "heat": 7,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/jd-1789035309938.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de076e6a26e2ab",
+   "slug": "xiaomi",
+   "name": "小米",
+   "aliases": [
+    "小米集团",
+    "MI"
+   ],
+   "industry": "智能硬件",
+   "heat": 8,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/xiaomi.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de076f5c7bd3a3",
+   "slug": "huawei",
+   "name": "华为",
+   "aliases": [
+    "菊花厂",
+    "华子"
+   ],
+   "industry": "通信设备",
+   "heat": 9,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/huawei.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de07706df704de",
+   "slug": "netease",
+   "name": "网易",
+   "aliases": [
+    "猪厂",
+    "网易游戏"
+   ],
+   "industry": "互联网",
+   "heat": 10,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/netease.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de07713c31e4a8",
+   "slug": "dji",
+   "name": "大疆",
+   "aliases": [
+    "DJI",
+    "大疆创新"
+   ],
+   "industry": "智能硬件",
+   "heat": 11,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/dji.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de07724a6755c0",
+   "slug": "kuaishou",
+   "name": "快手",
+   "aliases": [
+    "快手科技"
+   ],
+   "industry": "互联网",
+   "heat": 12,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/kuaishou-1789035376009.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de0773089b4289",
+   "slug": "bilibili",
+   "name": "哔哩哔哩",
+   "aliases": [
+    "B站",
+    "bilibili"
+   ],
+   "industry": "互联网",
+   "heat": 13,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/bilibili.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de0774397b9640",
+   "slug": "di-di",
+   "name": "滴滴",
+   "aliases": [
+    "滴滴出行",
+    "小桔"
+   ],
+   "industry": "出行",
+   "heat": 14,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/di-di.ico"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de07756d39bd34",
+   "slug": "trip-com",
+   "name": "携程",
+   "aliases": [
+    "携程集团",
+    "Ctrip"
+   ],
+   "industry": "旅游",
+   "heat": 15,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/trip-com.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de07765ce5d888",
+   "slug": "elenet",
+   "name": "饿了么",
+   "aliases": [
+    "饿了么",
+    "蜂鸟"
+   ],
+   "industry": "本地生活",
+   "heat": 16,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/elenet.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de0777228f366d",
+   "slug": "ant-group",
+   "name": "蚂蚁集团",
+   "aliases": [
+    "蚂蚁金服",
+    "支付宝"
+   ],
+   "industry": "金融科技",
+   "heat": 17,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/ant-group-1789035434804.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de07784f9306ed",
+   "slug": "microsoft",
+   "name": "微软",
+   "aliases": [
+    "Microsoft",
+    "MSFT"
+   ],
+   "industry": "外企",
+   "heat": 18,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/microsoft-1789035468508.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de07795aca4fb2",
+   "slug": "apple",
+   "name": "苹果",
+   "aliases": [
+    "Apple"
+   ],
+   "industry": "外企",
+   "heat": 19,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/apple.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de077a16f43309",
+   "slug": "google",
+   "name": "谷歌",
+   "aliases": [
+    "Google"
+   ],
+   "industry": "外企",
+   "heat": 20,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/google.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de077b0a850ed8",
+   "slug": "amazon",
+   "name": "亚马逊",
+   "aliases": [
+    "Amazon",
+    "AWS"
+   ],
+   "industry": "外企",
+   "heat": 21,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/amazon.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de077c4284f332",
+   "slug": "nvidia",
+   "name": "英伟达",
+   "aliases": [
+    "NVIDIA"
+   ],
+   "industry": "外企",
+   "heat": 22,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/nvidia.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de077d2afeed3e",
+   "slug": "qualcomm",
+   "name": "高通",
+   "aliases": [
+    "Qualcomm"
+   ],
+   "industry": "外企",
+   "heat": 23,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/qualcomm.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de077e212b521b",
+   "slug": "intel",
+   "name": "英特尔",
+   "aliases": [
+    "Intel"
+   ],
+   "industry": "外企",
+   "heat": 24,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/intel.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de077f39ddda6c",
+   "slug": "shopee",
+   "name": "Shopee",
+   "aliases": [
+    "虾皮"
+   ],
+   "industry": "外企",
+   "heat": 25,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/shopee.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de07802e58fac6",
+   "slug": "grab",
+   "name": "Grab",
+   "aliases": [],
+   "industry": "外企",
+   "heat": 26,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/grab.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de07814cff47e3",
+   "slug": "tuya",
+   "name": "涂鸦智能",
+   "aliases": [
+    "tuya"
+   ],
+   "industry": "物联网",
+   "heat": 27,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/tuya-1789035505667.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de0782547d9344",
+   "slug": "hikvision",
+   "name": "海康威视",
+   "aliases": [
+    "海康"
+   ],
+   "industry": "智能物联",
+   "heat": 28,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/hikvision.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de078373811d71",
+   "slug": "dahua",
+   "name": "大华股份",
+   "aliases": [
+    "大华"
+   ],
+   "industry": "智能物联",
+   "heat": 29,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/dahua-1789035554895.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de07844f6ca3dc",
+   "slug": "iflytek",
+   "name": "科大讯飞",
+   "aliases": [
+    "讯飞"
+   ],
+   "industry": "人工智能",
+   "heat": 30,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/iflytek.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de078569d97382",
+   "slug": "sensetime",
+   "name": "商汤科技",
+   "aliases": [
+    "商汤"
+   ],
+   "industry": "人工智能",
+   "heat": 31,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/sensetime-1789035599816.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de07865b788335",
+   "slug": "megvii",
+   "name": "旷视科技",
+   "aliases": [
+    "旷视",
+    "Face++"
+   ],
+   "industry": "人工智能",
+   "heat": 32,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/megvii-1789035645972.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de07874908ed6c",
+   "slug": "zijie-ml",
+   "name": "智谱AI",
+   "aliases": [
+    "zhipu",
+    "智谱",
+    "chatglm"
+   ],
+   "industry": "人工智能",
+   "heat": 33,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/zijie-ml.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de0788550cbb19",
+   "slug": "moonshot",
+   "name": "月之暗面",
+   "aliases": [
+    "moonshot",
+    "kimi"
+   ],
+   "industry": "人工智能",
+   "heat": 34,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/moonshot-1789035666501.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de0789749d60c3",
+   "slug": "deepsense",
+   "name": "深度求索",
+   "aliases": [
+    "DeepSeek",
+    "deepseek"
+   ],
+   "industry": "人工智能",
+   "heat": 35,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/deepsense.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de078a05911d3a",
+   "slug": "baichuan",
+   "name": "百川智能",
+   "aliases": [
+    "baichuan"
+   ],
+   "industry": "人工智能",
+   "heat": 36,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/baichuan-1789035789831.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de078b7ab0434c",
+   "slug": "minimax",
+   "name": "MiniMax",
+   "aliases": [
+    "minimax",
+    "稀宇科技"
+   ],
+   "industry": "人工智能",
+   "heat": 37,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/minimax.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de078c5e2155a5",
+   "slug": "stepfun",
+   "name": "阶跃星辰",
+   "aliases": [
+    "stepfun"
+   ],
+   "industry": "人工智能",
+   "heat": 38,
+   "logo": null
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de078d5bec1adf",
+   "slug": "01-ai",
+   "name": "零一万物",
+   "aliases": [
+    "01ai",
+    "零一"
+   ],
+   "industry": "人工智能",
+   "heat": 39,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/01-ai-1789035824182.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de078e400de5f6",
+   "slug": "lenovo",
+   "name": "联想",
+   "aliases": [
+    "Lenovo",
+    "联想集团"
+   ],
+   "industry": "智能硬件",
+   "heat": 40,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/lenovo.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de078f72cf3664",
+   "slug": "honor",
+   "name": "荣耀",
+   "aliases": [
+    "荣耀终端"
+   ],
+   "industry": "智能硬件",
+   "heat": 41,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/honor.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de07900b2ec796",
+   "slug": "oppo",
+   "name": "OPPO",
+   "aliases": [
+    "欧加"
+   ],
+   "industry": "智能硬件",
+   "heat": 42,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/oppo.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de0791513e8042",
+   "slug": "vivo",
+   "name": "vivo",
+   "aliases": [
+    "维沃"
+   ],
+   "industry": "智能硬件",
+   "heat": 43,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/vivo.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de07921a509192",
+   "slug": "realme",
+   "name": "realme",
+   "aliases": [
+    "真我"
+   ],
+   "industry": "智能硬件",
+   "heat": 44,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/realme-1789035765183.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de07935a042033",
+   "slug": "transsion",
+   "name": "传音控股",
+   "aliases": [
+    "传音"
+   ],
+   "industry": "智能硬件",
+   "heat": 45,
+   "logo": null
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de07944400cd1b",
+   "slug": "xiaopeng",
+   "name": "小鹏汽车",
+   "aliases": [
+    "小鹏",
+    "XPeng"
+   ],
+   "industry": "新能源汽车",
+   "heat": 46,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/xiaopeng.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de079528281b5c",
+   "slug": "nio",
+   "name": "蔚来",
+   "aliases": [
+    "NIO"
+   ],
+   "industry": "新能源汽车",
+   "heat": 47,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/nio-1789035742250.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de079654577656",
+   "slug": "li-auto",
+   "name": "理想汽车",
+   "aliases": [
+    "理想",
+    "Li Auto"
+   ],
+   "industry": "新能源汽车",
+   "heat": 48,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/li-auto.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de07975e033373",
+   "slug": "byd",
+   "name": "比亚迪",
+   "aliases": [
+    "BYD"
+   ],
+   "industry": "新能源汽车",
+   "heat": 49,
+   "logo": "https://636f-codecv-8gf1cv0db1056941-1300408620.tcb.qcloud.la/mianjing/logos/byd-1789035710828.svg"
+  },
+  {
+   "_id": "cd6888fc6a9f7b0202de07980a230f1a",
+   "slug": "geely",
+   "name": "吉利",
+   "aliases": [
+    "吉利控股"
+   ],
+   "industry": "汽车",
+   "heat": 50,
+   "logo": null
+  },
+  {
+   "_id": "local-custom-954404eb",
+   "slug": "custom-954404eb",
+   "name": "合合信息",
+   "aliases": [],
+   "industry": "互联网",
+   "heat": 10,
+   "logo": ""
+  },
+  {
+   "_id": "local-custom-a1570d4e",
+   "slug": "custom-a1570d4e",
+   "name": "东方财富",
+   "aliases": [],
+   "industry": "互联网",
+   "heat": 10,
+   "logo": ""
+  }
+ ],
+ "positions": [
+  {
+   "_id": "cd6888fc6a9f7b1702de07e73383981c",
+   "slug": "agent-kaifa",
+   "name": "Agent开发",
+   "category": "技术",
+   "heat": 1
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de07e87de21578",
+   "slug": "houduan",
+   "name": "后端开发",
+   "category": "技术",
+   "heat": 2
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de07e9405baed0",
+   "slug": "qianduan",
+   "name": "前端开发",
+   "category": "技术",
+   "heat": 3
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de07ea6e450527",
+   "slug": "suanfa",
+   "name": "算法工程师",
+   "category": "技术",
+   "heat": 4
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de07eb53f201ef",
+   "slug": "dashuju",
+   "name": "大数据开发",
+   "category": "技术",
+   "heat": 5
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de07ec5fb105f4",
+   "slug": "ce-shi",
+   "name": "测试开发",
+   "category": "技术",
+   "heat": 6
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de07ed25b1da8c",
+   "slug": "yunwei",
+   "name": "运维/SRE",
+   "category": "技术",
+   "heat": 7
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de07ee79e8be05",
+   "slug": "yunying-kaifa",
+   "name": "音视频开发",
+   "category": "技术",
+   "heat": 8
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de07ef58c3fffd",
+   "slug": "kehuduan",
+   "name": "客户端开发",
+   "category": "技术",
+   "heat": 9
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de07f073c93006",
+   "slug": "qianrushi",
+   "name": "嵌入式开发",
+   "category": "技术",
+   "heat": 10
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de07f10d47f616",
+   "slug": "youxi-kaifa",
+   "name": "游戏开发",
+   "category": "技术",
+   "heat": 11
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de07f24a11fafb",
+   "slug": "da-moxing",
+   "name": "大模型算法",
+   "category": "技术",
+   "heat": 12
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de07f32c911f39",
+   "slug": "ai-shuju",
+   "name": "AI数据算法",
+   "category": "技术",
+   "heat": 13
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de07f433d63855",
+   "slug": "wangluoanquan",
+   "name": "网络安全",
+   "category": "技术",
+   "heat": 14
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de07f525373f7a",
+   "slug": "jisuanji-shijue",
+   "name": "计算机视觉",
+   "category": "技术",
+   "heat": 15
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de07f66cbf6e85",
+   "slug": "ziran-yuyan",
+   "name": "自然语言处理",
+   "category": "技术",
+   "heat": 16
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de07f737de98b9",
+   "slug": "tuxiang-suanfa",
+   "name": "图像算法",
+   "category": "技术",
+   "heat": 17
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de07f85212d181",
+   "slug": "tuijian-suanfa",
+   "name": "推荐算法",
+   "category": "技术",
+   "heat": 18
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de07f945ee583e",
+   "slug": "fengkong-suanfa",
+   "name": "风控算法",
+   "category": "技术",
+   "heat": 19
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de07fa30d2f33f",
+   "slug": "jiaochasi",
+   "name": "交叉学科研究",
+   "category": "技术",
+   "heat": 20
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de07fb5cbf7413",
+   "slug": "chanpin-jingli",
+   "name": "产品经理",
+   "category": "产品",
+   "heat": 21
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de07fc3e169a74",
+   "slug": "chanpin-shixi",
+   "name": "产品实习",
+   "category": "产品",
+   "heat": 22
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de07fd271944db",
+   "slug": "AI-chanpin",
+   "name": "AI产品经理",
+   "category": "产品",
+   "heat": 23
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de07fe46b5158a",
+   "slug": "shuju-chanpin",
+   "name": "数据产品经理",
+   "category": "产品",
+   "heat": 24
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de07ff33f07c09",
+   "slug": "celue-chanpin",
+   "name": "策略产品经理",
+   "category": "产品",
+   "heat": 25
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de0800336920d2",
+   "slug": "yingjian-chanpin",
+   "name": "硬件产品经理",
+   "category": "产品",
+   "heat": 26
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de080130a6818f",
+   "slug": "yunying",
+   "name": "运营",
+   "category": "运营",
+   "heat": 27
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de08027aa4cac6",
+   "slug": "neirong-yunying",
+   "name": "内容运营",
+   "category": "运营",
+   "heat": 28
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de08032ddd0dda",
+   "slug": "yonghu-yunying",
+   "name": "用户运营",
+   "category": "运营",
+   "heat": 29
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de08044ee3f1b6",
+   "slug": "huodong-yunying",
+   "name": "活动运营",
+   "category": "运营",
+   "heat": 30
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de0805253b0754",
+   "slug": "shangpin-yunying",
+   "name": "商品运营",
+   "category": "运营",
+   "heat": 31
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de08063252bac8",
+   "slug": "xinmeiti-yunying",
+   "name": "新媒体运营",
+   "category": "运营",
+   "heat": 32
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de08077f1e397f",
+   "slug": "zhibo-yunying",
+   "name": "直播运营",
+   "category": "运营",
+   "heat": 33
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de08083181a570",
+   "slug": "shequ-yunying",
+   "name": "社区运营",
+   "category": "运营",
+   "heat": 34
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de08093c56d497",
+   "slug": "kuajing-yunying",
+   "name": "跨境电商运营",
+   "category": "运营",
+   "heat": 35
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de080a06df77e0",
+   "slug": "youxi-yunying",
+   "name": "游戏运营",
+   "category": "运营",
+   "heat": 36
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de080b7688571c",
+   "slug": "shichang",
+   "name": "市场营销",
+   "category": "市场",
+   "heat": 37
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de080c6800cd78",
+   "slug": "pinpai-gongguan",
+   "name": "品牌公关",
+   "category": "市场",
+   "heat": 38
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de080d5a58b08e",
+   "slug": "guanggao-toufang",
+   "name": "广告投放",
+   "category": "市场",
+   "heat": 39
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de080e21cf671a",
+   "slug": "shangwu-tuozhan",
+   "name": "商务拓展BD",
+   "category": "销售",
+   "heat": 40
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de080f0c512b23",
+   "slug": "xiaoshou",
+   "name": "销售",
+   "category": "销售",
+   "heat": 41
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de081072d48351",
+   "slug": "xiaoshou-guanpei",
+   "name": "销售管培生",
+   "category": "销售",
+   "heat": 42
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de08110b54e953",
+   "slug": "dian-shang-yunying",
+   "name": "电商运营",
+   "category": "运营",
+   "heat": 43
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de081238f11ede",
+   "slug": "kefu-guanli",
+   "name": "客服管理",
+   "category": "职能",
+   "heat": 44
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de08135483636e",
+   "slug": "renli-ziyuan",
+   "name": "人力资源HR",
+   "category": "职能",
+   "heat": 45
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de0814006fca62",
+   "slug": "zhaopin",
+   "name": "招聘专员",
+   "category": "职能",
+   "heat": 46
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de081533c7fc6e",
+   "slug": "xingzheng",
+   "name": "行政",
+   "category": "职能",
+   "heat": 47
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de08163a64b7b9",
+   "slug": "falu-shiwu",
+   "name": "法务",
+   "category": "职能",
+   "heat": 48
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de08173bebd780",
+   "slug": "caiwu",
+   "name": "财务",
+   "category": "职能",
+   "heat": 49
+  },
+  {
+   "_id": "cd6888fc6a9f7b1702de0818510d6d10",
+   "slug": "chuna",
+   "name": "出纳",
+   "category": "职能",
+   "heat": 50
+  },
+  {
+   "_id": "local-aiqz",
+   "slug": "ai-quanzhan",
+   "name": "AI全栈",
+   "category": "技术",
+   "heat": 10
+  }
+ ],
+ "topics": [
+  {
+   "_id": "6b9a89a1f5f94f0a9c9e679a3c889af4",
+   "slug": "topic-2d075e13",
+   "name": "面经创作大赛",
+   "description": "面经创作大赛第一期，投稿赢会员，最高可得终身会员 🎉",
+   "expCount": 0,
+   "badge": "活动进行中",
+   "cover": null
+  }
+ ],
+ "stats": {
+  "total": 18,
+  "companyCount": 9,
+  "positionCount": 5,
+  "questionCount": 131
+ },
+ "company-facets": {
+  "total": 0,
+  "questionCount": 0,
+  "batches": [],
+  "positions": []
+ },
+ "topic-facets": {
+  "total": 0,
+  "questionCount": 0,
+  "batches": [],
+  "positions": []
+ }
+}
