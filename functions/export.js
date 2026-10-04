@@ -51,10 +51,6 @@ export async function onRequestPost(context) {
   // フォントのフェッチ/デコード完了を確実に待つため、document.fonts.ready で
   // マーカー要素を立てて waitForSelector で同期する。
   const fontWait = `<script>document.fonts.ready.then(()=>{const d=document.createElement('div');d.id='fonts-ready';document.body.appendChild(d)})</script>`
-  // 実測: <style> 要素のテキストが ~7MB 未満だと CF BR の Chromium が丸ごと
-  // ドロップする（~8MB 超だと適用されるブラックボックス閾値）。body 内
-  // パディングは無関係なため <style> 内に巨大コメントを入れて押し上げる。
-  const stylePad = `/*${'x'.repeat(6_000_000)}*/`
   const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}<style>${fonts}${
     style || ''
   }${stylePad}</style></head><body>${content}${fontWait}</body></html>`
