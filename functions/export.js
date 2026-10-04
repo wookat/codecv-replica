@@ -59,7 +59,7 @@ export async function onRequestPost(context) {
   const fontWait = `<script>document.fonts.ready.then(()=>{const d=document.createElement('div');d.id='fonts-ready';document.body.appendChild(d)})</script>`
   const html = `<!doctype html><html><head><meta charset="utf-8">${iconfont}${linkTag}<style>${fonts}${
     style || ''
-  }</style></head><body>${content}${fontWait}</body></html>`
+  }${fonts}</style></head><body>${content}${fontWait}</body></html>`
   const endpoint = isPdf ? 'pdf' : 'screenshot'
   const body = isPdf
     ? {
