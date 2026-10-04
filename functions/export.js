@@ -24,8 +24,9 @@ async function fontCss(origin, families) {
     return families.includes(m[1])
   })
   const out = kept.join('\n')
-  fontCssCache.set(key, out)
-  return { css: out, dbgHeads: '' }
+  const result = { css: out, dbgHeads: '' }
+  fontCssCache.set(key, result) // キャッシュヒットも miss と同じ形で返す
+  return result
 }
 
 export async function onRequestPost(context) {
@@ -52,13 +53,18 @@ export async function onRequestPost(context) {
     families.push('Noto Serif SC')
   }
   const { css: fonts, dbgHeads } = await fontCss(origin, families)
+  // data-URI フォントはネットワーク待機に数えられず、print がデコード完了を待たず
+  // フォールバック書体で出る競合がある。document.fonts.ready のマーカーを
+  // waitForSelector で待たせて確定させる。
+  const fontWait = `<script>document.fonts.ready.then(()=>{const d=document.createElement('div');d.id='fonts-ready';document.body.appendChild(d)})</script>`
   const html = `<!doctype html><html><head><meta charset="utf-8">${iconfont}${linkTag}<style>${fonts}${
     style || ''
-  }</style></head><body>${content}</body></html>`
+  }</style></head><body>${content}${fontWait}</body></html>`
   const endpoint = isPdf ? 'pdf' : 'screenshot'
   const body = isPdf
     ? {
         html,
+        waitForSelector: '#fonts-ready',
         pdfOptions: {
           // width/height は CF BR では無視され Letter に落ちるため format 指定が必須（小文字のみ受理）
           format: 'a4',
@@ -69,6 +75,7 @@ export async function onRequestPost(context) {
       }
     : {
         html,
+        waitForSelector: '#fonts-ready',
         screenshotOptions: { fullPage: false },
         viewport: { width: 794, height: 1123 },
         gotoOptions: { waitUntil: 'networkidle0' }
