@@ -11,7 +11,10 @@ export const onRequestOptions = context => json(context.request, {})
 let fontCssCache = null
 async function fontCss(origin) {
   if (fontCssCache) return fontCssCache
-  const css = await (await fetch(`${origin}/fonts/resume-fonts.css`)).text()
+  const css =
+    (await (await fetch(`${origin}/fonts/resume-fonts.css`)).text()) +
+    '\n' +
+    (await (await fetch(`${origin}/fonts/iconfont.css`)).text())
   const urls = [...css.matchAll(/url\('([^']+)'\)/g)].map(m => m[1])
   const bufs = await Promise.all(
     urls.map(async u => new Uint8Array(await (await fetch(new URL(u, origin))).arrayBuffer()))
@@ -37,22 +40,23 @@ export async function onRequestPost(context) {
     return json(request, { msg: 'export service unavailable' }, 503)
   }
   const linkTag = link && link !== 'none' ? `<link rel="stylesheet" href="${link}">` : ''
-  const iconfont = `<link rel="stylesheet" href="${
-    new URL(request.url).origin
-  }/fonts/iconfont.css">`
+  // iconfont.css の @font-face も外部 woff2 参照のためブラウザ側で取れない
+  // （.iconfont クラス规则自体は fontCss 経由で data-URI 化した @font-face が効く）
+  const iconfont = ''
   // .jufe の font-family が Noto Sans SC/Noto Serif SC/Nunito を指すため、
   // レンダ側にもフォントを届けないとフォールバック書体で折返し位置がずれる。
-  // googleapis は CF BR から到達不可。本站自ホストを公式推奨の addStyleTag で注入する
+  // googleapis は CF BR から到達不可。本站自ホストのフォントを data-URI 内联化して使う
   const origin = new URL(request.url).origin
-  const html = `<!doctype html><html><head><meta charset="utf-8">${iconfont}${linkTag}<style>${
+  // @font-face は <style> 内の data-URI でのみ BR に適用される実測あり（addStyleTag の大きな
+  // content は黙殺される）。サイト側 style と同じ <style> ブロックへ前置する。
+  const fonts = await fontCss(origin)
+  const html = `<!doctype html><html><head><meta charset="utf-8">${iconfont}${linkTag}<style>${fonts}${
     style || ''
   }</style></head><body>${content}</body></html>`
   const endpoint = isPdf ? 'pdf' : 'screenshot'
-  const fonts = await fontCss(origin)
   const body = isPdf
     ? {
         html,
-        addStyleTag: [{ content: fonts }],
         pdfOptions: {
           // width/height は CF BR では無視され Letter に落ちるため format 指定が必須（小文字のみ受理）
           format: 'a4',
@@ -63,7 +67,6 @@ export async function onRequestPost(context) {
       }
     : {
         html,
-        addStyleTag: [{ content: fonts }],
         screenshotOptions: { fullPage: false },
         viewport: { width: 794, height: 1123 },
         gotoOptions: { waitUntil: 'networkidle0' }

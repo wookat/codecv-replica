@@ -1,5 +1,11 @@
 /* 自托管简历字体 —— CF Browser Rendering 无法访问 fonts.googleapis.com，改从本站 origin 提供 */
 @font-face {
+  font-family: 'iconfont';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/fonts/iconfont.woff2') format('woff2');
+}
+@font-face {
   font-family: 'Noto Sans SC';
   font-style: normal;
   font-weight: 400;
