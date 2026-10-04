@@ -19,9 +19,16 @@ const sort = ref<'new' | 'hot'>('new')
 const batchLabel = (m: MianjingItem) => {
   const g = m.grade ? `${String(m.grade).slice(2)}届` : ''
   const b =
-    { qiuzhao: '秋招', chunzhao: '春招', shuqi: '暑期实习', richang: '日常实习', shezhao: '社招' }[
-      m.batch as string
-    ] ?? m.batch
+    {
+      qiuzhao: '秋招',
+      chunzhao: '春招',
+      shuxi: '暑期实习',
+      shuqi: '暑期实习',
+      'shuqi-shixi': '暑期实习',
+      'richang-shixi': '日常实习',
+      richang: '日常实习',
+      shezhao: '社招'
+    }[m.batch as string] ?? m.batch
   return `${g}${b}`
 }
 const batchKey = (m: MianjingItem) => `${m.batch}-${m.grade}`

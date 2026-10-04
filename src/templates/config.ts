@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import { TYPE_ORDER } from './order'
 
 const initialCVState: Map<string, string[]> = new Map()
 
@@ -46,12 +47,9 @@ for (const [path, curModule] of moduleEntries) {
   ])
 }
 
-const match = (module: SubModule) => {
-  // 数字前缀决定排序权重；生产期命名（如 agent_development）无前缀，按 0 处理保持插入序
-  const m = module.type.match(/^\d+/)
-  return m ? +m[0] : 0
-}
-templates.value.sort((a, b) => match(b) - match(a))
+// 「综合排序」与生产一致：index.json 数组序（非热度/数字前缀序）
+const ORDER = new Map(TYPE_ORDER.map((t, i) => [t, i]))
+templates.value.sort((a, b) => (ORDER.get(a.type) ?? 9999) - (ORDER.get(b.type) ?? 9999))
 
 export function getPrimaryBGColor(type: string) {
   return initialCVState.get(type)?.[1] ?? '#333'

@@ -9,14 +9,16 @@ const router = useRouter()
 const keyword = ref('')
 const tag = ref(String(route.query.tags || '全部'))
 
+// 生产「热门」行顺序固定为这 5 个（index.json 里热门组有 8 个，页面只展示一行）
+const HOT_ORDER = ['daxuesheng', 'shixisheng', 'yingjiesheng', 'qiuzhi', 'liuxue']
 const GROUPS: { label: string; icon: string; items: { slug: string; name: string }[] }[] = [
   {
     label: '热门',
     icon: '🔥',
-    items: TEMPLATE_CATEGORIES.filter(c => c.group === '热门').map(c => ({
-      slug: c.slug,
-      name: c.name
-    }))
+    items: HOT_ORDER.map(s => {
+      const c = TEMPLATE_CATEGORIES.find(x => x.slug === s)
+      return { slug: s, name: c?.name ?? s }
+    })
   },
   {
     label: '高校',
@@ -72,7 +74,11 @@ const TAG_TABS = [
   '电气',
   '英文',
   '外企',
+  'Java',
+  'Go',
   '大模型',
+  'Ai',
+  'Agent开发',
   '前端',
   '后端',
   '算法',
@@ -91,13 +97,16 @@ const TAG_TABS = [
   '云计算',
   '数据分析',
   '区块链',
-  '会计学'
+  '会计学',
+  '软件工程',
+  '翻译',
+  '市场营销'
 ]
 
 const tplTags = (t: any): string[] => (Array.isArray(t.tags) ? t.tags : [])
 
-const sort = ref<'综合排序' | '最新上架' | '最多下载'>('综合排序')
-const SORTS = ['综合排序', '最新上架', '最多下载'] as const
+const sort = ref<'综合排序' | '最新上传' | '最多下载'>('综合排序')
+const SORTS = ['综合排序', '最新上传', '最多下载'] as const
 
 const shown = computed(() => {
   let rows = templates.value
@@ -110,22 +119,25 @@ const shown = computed(() => {
   const kw = keyword.value.trim()
   if (kw) rows = rows.filter(r => r.name.includes(kw) || tplTags(r).some(x => x.includes(kw)))
   const sorted = [...rows]
-  // 综合排序=生产热度序；最新上架=配置插入序（新模板在前）；最多下载=hot 降序
+  // 综合排序=生产数组序（index.json 顺序，与线上一致）；最新上架=配置插入序；最多下载=hot 降序
   if (sort.value === '最多下载') sorted.sort((a, b) => +(b.hot || 0) - +(a.hot || 0))
-  else if (sort.value === '综合排序') sorted.sort((a, b) => +(b.hot || 0) - +(a.hot || 0))
   return sorted
 })
 
-// 生产 NEW 角标只出现在最近上架的一批：取 cv-* 序列尾部 12 套
+// 生产 NEW 角标 = 最近上架的一批（日期最新的 5 套：2026-09 批次）
 const newTypes = new Set(
-  templates.value
-    .filter(t => String(t.type).startsWith('cv-'))
-    .slice(-12)
+  [...templates.value]
+    .filter(t => t.date)
+    .sort((a, b) => String(b.date).localeCompare(String(a.date)))
+    .slice(0, 5)
     .map(t => t.type)
 )
 const isNew = (t: any) => newTypes.has(t.type)
 
 const tplSlug = (t: any) => t.type
+
+// 生产分类行默认单行收起，点右侧 › 展开
+const openGroups = ref<Record<string, boolean>>({})
 
 watch(tag, t => {
   router.replace({ query: t === '全部' ? {} : { tags: t } })
@@ -147,24 +159,39 @@ watch(
       <div class="cat-card">
         <div v-for="g in GROUPS" :key="g.label" class="cat-row">
           <div class="cat-label">{{ g.label }}</div>
-          <div class="cat-items">
+          <div class="cat-items" :class="{ open: openGroups[g.label] }">
             <router-link v-for="c in g.items" :key="c.slug" :to="`/${c.slug}`" class="cat-link">{{
               c.name
             }}</router-link>
           </div>
+          <button
+            class="cat-more"
+            type="button"
+            aria-label="展开"
+            @click="openGroups[g.label] = !openGroups[g.label]"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              :class="{ flip: openGroups[g.label] }"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
       </div>
       <div class="promo-col">
         <router-link to="/jobs" class="promo banner-jobs">
-          <img src="/prod-assets/offerstar-recruit.webp" alt="2027校招信息汇总" draggable="false" />
+          <img
+            src="/prod-assets/offerstar-recruit.webp"
+            alt="简历模板页面校招信息汇总"
+            draggable="false"
+          />
         </router-link>
         <router-link to="/mianjing" class="promo banner-mj">
-          <div class="bm">
-            <p class="bm-badge">面经广场</p>
-            <p class="bm-t">最高可得<b>终身会员</b></p>
-            <p class="bm-s">分享你的笔面经验 让更多人少走弯路</p>
-            <span class="bm-btn">立即查看</span>
-          </div>
+          <img src="/prod-assets/mj-banner.webp" alt="面经广告位" draggable="false" />
         </router-link>
       </div>
     </div>
@@ -178,6 +205,15 @@ watch(
 
     <!-- 模板区 -->
     <div class="tpl-card">
+      <div class="tpl-head">
+        <ul class="tag-tabs">
+          <li v-for="t in TAG_TABS" :key="t">
+            <button class="tag-tab" :class="{ checked: tag === t }" @click="tag = t">
+              {{ t }}
+            </button>
+          </li>
+        </ul>
+      </div>
       <div class="sort-row">
         <div class="sort-tabs">
           <span
@@ -189,17 +225,8 @@ watch(
             >{{ s }}</span
           >
         </div>
-      </div>
-      <div class="tpl-head">
-        <ul class="tag-tabs">
-          <li v-for="t in TAG_TABS" :key="t">
-            <button class="tag-tab" :class="{ checked: tag === t }" @click="tag = t">
-              {{ t }}
-            </button>
-          </li>
-        </ul>
         <div class="jl-search">
-          <input v-model="keyword" type="text" placeholder="搜索模板" />
+          <input v-model="keyword" type="text" placeholder="根据关键词搜索简历模板" />
           <button class="go" aria-label="搜索">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path
@@ -221,7 +248,14 @@ watch(
         >
           <div class="rc-top">
             <p class="use">{{ t.hot ?? 0 }}人使用过</p>
-            <sup v-if="isNew(t)" class="new-badge">NEW</sup>
+            <span v-if="(t.hot ?? 0) >= 1000" class="hot-badge">
+              <svg viewBox="0 0 1024 1024" fill="currentColor">
+                <path
+                  d="M326.3 981.3C261.2 850.5 295.5 775.3 346.9 706.6c54.8-78.5 68.5-153.7 68.5-153.7s44.5 52.4 27.4 137.4c75.4-81.8 89.1-212.6 78.8-261.7 171.3 114.5 246.7 366.3 147.4 549.5 527.7-287.8 130.2-716.2 61.7-762 24 49 27.4 130.8-20.6 170C631.3 98.3 436 42.7 436 42.7c24 147.2-82.2 307.4-185 428.4-3.4-58.9-6.8-98.1-41.1-157-6.8 108-92.5 193-116.5 300.9-30.8 147.2 24 251.8 232.9 366.3z"
+                />
+              </svg>
+              热门模板
+            </span>
           </div>
           <div class="rc-img">
             <div class="mask"><button class="use-btn">使用模板</button></div>
@@ -230,12 +264,13 @@ watch(
               :alt="`CodeCV简历在线简历制作工具 - ${t.name}简历模板`"
               loading="lazy"
             />
+            <sup v-if="isNew(t)" class="new-badge">new</sup>
           </div>
           <div v-if="tplTags(t).length" class="rc-tags">
             <span v-for="x in tplTags(t).slice(0, 4)" :key="x" class="rc-tag">{{ x }}</span>
           </div>
           <div class="rc-bottom">
-            <span class="rc-name">{{ t.name }}</span>
+            <span class="rc-name">{{ t.name }}简历</span>
           </div>
         </router-link>
         <el-empty v-if="!shown.length" description="暂无匹配模板" />
@@ -290,38 +325,11 @@ watch(
 }
 .banner-mj {
   width: 210px;
-  background: linear-gradient(135deg, #1f2937, #374151);
-  .bm {
-    padding: 18px 16px;
-    color: #fff;
-    .bm-badge {
-      display: inline-block;
-      font-size: 11px;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: rgba(255, 116, 73, 0.9);
-      margin: 0 0 10px;
-    }
-    .bm-t {
-      font-size: 17px;
-      font-weight: 800;
-      margin: 0 0 6px;
-      b {
-        color: #ffb25e;
-      }
-    }
-    .bm-s {
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.75);
-      margin: 0 0 14px;
-    }
-    .bm-btn {
-      display: inline-block;
-      padding: 6px 14px;
-      border-radius: 999px;
-      font-size: 13px;
-      background: linear-gradient(90deg, #ff7449, #ff9a44);
-    }
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 }
 @media (max-width: 1024px) {
@@ -335,6 +343,10 @@ watch(
 .sort-row {
   margin-top: 16px;
   padding: 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   .sort-tabs {
     display: flex;
     gap: 18px;
@@ -379,8 +391,32 @@ watch(
   flex-wrap: wrap;
   gap: 8px 24px;
   align-items: center;
-  max-height: 84px;
+  max-height: 24px;
   overflow: hidden;
+  &.open {
+    max-height: none;
+  }
+}
+.cat-more {
+  flex-shrink: 0;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: -2px -8px 0 0;
+  color: #9ca3af;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  &:hover {
+    color: var(--theme);
+  }
+  svg {
+    width: 16px;
+    height: 16px;
+    &.flip {
+      transform: rotate(90deg);
+    }
+  }
 }
 .cat-link {
   font-size: 14px;
@@ -538,14 +574,16 @@ watch(
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .new-badge {
-      background: #22c55e;
-      color: #fff;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 6px 0 6px 0;
-      line-height: 1;
+    .hot-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: #ef4444;
+      font-size: 12px;
+      svg {
+        width: 14px;
+        height: 14px;
+      }
     }
   }
   .rc-tags {
@@ -571,6 +609,18 @@ watch(
       border-radius: 6px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
       display: block;
+    }
+    .new-badge {
+      position: absolute;
+      top: -8px;
+      right: 10px;
+      background: #22c55e;
+      color: #fff;
+      font-size: 11px;
+      padding: 3px 7px;
+      border-radius: 0 0 6px 6px;
+      line-height: 1.2;
+      z-index: 2;
     }
     .mask {
       position: absolute;

@@ -39,12 +39,6 @@ const AI_CARDS = [
     icon: '✍🏻',
     title: '简历生成',
     desc: '让AI帮您撰写精美简历，通过强大的GPT生成，突出优势，脱颖而出！'
-  },
-  {
-    icon: '✌🏻',
-    title: '支持多文件导出',
-    desc: '除了 PDF 格式，我们还支持 Markdown、PNG格式的文件导出，基本涵盖大部分的使用场景',
-    badges: ['.PDF', '.MD', '.PNG']
   }
 ]
 
@@ -144,21 +138,38 @@ const COMMENTS = [
       <p class="sub">
         简历内容不够丰富不知道如何下手？自己翻译简历觉得很困难？没关系，找 AI 这些都能解决～
       </p>
-      <ul class="ai-grid">
-        <li v-for="c in AI_CARDS" :key="c.title" class="ai-card">
-          <p class="ai-title">
-            <span>{{ c.icon }}</span> {{ c.title }}
-          </p>
-          <p class="ai-desc">{{ c.desc }}</p>
-          <div v-if="c.badges" class="ai-badges">
-            <span v-for="b in c.badges" :key="b">{{ b }}</span>
-          </div>
-        </li>
-      </ul>
-      <p class="ai-foot">
-        🚀 我们推出了多种导出方式，无论是制作图片还是 PDF ，您只需编写简单的 MD 文本或者 Word
-        ，其他的我们都助您轻松生成！快来尝试吧！✨
+      <div class="ai-body">
+        <img src="/prod-assets/chat.svg" class="ai-illust" alt="AI小助手" />
+        <ul class="ai-grid">
+          <li v-for="(c, i) in AI_CARDS" :key="c.title" class="ai-card" :class="{ off: i === 1 }">
+            <p class="ai-title">
+              <span>{{ c.icon }}</span> {{ c.title }}
+            </p>
+            <p class="ai-desc">{{ c.desc }}</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 支持多文件导出 -->
+    <section class="sec ext noto-sans-sc">
+      <h2>✌🏻 支持多文件导出</h2>
+      <p class="sub">
+        除了 PDF 格式，我们还支持 Markdown、PNG格式的文件导出，基本涵盖大部分的使用场景
       </p>
+      <div class="ext-body">
+        <img src="/prod-assets/ext.svg" class="ext-illust" alt="支持多文件导出" />
+        <div class="ext-labels">
+          <span class="pdf">.PDF</span>
+          <span class="md">.MD</span>
+          <span class="png">.PNG</span>
+        </div>
+        <p class="ext-desc">
+          🚀 我们推出了多种导出方式，无论是制作图片还是 <b class="c-pdf">PDF</b> ，您只需编写简单的
+          <b class="c-md">MD</b> 文本或者
+          <b class="c-word">Word</b> ，其他的我们都助您轻松生成！快来尝试吧！✨
+        </p>
+      </div>
     </section>
 
     <!-- 好评如潮 -->
@@ -349,54 +360,106 @@ const COMMENTS = [
     color: var(--theme);
   }
 }
+.ai-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  @media (min-width: 768px) {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+.ai-illust {
+  width: 50%;
+  min-width: 300px;
+  margin-right: 20px;
+  user-select: none;
+  @media (max-width: 767px) {
+    width: 100%;
+    margin-right: 0;
+  }
+}
 .ai-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   list-style: none;
   padding: 0;
   margin: 0;
   text-align: left;
-  @media (max-width: 640px) {
-    grid-template-columns: 1fr;
-  }
 }
 .ai-card {
   background: var(--background);
   border-radius: 14px;
-  padding: 26px 28px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  padding: 20px;
+  max-width: 300px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  &.off {
+    @media (min-width: 768px) {
+      transform: translateX(-100px);
+    }
+  }
   .ai-title {
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 700;
-    margin: 0 0 10px;
+    margin: 0 0 12px;
   }
   .ai-desc {
     font-size: 14px;
-    line-height: 1.8;
+    line-height: 1.6;
     color: #6b7280;
     margin: 0;
   }
-  .ai-badges {
-    display: flex;
-    gap: 8px;
-    margin-top: 14px;
-    span {
-      padding: 3px 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--theme);
-      background: rgba(255, 116, 73, 0.1);
-    }
+}
+.ext-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 0;
+  @media (min-width: 768px) {
+    flex-direction: row;
+    justify-content: space-around;
   }
 }
-.ai-foot {
-  margin: 30px auto 0;
-  max-width: 760px;
-  font-size: 14px;
-  color: #6b7280;
-  line-height: 1.9;
+.ext-illust {
+  max-width: 300px;
+  user-select: none;
+}
+.ext-labels {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  font-size: 30px;
+  font-weight: 700;
+  .pdf {
+    color: #e92423;
+  }
+  .md {
+    color: #518bf8;
+  }
+  .png {
+    color: #03c782;
+  }
+}
+.ext-desc {
+  max-width: 300px;
+  font-size: 15px;
+  line-height: 2.4;
+  color: var(--font-color);
+  b {
+    font-weight: 700;
+  }
+  .c-pdf {
+    color: #e92423;
+  }
+  .c-md {
+    color: var(--theme);
+  }
+  .c-word {
+    color: #518bf8;
+  }
 }
 .cm-grid {
   display: grid;

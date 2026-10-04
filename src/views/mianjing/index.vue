@@ -27,9 +27,14 @@ const batchOptions = ['秋招', '春招', '暑期实习', '日常实习', '社�
 const batchLabel = (m: MianjingItem) => {
   const g = m.grade ? `${String(m.grade).slice(2)}届` : ''
   const b =
-    { qiuzhao: '秋招', chunzhao: '春招', shuqi: '暑期实习', richang: '日常实习', shezhao: '社招' }[
-      m.batch as string
-    ] ?? m.batch
+    {
+      qiuzhao: '秋招',
+      chunzhao: '春招',
+      shuxi: '暑期实习',
+      'shuqi-shixi': '暑期实习',
+      'richang-shixi': '日常实习',
+      shezhao: '社招'
+    }[m.batch as string] ?? m.batch
   return `${g}${b}`
 }
 
@@ -60,7 +65,7 @@ async function load() {
 }
 
 const hotList = computed(() =>
-  [...list.value].sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0)).slice(0, 8)
+  [...list.value].sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0)).slice(0, 5)
 )
 const shown = computed(() =>
   sort.value === 'hot'
@@ -316,22 +321,6 @@ onMounted(async () => {
                   <path d="M12 6v6h4" /></svg
                 >{{ fmtTime(m.publishTime) }}</span
               >
-              <span class="f-ic"
-                ><svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M13 5h8" />
-                  <path d="M13 12h8" />
-                  <path d="M13 19h8" />
-                  <path d="m3 17 2 2 4-4" />
-                  <path d="m3 7 2 2 4-4" /></svg
-                >{{ m.questionCount ?? '—' }} 题</span
-              >
               <span class="f-ic grow"></span>
               <span class="f-ic"
                 ><svg
@@ -347,6 +336,32 @@ onMounted(async () => {
                   />
                   <circle cx="12" cy="12" r="3" /></svg
                 >{{ m.viewCount ?? 0 }}</span
+              >
+              <span v-if="m.likeCount" class="f-ic"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M7 10v12M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88"
+                  /></svg
+                >{{ m.likeCount }}</span
+              >
+              <span v-if="m.commentCount" class="f-ic"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" /></svg
+                >{{ m.commentCount }}</span
               >
             </div>
           </router-link>
@@ -391,6 +406,13 @@ onMounted(async () => {
               </router-link>
             </li>
           </ul>
+        </div>
+        <div class="aside-card share-card">
+          <strong class="aside-title">分享你的面经</strong>
+          <p class="sc-line">记录真实面试问题与流程，帮下一届少走弯路</p>
+          <p class="sc-line">同一家公司可按轮次（一面/二面/HR面）拆分多篇</p>
+          <p class="sc-line">支持关联你的投递记录，把面试进程串成一条线</p>
+          <router-link to="/mianjing/write" class="mj-btn sc-btn">立即投稿</router-link>
         </div>
       </aside>
     </div>

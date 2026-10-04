@@ -20,6 +20,9 @@ const index = JSON.parse(readFileSync(resolve(SEED, 'index.json'), 'utf8'))
 // 分类页卡片展示的生产 createTime（YYYY-MM-DD）
 const CTIME_PATH = '/home/ubuntu/codecv-replica-data/seeds/template-ctime.json'
 const ctime = existsSync(CTIME_PATH) ? JSON.parse(readFileSync(CTIME_PATH, 'utf8')) : {}
+// 生产卡片展示名（基准名，不带“简历”后缀；从页面 HTML 反解）
+const NAMES_PATH = '/home/ubuntu/codecv-replica-data/seeds/template-names.json'
+const names = existsSync(NAMES_PATH) ? JSON.parse(readFileSync(NAMES_PATH, 'utf8')) : {}
 const EMAIL_RE = /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g
 
 const localize = (md, slug) =>
@@ -32,11 +35,13 @@ const localize = (md, slug) =>
     .replace(/[\u200B\uFEFF]/g, '')
 
 let done = 0
+const typeOrder = []
 for (const entry of index) {
   const slug = entry.slug
   const raw = JSON.parse(readFileSync(resolve(SEED, 'raw', `${slug}.json`), 'utf8'))
   const type = raw.type
   if (!type) throw new Error(`${slug} 缺 type`)
+  typeOrder.push(type)
   const skinPath = resolve(SKINS, `${type}.css.txt`)
   if (!existsSync(skinPath)) throw new Error(`缺皮肤：${type}`)
 
@@ -45,7 +50,7 @@ for (const entry of index) {
   mkdirSync(dir, { recursive: true })
 
   const mod = {
-    name: entry.name,
+    name: names[type] || entry.name,
     font: raw.font || '',
     lineHeight: Number(raw.lineHeight || 25),
     content: localize(raw.content.trim(), slug),
@@ -83,4 +88,9 @@ for (const entry of index) {
   writeFileSync(resolve(dir, 'style.scss'), readFileSync(skinPath, 'utf8'))
   done++
 }
+// 生产「综合排序」= index.json 数组序；生成静态顺序表供 config.ts 排序
+writeFileSync(
+  resolve(root, 'src/templates/order.ts'),
+  `// 由 scripts/gen-templates.mjs 生成——勿手改（生产模板中心综合排序序）\nexport const TYPE_ORDER: string[] = [\n${typeOrder.map(t => `  '${t}'`).join(',\n')}\n]\n`
+)
 console.log(`生成 ${done} 套模板模块 → src/templates/modules/<type>/`)

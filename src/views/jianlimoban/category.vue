@@ -238,18 +238,36 @@ const shown = computed(() => {
             class="resume-card"
           >
             <div class="rc-img">
-              <span v-if="(t.hot ?? 0) >= 1000" class="hot-badge">热门</span>
-              <div class="mask"><button class="use-btn">使用模板</button></div>
+              <span v-if="(t.hot ?? 0) >= 1000" class="hot-badge">
+                <svg viewBox="0 0 1024 1024" fill="currentColor" aria-hidden="true">
+                  <path
+                    d="M326.3 981.3C261.2 850.5 295.5 775.3 346.9 706.6c54.8-78.5 68.5-153.7 68.5-153.7s44.5 52.4 27.4 137.4c75.4-81.8 89.1-212.6 78.8-261.7 171.3 114.5 246.7 366.3 147.4 549.5 527.7-287.8 130.2-716.2 61.7-762 24 49 27.4 130.8-20.6 170C631.3 98.3 436 42.7 436 42.7c24 147.2-82.2 307.4-185 428.4-3.4-58.9-6.8-98.1-41.1-157-6.8 108-92.5 193-116.5 300.9-30.8 147.2 24 251.8 232.9 366.3z"
+                  />
+                </svg>
+                热门
+              </span>
+              <div class="mask"><span class="use-btn">使用模板</span></div>
               <img :src="t.img" :alt="`${t.name}简历模板`" loading="lazy" />
             </div>
-            <span class="rc-name">{{ t.name }}简历模板</span>
-            <div class="rc-info">
-              <div class="rc-tags">
-                <span v-for="x in (t.tags ?? []).slice(0, 3)" :key="x">{{ x }}</span>
-              </div>
-              <p class="rc-meta">
-                {{ t.hot ?? 0 }}人使用<template v-if="t.date"> · {{ t.date }}</template>
-              </p>
+            <h3 class="rc-name">{{ t.name }}简历模板</h3>
+            <p v-if="t.description" class="rc-desc">{{ t.description }}</p>
+            <div v-if="(t.tags ?? []).length" class="rc-tags">
+              <span v-for="x in (t.tags ?? []).slice(0, 4)" :key="x">{{ x }}</span>
+            </div>
+            <div class="rc-meta">
+              <span class="rc-users">
+                <svg viewBox="0 0 1024 1024" fill="currentColor" aria-hidden="true">
+                  <path
+                    d="M519.8 574.1c115.7 0 209.5-97.3 209.5-217.3S635.4 139.6 519.8 139.6 310.3 236.9 310.3 356.8s93.8 217.3 209.5 217.3z"
+                  />
+                  <path
+                    d="M519.8 170.7c96.1 0 174.3 81.4 174.3 181.4s-78.2 181.4-174.3 181.4-174.4-81.4-174.4-181.4 78.3-181.4 174.4-181.4z"
+                    fill="#f8d02d"
+                  />
+                </svg>
+                {{ t.hot ?? 0 }}人使用
+              </span>
+              <span v-if="t.date" class="rc-date">{{ t.date }}</span>
             </div>
           </router-link>
           <el-empty
@@ -443,15 +461,22 @@ const shown = computed(() => {
     overflow: hidden;
     .hot-badge {
       position: absolute;
-      top: 0;
-      left: 0;
+      top: 8px;
+      left: 8px;
       z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
       background: linear-gradient(90deg, #ff7449, #ff9a44);
       color: #fff;
-      font-size: 10px;
-      font-weight: 600;
-      padding: 3px 7px;
-      border-radius: 6px 0 6px 0;
+      font-size: 12px;
+      padding: 2px 8px 2px 6px;
+      border-radius: 999px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+      svg {
+        width: 14px;
+        height: 14px;
+      }
     }
     img {
       width: 100%;
@@ -471,11 +496,12 @@ const shown = computed(() => {
     }
     .use-btn {
       border: none;
-      background: var(--theme);
+      background: linear-gradient(90deg, #ff7449, #ff9a44);
       color: #fff;
       font-size: 14px;
-      border-radius: 6px;
-      padding: 8px 14px;
+      border-radius: 999px;
+      padding: 8px 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       cursor: pointer;
     }
     &:hover .mask {
@@ -484,35 +510,61 @@ const shown = computed(() => {
   }
   .rc-name {
     display: block;
-    margin-top: 6px;
-    font-size: 13px;
+    margin: 8px 0 0;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .rc-info {
+  .rc-desc {
+    margin: 4px 0 0;
+    font-size: 12px;
+    line-height: 20px;
+    color: #6b7280;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .rc-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 6px;
+    max-height: 20px;
+    overflow: hidden;
+    span {
+      font-size: 12px;
+      line-height: 20px;
+      color: #6b7280;
+      background: rgba(0, 0, 0, 0.04);
+      border-radius: 4px;
+      padding: 0 4px;
+      white-space: nowrap;
+    }
+  }
+  .rc-meta {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-top: 6px;
-    .rc-tags {
-      display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: #9ca3af;
+    .rc-users {
+      display: inline-flex;
+      align-items: center;
       gap: 4px;
-      overflow: hidden;
-      span {
-        font-size: 11px;
-        color: #6b7280;
-        border: 1px solid rgba(0, 0, 0, 0.08);
-        border-radius: 4px;
-        padding: 1px 5px;
-        white-space: nowrap;
+      white-space: nowrap;
+      svg {
+        width: 14px;
+        height: 14px;
       }
     }
-    .rc-meta {
+    .rc-date {
       flex-shrink: 0;
-      font-size: 11px;
-      color: #9ca3af;
-      margin: 0;
     }
   }
   &:hover .rc-name {

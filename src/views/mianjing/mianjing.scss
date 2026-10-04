@@ -667,3 +667,23 @@
     z-index: 30;
   }
 }
+
+.share-card {
+  margin-top: 16px;
+  .sc-line {
+    font-size: 13px;
+    line-height: 1.9;
+    color: var(--font-color);
+    opacity: 0.75;
+    margin: 0 0 4px;
+  }
+  .sc-btn {
+    display: block;
+    margin-top: 14px;
+    text-align: center;
+    padding: 12px;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+}
