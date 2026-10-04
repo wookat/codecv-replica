@@ -5,28 +5,19 @@ import { json } from './_lib.js'
 
 export const onRequestOptions = context => json(context.request, {})
 
-// フォントを本站 origin から self-fetch し base64 data-URI 化して <style> に内包する。
-// html パラメータ経路では外部フォント取得が print に間に合わない（WenQuanYi フォールバック観測）
-// ため、フェッチ不要の inline 化で確実に適用させる。
-// BR は ~5MB 超のインライン <style> を黙殺する実測があるため、テンプレが参照しない
-// ファミリー（Serif 等）は送らない：ほぼ全テンプレは Sans のみで ~3.3MB に収まる。
-const fontCssCache = new Map()
-async function fontCss(origin, families) {
-  const key = families.join(',')
-  if (fontCssCache.has(key)) return fontCssCache.get(key)
-  // 構築時に data-URI 焼き込み済みの export-fonts.css（実行時 btoa を排除）
-  const css = await (await fetch(`${origin}/fonts/export-fonts.css`)).text()
-  // @font-face ブロックを family 名で選別
-  const blocks = css.match(/@font-face\s*{[^}]+}|(?!@font-face)[^@]+/g) || []
-  const kept = blocks.filter(b => {
-    const m = b.match(/font-family:\s*'([^']+)'/)
-    if (!m) return true // クラス規則等非 @font-face は全て残す
-    return families.includes(m[1])
-  })
-  const out = kept.join('\n')
-  const result = { css: out, dbgHeads: '' }
-  fontCssCache.set(key, result) // キャッシュヒットも miss と同じ形で返す
-  return result
+// フォント提供方式の変遷（実測ベース）:
+// 1. 外部 woff2 URL 参照 —— BR の Chromium がデコードまで待たず適用されない（×）
+// 2. addStyleTag(url|content) —— CF BR が黙殺（×）
+// 3. data-URI @font-face の inline <style> —— html が小さいと適用されず、
+//    ~8MB 超に膨らむと適用される（ブラックボックス的なサイズ閾値が存在、×）
+// 4. data-URI @font-face を face 別ファイルに切り出して <link> で読ませる（採用）
+//    本站 origin の CSS フェッチは BR から到達可能（skin css が適用される実績）。
+const FACE_FILES = {
+  'Noto Sans SC': ['face-noto-sans-sc-400.css', 'face-noto-sans-sc-700.css'],
+  'Noto Serif SC': ['face-noto-serif-sc-400.css', 'face-noto-serif-sc-700.css'],
+  Nunito: ['face-nunito-400.css', 'face-nunito-700.css'],
+  // @font-face 本体と ~200 個の .icon-* クラス規則の2ファイル
+  iconfont: ['face-iconfont-400.css', 'face-iconfont.css']
 }
 
 export async function onRequestPost(context) {
@@ -37,29 +28,26 @@ export async function onRequestPost(context) {
     return json(request, { msg: 'export service unavailable' }, 503)
   }
   const linkTag = link && link !== 'none' ? `<link rel="stylesheet" href="${link}">` : ''
-  // iconfont.css の @font-face も外部 woff2 参照のためブラウザ側で取れない
-  // （.iconfont クラス规则自体は fontCss 経由で data-URI 化した @font-face が効く）
-  const iconfont = ''
+  const origin = new URL(request.url).origin
   // .jufe の font-family が Noto Sans SC/Noto Serif SC/Nunito を指すため、
   // レンダ側にもフォントを届けないとフォールバック書体で折返し位置がずれる。
-  // googleapis は CF BR から到達不可。本站自ホストのフォントを data-URI 内联化して使う
-  const origin = new URL(request.url).origin
-  // @font-face は <style> 内の data-URI でのみ BR に適用される実測あり（addStyleTag の大きな
-  // content は黙殺される）。サイト側 style と同じ <style> ブロックへ前置する。
-  // 参照されるファミリーだけ内联する（iconfont/Nunito は小さいので常時同梱）
+  // googleapis は CF BR から到達不可のため本站自ホストの css を link で渡す。
   const scan = `${content || ''}${style || ''}${link || ''}`.toLowerCase()
   const families = ['Noto Sans SC', 'iconfont', 'Nunito']
   if (scan.includes('noto-serif-sc') || scan.includes('noto serif sc')) {
     families.push('Noto Serif SC')
   }
-  const { css: fonts, dbgHeads } = await fontCss(origin, families)
-  // data-URI フォントはネットワーク待機に数えられず、print がデコード完了を待たず
-  // フォールバック書体で出る競合がある。document.fonts.ready のマーカーを
-  // waitForSelector で待たせて確定させる。
+  const fontLinks = families
+    .flatMap(f =>
+      (FACE_FILES[f] || []).map(fn => `<link rel="stylesheet" href="${origin}/fonts/${fn}">`)
+    )
+    .join('')
+  // フォントのフェッチ/デコード完了を確実に待つため、document.fonts.ready で
+  // マーカー要素を立てて waitForSelector で同期する。
   const fontWait = `<script>document.fonts.ready.then(()=>{const d=document.createElement('div');d.id='fonts-ready';document.body.appendChild(d)})</script>`
-  const html = `<!doctype html><html><head><meta charset="utf-8">${iconfont}${linkTag}<style>${fonts}${
+  const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}${fontLinks}<style>${
     style || ''
-  }${fonts}</style></head><body>${content}${fontWait}</body></html>`
+  }</style></head><body>${content}${fontWait}</body></html>`
   const endpoint = isPdf ? 'pdf' : 'screenshot'
   const body = isPdf
     ? {
@@ -94,18 +82,7 @@ export async function onRequestPost(context) {
     )
     if (!r.ok) return json(request, { msg: `browser-rendering ${r.status}` }, 503)
     const buf = new Uint8Array(await r.arrayBuffer())
-    return json(
-      request,
-      Object.assign(
-        {
-          fontsLen: fonts.length,
-          dbgHeads,
-          dbgFontsHead: fonts.slice(0, 80),
-          dbgStyleHead: (html.match(/<style>([\s\S]{0,80})/) || [])[1] || 'NO_STYLE'
-        },
-        isPdf ? { pdf: { data: [...buf] } } : { picture: { data: [...buf] } }
-      )
-    )
+    return json(request, isPdf ? { pdf: { data: [...buf] } } : { picture: { data: [...buf] } })
   } catch (e) {
     return json(request, { msg: String(e?.message || e) }, 503)
   }
