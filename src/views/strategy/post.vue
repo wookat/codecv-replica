@@ -2,12 +2,13 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { postDetail } from '@/api/modules/site'
-import { renderArticle } from '@/utils/article'
+import { extractToc, renderArticle, TocItem } from '@/utils/article'
 import { templates } from '@/templates/config'
 
 const route = useRoute()
 const post = ref<any>(null)
 const html = ref('')
+const toc = ref<TocItem[]>([])
 const loading = ref(true)
 
 // 与生产一致的右侧推荐模板位（生产实测顺序）
@@ -17,6 +18,10 @@ const recommends = computed(() =>
     .map(t => templates.value.find(x => x.type === t))
     .filter((x): x is NonNullable<typeof x> => Boolean(x))
 )
+
+function scrollTo(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+}
 
 const fmt = (ts?: number) => {
   if (!ts) return ''
@@ -31,7 +36,10 @@ onMounted(async () => {
   try {
     const res = await postDetail(route.params.id as string)
     post.value = res?.data ?? null
-    if (post.value?.contentMd) html.value = renderArticle(post.value.contentMd)
+    if (post.value?.contentMd) {
+      html.value = renderArticle(post.value.contentMd)
+      toc.value = extractToc(post.value.contentMd)
+    }
   } catch (e) {
     console.error('获取文章失败:', e)
   } finally {
@@ -74,6 +82,17 @@ onMounted(async () => {
         <el-empty v-else-if="!loading" description="文章不存在或已删除" />
       </div>
       <aside class="pd-aside">
+        <div v-if="toc.length" class="rec-card toc-card">
+          <strong class="rec-title">目录</strong>
+          <a
+            v-for="t in toc"
+            :key="t.id"
+            class="toc-item"
+            :class="{ h3: t.level === 3 }"
+            @click="scrollTo(t.id)"
+            >{{ t.text }}</a
+          >
+        </div>
         <div class="rec-card">
           <strong class="rec-title">
             <svg
@@ -129,6 +148,29 @@ onMounted(async () => {
   display: none;
   @media (min-width: 1024px) {
     display: block;
+  }
+}
+.toc-card {
+  margin-bottom: 16px;
+  .toc-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: transparent;
+    padding: 5px 8px;
+    font-size: 13px;
+    color: var(--font-color);
+    opacity: 0.65;
+    cursor: pointer;
+    border-radius: 8px;
+    &.h3 {
+      padding-left: 24px;
+    }
+    &:hover {
+      color: var(--theme);
+      opacity: 1;
+    }
   }
 }
 .rec-card {

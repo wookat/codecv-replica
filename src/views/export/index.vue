@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { convertDOM } from '@/utils/moduleCombine'
 import { applyTemplateTheme, importCSS } from '@/utils'
+import { getCurrentTypeContent } from '@/store/modules/editor'
 
 const route = useRoute()
 const router = useRouter()
@@ -21,6 +22,8 @@ onMounted(() => {
   } catch {
     /* ignore */
   }
+  // 未编辑过的模板：回落到模板内置内容，保证打印/导出永远有简历
+  if (!md) md = getCurrentTypeContent(id)
   if (md) html.value = convertDOM(md).innerHTML
 })
 

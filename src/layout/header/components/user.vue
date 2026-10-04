@@ -2,12 +2,14 @@
 import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import ThemeToggle from '@/components/themeToggle.vue'
+import AccountSettings from '@/components/AccountSettings.vue'
 import useUserStore from '@/store/modules/user'
 import { currentUser, logoutLocal, type LocalUser } from '@/utils/auth'
 
 const router = useRouter()
 const store = useUserStore()
 const user = ref<LocalUser | null>(null)
+const settings = ref(false)
 onMounted(() => {
   user.value = currentUser()
 })
@@ -55,11 +57,13 @@ function logout() {
       <template #dropdown>
         <el-dropdown-menu>
           <el-dropdown-item @click="router.push('/profile')">我的简历</el-dropdown-item>
+          <el-dropdown-item @click="settings = true">账号设置</el-dropdown-item>
           <el-dropdown-item @click="logout">退出登录</el-dropdown-item>
         </el-dropdown-menu>
       </template>
     </el-dropdown>
     <button v-else class="login-btn" @click="router.push('/login')">登录 / 注册</button>
+    <AccountSettings v-model="settings" />
   </div>
 </template>
 

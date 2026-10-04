@@ -7,6 +7,7 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    AccountSettings: typeof import('./src/components/AccountSettings.vue')['default']
     AsideRail: typeof import('./src/components/AsideRail.vue')['default']
     BrowseHistory: typeof import('./src/components/browse-history/browseHistory.vue')['default']
     Chat: typeof import('./src/components/chat-room/chat.vue')['default']
@@ -38,6 +39,8 @@ declare module '@vue/runtime-core' {
     ElSwitch: typeof import('element-plus/es')['ElSwitch']
     ElTable: typeof import('element-plus/es')['ElTable']
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
+    ElTabPane: typeof import('element-plus/es')['ElTabPane']
+    ElTabs: typeof import('element-plus/es')['ElTabs']
     ElTimeline: typeof import('element-plus/es')['ElTimeline']
     ElTimelineItem: typeof import('element-plus/es')['ElTimelineItem']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
