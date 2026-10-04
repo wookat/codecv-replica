@@ -1,5 +1,6 @@
 import { markdownToHTML } from 'markdown-transform-html'
 import { getAvatarConfig } from '@/templates/config'
+import { getLocalStorage } from '@/common/localstorage'
 
 // 简历模块拆分 将每个子模块内容进行整合
 function moduleCombine(DOMStr: string) {
@@ -60,4 +61,23 @@ export function avatarOverlayHTML(type: string) {
     : `${location.origin}${av.url.startsWith('/') ? '' : '/'}${av.url}`
   const radius = av.type === 'circle' ? 'border-radius:50%;' : ''
   return `<img alt="个人头像" class="cv-avatar-overlay" src="${src}" style="position:absolute;top:${av.top}px;left:${av.left}px;z-index:3;${radius}">`
+}
+
+// 校徽覆盖层：用户上传的校徽图 绝对定位在纸面（位置持久化于 localStorage）
+export function badgeOverlayHTML(type: string) {
+  const raw = getLocalStorage(`badge_config-${type}`) as string | null
+  if (!raw) return ''
+  try {
+    const cfg = JSON.parse(raw) as { url: string; top: number; left: number }
+    const src = /^(https?:|data:|blob:)/.test(cfg.url)
+      ? cfg.url
+      : `${location.origin}${cfg.url.startsWith('/') ? '' : '/'}${cfg.url}`
+    return `<img alt="校徽" class="cv-badge-overlay" src="${src}" style="position:absolute;top:${cfg.top}px;left:${cfg.left}px;width:56px;z-index:3;">`
+  } catch {
+    return ''
+  }
+}
+
+export function allOverlaysHTML(type: string) {
+  return avatarOverlayHTML(type) + badgeOverlayHTML(type)
 }

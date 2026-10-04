@@ -14,11 +14,19 @@ import {
   usePrimaryColor,
   useAdjust,
   useFollowRoll,
+  useLineHeight,
+  useParaSpacing,
+  useFontSize,
+  useJustify,
+  useOnePage,
+  useBadge,
   restResumeContent
 } from './hook'
 import { oneDark } from '@codemirror/theme-one-dark'
 import { useThemeConfig } from '@/common/global'
 import { useResumeType } from '../../hook'
+import ProofreadDrawer from '../proofread/proofread.vue'
+import { ref } from 'vue'
 
 const emits = defineEmits(['upload-avatar', 'html-convert'])
 
@@ -30,7 +38,15 @@ const { setAvatar } = useAvatar(emits)
 const { primaryColor, setPrimaryColor } = usePrimaryBGColor(resumeType.value)
 const { adjustMargin, visible, confirmAdjustment, properties } = useAdjust(resumeType.value)
 const { followRoll, setFollowRoll } = useFollowRoll()
+const { lineHeight, applyLineHeight } = useLineHeight(resumeType.value)
+const { paraSpacing, applyParaSpacing } = useParaSpacing(resumeType.value)
+const { fontSize, fontSizeOptions, applyFontSize } = useFontSize(resumeType.value)
+const { justified, toggleJustify } = useJustify(resumeType.value)
+const { smartOnePage } = useOnePage(resumeType.value)
+const { setBadge } = useBadge(resumeType.value)
 const { isDark } = useThemeConfig()
+
+const proofreadVisible = ref(false)
 </script>
 
 <template>
@@ -48,18 +64,70 @@ const { isDark } = useThemeConfig()
       <el-tooltip content="调整元素上下边距" effect="light">
         <i class="iconfont icon-adjust operator-item" @click="adjustMargin"></i>
       </el-tooltip>
+      <el-tooltip content="编写CSS" effect="light">
+        <i class="operator-item iconfont icon-diy" @click="toggleDialog"></i
+      ></el-tooltip>
       <el-tooltip
         content="上传前请确保你想上传的位置在编辑器中存在 ![个人头像](...) 此占位符"
         effect="light"
       >
-        <label for="upload-avatar" class="operator-item card">
-          <i class="iconfont icon-zhengjian"></i>
-        </label>
+        <label for="upload-avatar" class="operator-item text-btn"> 证件照 </label>
       </el-tooltip>
       <input type="file" id="upload-avatar" accept=".png,.jpg,.jpeg" @change="setAvatar" />
-      <el-tooltip content="编写CSS" effect="light">
-        <i class="operator-item iconfont icon-diy" @click="toggleDialog"></i
-      ></el-tooltip>
+      <el-tooltip content="上传校徽（拖拽图中校徽可调整位置）" effect="light">
+        <label for="upload-badge" class="operator-item text-btn">校徽</label>
+      </el-tooltip>
+      <input type="file" id="upload-badge" accept=".png,.jpg,.jpeg" @change="setBadge" />
+      <el-tooltip content="自动缩小字号行距装进一页" effect="light">
+        <button class="operator-item text-btn" @click="smartOnePage">智能一页</button>
+      </el-tooltip>
+      <el-tooltip content="段落两端对齐" effect="light">
+        <button
+          class="operator-item text-btn"
+          :class="{ active: justified }"
+          @click="toggleJustify"
+        >
+          两端对齐
+        </button>
+      </el-tooltip>
+      <el-tooltip content="错别字检查" effect="light">
+        <button class="operator-item text-btn" @click="proofreadVisible = true">错别字检查</button>
+      </el-tooltip>
+
+      <el-input-number
+        class="operator-item num-step"
+        size="small"
+        v-model="lineHeight"
+        :min="18"
+        :max="60"
+        :step="2"
+        @change="(n: number | undefined) => n != null && applyLineHeight(n)"
+      />
+      <el-input-number
+        class="operator-item num-step"
+        size="small"
+        v-model="paraSpacing"
+        :min="0"
+        :max="60"
+        :step="2"
+        @change="(n: number | undefined) => n != null && applyParaSpacing(n)"
+      />
+      <el-select
+        v-model="fontSize"
+        class="operator-item size-select"
+        size="small"
+        @change="(n: number) => applyFontSize(n)"
+      >
+        <el-option v-for="o in fontSizeOptions" :key="o.value" :label="o.label" :value="o.value" />
+      </el-select>
+      <el-select v-model="font" class="operator-item font-select" @change="setFont" size="small">
+        <el-option
+          v-for="item in fontOptions"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value"
+        />
+      </el-select>
       <div class="operator-item font-color-picker">
         <el-color-picker @change="setColor" size="small" v-model="color" />
       </div>
@@ -85,25 +153,10 @@ const { isDark } = useThemeConfig()
           @change="setFollowRoll"
         />
       </el-tooltip>
-      <el-tooltip content="字体设置" effect="light">
-        <el-select
-          v-model="font"
-          class="operator-item font-select"
-          @change="setFont"
-          placement="bottom"
-          size="small"
-        >
-          <el-option
-            v-for="item in fontOptions"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          />
-        </el-select>
-      </el-tooltip>
     </div>
     <br />
   </div>
+  <ProofreadDrawer v-model="proofreadVisible" />
   <!-- 弹出框 -->
   <ToastModal v-if="cssDialog" :flag="cssDialog" @close="cssDialog = false" width="400px">
     <h4 class="mb-10">编写CSS样式让它作用在模板上</h4>
@@ -170,7 +223,9 @@ const { isDark } = useThemeConfig()
     display: flex;
     margin-top: 25px;
     justify-content: center;
-    align-items: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+    row-gap: 8px;
 
     .operator-item {
       margin-right: 14px;
@@ -181,9 +236,35 @@ const { isDark } = useThemeConfig()
     .main-color-picker {
       margin-right: 0;
     }
-    #upload-avatar {
+    #upload-avatar,
+    #upload-badge {
       width: 0;
       height: 0;
+    }
+    .text-btn {
+      color: #f8f8f8;
+      font-size: 14px;
+      cursor: pointer;
+      white-space: nowrap;
+      border: none;
+      background: transparent;
+      padding: 2px 4px;
+
+      &:hover {
+        opacity: 0.8;
+      }
+      &.active {
+        color: var(--theme);
+      }
+    }
+    .num-step {
+      width: 92px;
+    }
+    .size-select {
+      width: 78px;
+    }
+    .font-select {
+      width: 110px;
     }
 
     i.iconfont {

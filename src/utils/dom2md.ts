@@ -34,8 +34,8 @@ export function resumeDOMStruct2Markdown({
         ['ul', 'ol'].includes(<string>getTagName(<HTMLElement>node)) &&
         getTagName(<HTMLElement>parent) == 'li',
       children = node.childNodes
-    // 模板配置的头像覆盖层不属于文档内容，序列化回 md 时跳过
-    if (classList.contains('cv-avatar-overlay')) return ''
+    // 模板配置的头像/校徽覆盖层不属于文档内容，序列化回 md 时跳过
+    if (classList.contains('cv-avatar-overlay') || classList.contains('cv-badge-overlay')) return ''
     if (classList.contains('flex-layout')) {
       result += '::: start\n' // 如果是指定的类名，则添加起始语法到结果字符串中
     } else if (classList.contains('iconfont')) {

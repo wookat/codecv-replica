@@ -13,6 +13,10 @@ export const CUSTOM_CSS_STYLE = 'custom-css-style',
   AUTO_ONE_PAGE = 'auto-one-page',
   WHITE_SPACE = 'white-space',
   LINE_HEIGHT = 'Line_Height',
+  FONT_SIZE = 'font_size',
+  PARA_SPACING = 'para_spacing',
+  JUSTIFY_TEXT = 'justify_text',
+  BADGE_CONFIG = 'badge_config',
   A4_HEIGHT = 1123,
   SELF_HEIGHT = -1234
 
@@ -203,8 +207,206 @@ export function restResumeContent(resumeType: string) {
   localStorage.removeItem(`${AUTO_ONE_PAGE}-${resumeType}`)
   localStorage.removeItem(`${ADJUST_RESUME_MARGIN_TOP}-${resumeType}`)
   localStorage.removeItem(`${LINE_HEIGHT}-${resumeType}`)
+  localStorage.removeItem(`${FONT_SIZE}-${resumeType}`)
+  localStorage.removeItem(`${PARA_SPACING}-${resumeType}`)
+  localStorage.removeItem(`${JUSTIFY_TEXT}-${resumeType}`)
+  localStorage.removeItem(`${BADGE_CONFIG}-${resumeType}`)
   localStorage.removeItem(`markdown-content-${resumeType}`)
   location.reload()
+}
+
+function upsertPersistStyle(cacheKey: string, css: string) {
+  let styleDOM = query(cacheKey)
+  const isAppend = styleDOM
+  if (!styleDOM) {
+    styleDOM = createStyle()
+    styleDOM.setAttribute(cacheKey, 'true')
+  }
+  styleDOM.textContent = css
+  !isAppend && document.head.appendChild(styleDOM)
+  set(cacheKey, css)
+}
+
+function restorePersistStyle(cacheKey: string) {
+  const css = (get(cacheKey) as string) || ''
+  css && upsertPersistStyle(cacheKey, css)
+}
+
+function reSplit() {
+  const renderCV = queryRenderCV()
+  renderCV && splitPage(renderCV)
+}
+
+// 行距（px 步进，作用于纸面文本行高）
+export function useLineHeight(resumeType: string) {
+  const cacheKey = LINE_HEIGHT + '-' + resumeType
+  const match = ((get(cacheKey) as string) || '').match(/line-height:\s*([\d.]+)px/)
+  const lineHeight = ref(match ? Number(match[1]) : 30)
+
+  function apply(n: number) {
+    lineHeight.value = n
+    upsertPersistStyle(cacheKey, `.jufe * { line-height: ${n}px !important; }`)
+    reSplit()
+  }
+  onActivated(() => restorePersistStyle(cacheKey))
+  return { lineHeight, applyLineHeight: apply }
+}
+
+// 段距（px 步进，作用于段落/列表上下外边距）
+export function useParaSpacing(resumeType: string) {
+  const cacheKey = PARA_SPACING + '-' + resumeType
+  const match = ((get(cacheKey) as string) || '').match(/margin-top:\s*([\d.]+)px/)
+  const paraSpacing = ref(match ? Number(match[1]) : 10)
+
+  function apply(n: number) {
+    paraSpacing.value = n
+    upsertPersistStyle(
+      cacheKey,
+      `.jufe p, .jufe li, .jufe blockquote { margin-top: ${n}px !important; margin-bottom: ${n}px !important; }`
+    )
+    reSplit()
+  }
+  onActivated(() => restorePersistStyle(cacheKey))
+  return { paraSpacing, applyParaSpacing: apply }
+}
+
+// 字号（作用于纸面基准字号）
+export function useFontSize(resumeType: string) {
+  const cacheKey = FONT_SIZE + '-' + resumeType
+  const match = ((get(cacheKey) as string) || '').match(/font-size:\s*([\d.]+)px/)
+  const fontSize = ref(match ? Number(match[1]) : 15)
+  const fontSizeOptions = [13, 14, 15, 16, 17, 18, 20].map(v => ({
+    value: v,
+    label: v + 'px'
+  }))
+
+  function apply(n: number) {
+    fontSize.value = n
+    upsertPersistStyle(cacheKey, `.jufe { font-size: ${n}px !important; }`)
+    reSplit()
+  }
+  onActivated(() => restorePersistStyle(cacheKey))
+  return { fontSize, fontSizeOptions, applyFontSize: apply }
+}
+
+// 两端对齐
+export function useJustify(resumeType: string) {
+  const cacheKey = JUSTIFY_TEXT + '-' + resumeType
+  const justified = ref(Boolean(get(cacheKey)))
+
+  function toggleJustify() {
+    justified.value = !justified.value
+    if (justified.value) {
+      upsertPersistStyle(
+        cacheKey,
+        '.jufe p, .jufe li, .jufe blockquote { text-align: justify !important; }'
+      )
+    } else {
+      upsertPersistStyle(cacheKey, '')
+      set(cacheKey, '')
+      removeLocalStorage(cacheKey)
+    }
+  }
+  onActivated(() => restorePersistStyle(cacheKey))
+  return { justified, toggleJustify }
+}
+
+// 智能一页：逐级缩字号+行距直到装进一页
+export function useOnePage(resumeType: string) {
+  const cacheKey = AUTO_ONE_PAGE + '-' + resumeType
+
+  function applyShrink(baseSize: number) {
+    upsertPersistStyle(
+      cacheKey,
+      `.jufe { font-size: ${baseSize}px !important; } .jufe * { line-height: ${Math.round(
+        baseSize * 1.7
+      )}px !important; }`
+    )
+    reSplit()
+  }
+
+  function smartOnePage() {
+    const renderCV = queryRenderCV()
+    if (!renderCV) return
+    if (pageSize.value <= 1) return
+    const cur = parseFloat(getComputedStyle(renderCV).fontSize) || 15
+    for (let size = cur - 0.5; size >= 10; size -= 0.5) {
+      applyShrink(size)
+      if (pageSize.value <= 1) return
+    }
+  }
+  onActivated(() => restorePersistStyle(cacheKey))
+  return { smartOnePage }
+}
+
+// 校徽：上传图片叠加到头部区域 可拖拽定位
+export function useBadge(resumeType: string) {
+  const cacheKey = BADGE_CONFIG + '-' + resumeType
+
+  async function setBadge(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = function (e) {
+      set(cacheKey, JSON.stringify({ url: e.target?.result as string, top: 10, left: 10 }))
+      reSplit()
+      location.reload()
+    }
+  }
+
+  // 拖拽重定位：预览是 scale 渲染，位移要除以缩放系数
+  let dragBound = false
+  function bindDrag() {
+    if (dragBound) return
+    dragBound = true
+    let dragging: HTMLElement | null = null
+    let startX = 0,
+      startY = 0,
+      baseTop = 0,
+      baseLeft = 0
+    document.addEventListener('mousedown', e => {
+      const t = e.target as HTMLElement
+      if (!t.classList?.contains('cv-badge-overlay')) return
+      dragging = t
+      startX = e.clientX
+      startY = e.clientY
+      baseTop = parseFloat(t.style.top) || 0
+      baseLeft = parseFloat(t.style.left) || 0
+      e.preventDefault()
+    })
+    document.addEventListener('mousemove', e => {
+      if (!dragging) return
+      const scale = step.value / 100 || 1
+      const top = baseTop + (e.clientY - startY) / scale
+      const left = baseLeft + (e.clientX - startX) / scale
+      dragging.style.top = top + 'px'
+      dragging.style.left = left + 'px'
+      document.querySelectorAll('img.cv-badge-overlay').forEach(el => {
+        ;(el as HTMLElement).style.top = top + 'px'
+        ;(el as HTMLElement).style.left = left + 'px'
+      })
+    })
+    document.addEventListener('mouseup', e => {
+      if (!dragging) return
+      const scale = step.value / 100 || 1
+      const top = Math.round(baseTop + (e.clientY - startY) / scale)
+      const left = Math.round(baseLeft + (e.clientX - startX) / scale)
+      dragging = null
+      const raw = get(cacheKey) as string | null
+      if (!raw) return
+      try {
+        const cfg = JSON.parse(raw)
+        cfg.top = top
+        cfg.left = left
+        set(cacheKey, JSON.stringify(cfg))
+      } catch {
+        /* ignore */
+      }
+    })
+  }
+  onActivated(bindDrag)
+  return { setBadge }
 }
 
 // 调节元素边距

@@ -8,7 +8,7 @@ import { download, downloadOfBuffer, importCSS, isDev, queryDOM, useLoading } fr
 import { ensureEmptyPreWhiteSpace, splitPage } from './components/tabbar/hook'
 import useEditorStore from '@/store/modules/editor'
 import { resolveTemplateType } from '@/templates/config'
-import { avatarOverlayHTML, convertDOM } from '@/utils/moduleCombine'
+import { allOverlaysHTML, convertDOM } from '@/utils/moduleCombine'
 import { resumeExport } from '@/api/modules/resume'
 import {
   CUSTOM_CSS_STYLE,
@@ -17,7 +17,10 @@ import {
   MARKDOWN_FONT,
   ADJUST_RESUME_MARGIN_TOP,
   AUTO_ONE_PAGE,
-  LINE_HEIGHT
+  LINE_HEIGHT,
+  FONT_SIZE,
+  PARA_SPACING,
+  JUSTIFY_TEXT
 } from './components/tabbar/hook'
 
 export const get = getLocalStorage,
@@ -26,6 +29,9 @@ export const get = getLocalStorage,
     CUSTOM_MARKDOWN_PRIMARY_BG_COLOR,
     MARKDOWN_FONT,
     LINE_HEIGHT,
+    FONT_SIZE,
+    PARA_SPACING,
+    JUSTIFY_TEXT,
     ADJUST_RESUME_MARGIN_TOP, // priority 3 (数字越大 优先级越低)
     AUTO_ONE_PAGE, // priority 2
     CUSTOM_CSS_STYLE // priority 1
@@ -38,7 +44,7 @@ export function useRenderHTML(resumeType: Ref<string>) {
   onActivated(() => {
     importCSS(resumeType.value)
     renderDOM.value.innerHTML =
-      convertDOM(editorStore.MDContent).innerHTML + avatarOverlayHTML(resumeType.value)
+      convertDOM(editorStore.MDContent).innerHTML + allOverlaysHTML(resumeType.value)
     setTimeout(() => splitPage(renderDOM.value), 100)
   })
 
@@ -47,7 +53,7 @@ export function useRenderHTML(resumeType: Ref<string>) {
   watch(
     () => editorStore.MDContent,
     v => {
-      renderDOM.value.innerHTML = convertDOM(v).innerHTML + avatarOverlayHTML(resumeType.value)
+      renderDOM.value.innerHTML = convertDOM(v).innerHTML + allOverlaysHTML(resumeType.value)
       lazySplitPage()
     }
   )

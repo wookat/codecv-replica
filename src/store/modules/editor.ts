@@ -24,7 +24,11 @@ const useEditorStore = defineStore('editorStore', {
   state: () => ({
     MDContent: '',
     nativeContent: '',
-    writable: Boolean(getLocalStorage(WRITABLE)) || false
+    writable: Boolean(getLocalStorage(WRITABLE)) || false,
+    // 预览模式：隐藏左侧编辑器 只看纸面（对齐线上版三模式切换）
+    previewMode: false,
+    // 编辑历史栈 用于顶栏撤销按钮
+    history: [] as string[]
   }),
   actions: {
     // 初始化编辑器内容（默认为Markdown模式）
@@ -35,11 +39,23 @@ const useEditorStore = defineStore('editorStore', {
         : getCurrentTypeContent(resumeType)
     },
     setMDContent(nv: string, resumeType: string) {
+      if (nv !== this.MDContent) {
+        this.history.push(this.MDContent)
+        if (this.history.length > 30) this.history.shift()
+      }
       this.MDContent = nv
       // 处理之后的操作
       if (!nv) return
       setLocalStorage(`${MARKDOWN_CONTENT}-${resumeType}`, nv)
       cloudPush(resumeType, nv)
+    },
+    // 撤销到上一个内容快照
+    undo() {
+      const prev = this.history.pop()
+      return prev === undefined ? null : prev
+    },
+    setPreviewMode(v: boolean) {
+      this.previewMode = v
     },
     // 切换编辑模式
     setWritableMode(originHTML: HTMLElement) {
