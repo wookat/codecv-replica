@@ -89,7 +89,10 @@ export async function onRequestPost(context) {
     const buf = new Uint8Array(await r.arrayBuffer())
     return json(
       request,
-      Object.assign({ fontsLen: fonts.length, dbgHeads }, isPdf ? { pdf: { data: [...buf] } } : { picture: { data: [...buf] } })
+      Object.assign(
+        { fontsLen: fonts.length, dbgHeads },
+        isPdf ? { pdf: { data: [...buf] } } : { picture: { data: [...buf] } }
+      )
     )
   } catch (e) {
     return json(request, { msg: String(e?.message || e) }, 503)
