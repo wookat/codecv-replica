@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { convertDOM } from '@/utils/moduleCombine'
-import { importCSS } from '@/utils'
+import { applyTemplateTheme, importCSS } from '@/utils'
 
 const route = useRoute()
 const router = useRouter()
@@ -13,6 +13,7 @@ onMounted(() => {
   const id = route.params.id as string
   type.value = id
   importCSS(id)
+  applyTemplateTheme(id)
   let md = ''
   try {
     const raw = localStorage.getItem(`markdown-content-${id}`)

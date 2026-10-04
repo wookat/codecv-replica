@@ -67,7 +67,14 @@ export interface MianjingItem {
   commentCount?: number
   publishTime?: number
   companyLogo?: string
-  author?: { uid?: string; nickName?: string; avatar?: string; school?: string; major?: string }
+  author?: {
+    uid?: string
+    nickName?: string
+    avatar?: string
+    av?: number
+    school?: string
+    major?: string
+  }
   related?: { _id: string; title: string; viewCount?: number }[]
   [k: string]: unknown
 }

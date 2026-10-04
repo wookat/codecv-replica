@@ -2,7 +2,10 @@
 import { computed } from 'vue'
 import { templates } from '@/templates/config'
 
-// 生产页面通用右侧栏：校招 banner + 可选插槽卡片（如微信群 QR）+ 热度排行榜
+withDefaults(defineProps<{ jobsFirst?: boolean }>(), { jobsFirst: true })
+
+// 生产页面通用右侧栏：校招 banner + 可选插槽卡片（如微信群 QR）+ 热度排行榜；
+// jobsFirst=false 时 banner 排在插槽卡片与热度榜之后（对齐 /strategy 生产顺序）
 const hotRank = computed(() =>
   [...templates.value].sort((a, b) => +(b.hot || 0) - +(a.hot || 0)).slice(0, 15)
 )
@@ -10,7 +13,7 @@ const hotRank = computed(() =>
 
 <template>
   <aside class="rail-aside">
-    <router-link to="/jobs" class="aside-jobs">
+    <router-link v-if="jobsFirst" to="/jobs" class="aside-jobs">
       <img src="/prod-assets/offerstar-recruit.webp" alt="2027校招信息汇总" />
       <p class="aj-cap">打破信息差，早就是机会 🎈</p>
     </router-link>
@@ -27,6 +30,10 @@ const hotRank = computed(() =>
         </li>
       </ol>
     </div>
+    <router-link v-if="!jobsFirst" to="/jobs" class="aside-jobs">
+      <img src="/prod-assets/offerstar-recruit.webp" alt="2027校招信息汇总" />
+      <p class="aj-cap">打破信息差，早就是机会 🎈</p>
+    </router-link>
   </aside>
 </template>
 

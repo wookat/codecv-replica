@@ -144,13 +144,13 @@ const GROUPS: { label: string; icon: string; slugs: string[] }[] = [
 ]
 const catName = (s: string) => TEMPLATE_CATEGORIES.find(c => c.slug === s)?.name ?? s
 
-// 生产每组默认收起，超过阈值给「展开全部」按钮
+// 生产默认全部展开，超过阈值给「收起 / 展开全部」按钮
 const expanded = ref<Record<string, boolean>>({})
 const CAP = 12
 const shownSlugs = (g: (typeof GROUPS)[number]) =>
-  expanded.value[g.label] ? g.slugs : g.slugs.slice(0, CAP)
+  expanded.value[g.label] === false ? g.slugs.slice(0, CAP) : g.slugs
 const toggleGroup = (label: string) => {
-  expanded.value[label] = !expanded.value[label]
+  expanded.value[label] = expanded.value[label] === false
 }
 
 // 生产标题：分类名本身带「简历模板」则只加「汇总」
@@ -221,7 +221,7 @@ const shown = computed(() => {
               type="button"
               @click="toggleGroup(g.label)"
             >
-              {{ expanded[g.label] ? '收起' : `展开全部 ${g.slugs.length} 个` }}
+              {{ expanded[g.label] === false ? `展开全部 ${g.slugs.length} 个` : '收起' }}
             </button>
           </div>
         </div>
@@ -238,16 +238,18 @@ const shown = computed(() => {
             class="resume-card"
           >
             <div class="rc-img">
-              <span class="hot-badge">热门</span>
+              <span v-if="(t.hot ?? 0) >= 1000" class="hot-badge">热门</span>
               <div class="mask"><button class="use-btn">使用模板</button></div>
               <img :src="t.img" :alt="`${t.name}简历模板`" loading="lazy" />
             </div>
-            <span class="rc-name">{{ t.name }}</span>
+            <span class="rc-name">{{ t.name }}简历模板</span>
             <div class="rc-info">
               <div class="rc-tags">
                 <span v-for="x in (t.tags ?? []).slice(0, 3)" :key="x">{{ x }}</span>
               </div>
-              <p class="rc-meta">{{ t.hot ?? 0 }}人使用</p>
+              <p class="rc-meta">
+                {{ t.hot ?? 0 }}人使用<template v-if="t.date"> · {{ t.date }}</template>
+              </p>
             </div>
           </router-link>
           <el-empty
@@ -414,12 +416,16 @@ const shown = computed(() => {
   font-size: 18px;
   font-weight: 700;
   display: flex;
-  align-items: baseline;
-  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
   .sum-count {
     font-size: 12px;
     font-weight: 400;
-    color: #9ca3af;
+    color: var(--theme);
+    background: color-mix(in srgb, var(--theme) 10%, transparent);
+    border-radius: 999px;
+    padding: 4px 12px;
+    white-space: nowrap;
   }
 }
 .tag-pill.more {

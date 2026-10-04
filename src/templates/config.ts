@@ -24,7 +24,8 @@ type SubModule = {
   description?: string
   tags?: string[]
   level?: string
-  avatar?: string
+  date?: string
+  avatar?: string | { url: string; top: number; left: number; type?: string }
 }
 export type TemplateType = SubModule
 

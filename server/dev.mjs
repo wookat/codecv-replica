@@ -60,8 +60,9 @@ const json = (res, obj, code = 200, req) => {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': req?.headers?.origin || '*',
     'Access-Control-Allow-Credentials': 'true',
-    'Access-Control-Allow-Headers': '*',
-    'Access-Control-Allow-Methods': '*',
+    // 带 credentials 时通配符 * 不被浏览器接受，回显请求头
+    'Access-Control-Allow-Headers': req?.headers?.['access-control-request-headers'] || '*',
+    'Access-Control-Allow-Methods': req?.headers?.['access-control-request-method'] || '*',
   })
   res.end(JSON.stringify(obj))
 }

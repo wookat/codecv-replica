@@ -3,7 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { convertDOM } from '@/utils/moduleCombine'
 import { templates } from '@/templates/config'
-import { importCSS } from '@/utils'
+import { applyTemplateTheme, importCSS } from '@/utils'
 
 const route = useRoute()
 const html = ref('')
@@ -13,6 +13,7 @@ onMounted(() => {
   const type = route.params.type as string
   const t = templates.value.find(x => x.type === type)
   importCSS(type)
+  applyTemplateTheme(type)
   // 公开简历页：优先取本地已存内容，否则展示模板原文
   let md = ''
   try {

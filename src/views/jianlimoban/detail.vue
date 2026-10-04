@@ -18,9 +18,6 @@ const related = computed<any[]>(() => {
     .sort((a, b) => +(b.hot || 0) - +(a.hot || 0))
     .slice(0, 8)
 })
-const hotRank = computed(() =>
-  [...templates.value].sort((a, b) => +(b.hot || 0) - +(a.hot || 0)).slice(0, 15)
-)
 
 const seoHtml = computed(() => {
   if (!tpl.value) return ''
@@ -173,31 +170,6 @@ function useTemplate() {
             </div>
           </section>
         </div>
-
-        <aside class="jld-aside">
-          <router-link to="/jobs" class="aside-jobs">
-            <img src="/prod-assets/offerstar-recruit.webp" alt="2027校招信息汇总" />
-          </router-link>
-          <div class="aside-rank">
-            <p class="ar-title">
-              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                <path
-                  d="M13.5 0.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"
-                />
-              </svg>
-              简历模板热度排行榜
-            </p>
-            <ol class="ar-list">
-              <li v-for="(t, i) in hotRank" :key="t.type">
-                <router-link :to="`/jianlimoban/${t.type}`">
-                  <span class="rk" :class="{ top: i < 3 }">{{ i + 1 }}</span>
-                  <span class="rt">{{ (t.tags ?? []).slice(0, 6).join('/') || t.name }}</span>
-                  <span class="rh">🔥{{ t.hot }}</span>
-                </router-link>
-              </li>
-            </ol>
-          </div>
-        </aside>
       </div>
     </template>
     <el-empty v-else description="模板不存在" />
@@ -241,7 +213,7 @@ export default { name: 'jianlimoban-detail' }
 }
 .preview {
   width: 100%;
-  max-width: 520px;
+  max-width: 720px;
   flex: 1;
   cursor: zoom-in;
   .pv-box {
@@ -548,77 +520,6 @@ export default { name: 'jianlimoban-detail' }
       color: #6b7280;
       line-height: 1.8;
       margin: 0;
-    }
-  }
-}
-.jld-aside {
-  width: 260px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  @media (max-width: 900px) {
-    display: none;
-  }
-  .aside-jobs {
-    border-radius: 12px;
-    overflow: hidden;
-    display: block;
-    img {
-      width: 100%;
-      display: block;
-    }
-  }
-  .aside-rank {
-    background: var(--background);
-    border-radius: 12px;
-    padding: 14px;
-    .ar-title {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--theme);
-      margin: 0 0 10px;
-    }
-    .ar-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      li a {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 5px 0;
-        font-size: 12px;
-        color: var(--font-color);
-        text-decoration: none;
-        .rk {
-          width: 16px;
-          flex-shrink: 0;
-          font-weight: 700;
-          color: #9ca3af;
-          &.top {
-            color: var(--theme);
-          }
-        }
-        .rt {
-          flex: 1;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          color: #6b7280;
-        }
-        .rh {
-          flex-shrink: 0;
-          color: #9ca3af;
-          font-size: 11px;
-        }
-        &:hover .rt {
-          color: var(--theme);
-        }
-      }
     }
   }
 }

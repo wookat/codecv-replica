@@ -8,6 +8,26 @@ export async function importCSS(name: string) {
   return res.default
 }
 
+// 在只读渲染页（cv/share/export）应用模板主题变量：主色/背景色/字体，
+// 与编辑器 tabbar 的注入口径一致；用户在编辑器里自定义过的颜色优先
+export async function applyTemplateTheme(type: string) {
+  const { getPrimaryBGColor, getPrimaryColor, getFontFamily } = await import('../templates/config')
+  const bg =
+      localStorage.getItem(`custom-markdown-primary-bg-color-${type}`) || getPrimaryBGColor(type),
+    color = localStorage.getItem(`custom-markdown-primary-color-${type}`) || getPrimaryColor(type),
+    font = getFontFamily(type)
+  let style = query('replica-template-theme')
+  if (!style) {
+    style = createStyle()
+    style.setAttribute('replica-template-theme', 'true')
+    document.head.appendChild(style)
+  }
+  let css = `:root { --markdown-primary-bg-color: ${bg}; --markdown-primary-color: ${color}; }`
+  if (font)
+    css += `.jufe * { font-family: ${font}, 'Noto Sans SC', 'Noto Serif SC', 'Nunito', sans-serif, serif; }`
+  style.textContent = css
+}
+
 export function download(url: string, fileName: string) {
   const a = document.createElement('a')
   a.download = fileName

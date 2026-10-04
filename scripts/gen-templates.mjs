@@ -17,15 +17,19 @@ const SKINS = resolve(root, 'src/lib/codecv-src/skins')
 const OUT = resolve(root, 'src/templates/modules')
 
 const index = JSON.parse(readFileSync(resolve(SEED, 'index.json'), 'utf8'))
+// 分类页卡片展示的生产 createTime（YYYY-MM-DD）
+const CTIME_PATH = '/home/ubuntu/codecv-replica-data/seeds/template-ctime.json'
+const ctime = existsSync(CTIME_PATH) ? JSON.parse(readFileSync(CTIME_PATH, 'utf8')) : {}
 const EMAIL_RE = /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g
 
 const localize = (md, slug) =>
   md
-    .replace(/https:\/\/636f-codecv-8gf1cv0db1056941-1300408620\.tcb\.qcloud\.la\/images\//g, '/codecv-assets/')
+    .replace(
+      /https:\/\/636f-codecv-8gf1cv0db1056941-1300408620\.tcb\.qcloud\.la\/images\//g,
+      '/codecv-assets/'
+    )
     .replace(EMAIL_RE, `${slug}@example.com`)
-    .replace(/[​﻿]/g, '')
-
-const ts = (s) => JSON.stringify(s)
+    .replace(/[\u200B\uFEFF]/g, '')
 
 let done = 0
 for (const entry of index) {
@@ -52,20 +56,29 @@ for (const entry of index) {
     // OSS config.ts 会从目录名回填 type；此处保留扩展字段供模板详情/头像叠层用
     slug,
     description: raw.description || '',
-    tags: entry.tags,
+    // 生产详情页“适用方向”用抓取的全量标签（含学校/关键词），index.json 的检索标签兜底
+    tags: Array.isArray(raw.tags) && raw.tags.length ? raw.tags : entry.tags,
     level: entry.level,
+    date: (() => {
+      const ms = ctime[type] || entry.updateTime
+      return ms ? new Date(ms).toISOString().slice(0, 10) : undefined
+    })(),
     avatar: raw.avatar
       ? {
           url: `/codecv-assets/${String(raw.avatar.url).split('/').pop()}`,
           top: Number(raw.avatar.top),
           left: Number(raw.avatar.left),
-          type: raw.avatar.type,
+          type: raw.avatar.type
         }
-      : undefined,
+      : undefined
   }
   writeFileSync(
     resolve(dir, 'index.ts'),
-    `// 由 scripts/gen-templates.mjs 生成——勿手改（源：scripts/seeds/codecv/raw/${slug}.json）\nexport default ${JSON.stringify(mod, null, 2).replace(/"([^"\\]+)":/g, '$1:')}\n`,
+    `// 由 scripts/gen-templates.mjs 生成——勿手改（源：scripts/seeds/codecv/raw/${slug}.json）\nexport default ${JSON.stringify(
+      mod,
+      null,
+      2
+    ).replace(/"([^"\\]+)":/g, '$1:')}\n`
   )
   writeFileSync(resolve(dir, 'style.scss'), readFileSync(skinPath, 'utf8'))
   done++

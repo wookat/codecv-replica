@@ -3,7 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { convertDOM } from '@/utils/moduleCombine'
 import { templates } from '@/templates/config'
-import { importCSS } from '@/utils'
+import { applyTemplateTheme, importCSS } from '@/utils'
 
 const route = useRoute()
 const html = ref('')
@@ -22,6 +22,7 @@ onMounted(() => {
   type.value = s.type
   name.value = s.name
   importCSS(s.type)
+  applyTemplateTheme(s.type)
   const raw = localStorage.getItem(`markdown-content-${s.type}`)
   const md = raw ? JSON.parse(raw).value ?? '' : ''
   if (md) html.value = convertDOM(md).innerHTML

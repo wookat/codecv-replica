@@ -89,7 +89,7 @@ onMounted(load)
           </div>
         </div>
       </div>
-      <AsideRail>
+      <AsideRail :jobs-first="false">
         <div class="mp-card">
           <p class="mp-title">小程序功能上新</p>
           <img src="/prod-assets/miniprogram-feature.webp" alt="小程序功能上新" />

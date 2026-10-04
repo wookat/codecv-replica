@@ -1,15 +1,31 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { postDetail } from '@/api/modules/site'
 import { renderArticle } from '@/utils/article'
+import { templates } from '@/templates/config'
 
 const route = useRoute()
 const post = ref<any>(null)
 const html = ref('')
 const loading = ref(true)
 
-const fmt = (ts?: number) => (ts ? new Date(ts).toLocaleString() : '')
+// 与生产一致的右侧推荐模板位（固定四类代表模板）
+const recommendTypes = ['15simple_versatile', '1internet_avatar', '41', '19social']
+const recommends = computed(() =>
+  recommendTypes
+    .map(t => templates.value.find(x => x.type === t))
+    .filter((x): x is NonNullable<typeof x> => Boolean(x))
+)
+
+const fmt = (ts?: number) => {
+  if (!ts) return ''
+  const d = new Date(ts)
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(
+    d.getMinutes()
+  )}:${p(d.getSeconds())}`
+}
 
 onMounted(async () => {
   try {
@@ -26,16 +42,40 @@ onMounted(async () => {
 
 <template>
   <div class="pd-page">
-    <div v-loading="loading" class="pd-card">
-      <template v-if="post">
-        <h1>{{ post.title }}</h1>
-        <div class="meta-row">
-          <span>{{ fmt(post.create_time) }}</span>
-          <span>{{ post.viewNum }} 浏览</span>
-        </div>
-        <div class="markdown-body pd-body" v-html="html"></div>
-        <div class="tags-row">
-          <span class="tag-ic">
+    <div class="pd-layout">
+      <div v-loading="loading" class="pd-card">
+        <template v-if="post">
+          <h1>{{ post.title }}</h1>
+          <div class="meta-row">
+            <span>{{ fmt(post.create_time) }}</span>
+            <span>{{ post.viewNum }} 浏览</span>
+          </div>
+          <div class="markdown-body pd-body" v-html="html"></div>
+          <div class="tags-row">
+            <span class="tag-ic">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"
+                />
+                <circle cx="7.5" cy="7.5" r=".5" />
+              </svg>
+              标签：
+            </span>
+            <span v-for="t in post.tags" :key="t" class="tag">{{ t }}</span>
+          </div>
+        </template>
+        <el-empty v-else-if="!loading" description="文章不存在或已删除" />
+      </div>
+      <aside class="pd-aside">
+        <div class="rec-card">
+          <strong class="rec-title">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -44,17 +84,25 @@ onMounted(async () => {
               stroke-linecap="round"
               stroke-linejoin="round"
             >
-              <path
-                d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"
-              />
-              <circle cx="7.5" cy="7.5" r=".5" />
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <path d="M14 2v6h6" />
+              <path d="M16 13H8" />
+              <path d="M16 17H8" />
+              <path d="M10 9H8" />
             </svg>
-            标签：
-          </span>
-          <span v-for="t in post.tags" :key="t" class="tag">{{ t }}</span>
+            推荐简历模板
+          </strong>
+          <router-link
+            v-for="t in recommends"
+            :key="t.type"
+            :to="`/jianlimoban/${t.type}`"
+            class="rec-item"
+          >
+            <img :src="t.img" :alt="t.name" loading="lazy" />
+            <span>{{ t.name }}</span>
+          </router-link>
         </div>
-      </template>
-      <el-empty v-else-if="!loading" description="文章不存在或已删除" />
+      </aside>
     </div>
   </div>
 </template>
@@ -65,6 +113,63 @@ onMounted(async () => {
   margin: 0 auto;
   padding: 20px;
   color: var(--font-color);
+}
+.pd-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+.pd-card {
+  flex: 1;
+  min-width: 0;
+}
+.pd-aside {
+  width: 220px;
+  flex-shrink: 0;
+  display: none;
+  @media (min-width: 1024px) {
+    display: block;
+  }
+}
+.rec-card {
+  background: var(--background);
+  border-radius: 12px;
+  padding: 16px;
+  position: sticky;
+  top: 80px;
+  .rec-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 15px;
+    color: var(--theme);
+    margin-bottom: 10px;
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+  .rec-item {
+    display: block;
+    text-decoration: none;
+    margin-bottom: 14px;
+    img {
+      width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      display: block;
+    }
+    span {
+      display: block;
+      text-align: center;
+      font-size: 13px;
+      color: var(--font-color);
+      margin-top: 6px;
+    }
+    &:hover span {
+      color: var(--theme);
+    }
+  }
 }
 .pd-card {
   background: var(--background);

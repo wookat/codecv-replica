@@ -2,12 +2,19 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { mianjingDetail, mianjingMeta, MianjingCompany, MianjingItem } from '@/api/modules/site'
+import {
+  mianjingDetail,
+  mianjingList,
+  mianjingMeta,
+  MianjingCompany,
+  MianjingItem
+} from '@/api/modules/site'
 import { extractToc, localAsset, logoColor, renderArticle, TocItem } from '@/utils/article'
 
 const route = useRoute()
 const doc = ref<MianjingItem | null>(null)
 const company = ref<MianjingCompany | null>(null)
+const hotList = ref<MianjingItem[]>([])
 const toc = ref<TocItem[]>([])
 const html = ref('')
 const loading = ref(true)
@@ -27,6 +34,19 @@ const batchLabel = computed(() => {
 })
 
 const readMins = computed(() => Math.max(1, Math.round((doc.value?.contentMd?.length ?? 0) / 500)))
+
+const authorAvatar = computed(() => {
+  const av = doc.value?.author?.av
+  return av ? `/prod-assets/avatar${av}.png` : '/prod-assets/avatar1.png'
+})
+
+const publishLabel = computed(() => {
+  const t = doc.value?.publishTime
+  if (!t) return ''
+  const d = new Date(t)
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`
+})
 
 function onScroll() {
   const el = document.documentElement
@@ -57,6 +77,14 @@ onMounted(async () => {
       const cs = await mianjingMeta('companies')
       company.value = (cs?.data ?? []).find((c: MianjingCompany) => c.slug === companySlug) ?? null
     }
+    mianjingList({ pageSize: 60 })
+      .then(lr => {
+        hotList.value = (lr?.data ?? [])
+          .filter((x: MianjingItem) => x._id !== doc.value?._id)
+          .sort((a: MianjingItem, b: MianjingItem) => (b.viewCount ?? 0) - (a.viewCount ?? 0))
+          .slice(0, 6)
+      })
+      .catch((e: unknown) => console.warn('获取最热面经失败:', e))
   } catch (e) {
     console.error('获取面经详情失败:', e)
   } finally {
@@ -85,6 +113,20 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
             d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"
           />
           <path d="M7 10v12" />
+        </svg>
+      </button>
+      <button class="dock-btn" aria-label="评论" @click="ElMessage.info('评论区即将上线')">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+          />
         </svg>
       </button>
       <button class="dock-btn" aria-label="收藏" :class="{ on: fav }" @click="fav = !fav">
@@ -165,12 +207,11 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
           <article class="flex-1 min-w-0">
             <div class="d-card">
               <div class="author-card">
-                <img :src="doc.author?.avatar || '/static/png/avatar.png'" alt="" loading="lazy" />
+                <img :src="authorAvatar" alt="" loading="lazy" />
                 <div class="flex-1 min-w-0">
                   <p class="an">{{ doc.author?.nickName || '匿名投稿' }}</p>
                   <p class="am">
-                    发布于
-                    {{ doc.publishTime ? new Date(doc.publishTime).toLocaleDateString() : '' }}
+                    发布于 {{ publishLabel }}
                     <template v-if="doc.author?.school"> · {{ doc.author.school }}</template>
                     <template v-if="doc.author?.major"> · {{ doc.author.major }}</template>
                   </p>
@@ -240,8 +281,31 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
           </article>
 
           <aside class="mj-aside">
+            <div v-if="company" class="aside-card">
+              <router-link :to="`/mianjing/c/${company.slug}`" class="comp-card">
+                <span
+                  class="mj-logo lg"
+                  :style="{ '--mj-logo-bg': logoColor(company.slug) } as any"
+                >
+                  <img
+                    v-if="company.logo"
+                    :src="localAsset(company.logo)"
+                    :alt="company.name"
+                    class="mj-logo-img"
+                  />
+                  <template v-else>{{ company.name[0] }}</template>
+                </span>
+                <span>
+                  <b>{{ company.name }}</b>
+                  <p class="cc-sub">面经合集</p>
+                </span>
+              </router-link>
+              <router-link :to="`/mianjing/c/${company.slug}`" class="comp-btn"
+                >查看该公司全部面经</router-link
+              >
+            </div>
             <div v-if="toc.length" class="aside-card toc-card">
-              <strong class="aside-title">本篇目录</strong>
+              <strong class="aside-title">目录</strong>
               <a
                 v-for="t in toc"
                 :key="t.id"
@@ -278,23 +342,31 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
                 </span>
               </router-link>
             </div>
-            <div v-if="company" class="aside-card">
-              <router-link :to="`/mianjing/c/${company.slug}`" class="comp-card">
-                <span
-                  class="mj-logo lg"
-                  :style="{ '--mj-logo-bg': logoColor(company.slug) } as any"
-                >
-                  <img
-                    v-if="company.logo"
-                    :src="localAsset(company.logo)"
-                    :alt="company.name"
-                    class="mj-logo-img"
-                  />
-                  <template v-else>{{ company.name[0] }}</template>
-                </span>
-                <span>
-                  <b>{{ company.name }}面经</b>
-                  <p class="cc-sub">{{ company.industry }}</p>
+            <div v-if="hotList.length" class="aside-card">
+              <strong class="aside-title">最热面经</strong>
+              <router-link
+                v-for="(r, i) in hotList"
+                :key="r._id"
+                :to="`/mianjing/p/${r._id}`"
+                class="hot-row"
+              >
+                <span class="rank" :class="{ top: i < 3 }">{{ i + 1 }}</span>
+                <span class="t">{{ r.title }}</span>
+                <span class="v">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"
+                    />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                  {{ r.viewCount ?? 0 }}
                 </span>
               </router-link>
             </div>
@@ -366,6 +438,21 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
     font-size: 12px;
     opacity: 0.5;
     margin-top: 2px;
+  }
+}
+.comp-btn {
+  display: block;
+  margin-top: 14px;
+  padding: 10px 0;
+  border-radius: 999px;
+  background: rgba(255, 107, 53, 0.12);
+  color: var(--theme);
+  font-size: 14px;
+  text-align: center;
+  text-decoration: none;
+  &:hover {
+    background: var(--theme);
+    color: #fff;
   }
 }
 </style>
