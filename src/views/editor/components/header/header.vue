@@ -12,7 +12,8 @@ const emit = defineEmits([
   'download-native',
   'download-md',
   'import-md',
-  'download-picture'
+  'download-picture',
+  'print-page'
 ])
 
 const { exportFile, importFile, fileName } = useFile(emit)
@@ -29,6 +30,7 @@ const { open, toggle } = useSwitch()
       @export-md="exportFile('md')"
       @import-md="importFile"
       @export-picture="exportFile('picture')"
+      @print-page="emit('print-page')"
     />
     <ExportTotal />
     <button class="exporter server-export btn" @click="exportFile('dynamic')">导出PDF</button>

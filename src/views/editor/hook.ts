@@ -1,6 +1,6 @@
 import { onActivated, onDeactivated, Ref, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useDebounceFn, useThrottleFn } from '@vueuse/core'
+import { useDebounceFn } from '@vueuse/core'
 
 import { getLocalStorage } from '@/common/localstorage'
 import { errorMessage, successMessage, warningMessage } from '@/common/message'
@@ -40,11 +40,13 @@ export function useRenderHTML(resumeType: Ref<string>) {
     setTimeout(() => splitPage(renderDOM.value), 100)
   })
 
+  // splitPage 需等 DOM 布局稳定且开销大：防抖到输入停顿后再分页（原实现每次击键新建 throttle 实例等于没节流）
+  const lazySplitPage = useDebounceFn(() => splitPage(renderDOM.value), 200)
   watch(
     () => editorStore.MDContent,
     v => {
       renderDOM.value.innerHTML = convertDOM(v).innerHTML
-      useThrottleFn(() => splitPage(renderDOM.value), 50)()
+      lazySplitPage()
     }
   )
   // 刷新页面（这里是一个比较有问题的点）

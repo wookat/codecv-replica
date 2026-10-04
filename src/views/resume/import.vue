@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { templates } from '@/templates/config'
 import { setLocalStorage } from '@/common/localstorage'
+import { isJsonResume, jsonResumeToMd } from '@/utils/jsonResume'
 
 const router = useRouter()
 const dragging = ref(false)
@@ -26,9 +27,14 @@ function onDrop(e: DragEvent) {
 }
 
 async function importFile(f: File) {
-  if (!/\.(md|markdown|txt)$/i.test(f.name)) return ElMessage.warning('仅支持 .md / .txt 格式')
-  const text = await f.text()
+  if (!/\.(md|markdown|txt|json)$/i.test(f.name))
+    return ElMessage.warning('仅支持 .md / .txt / .json 格式')
+  let text = await f.text()
   if (text.trim().length < 10) return ElMessage.warning('文件内容过短')
+  if (/\.json$/i.test(f.name)) {
+    if (!isJsonResume(text)) return ElMessage.warning('不是可识别的 JSON Resume 格式')
+    text = jsonResumeToMd(JSON.parse(text))
+  }
   // 复刻版：导入到「自定义简历」草稿，进入编辑器
   const type = 'create'
   if (!templates.value.some(t => t.type === type)) {
@@ -76,9 +82,15 @@ async function importFile(f: File) {
           <path d="M12 3v12" />
         </svg>
         <p class="d-t">点击选择或拖拽文件到此处</p>
-        <p class="d-s">.md / .markdown / .txt</p>
+        <p class="d-s">.md / .markdown / .txt / .json（JSON Resume）</p>
       </div>
-      <input ref="fileInput" type="file" accept=".md,.markdown,.txt" hidden @change="onFile" />
+      <input
+        ref="fileInput"
+        type="file"
+        accept=".md,.markdown,.txt,.json"
+        hidden
+        @change="onFile"
+      />
       <div class="tips">
         <p>小提示：在编辑器中可随时用「导出 MD」备份你的简历内容</p>
       </div>

@@ -1,15 +1,18 @@
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
 import Header from './components/header/header.vue'
 import MarkdownRender from '@/views/editor/components/preview/render.vue'
 import Editor from '@/views/editor/components/editor/editorContainer.vue'
 import { useResumeType, useDownLoad, useImportMD, useAvatar, useShowExport } from './hook'
 import { startGuide } from './components/guide/guide'
 
+const router = useRouter()
 const { resumeType } = useResumeType()
 const { downloadDynamic, downloadNative, downloadMD } = useDownLoad(resumeType)
 const { importMD } = useImportMD(resumeType.value)
 const { setAvatar } = useAvatar(resumeType.value)
 const { showExport } = useShowExport()
+const gotoPrint = () => router.push(`/export/${resumeType.value}`)
 startGuide()
 </script>
 
@@ -20,6 +23,7 @@ startGuide()
     @download-native="downloadNative"
     @download-md="downloadMD"
     @import-md="importMD"
+    @print-page="gotoPrint"
   />
   <div id="editor">
     <Editor />

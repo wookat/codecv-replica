@@ -9,7 +9,10 @@ import {
   MianjingCompany,
   MianjingItem
 } from '@/api/modules/site'
+import { createComment, listComments } from '@/api/modules/share'
 import { extractToc, localAsset, logoColor, renderArticle, TocItem } from '@/utils/article'
+import { currentUser } from '@/utils/auth'
+import LoginModal from '@/components/LoginModal.vue'
 
 const route = useRoute()
 const doc = ref<MianjingItem | null>(null)
@@ -21,6 +24,57 @@ const loading = ref(true)
 const progress = ref(0)
 const liked = ref(false)
 const fav = ref(false)
+
+// ---- 评论区 ----
+interface Cmt {
+  id: number
+  nickname: string
+  content: string
+  created_at: number
+}
+const comments = ref<Cmt[]>([])
+const cmtDraft = ref('')
+const cmtPosting = ref(false)
+const loginModal = ref(false)
+const docId = computed(() => String(route.params.docId))
+
+const cmtFmt = (ts: number) => new Date(ts).toLocaleString('zh-CN', { hour12: false })
+
+async function loadComments() {
+  try {
+    const res = await listComments(docId.value)
+    if (res?.code === 200) comments.value = res.data ?? []
+  } catch {
+    /* ignore */
+  }
+}
+
+async function postComment() {
+  const text = cmtDraft.value.trim()
+  if (!text) return ElMessage.warning('先写点内容吧')
+  if (!currentUser()) {
+    loginModal.value = true
+    return
+  }
+  cmtPosting.value = true
+  try {
+    const res = await createComment(docId.value, text)
+    if (res?.code === 401) {
+      loginModal.value = true
+      return
+    }
+    if (res?.code !== 200) return ElMessage.error(res?.msg || '评论失败')
+    cmtDraft.value = ''
+    ElMessage.success('评论成功')
+    await loadComments()
+  } finally {
+    cmtPosting.value = false
+  }
+}
+
+function gotoComments() {
+  document.getElementById('mj-comments')?.scrollIntoView({ behavior: 'smooth' })
+}
 
 const batchLabel = computed(() => {
   const m = doc.value
@@ -85,6 +139,7 @@ onMounted(async () => {
           .slice(0, 6)
       })
       .catch((e: unknown) => console.warn('获取最热面经失败:', e))
+    loadComments()
   } catch (e) {
     console.error('获取面经详情失败:', e)
   } finally {
@@ -115,7 +170,7 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
           <path d="M7 10v12" />
         </svg>
       </button>
-      <button class="dock-btn" aria-label="评论" @click="ElMessage.info('评论区即将上线')">
+      <button class="dock-btn" aria-label="评论" @click="gotoComments">
         <svg
           viewBox="0 0 24 24"
           fill="none"
@@ -278,6 +333,38 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 
               <div class="mj-article" v-html="html"></div>
             </div>
+
+            <!-- 评论区 -->
+            <div id="mj-comments" class="d-card cmt-card">
+              <h3 class="cmt-title">评论（{{ comments.length }}）</h3>
+              <div class="cmt-input">
+                <textarea
+                  v-model="cmtDraft"
+                  rows="3"
+                  maxlength="500"
+                  placeholder="写下你的看法、补充或提问…"
+                ></textarea>
+                <div class="cmt-bar">
+                  <span class="cmt-hint">{{ cmtDraft.length }}/500</span>
+                  <button class="mj-btn sm" :disabled="cmtPosting" @click="postComment">
+                    {{ cmtPosting ? '发布中…' : '发表评论' }}
+                  </button>
+                </div>
+              </div>
+              <ul v-if="comments.length" class="cmt-list">
+                <li v-for="c in comments" :key="c.id">
+                  <span class="c-av">{{ (c.nickname || '匿')[0] }}</span>
+                  <div class="c-body">
+                    <p class="c-meta">
+                      <b>{{ c.nickname || '匿名用户' }}</b>
+                      <time>{{ cmtFmt(c.created_at) }}</time>
+                    </p>
+                    <p class="c-text">{{ c.content }}</p>
+                  </div>
+                </li>
+              </ul>
+              <p v-else class="cmt-empty">还没有评论，来抢沙发～</p>
+            </div>
           </article>
 
           <aside class="mj-aside">
@@ -375,6 +462,7 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
       </template>
       <el-empty v-else-if="!loading" description="面经不存在或已删除" />
     </div>
+    <LoginModal v-if="loginModal" @close="loginModal = false" />
   </div>
 </template>
 
@@ -453,6 +541,92 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
   &:hover {
     background: var(--theme);
     color: #fff;
+  }
+}
+.cmt-card {
+  margin-top: 16px;
+  padding: 20px 24px;
+  .cmt-title {
+    margin: 0 0 16px;
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .cmt-input textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: var(--body-background);
+    color: var(--font-color);
+    font-size: 14px;
+    line-height: 1.7;
+    outline: none;
+    resize: vertical;
+    box-sizing: border-box;
+    &:focus {
+      border-color: var(--theme);
+    }
+  }
+  .cmt-bar {
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .cmt-hint {
+      font-size: 12px;
+      opacity: 0.45;
+    }
+    .mj-btn.sm {
+      padding: 7px 18px;
+      font-size: 13px;
+    }
+  }
+  .cmt-list {
+    list-style: none;
+    padding: 0;
+    margin: 18px 0 0;
+    li {
+      display: flex;
+      gap: 10px;
+      padding: 12px 0;
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+    }
+    .c-av {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+      border-radius: 999px;
+      background: rgba(255, 107, 53, 0.14);
+      color: var(--theme);
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .c-meta {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      font-size: 13px;
+      time {
+        font-size: 12px;
+        opacity: 0.45;
+      }
+    }
+    .c-text {
+      margin-top: 4px;
+      font-size: 14px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+  }
+  .cmt-empty {
+    margin-top: 18px;
+    font-size: 13px;
+    opacity: 0.45;
+    text-align: center;
   }
 }
 </style>

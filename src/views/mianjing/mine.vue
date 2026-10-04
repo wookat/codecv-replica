@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { delMianjing, myMianjing } from '@/api/modules/share'
+import { currentUser } from '@/utils/auth'
 
 interface MineItem {
   _id: string
@@ -16,15 +18,40 @@ interface MineItem {
   create_time?: number
 }
 
-const mine = ref<MineItem[]>(JSON.parse(localStorage.getItem('mianjing-mine') || '[]'))
+const MINE_KEY = 'mianjing-mine'
+const localMine = () => JSON.parse(localStorage.getItem(MINE_KEY) || '[]') as MineItem[]
+const mine = ref<MineItem[]>(localMine())
 const has = computed(() => mine.value.length > 0)
+
+onMounted(async () => {
+  if (!currentUser()) return
+  try {
+    const res = await myMianjing()
+    if (res?.code !== 200) return
+    // 服务端为准（跨端可见），本地遗留条目并入显示
+    const srv = (res.data ?? []) as MineItem[]
+    const srvIds = new Set(srv.map(m => String(m._id)))
+    const merged = [
+      ...srv.map(m => ({ ...m, _id: `srv-${m._id}` })),
+      ...localMine().filter(m => m._id.startsWith('local-') && !srvIds.has(String(m._id)))
+    ]
+    merged.sort((a, b) => (b.create_time ?? 0) - (a.create_time ?? 0))
+    mine.value = merged
+  } catch {
+    /* 服务端失败用本地 */
+  }
+})
 
 const fmt = (ts?: number) => (ts ? new Date(ts).toLocaleString() : '')
 
 async function remove(id: string) {
   await ElMessageBox.confirm('确定删除这篇投稿吗？', '删除', { type: 'warning' })
+  if (id.startsWith('srv-')) {
+    const res = await delMianjing(id.slice(4))
+    if (res?.code !== 200) return ElMessage.error(res?.msg || '删除失败')
+  }
   mine.value = mine.value.filter(m => m._id !== id)
-  localStorage.setItem('mianjing-mine', JSON.stringify(mine.value))
+  localStorage.setItem(MINE_KEY, JSON.stringify(mine.value.filter(m => m._id.startsWith('local-'))))
   ElMessage.success('已删除')
 }
 </script>

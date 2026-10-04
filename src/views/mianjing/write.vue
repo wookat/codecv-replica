@@ -2,7 +2,10 @@
 import { computed, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { mianjingMeta, MianjingCompany, MianjingPosition } from '@/api/modules/site'
+import { submitMianjing } from '@/api/modules/share'
 import { localAsset, logoColor } from '@/utils/article'
+import { currentUser } from '@/utils/auth'
+import LoginModal from '@/components/LoginModal.vue'
 
 const companies = ref<MianjingCompany[]>([])
 const positions = ref<MianjingPosition[]>([])
@@ -62,7 +65,10 @@ function autoSave() {
   timer = setTimeout(() => localStorage.setItem(DRAFT_KEY, JSON.stringify(form.value)), 600)
 }
 
-function submit() {
+const submitting = ref(false)
+const loginModal = ref(false)
+
+async function submit() {
   const f = form.value
   if (!f.companySlug) return ElMessage.warning('请选择公司')
   if (!f.positionSlug) return ElMessage.warning('请选择岗位方向')
@@ -70,18 +76,34 @@ function submit() {
   if (f.title.trim().length < 4) return ElMessage.warning('标题至少 4 个字')
   if (f.contentMd.trim().length < 50)
     return ElMessage.warning('正文至少 50 字，建议写清面试问题与过程')
-  // 复刻版：投稿存本地（线上版需登录后服务端审核）
-  const mine = JSON.parse(localStorage.getItem('mianjing-mine') || '[]')
-  mine.unshift({
-    ...f,
-    _id: `local-${Date.now()}`,
-    companyName: company.value?.name,
-    create_time: Date.now(),
-    status: 'pending'
-  })
-  localStorage.setItem('mianjing-mine', JSON.stringify(mine))
-  localStorage.removeItem(DRAFT_KEY)
-  submitted.value = true
+  if (!currentUser()) {
+    loginModal.value = true
+    return
+  }
+  submitting.value = true
+  try {
+    const res = await submitMianjing({ ...f, companyName: company.value?.name })
+    if (res?.code !== 200) {
+      if (res?.code === 401) {
+        loginModal.value = true
+        return
+      }
+      return ElMessage.error(res?.msg || '投稿失败')
+    }
+    const mine = JSON.parse(localStorage.getItem('mianjing-mine') || '[]')
+    mine.unshift({
+      ...f,
+      _id: `srv-${res.data.id}`,
+      companyName: company.value?.name,
+      create_time: Date.now(),
+      status: 'pending'
+    })
+    localStorage.setItem('mianjing-mine', JSON.stringify(mine))
+    localStorage.removeItem(DRAFT_KEY)
+    submitted.value = true
+  } finally {
+    submitting.value = false
+  }
 }
 </script>
 
@@ -238,10 +260,13 @@ function submit() {
             <input v-model="form.anonymous" type="checkbox" />
             匿名发布
           </label>
-          <button class="mj-btn" @click="submit">提交面经</button>
+          <button class="mj-btn" :disabled="submitting" @click="submit">
+            {{ submitting ? '提交中…' : '提交面经' }}
+          </button>
         </div>
       </div>
     </template>
+    <LoginModal v-if="loginModal" @close="loginModal = false" />
   </div>
 </template>
 

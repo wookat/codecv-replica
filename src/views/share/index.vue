@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import { convertDOM } from '@/utils/moduleCombine'
 import { templates } from '@/templates/config'
 import { applyTemplateTheme, importCSS } from '@/utils'
+import { getShare } from '@/api/modules/share'
 
 const route = useRoute()
 const html = ref('')
@@ -12,20 +13,34 @@ const type = ref('')
 
 const SHARE_KEY = 'codecv-share'
 
-onMounted(() => {
+function render(type_: string, name_: string, md: string) {
+  type.value = type_
+  name.value = name_
+  importCSS(type_)
+  applyTemplateTheme(type_)
+  html.value = convertDOM(md).innerHTML
+}
+
+onMounted(async () => {
   const id = route.params.id as string
+  try {
+    const res = await getShare(id)
+    if (res?.code === 200 && res.data?.content) {
+      render(res.data.type, res.data.name, res.data.content)
+      return
+    }
+  } catch {
+    /* 服务端失败回落本地 */
+  }
+  // 本地兜底：同机浏览器生成的分享仍可读
   const reg: Record<string, { type: string; name: string }> = JSON.parse(
     localStorage.getItem(SHARE_KEY) || '{}'
   )
   const s = reg[id]
   if (!s) return
-  type.value = s.type
-  name.value = s.name
-  importCSS(s.type)
-  applyTemplateTheme(s.type)
   const raw = localStorage.getItem(`markdown-content-${s.type}`)
   const md = raw ? JSON.parse(raw).value ?? '' : ''
-  if (md) html.value = convertDOM(md).innerHTML
+  if (md) render(s.type, s.name, md)
 })
 
 const tpl = computed(() => templates.value.find(t => t.type === type.value))

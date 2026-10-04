@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { templates } from '@/templates/config'
 import { cloudDelete, syncLocalCloud } from '@/api/modules/cloudResume'
+import { createShare } from '@/api/modules/share'
 import { currentUser, logoutLocal } from '@/utils/auth'
 import LoginModal from '@/components/LoginModal.vue'
 
@@ -54,6 +55,18 @@ const has = computed(() => resumes.value.length > 0)
 
 function edit(type: string) {
   router.push(`/editor/${type}`)
+}
+
+async function share(r: (typeof resumes.value)[number]) {
+  const res = await createShare({ type: r.type, name: r.name, content: r.content })
+  if (res?.code !== 200) return ElMessage.error(res?.msg || '分享失败')
+  const link = `${location.origin}/#/share/${res.data.id}`
+  try {
+    await navigator.clipboard.writeText(link)
+    ElMessage.success('分享链接已复制到剪贴板')
+  } catch {
+    ElMessageBox.alert(link, '分享链接', { confirmButtonText: '知道了' })
+  }
 }
 
 async function remove(type: string) {
@@ -128,6 +141,7 @@ onMounted(async () => {
               <p class="rt">模板：{{ r.tplName }}</p>
               <div class="rv-actions">
                 <button class="a" @click="edit(r.type)">编辑</button>
+                <button class="a" @click="share(r)">分享</button>
                 <button class="a danger" @click="remove(r.type)">删除</button>
               </div>
             </div>

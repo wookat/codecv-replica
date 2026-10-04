@@ -2,7 +2,7 @@
 import nav from '@/common/nav/nav'
 import { refreshGuide } from '../guide/guide'
 
-defineEmits(['export-md', 'import-md', 'export-picture'])
+defineEmits(['export-md', 'import-md', 'export-picture', 'print-page'])
 </script>
 
 <template>
@@ -26,6 +26,9 @@ defineEmits(['export-md', 'import-md', 'export-picture'])
                   />
                 </label>
                 <span v-else-if="subNavItem.includes('导出MD')" @click="$emit('export-md')">{{
+                  subNavItem
+                }}</span>
+                <span v-else-if="subNavItem === '打印'" @click="$emit('print-page')">{{
                   subNavItem
                 }}</span>
                 <span v-else @click="$emit('export-picture')">{{ subNavItem }}</span>
