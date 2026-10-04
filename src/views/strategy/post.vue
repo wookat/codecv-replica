@@ -10,8 +10,8 @@ const post = ref<any>(null)
 const html = ref('')
 const loading = ref(true)
 
-// 与生产一致的右侧推荐模板位（固定四类代表模板）
-const recommendTypes = ['15simple_versatile', '1internet_avatar', '41', '19social']
+// 与生产一致的右侧推荐模板位（生产实测顺序）
+const recommendTypes = ['45', '1internet_avatar', '43', '48', '61', '38']
 const recommends = computed(() =>
   recommendTypes
     .map(t => templates.value.find(x => x.type === t))

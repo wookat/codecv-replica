@@ -104,7 +104,42 @@ const tiers: Tier[] = [
   }
 ]
 
+// 与首页一致的用户评价（生产同文案）
+const COMMENTS = [
+  {
+    content: '使用体验还不错呀，UI 做的也蛮好的，加油！',
+    avatar: '/prod-assets/avatar1.png',
+    profession: '阿里巴巴前端'
+  },
+  {
+    content:
+      '在nk推荐中看到了这个工具，非常感谢作者大大的开发，虽然我不是前后端开发，但是直观感觉这玩意真好～',
+    avatar: '/prod-assets/avatar2.png',
+    profession: '嵌入式开发工程师'
+  },
+  {
+    content: '这个简历工具实在是泰库辣！真的节省了我很多时间，简历模板也很实用，发现了宝藏工具！！',
+    avatar: '/prod-assets/avatar3.png',
+    profession: 'Java开发工程师'
+  },
+  {
+    content:
+      '简历写起来真的非常方便，因为我不懂UP说的markdown，所以我使用所见即所得方式编写，感觉就和写word一样简单，墙裂推荐～',
+    avatar: '/prod-assets/avatar4.png',
+    profession: '用户运营'
+  },
+  {
+    content:
+      '周末在家搞网站发现的这个宝藏资源，写简历就跟写笔记一样简单了，所见即所得，以后写简历就在这上面了～',
+    avatar: '/prod-assets/avatar5.png',
+    profession: '产品经理'
+  }
+]
+
 const paying = ref(false)
+function scrollTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
 function upgrade(t: Tier) {
   paying.value = true
   // 复刻版：支付通道未接入，提示后关闭
@@ -154,6 +189,29 @@ function upgrade(t: Tier) {
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- 用户评价（生产同板块） -->
+    <div class="mb-comments">
+      <h2>看看用户的真实评价</h2>
+      <p class="sub">
+        看看用户的真实评价，用户说好才是真的好，已经有 5000+ 用户使用CodeCV简历制作简历成功入职拿到
+        OFFER!
+      </p>
+      <ul class="cm-grid">
+        <li v-for="c in COMMENTS" :key="c.profession" class="cm-card">
+          <p class="cm-content">{{ c.content }}</p>
+          <p class="cm-info">
+            <img :src="c.avatar" alt="头像" /><sub>{{ c.profession }}</sub>
+          </p>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 黑色 CTA 横幅 -->
+    <div class="mb-banner">
+      <p>目前已累计导出 150000+ 简历 ｜ 帮助 5000+ 用户成功入职!</p>
+      <a class="banner-btn" href="#top" @click.prevent="scrollTop">升级会员</a>
     </div>
   </div>
 </template>
@@ -282,6 +340,92 @@ function upgrade(t: Tier) {
     justify-content: space-between;
     font-size: 14px;
     align-items: center;
+  }
+}
+.mb-comments {
+  width: 100%;
+  text-align: center;
+  padding: 60px 0 30px;
+  h2 {
+    font-size: 28px;
+    font-weight: 800;
+    margin: 0 0 12px;
+  }
+  .sub {
+    color: #9ca3af;
+    font-size: 14px;
+    margin: 0 0 34px;
+  }
+}
+.cm-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+.cm-card {
+  background: #f3f4f6;
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 150px;
+  .cm-content {
+    font-size: 13px;
+    line-height: 1.8;
+    color: #4b5563;
+    margin: 0 0 14px;
+  }
+  .cm-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+    }
+    sub {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+  }
+}
+.mb-banner {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  background: #0d0d0d;
+  text-align: center;
+  padding: 42px 20px;
+  margin-top: 40px;
+  p {
+    color: #fff;
+    font-size: 16px;
+    margin: 0 0 22px;
+  }
+  .banner-btn {
+    display: inline-block;
+    background: linear-gradient(90deg, #f6e05e, #ecc94b);
+    color: #1a1a1a;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 10px 26px;
+    border-radius: 8px;
+    text-decoration: none;
+    &:hover {
+      filter: brightness(1.05);
+    }
   }
 }
 </style>

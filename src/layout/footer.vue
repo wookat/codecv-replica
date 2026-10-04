@@ -1,13 +1,17 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+// 生产 /progress 为极简页脚（仅版权行）
+const minimal = computed(() => useRoute().path === '/progress')
+</script>
+
 <template>
   <div class="footer-wrap">
-    <div class="footer noto-sans-sc">
+    <div v-if="!minimal" class="footer noto-sans-sc">
       <ul>
         <strong class="title">友情链接</strong>
         <li><a href="https://markdown.com.cn" target="_blank" rel="noopener">markdown教程</a></li>
         <li><a href="https://shenqiji.com" target="_blank" rel="noopener">神器集</a></li>
-        <li>
-          <a href="https://github.com/acmenlei/codecv" target="_blank" rel="noopener">开源代码</a>
-        </li>
       </ul>
       <ul>
         <strong class="title">其他产品</strong>

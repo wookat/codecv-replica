@@ -1,6 +1,17 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { templates } from '@/templates/config'
+// 生产首页「最新模板」为运营精选的 6 套固定卡片（名称与模板库展示名不同）
+const RECENT = [
+  { type: '45', img: '/covers/cv-45.webp', name: '应届后端开发工程师' },
+  { type: '1internet_avatar', img: '/covers/cv-1internet-avatar.webp', name: '大数据开发工程师' },
+  { type: '38', img: '/covers/cv-38.webp', name: '数据运营' },
+  { type: '43', img: '/covers/cv-43.webp', name: '运营通用' },
+  { type: '44', img: '/covers/cv-44.webp', name: '中高级数据运营通用' },
+  {
+    type: '15simple_versatile',
+    img: '/covers/cv-15simple-versatile.webp',
+    name: '后端Java开发工程师'
+  }
+]
 
 const FEATURES = [
   { icon: '🎈', name: '不设限', desc: '简历模板中一切都是可控的 不被默认简历排版限制～' },
@@ -20,9 +31,7 @@ const FAN = [
   { src: '/prod-assets/hero-14.webp', rotate: 24, x: 120, y: 24 }
 ]
 
-const newest = computed(() =>
-  [...templates.value].sort((a, b) => +(b.hot || 0) - +(a.hot || 0)).slice(0, 6)
-)
+const newest = RECENT
 
 const AI_CARDS = [
   {
@@ -352,9 +361,8 @@ const COMMENTS = [
   .tc-name {
     margin: 10px 0 0;
     font-size: 13px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    letter-spacing: 0.05em;
+    text-align: center;
   }
   &:hover .tc-name {
     color: var(--theme);

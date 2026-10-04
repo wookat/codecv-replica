@@ -16,7 +16,7 @@ const emit = defineEmits<(e: 'close') => void>()
         </div>
         <div class="lm-right">
           <h4>微信扫码登录</h4>
-          <img class="lm-qr" src="/prod-assets/wechat.jpg" alt="微信扫码登录二维码" />
+          <img class="lm-qr" src="/prod-assets/miniprogram.webp" alt="微信扫码登录二维码" />
           <p class="lm-tip">有效期 <b>1分钟</b> 请及时扫码完成登录</p>
           <p class="lm-agree">
             登录表示您同意该<a

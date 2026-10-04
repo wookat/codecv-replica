@@ -159,7 +159,7 @@ function onSizeChange(s: number) {
   loadList()
 }
 
-const fmtDay = (ts?: number) => (ts ? dayjs(ts).format('MM-DD') : '-')
+const fmtDay = (ts?: number) => (ts ? dayjs(ts).format('YYYY-MM-DD') : '-')
 const isToday = (ts?: number) => !!ts && dayjs(ts).isSame(dayjs(), 'day')
 
 const favCount = computed(

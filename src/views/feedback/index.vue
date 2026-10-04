@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import AsideRail from '@/components/AsideRail.vue'
 
@@ -16,6 +16,11 @@ const content = ref('')
 const field = ref('')
 const avatar = ref('/static/png/avatar1-155VfYeO.png')
 const list = ref<FeedbackItem[]>([])
+const current = ref(1)
+const PAGE_SIZE = 6
+const shown = computed(() =>
+  list.value.slice((current.value - 1) * PAGE_SIZE, current.value * PAGE_SIZE)
+)
 
 const AVATARS = [
   '/static/png/avatar1-155VfYeO.png',
@@ -90,7 +95,7 @@ function submit() {
         <div class="said">
           <h3>✨ 看看大家都说了什么</h3>
           <ul class="suggests">
-            <li v-for="(f, i) in list" :key="i">
+            <li v-for="(f, i) in shown" :key="i">
               <p class="fc">{{ f.content }}</p>
               <p v-if="f.reply" class="fr">
                 <sub>{{ f.reply }}</sub>
@@ -102,6 +107,15 @@ function submit() {
               </p>
             </li>
           </ul>
+          <div v-if="list.length > PAGE_SIZE" class="fb-pager">
+            <el-pagination
+              v-model:current-page="current"
+              :page-size="PAGE_SIZE"
+              :total="list.length"
+              background
+              layout="prev, pager, next"
+            />
+          </div>
         </div>
       </div>
       <AsideRail>
@@ -233,6 +247,9 @@ function submit() {
     margin: 0 0 20px 4px;
     font-weight: 500;
   }
+}
+.fb-pager {
+  margin-top: 20px;
 }
 .suggests {
   display: grid;
