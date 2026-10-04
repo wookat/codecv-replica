@@ -18,17 +18,16 @@ export async function onRequestPost(context) {
   }/fonts/iconfont.css">`
   // .jufe の font-family が Noto Sans SC/Noto Serif SC/Nunito を指すため、
   // レンダ側にもフォントを届けないとフォールバック書体で折返し位置がずれる。
-  // googleapis は CF BR から到達不可のため本站自ホストの resume-fonts.css を参照する
-  const fonts = `<link rel="stylesheet" href="${
-    new URL(request.url).origin
-  }/fonts/resume-fonts.css">`
-  const html = `<!doctype html><html><head><meta charset="utf-8">${iconfont}${fonts}${linkTag}<style>${
+  // googleapis は CF BR から到達不可。本站自ホストを公式推奨の addStyleTag で注入する
+  const origin = new URL(request.url).origin
+  const html = `<!doctype html><html><head><meta charset="utf-8">${iconfont}${linkTag}<style>${
     style || ''
   }</style></head><body>${content}</body></html>`
   const endpoint = isPdf ? 'pdf' : 'screenshot'
   const body = isPdf
     ? {
         html,
+        addStyleTag: [{ url: `${origin}/fonts/resume-fonts.css` }],
         pdfOptions: {
           // width/height は CF BR では無視され Letter に落ちるため format 指定が必須（小文字のみ受理）
           format: 'a4',
@@ -39,6 +38,7 @@ export async function onRequestPost(context) {
       }
     : {
         html,
+        addStyleTag: [{ url: `${origin}/fonts/resume-fonts.css` }],
         screenshotOptions: { fullPage: false },
         viewport: { width: 794, height: 1123 },
         gotoOptions: { waitUntil: 'networkidle0' }
