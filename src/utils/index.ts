@@ -3,8 +3,15 @@ import 'element-plus/es/components/loading/style/css'
 
 export const wOpen = window.open
 
+// 模板皮肤 css chunk 的 URL 映射：vite 构建后每套皮肤的 <link> href 带 hash，
+// 通过动态 import 前后对比 <link> 集合来捕获，导出 PDF 时用确定性的皮肤地址
+export const skinLinkMap: Record<string, string> = {}
+
 export async function importCSS(name: string) {
+  const before = new Set(Array.from(document.querySelectorAll('link')).map(l => l.href))
   const res = await import(`../templates/modules/${name}/style.scss`)
+  const added = Array.from(document.querySelectorAll('link')).find(l => !before.has(l.href))
+  if (added) skinLinkMap[name] = added.href
   return res.default
 }
 

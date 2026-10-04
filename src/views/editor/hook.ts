@@ -1,10 +1,18 @@
-import { onActivated, onDeactivated, Ref, ref, watch } from 'vue'
+import { onActivated, onDeactivated, onMounted, Ref, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDebounceFn } from '@vueuse/core'
 
 import { getLocalStorage } from '@/common/localstorage'
 import { errorMessage, successMessage, warningMessage } from '@/common/message'
-import { download, downloadOfBuffer, importCSS, isDev, queryDOM, useLoading } from '@/utils'
+import {
+  download,
+  downloadOfBuffer,
+  importCSS,
+  isDev,
+  queryDOM,
+  skinLinkMap,
+  useLoading
+} from '@/utils'
 import { ensureEmptyPreWhiteSpace, splitPage } from './components/tabbar/hook'
 import useEditorStore from '@/store/modules/editor'
 import { resolveTemplateType } from '@/templates/config'
@@ -41,6 +49,7 @@ export function useRenderHTML(resumeType: Ref<string>) {
   const renderDOM = ref<HTMLElement>(document.body)
   const editorStore = useEditorStore()
 
+  onMounted(() => importCSS(resumeType.value))
   onActivated(() => {
     importCSS(resumeType.value)
     renderDOM.value.innerHTML =
@@ -104,8 +113,13 @@ export function useDownLoad(type: Ref<string>) {
       // 生产环境使用动态导入 生产环境使用link的方式引入（解决生产default属性不暴露的问题）
       style = await importCSS(type.value)
     } else {
-      const linkStyle = document.querySelector('link[href*="/css/style"]') as HTMLLinkElement
-      linkURL = linkStyle?.href || 'none'
+      // 先确保当前模板皮肤 chunk 已加载，再从映射取该模板确切的皮肤地址
+      //（直接抓第一个 /css/style 链接会误中 iconfont 公共 chunk）
+      await importCSS(type.value)
+      linkURL =
+        skinLinkMap[type.value] ||
+        (document.querySelector('link[href*="/css/style"]') as HTMLLinkElement)?.href ||
+        'none'
     }
     // 处理自定义生成的样式
     for (const attr of styleAttrs) {
