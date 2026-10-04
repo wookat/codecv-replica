@@ -5,6 +5,7 @@ import pinia from '@/store'
 import { getLocalStorage, setLocalStorage } from '@/common/localstorage'
 import { showMessageVN } from '@/common/message'
 import { templates } from '@/templates/config'
+import { cloudPush } from '@/api/modules/cloudResume'
 import { ensureEmptyPreWhiteSpace } from '@/views/editor/components/tabbar/hook'
 
 const MARKDOWN_CONTENT = 'markdown-content'
@@ -38,6 +39,7 @@ const useEditorStore = defineStore('editorStore', {
       // 处理之后的操作
       if (!nv) return
       setLocalStorage(`${MARKDOWN_CONTENT}-${resumeType}`, nv)
+      cloudPush(resumeType, nv)
     },
     // 切换编辑模式
     setWritableMode(originHTML: HTMLElement) {

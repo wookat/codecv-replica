@@ -5,3 +5,11 @@ compatibility_date = "2024-10-01"
 [[kv_namespaces]]
 binding = "UPSTASH_KV"
 id = "46c91ca210d1493b8a0861d993503840"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "codecv-db"
+database_id = "24d8d8d3-d530-4362-b3ea-6050a47dce05"
+
+[vars]
+CF_ACCOUNT_ID = "583090ace6fb9a02db3f2625487ed865"

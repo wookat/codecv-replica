@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { templates } from '@/templates/config'
+import { cloudDelete, syncLocalCloud } from '@/api/modules/cloudResume'
 import { currentUser, logoutLocal } from '@/utils/auth'
 import LoginModal from '@/components/LoginModal.vue'
 
@@ -60,6 +61,7 @@ async function remove(type: string) {
     type: 'warning'
   })
   localStorage.removeItem(`markdown-content-${type}`)
+  cloudDelete(type)
   scan()
   ElMessage.success('已删除')
 }
@@ -70,7 +72,10 @@ function logout() {
   ElMessage.success('已退出登录')
 }
 
-onMounted(scan)
+onMounted(async () => {
+  if (user.value) await syncLocalCloud()
+  scan()
+})
 </script>
 
 <template>

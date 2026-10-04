@@ -1,4 +1,8 @@
-/* 复刻版本地账号态（线上版为微信 OAuth + 服务端 session） */
+/* 账号态：真后端 /user/* 会话（TOKEN/USERNAME 存于 localStorage），loginLocal 仅为兼容兜底 */
+import { getLocalStorage, removeLocalStorage, setLocalStorage } from '@/common/localstorage'
+
+const TOKEN = 'TOKEN'
+const USERNAME = 'USERNAME'
 const KEY = 'codecv-user'
 
 export interface LocalUser {
@@ -7,6 +11,9 @@ export interface LocalUser {
 }
 
 export function currentUser(): LocalUser | null {
+  const token = getLocalStorage(TOKEN)
+  const username = getLocalStorage(USERNAME)
+  if (token && username) return { name: String(username), loginAt: 0 }
   try {
     const raw = localStorage.getItem(KEY)
     return raw ? (JSON.parse(raw) as LocalUser) : null
@@ -20,5 +27,19 @@ export function loginLocal(name = '微信用户') {
 }
 
 export function logoutLocal() {
+  const username = getLocalStorage(USERNAME)
+  if (username) {
+    fetch('/user/logout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username })
+    }).catch(() => {
+      /* 云端同步失败静默 */
+    })
+  }
+  removeLocalStorage(TOKEN)
+  removeLocalStorage(USERNAME)
   localStorage.removeItem(KEY)
 }
+
+export { setLocalStorage }

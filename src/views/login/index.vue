@@ -1,24 +1,33 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, reactive, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { loginLocal } from '@/utils/auth'
+import { syncLocalCloud } from '@/api/modules/cloudResume'
+import useUserStore from '@/store/modules/user'
 
 const router = useRouter()
 const route = useRoute()
-const scanning = ref(false)
+const store = useUserStore()
+const tab = ref<'qr' | 'acct'>('qr')
 const agreed = ref(false)
+const form = reactive({ username: '', password: '', verify: '' })
 
-function mockLogin() {
+onMounted(() => store.genVerify())
+
+function submit(isLogin: boolean) {
   if (!agreed.value) return ElMessage.warning('请先勾选同意用户隐私政策与服务协议')
-  scanning.value = true
-  // 复刻版本地模拟扫码成功（线上为微信扫码 + code 换 token）
-  setTimeout(() => {
-    loginLocal('微信用户')
-    ElMessage.success('登录成功')
-    router.replace((route.query.redirect as string) || '/profile')
-  }, 900)
+  store.login(form, isLogin)
 }
+
+watch(
+  () => store.loginState.logined,
+  async v => {
+    if (v) {
+      await syncLocalCloud()
+      router.replace((route.query.redirect as string) || '/profile')
+    }
+  }
+)
 </script>
 
 <template>
@@ -30,25 +39,42 @@ function mockLogin() {
       <img src="/prod-assets/login-page.svg" class="illus" alt="登录插画" draggable="false" />
       <div class="vline"></div>
       <div class="login-card">
-        <h1>微信扫码登录注册</h1>
+        <h1>登录 / 注册</h1>
         <p class="sub">登录开启沉浸式简历编写体验</p>
-        <div class="qr-box" :class="{ scanned: scanning }">
-          <img src="/prod-assets/miniprogram.webp" alt="微信扫码登录" class="qr" />
-          <div v-if="scanning" class="qr-ok">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M20 6 9 17l-5-5" />
-            </svg>
-            <span>已确认</span>
+        <div class="tabs">
+          <span :class="{ on: tab === 'qr' }" @click="tab = 'qr'">微信扫码</span>
+          <span :class="{ on: tab === 'acct' }" @click="tab = 'acct'">账号密码</span>
+        </div>
+        <template v-if="tab === 'qr'">
+          <div class="qr-box">
+            <img src="/prod-assets/miniprogram.webp" alt="微信扫码登录" class="qr" />
+          </div>
+          <p class="qr-tip">请使用微信扫码完成登录</p>
+        </template>
+        <div v-else class="acct-form">
+          <input v-model="form.username" class="acct-input" placeholder="用户名" maxlength="32" />
+          <input
+            v-model="form.password"
+            class="acct-input"
+            type="password"
+            placeholder="密码"
+            maxlength="64"
+          />
+          <div class="acct-verify">
+            <input v-model="form.verify" class="acct-input" placeholder="验证码" maxlength="4" />
+            <img
+              :src="store.loginState.verifyImg"
+              class="vimg"
+              alt="验证码"
+              title="点击换一张"
+              @click="store.genVerify()"
+            />
+          </div>
+          <div class="acct-btns">
+            <button class="mock" @click="submit(true)">登录</button>
+            <button class="mock ghost" @click="submit(false)">注册</button>
           </div>
         </div>
-        <button class="mock" @click="mockLogin">{{ scanning ? '登录中…' : '模拟扫码完成' }}</button>
         <label class="agree">
           <input v-model="agreed" type="checkbox" />
           <span>登录表示您同意该<a href="javascript:;">用户隐私政策与服务协议</a></span>
@@ -111,9 +137,26 @@ function mockLogin() {
     color: var(--font-color);
   }
   .sub {
-    margin: 10px 0 28px;
+    margin: 10px 0 20px;
     font-size: 14px;
     color: #9ca3af;
+  }
+}
+.tabs {
+  display: flex;
+  gap: 28px;
+  margin-bottom: 20px;
+  span {
+    font-size: 15px;
+    color: #9ca3af;
+    cursor: pointer;
+    padding-bottom: 6px;
+    border-bottom: 2px solid transparent;
+    &.on {
+      color: var(--font-color);
+      font-weight: 600;
+      border-bottom-color: var(--theme);
+    }
   }
 }
 .qr-box {
@@ -129,34 +172,65 @@ function mockLogin() {
     height: 100%;
     object-fit: cover;
   }
-  .qr-ok {
-    position: absolute;
-    inset: 0;
-    background: rgba(255, 255, 255, 0.92);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    color: #22c55e;
-    font-weight: 600;
-    svg {
-      width: 48px;
-      height: 48px;
+}
+.qr-tip {
+  margin-top: 18px;
+  font-size: 13px;
+  color: #9ca3af;
+}
+.acct-form {
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  .acct-input {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+    outline: none;
+    background: var(--background);
+    color: var(--font-color);
+    &:focus {
+      border-color: var(--theme);
     }
+  }
+  .acct-verify {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    .acct-input {
+      flex: 1;
+    }
+    .vimg {
+      height: 38px;
+      border-radius: 6px;
+      border: 1px solid #eee;
+      cursor: pointer;
+    }
+  }
+  .acct-btns {
+    display: flex;
+    gap: 10px;
+    margin-top: 6px;
   }
 }
 .mock {
-  margin-top: 24px;
+  flex: 1;
   border: none;
   border-radius: 999px;
   background: var(--theme);
   color: #fff;
   font-size: 14px;
-  padding: 10px 36px;
+  padding: 10px 0;
   cursor: pointer;
   &:hover {
     opacity: 0.9;
+  }
+  &.ghost {
+    background: transparent;
+    color: var(--theme);
+    border: 1px solid var(--theme);
   }
 }
 .agree {

@@ -1,0 +1,112 @@
+// /user/* —— CodeCV OSS 前端契约：register/login/logout/verify/update/queryUserById/pwdUpdate
+import { json, readBody } from '../_lib.js'
+import {
+  hashPassword,
+  verifyPassword,
+  issueToken,
+  dropToken,
+  tokenUser,
+  publicUser
+} from '../_auth.js'
+
+export async function onRequest(context) {
+  const { request, env } = context
+  const url = new URL(request.url)
+  if (request.method === 'OPTIONS') return json(request, {})
+  const route = url.pathname.split('/').pop()
+  const q = await readBody(request)
+  const db = env.DB
+  const kv = env.UPSTASH_KV
+  if (!db || !kv) return json(request, { code: 503, msg: 'service unavailable' }, 503)
+
+  if (route === 'register') {
+    const { username, password } = q
+    if (!username || !password) return json(request, { code: 400, msg: '用户名或密码不能为空' })
+    const exist = await db.prepare('SELECT id FROM users WHERE username = ?').bind(username).first()
+    if (exist) return json(request, { code: 400, msg: '用户名已被注册' })
+    const { salt, hash } = await hashPassword(password)
+    const r = await db
+      .prepare(
+        'INSERT INTO users (username, pwd_hash, salt, nickname, origin, created_at) VALUES (?,?,?,?,?,?)'
+      )
+      .bind(username, hash, salt, username, 'web', Date.now())
+      .run()
+    const row = await db
+      .prepare('SELECT * FROM users WHERE id = ?')
+      .bind(r.meta.last_row_id)
+      .first()
+    const token = await issueToken(kv, username)
+    return json(request, { code: 200, msg: '注册成功', token, data: publicUser(row) })
+  }
+
+  if (route === 'login') {
+    const { username, password } = q
+    const row = await db.prepare('SELECT * FROM users WHERE username = ?').bind(username).first()
+    if (!row || !(await verifyPassword(password || '', row.salt, row.pwd_hash))) {
+      return json(request, { code: 400, msg: '用户名或密码错误' })
+    }
+    const token = await issueToken(kv, username)
+    return json(request, { code: 200, msg: '登录成功', token, data: publicUser(row) })
+  }
+
+  if (route === 'logout') {
+    await dropToken(kv, q.username)
+    return json(request, { code: 200, msg: '退出成功' })
+  }
+
+  if (route === 'verify') {
+    const username = await tokenUser(kv, q.token)
+    if (!username || (q.username && username !== q.username)) {
+      return json(request, { code: 401, msg: '登录状态已失效' })
+    }
+    const row = await db.prepare('SELECT * FROM users WHERE username = ?').bind(username).first()
+    return row
+      ? json(request, { code: 200, msg: '验证成功', data: publicUser(row) })
+      : json(request, { code: 401, msg: '用户不存在' })
+  }
+
+  if (route === 'update') {
+    const { username } = q
+    const row = await db.prepare('SELECT id FROM users WHERE username = ?').bind(username).first()
+    if (!row) return json(request, { code: 404, msg: '用户不存在' })
+    await db
+      .prepare(
+        'UPDATE users SET nickname=?, sex=?, professional=?, graduation=?, school=?, avatar=? WHERE id=?'
+      )
+      .bind(
+        q.nickName ?? '',
+        q.sex ?? '',
+        q.professional ?? '',
+        q.graduation ?? '',
+        q.school ?? '',
+        q.avatar ?? '',
+        row.id
+      )
+      .run()
+    return json(request, { code: 200, msg: '更新成功' })
+  }
+
+  if (route === 'queryUserById') {
+    const row = await db.prepare('SELECT * FROM users WHERE id = ?').bind(q.uid).first()
+    return row
+      ? json(request, { code: 200, msg: '查询成功', data: publicUser(row) })
+      : json(request, { code: 404, msg: '用户不存在' })
+  }
+
+  if (route === 'pwdUpdate') {
+    const { username, oPassword, nPassword } = q
+    const row = await db.prepare('SELECT * FROM users WHERE username = ?').bind(username).first()
+    if (!row) return json(request, { code: 404, msg: '用户不存在' })
+    if (!(await verifyPassword(oPassword || '', row.salt, row.pwd_hash))) {
+      return json(request, { code: 400, msg: '原密码错误' })
+    }
+    const { salt, hash } = await hashPassword(nPassword)
+    await db
+      .prepare('UPDATE users SET pwd_hash=?, salt=? WHERE id=?')
+      .bind(hash, salt, row.id)
+      .run()
+    return json(request, { code: 200, msg: '密码修改成功' })
+  }
+
+  return json(request, { code: 404, msg: 'not found' }, 404)
+}

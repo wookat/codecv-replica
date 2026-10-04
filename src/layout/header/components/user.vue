@@ -1,14 +1,22 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import ThemeToggle from '@/components/themeToggle.vue'
+import useUserStore from '@/store/modules/user'
 import { currentUser, logoutLocal, type LocalUser } from '@/utils/auth'
 
 const router = useRouter()
+const store = useUserStore()
 const user = ref<LocalUser | null>(null)
 onMounted(() => {
   user.value = currentUser()
 })
+watch(
+  () => store.loginState.logined,
+  v => {
+    if (v) user.value = currentUser()
+  }
+)
 function logout() {
   logoutLocal()
   user.value = null

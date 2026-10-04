@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { getLocalStorage } from '@/common/localstorage'
 
 interface Tier {
   name: string
@@ -136,17 +138,48 @@ const COMMENTS = [
   }
 ]
 
+const router = useRouter()
 const paying = ref(false)
 function scrollTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
-function upgrade(t: Tier) {
+async function upgrade(t: Tier) {
+  const token = getLocalStorage('TOKEN') as string
+  if (!token) {
+    router.push('/login?redirect=/member')
+    return
+  }
   paying.value = true
-  // 复刻版：支付通道未接入，提示后关闭
-  setTimeout(() => {
+  try {
+    const res = await fetch('/api/order/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ plan: t.name, amount: +t.price })
+    })
+    const data = await res.json()
+    if (data.code !== 200) return ElMessage.error(data.msg || '下单失败')
+    await ElMessageBox.confirm(
+      `订单 ${data.data.orderNo} 已创建（¥${t.price}）。真实收款渠道未接入，点击确定模拟支付完成。`,
+      '确认支付',
+      { type: 'info', confirmButtonText: '模拟支付', cancelButtonText: '取消' }
+    )
+    const pay = await fetch('/api/order/pay', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ orderNo: data.data.orderNo })
+    })
+    const pd = await pay.json()
+    if (pd.code === 200) {
+      ElMessage.success(`「${t.name}」已开通（模拟支付）`)
+      router.push('/order')
+    } else {
+      ElMessage.error(pd.msg || '支付失败')
+    }
+  } catch (e) {
+    if (e !== 'cancel') ElMessage.error('网络异常，请稍后重试')
+  } finally {
     paying.value = false
-    ElMessage.info(`「${t.name}」支付通道接入后开放，敬请期待`)
-  }, 400)
+  }
 }
 </script>
 
@@ -177,7 +210,9 @@ function upgrade(t: Tier) {
           <del v-if="t.del" class="tdel">{{ t.del }}</del>
           <del v-else class="tdel op0">0</del>
           <div class="tunit">{{ t.unit }}</div>
-          <div class="tbtn" :class="t.btnGradient || ''" @click="upgrade(t)">升级会员</div>
+          <div class="tbtn" :class="t.btnGradient || ''" @click="!paying && upgrade(t)">
+            升级会员
+          </div>
         </div>
         <div class="rights">
           <div class="rights-title">功能权益</div>
