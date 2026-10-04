@@ -5,6 +5,30 @@ import { json } from './_lib.js'
 
 export const onRequestOptions = context => json(context.request, {})
 
+// フォントを本站 origin から self-fetch し base64 data-URI 化して addStyleTag に内包する。
+// html パラメータ経路では外部フォント取得が print に間に合わない（WenQuanYi フォールバック観測）
+// ため、フェッチ不要の inline 化で確実に適用させる。cold-start 時のみ取得・モジュールキャッシュ。
+let fontCssCache = null
+async function fontCss(origin) {
+  if (fontCssCache) return fontCssCache
+  const css = await (await fetch(`${origin}/fonts/resume-fonts.css`)).text()
+  const urls = [...css.matchAll(/url\('([^']+)'\)/g)].map(m => m[1])
+  const bufs = await Promise.all(
+    urls.map(async u => new Uint8Array(await (await fetch(new URL(u, origin))).arrayBuffer()))
+  )
+  let out = css
+  urls.forEach((u, i) => {
+    let bin = ''
+    const bytes = bufs[i]
+    for (let j = 0; j < bytes.length; j += 0x8000) {
+      bin += String.fromCharCode.apply(null, bytes.subarray(j, j + 0x8000))
+    }
+    out = out.replace(u, `data:font/woff2;base64,${btoa(bin)}`)
+  })
+  fontCssCache = out
+  return out
+}
+
 export async function onRequestPost(context) {
   const { request, env } = context
   const { content, style, link, type } = await request.json()
@@ -24,10 +48,11 @@ export async function onRequestPost(context) {
     style || ''
   }</style></head><body>${content}</body></html>`
   const endpoint = isPdf ? 'pdf' : 'screenshot'
+  const fonts = await fontCss(origin)
   const body = isPdf
     ? {
         html,
-        addStyleTag: [{ url: `${origin}/fonts/resume-fonts.css` }],
+        addStyleTag: [{ content: fonts }],
         pdfOptions: {
           // width/height は CF BR では無視され Letter に落ちるため format 指定が必須（小文字のみ受理）
           format: 'a4',
@@ -38,7 +63,7 @@ export async function onRequestPost(context) {
       }
     : {
         html,
-        addStyleTag: [{ url: `${origin}/fonts/resume-fonts.css` }],
+        addStyleTag: [{ content: fonts }],
         screenshotOptions: { fullPage: false },
         viewport: { width: 794, height: 1123 },
         gotoOptions: { waitUntil: 'networkidle0' }
