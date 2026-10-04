@@ -97,7 +97,12 @@ export async function onRequestPost(context) {
     return json(
       request,
       Object.assign(
-        { fontsLen: fonts.length, dbgHeads },
+        {
+          fontsLen: fonts.length,
+          dbgHeads,
+          dbgFontsHead: fonts.slice(0, 80),
+          dbgStyleHead: (html.match(/<style>([\s\S]{0,80})/) || [])[1] || 'NO_STYLE'
+        },
         isPdf ? { pdf: { data: [...buf] } } : { picture: { data: [...buf] } }
       )
     )
