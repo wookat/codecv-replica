@@ -64,7 +64,7 @@ export async function onRequestPost(context) {
   const body = isPdf
     ? {
         html,
-        waitForSelector: '#fonts-ready',
+        waitForSelector: { selector: '#fonts-ready', timeout: 10000 },
         pdfOptions: {
           // width/height は CF BR では無視され Letter に落ちるため format 指定が必須（小文字のみ受理）
           format: 'a4',
@@ -75,7 +75,7 @@ export async function onRequestPost(context) {
       }
     : {
         html,
-        waitForSelector: '#fonts-ready',
+        waitForSelector: { selector: '#fonts-ready', timeout: 10000 },
         screenshotOptions: { fullPage: false },
         viewport: { width: 794, height: 1123 },
         gotoOptions: { waitUntil: 'networkidle0' }
