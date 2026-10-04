@@ -5,21 +5,32 @@ import { json } from './_lib.js'
 
 export const onRequestOptions = context => json(context.request, {})
 
-// フォントを本站 origin から self-fetch し base64 data-URI 化して addStyleTag に内包する。
+// フォントを本站 origin から self-fetch し base64 data-URI 化して <style> に内包する。
 // html パラメータ経路では外部フォント取得が print に間に合わない（WenQuanYi フォールバック観測）
-// ため、フェッチ不要の inline 化で確実に適用させる。cold-start 時のみ取得・モジュールキャッシュ。
-let fontCssCache = null
-async function fontCss(origin) {
-  if (fontCssCache) return fontCssCache
+// ため、フェッチ不要の inline 化で確実に適用させる。
+// BR は ~5MB 超のインライン <style> を黙殺する実測があるため、テンプレが参照しない
+// ファミリー（Serif 等）は送らない：ほぼ全テンプレは Sans のみで ~3.3MB に収まる。
+const fontCssCache = new Map()
+async function fontCss(origin, families) {
+  const key = families.join(',')
+  if (fontCssCache.has(key)) return fontCssCache.get(key)
   const css =
     (await (await fetch(`${origin}/fonts/resume-fonts.css`)).text()) +
     '\n' +
     (await (await fetch(`${origin}/fonts/iconfont.css`)).text())
-  const urls = [...css.matchAll(/url\('([^']+)'\)/g)].map(m => m[1])
+  // @font-face ブロックを family 名で選別
+  const blocks = css.match(/@font-face\s*{[^}]+}|(?!@font-face)[^@]+/g) || []
+  const kept = blocks.filter(b => {
+    const m = b.match(/font-family:\s*'([^']+)'/)
+    if (!m) return true // クラス規則等非 @font-face は全て残す
+    return families.includes(m[1])
+  })
+  const keptCss = kept.join('\n')
+  const urls = [...keptCss.matchAll(/url\('([^']+)'\)/g)].map(m => m[1])
   const bufs = await Promise.all(
     urls.map(async u => new Uint8Array(await (await fetch(new URL(u, origin))).arrayBuffer()))
   )
-  let out = css
+  let out = keptCss
   urls.forEach((u, i) => {
     let bin = ''
     const bytes = bufs[i]
@@ -28,7 +39,7 @@ async function fontCss(origin) {
     }
     out = out.replace(u, `data:font/woff2;base64,${btoa(bin)}`)
   })
-  fontCssCache = out
+  fontCssCache.set(key, out)
   return out
 }
 
@@ -49,7 +60,13 @@ export async function onRequestPost(context) {
   const origin = new URL(request.url).origin
   // @font-face は <style> 内の data-URI でのみ BR に適用される実測あり（addStyleTag の大きな
   // content は黙殺される）。サイト側 style と同じ <style> ブロックへ前置する。
-  const fonts = await fontCss(origin)
+  // 参照されるファミリーだけ内联する（iconfont/Nunito は小さいので常時同梱）
+  const scan = `${content || ''}${style || ''}${link || ''}`.toLowerCase()
+  const families = ['Noto Sans SC', 'iconfont', 'Nunito']
+  if (scan.includes('noto-serif-sc') || scan.includes('noto serif sc')) {
+    families.push('Noto Serif SC')
+  }
+  const fonts = await fontCss(origin, families)
   const html = `<!doctype html><html><head><meta charset="utf-8">${iconfont}${linkTag}<style>${fonts}${
     style || ''
   }</style></head><body>${content}</body></html>`
