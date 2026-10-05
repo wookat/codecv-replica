@@ -11,12 +11,23 @@ export const onRequestOptions = context => json(context.request, {})
 // 3. data-URI @font-face の inline <style> —— これのみ確実に適用される（採用）
 // face 別ファイルに切り出し、テンプレが参照するファミリーだけ inline する。
 const FACE_FILES = {
-  'Noto Sans SC': ['face-noto-sans-sc-400.css', 'face-noto-sans-sc-700.css'],
+  'Noto Sans SC': [
+    'face-noto-sans-sc-400.css',
+    'face-noto-sans-sc-500.css',
+    'face-noto-sans-sc-700.css'
+  ],
   'Noto Serif SC': ['face-noto-serif-sc-400.css', 'face-noto-serif-sc-700.css'],
-  Nunito: ['face-nunito-400.css', 'face-nunito-700.css'],
+  Nunito: [
+    'face-nunito-400.css',
+    'face-nunito-500.css',
+    'face-nunito-700.css',
+    'face-nunito-800.css',
+    'face-nunito-900.css',
+    'face-nunito-500i.css'
+  ],
   // prod の Latin 数字は TimesNewRomanPS —— Regular は実バイナリ times.ttf、
-  // Bold は prod 側 TimesNewRomanPS-BoldMT に相当する Tinos-Bold を同姓で供給
-  'Times New Roman': ['face-times-new-roman-700.css'],
+  // Bold/Italic は Tinos(TimesNewRomanPS-BoldMT/ItalicMT 相当)を同姓で供給
+  'Times New Roman': ['face-times-new-roman-700.css', 'face-times-new-roman-italic.css'],
   // @font-face 本体と ~200 個の .icon-* クラス規則の2ファイル
   iconfont: ['face-iconfont-400.css', 'face-iconfont.css']
 }
@@ -109,24 +120,13 @@ export async function onRequestPost(context) {
     : LI_MARGIN0.has(name)
     ? `.markdown-transform-html li{margin-top:0}`
     : ''
-  // prod PDF ではラテン文字が TimesNewRomanPS(セリフ)で描かれるテンプレは
-  // 'Noto Sans SC'/'Noto Serif SC' 指定のものに限る(実測: Nunito は Nunito、
-  // 微软雅黑/阿里普惠/PingFang/FZKai は各フォント、Times 指定は Times のまま)。
-  // 先頭ファミリが Noto Sans/Serif SC(または未指定=既定 Noto)のときだけ
-  // 'Times New Roman' をスタック先頭に差して prod と同じ serif-Latin に揃える。
-  const stackMatch = (style || '').match(/\.jufe \*\s*\{[^}]*font-family:\s*([^;]+);/)
-  const callerStack = (stackMatch?.[1] || '').trim()
-  const firstFamily = callerStack.split(',')[0].replace(/['"]/g, '').trim()
-  const needsTimes =
-    callerStack === '' || firstFamily === 'Noto Sans SC' || firstFamily === 'Noto Serif SC'
-  const latinSerif = needsTimes
-    ? `.jufe * { font-family: 'Times New Roman', ${
-        callerStack || `'Noto Sans SC', 'Noto Serif SC', 'Nunito', sans-serif, serif`
-      }; }`
-    : ''
+  // prod の埋め込みフォントは投稿フォントスタック先頭のファミリーに一致
+  // (実測全114: Times 宣言テンプレだけ TimesNewRomanPS、他は先頭ファミリー
+  // 自体がラテンも描く。Serif 宣言は NotoSerifSC、その他各書体)——
+  // ラテン強制置換は不要のため行わない。
   const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}<style>${cloudFaces}${fonts}${markNormalize}${
     style || ''
-  }${latinSerif}${liFix}</style></head><body>${content}${watermark}${fontWait}</body></html>`
+  }${liFix}</style></head><body>${content}${watermark}${fontWait}</body></html>`
   const endpoint = isPdf ? 'pdf' : 'screenshot'
   const body = isPdf
     ? {
