@@ -1,6 +1,9 @@
 // POST /export {content,style,link,name,type:0|1} —— 服务端渲染 PDF/截图
-// 经 Cloudflare Browser Rendering REST（需 Pages 环境变量 CF_ACCOUNT_ID + BR_API_TOKEN）；
-// 未配置时 503（与本地 dev.mjs 缺浏览器行为一致）。
+// 渲染链两级:
+// 1. 自托管渲染服务 (RENDER_URL + RENDER_TOKEN) —— VPS 上 Chrome 114 CLI
+//    (Skia m114, 与 prod 同版本), 经 cloudflared 隧道 https://cvrender.zalize.com
+// 2. Cloudflare Browser Rendering REST (CF_ACCOUNT_ID + BR_API_TOKEN, Skia m128)
+//    自托管失败时回退; 两者都未配置时 503。
 import { json } from './_lib.js'
 
 export const onRequestOptions = context => json(context.request, {})
@@ -60,7 +63,7 @@ export async function onRequestPost(context) {
   const { request, env } = context
   const { content, style, link, name, type } = await request.json()
   const isPdf = Number(type) === 0
-  if (!env.CF_ACCOUNT_ID || !env.BR_API_TOKEN) {
+  if (!env.RENDER_URL && (!env.CF_ACCOUNT_ID || !env.BR_API_TOKEN)) {
     return json(request, { msg: 'export service unavailable' }, 503)
   }
   const origin = new URL(request.url).origin
@@ -150,6 +153,24 @@ export async function onRequestPost(context) {
   const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}<style>${cloudFaces}${fonts}${markNormalize}${liFix}${
     style || ''
   }</style></head><body>${fixedContent}${watermark}${fontWait}</body></html>`
+  // 優先: 自托管 Chrome114 渲染サービス (prod と同一 Skia m114)
+  if (env.RENDER_URL) {
+    try {
+      const r = await fetch(env.RENDER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: env.RENDER_TOKEN, html, type: isPdf ? 'pdf' : 'png' }),
+        signal: AbortSignal.timeout(60000)
+      })
+      if (r.ok) {
+        const { data } = await r.json()
+        if (Array.isArray(data) && data.length) {
+          return json(request, isPdf ? { pdf: { data } } : { picture: { data } })
+        }
+      }
+      // 自托管失敗 → CF BR へフォールバック
+    } catch { /* fallthrough */ }
+  }
   const endpoint = isPdf ? 'pdf' : 'screenshot'
   const body = isPdf
     ? {
