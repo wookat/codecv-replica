@@ -192,13 +192,8 @@ export async function onRequestPost(context) {
     /\.jufe \* ?\{ ?font-family: ?([^;}]+);? ?\}/g,
     (m, fl) => `.jufe * { font-family: ${fl.split(',')[0].trim()}, sans-serif, serif; }`
   )
-  // ・prod の style 末尾は必ず `*{line-height:NN}` で締まる ——
-  //   非 li 要素行距の統一压轴ルール(既定20px; ユーザー調整時はその値)。
-  //   li はより特異なルールが勝つため影響しない。
-  //   style 内に同型ルールがあればそれがその役割(値の有無を見ず最終扱い)。
-  if (!/markdown-transform-html \*\s*\{[^}]*line-height:/.test(fixedStyle)) {
-    fixedStyle += '.markdown-transform-html * { line-height: 20px; }'
-  }
+  // (末尾の *{line-height} 統一ルールは試したが回帰した —— prod 側では
+  //   非 li 行距もテンプレ既定値が効いており、20px 強制は整列を崩す)
   // 順序: skin link → フォント/markNormalize → liFix(テンプレ既定行距) → style
   // (attr 断片: テーマ変数 + ユーザー調整の Line_Height/font_size/para_spacing/
   //  justify/one-page/custom-css は必ず最後に置いて既定値を上書きさせる ——
