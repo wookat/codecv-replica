@@ -164,7 +164,7 @@ export async function onRequestPost(context) {
     '.markdown-transform-html .head-layout{margin-bottom:-1px}'
   const mt = n => `.markdown-transform-html{margin-top:${n}px}`
   const OFFSET_MAP = {
-    '19social': mt(-3),
+    '19social': mt(-4),
     '2concise': mt(-3),
     '3operation': mt(-2),
     '4internet': mt(2),
@@ -173,12 +173,12 @@ export async function onRequestPost(context) {
     '9business': mt(4),
     // CID 系（prod CID TrueType）ピクセル実測スイープで採用 ——
     // 勝者のみ: mt∈[-8,+4] を全レンダ検証して決定 (audit/cidcal,cidsweep)
-    '100': mt(-2), '35': mt(-1), '32': mt(-2), '31': mt(-2), '36': mt(-1),
+    '100': mt(-1), '35': mt(-1), '32': mt(-2), '31': mt(-2), '36': mt(-1),
     '33': mt(-2), '34': mt(-2), '17business': mt(-3), '66': mt(-1),
-    '76': mt(-3), '21it_campus': mt(-1), '75': mt(-1), '37': mt(-2),
+    '76': mt(-4), '21it_campus': mt(-1), '75': mt(-1), '37': mt(-2),
     '28': mt(-2), '63': mt(-1), '77': mt(-1), '87': mt(1), '56': mt(-1),
     '27': mt(4), '53': mt(1),
-    'agent_development': mt(-8), '74': mt(-7), '84': mt(3), '13geek': mt(-4)
+    'agent_development': mt(-9), '74': mt(-7), '13geek': mt(-4)
   }
   const offFix = OFFSET_MAP[name] || ''
   // prod の埋め込みフォントは投稿フォントスタック先頭のファミリーに一致
