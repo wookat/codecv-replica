@@ -26,7 +26,8 @@ import { oneDark } from '@codemirror/theme-one-dark'
 import { useThemeConfig } from '@/common/global'
 import { useResumeType } from '../../hook'
 import ProofreadDrawer from '../proofread/proofread.vue'
-import { ref } from 'vue'
+import { proofreadBus } from '../proofread/proofread'
+import { ref, watch } from 'vue'
 
 const emits = defineEmits(['upload-avatar', 'html-convert'])
 
@@ -47,6 +48,7 @@ const { setBadge } = useBadge(resumeType.value)
 const { isDark } = useThemeConfig()
 
 const proofreadVisible = ref(false)
+watch(proofreadBus, () => (proofreadVisible.value = true))
 </script>
 
 <template>

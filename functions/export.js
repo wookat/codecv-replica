@@ -44,7 +44,7 @@ const FACE_FILES = {
 const CLOUD_FONT_URLS = {
   'Times New Roman': 'times.ttf',
   微软雅黑: 'yahei.woff2',
-  '微软雅黑__700': 'yahei-bold.woff2',
+  微软雅黑__700: 'yahei-bold.woff2',
   PingFangSC: 'pingfang.woff2',
   阿里巴巴普惠体: 'puhuiti.ttf',
   'FZKai-Z03S': 'fzkai.ttf',
@@ -76,7 +76,9 @@ export async function onRequestPost(context) {
     try {
       const u = new URL(link, origin)
       skinHref = u.pathname.startsWith('/') ? `${origin}${u.pathname}${u.search}` : link
-    } catch { skinHref = link }
+    } catch {
+      skinHref = link
+    }
   }
   const linkTag = skinHref ? `<link rel="stylesheet" href="${skinHref}">` : ''
   // 描画 HTML は base URL を持たないため、content 内の相対/ローカル
@@ -97,7 +99,9 @@ export async function onRequestPost(context) {
   const cloudFaces = Object.entries(CLOUD_FONT_URLS)
     .map(([fam, file]) => {
       const [family, weight] = fam.split('__')
-      return `@font-face{font-family:'${family}';${weight ? `font-weight:${weight};` : ''}src:url('${origin}/fonts/cvfonts/${file}');}`
+      return `@font-face{font-family:'${family}';${
+        weight ? `font-weight:${weight};` : ''
+      }src:url('${origin}/fonts/cvfonts/${file}');}`
     })
     .join('')
   const fonts = (
@@ -138,7 +142,10 @@ export async function onRequestPost(context) {
   // (prod PDF から実抽出したラスタを wm-raster.png として自ホスト)。
   // position:fixed な img は paged media で全頁に自動繰返し、2px/css の
   // 解像度・alpha・回転・グリッドすべて prod と画素一致する。
-  const wmImg = top => `<img src="${origin}/codecv-assets/wm-raster.png" style="position:${isPdf ? 'fixed' : 'absolute'};left:0;top:${top}px;width:794px;height:1123px;z-index:2147483000;pointer-events:none">`
+  const wmImg = top =>
+    `<img src="${origin}/codecv-assets/wm-raster.png" style="position:${
+      isPdf ? 'fixed' : 'absolute'
+    };left:0;top:${top}px;width:794px;height:1123px;z-index:2147483000;pointer-events:none">`
   const watermark = isPdf ? wmImg(0) : wmImg(0) + wmImg(1123) + wmImg(2246) + wmImg(3369)
   // prod の export リクエスト style フィールドに同梱される正規化ルールを同じく
   // 同梱（mark 内の色/背景を outer 側に正規化・全要素 line-height:20px 強制）
@@ -152,7 +159,122 @@ export async function onRequestPost(context) {
   // (lh∈{17,18,19,20,22}×mt∈{0,5} を各テンプレ全変体レンダリングし、
   //  prod との行位置誤差が最小の組を採用。詳細: audit/EXPORT-AUDIT.md)。
   // 皮膚側 li ルールより後に置いて必ず勝たせるため、マップ値を一律出力する。
-  const LH_MAP = { '100':[19, 5],'101':[19,5],'102':[20,5],'103':[19,5],'104':[19,5],'105':[19,5],'106':[19,5],'107':[19,5],'108':[19,5],'109':[19,5],'10front_end':[20, 5],'11fresh':[20.5,5],'12internet_social':[23, 0],'13geek':[22, 0],'14heading':[21,5],'15simple_versatile':[21, 5],'16prominent_content':[20,5],'17business':[21, 5],'18art':[21, 5],'19social':[21, 5],'1internet_avatar':[20, 5],'20campus_simple':[19,5],'21it_campus':[18,5],'22':[20, 5],'23':[19,5],'24':[19, 5],'25':[19,5],'26':[18,5],'27':[19,0],'28':[20, 5],'29':[19,5],'2concise':[20,5],'30':[20,5],'31':[21, 5],'32':[21, 5],'33':[21, 5],'34':[21, 5],'35':[21, 5],'36':[20,5],'37':[20,5],'38':[19, 5],'39':[19,5],'3operation':[20, 5],'40':[20,5],'41':[20,5],'42':[20,5],'43':[20,5],'44':[20,5],'45':[19,5],'46':[20,5],'47':[20,5],'48':[20,5],'49':[20,5],'4internet':[20, 5],'50':[20,5],'51':[20,5],'52':[18,5],'53':[16,5],'54':[18,5],'55':[18,5],'56':[18,5],'57':[18,5],'58':[19,5],'59':[18,5],'5graduation_reexam':[20, 5],'60':[17,5],'61':[20,5],'62':[20,5],'63':[19,5],'64':[17,5],'65':[18,5],'66':[20,5],'67':[19,5],'68':[19,5],'69':[19,5],'6operation_avatar':[20,5],'70':[18,5],'71':[20,5],'72':[18,5],'73':[17,5],'74':[21,0],'75':[20,5],'76':[20, 5],'77':[20,5],'78':[17,5],'79':[17,5],'7simple_avatar':[21, 5],'80':[18,5],'81':[19,5],'82':[19,5],'83':[19,5],'84':[20, 5],'85':[18,5],'86':[19,5],'87':[19,0],'88':[19,5],'89':[18,5],'8general':[21, 5],'90':[19,5],'91':[19,5],'92':[19,5],'93':[19,5],'94':[19,5],'95':[19,5],'96':[19,5],'97':[20,5],'98':[19,5],'99':[19,5],'9business':[20, 5],'agent_development':[19,5],'duomotaidamoxingsuanfa':[18, 5],'shuziic':[19,5],'yinhangguanpeisheng':[19,5],'youxikehuduankaifa':[19,5] }
+  const LH_MAP = {
+    100: [19, 5],
+    101: [19, 5],
+    102: [20, 5],
+    103: [19, 5],
+    104: [19, 5],
+    105: [19, 5],
+    106: [19, 5],
+    107: [19, 5],
+    108: [19, 5],
+    109: [19, 5],
+    '10front_end': [20, 5],
+    '11fresh': [20.5, 5],
+    '12internet_social': [23, 0],
+    '13geek': [22, 0],
+    '14heading': [21, 5],
+    '15simple_versatile': [21, 5],
+    '16prominent_content': [20, 5],
+    '17business': [21, 5],
+    '18art': [21, 5],
+    '19social': [21, 5],
+    '1internet_avatar': [20, 5],
+    '20campus_simple': [19, 5],
+    '21it_campus': [18, 5],
+    22: [20, 5],
+    23: [19, 5],
+    24: [19, 5],
+    25: [19, 5],
+    26: [18, 5],
+    27: [19, 0],
+    28: [20, 5],
+    29: [19, 5],
+    '2concise': [20, 5],
+    30: [20, 5],
+    31: [21, 5],
+    32: [21, 5],
+    33: [21, 5],
+    34: [21, 5],
+    35: [21, 5],
+    36: [20, 5],
+    37: [20, 5],
+    38: [19, 5],
+    39: [19, 5],
+    '3operation': [20, 5],
+    40: [20, 5],
+    41: [20, 5],
+    42: [20, 5],
+    43: [20, 5],
+    44: [20, 5],
+    45: [19, 5],
+    46: [20, 5],
+    47: [20, 5],
+    48: [20, 5],
+    49: [20, 5],
+    '4internet': [20, 5],
+    50: [20, 5],
+    51: [20, 5],
+    52: [18, 5],
+    53: [16, 5],
+    54: [18, 5],
+    55: [18, 5],
+    56: [18, 5],
+    57: [18, 5],
+    58: [19, 5],
+    59: [18, 5],
+    '5graduation_reexam': [20, 5],
+    60: [17, 5],
+    61: [20, 5],
+    62: [20, 5],
+    63: [19, 5],
+    64: [17, 5],
+    65: [18, 5],
+    66: [20, 5],
+    67: [19, 5],
+    68: [19, 5],
+    69: [19, 5],
+    '6operation_avatar': [20, 5],
+    70: [18, 5],
+    71: [20, 5],
+    72: [18, 5],
+    73: [17, 5],
+    74: [21, 0],
+    75: [20, 5],
+    76: [20, 5],
+    77: [20, 5],
+    78: [17, 5],
+    79: [17, 5],
+    '7simple_avatar': [21, 5],
+    80: [18, 5],
+    81: [19, 5],
+    82: [19, 5],
+    83: [19, 5],
+    84: [20, 5],
+    85: [18, 5],
+    86: [19, 5],
+    87: [19, 0],
+    88: [19, 5],
+    89: [18, 5],
+    '8general': [21, 5],
+    90: [19, 5],
+    91: [19, 5],
+    92: [19, 5],
+    93: [19, 5],
+    94: [19, 5],
+    95: [19, 5],
+    96: [19, 5],
+    97: [20, 5],
+    98: [19, 5],
+    99: [19, 5],
+    '9business': [20, 5],
+    agent_development: [19, 5],
+    duomotaidamoxingsuanfa: [18, 5],
+    shuziic: [19, 5],
+    yinhangguanpeisheng: [19, 5],
+    youxikehuduankaifa: [19, 5]
+  }
   const lm = LH_MAP[name] || [20, 5]
   const liFix = `.markdown-transform-html *{line-height:${lm[0]}px}.markdown-transform-html li{line-height:${lm[0]}px;margin-top:${lm[1]}px}`
   // テンプレ別コンテンツオフセット —— prod PDF との逐頁ピクセル差が最小になる
@@ -173,44 +295,68 @@ export async function onRequestPost(context) {
     '9business': mt(4),
     // CID 系（prod CID TrueType）ピクセル実測スイープで採用 ——
     // 勝者のみ: mt∈[-8,+4] を全レンダ検証して決定 (audit/cidcal,cidsweep)
-    '100': mt(-2), '35': mt(-1), '32': mt(1), '31': mt(1), '36': mt(-2),
-    '33': mt(1), '34': mt(-2), '17business': mt(1), '66': mt(-2),
-    '76': mt(-4), '21it_campus': mt(-1), '75': mt(-2), '37': mt(-2),
-    '28': mt(-2), '63': mt(-2), '77': mt(-2), '87': mt(1), '56': mt(-1),
-     '53': mt(1),
-    'agent_development': mt(-9), '74': mt(-7), '13geek': mt(-4),
+    100: mt(-2),
+    35: mt(-1),
+    32: mt(1),
+    31: mt(1),
+    36: mt(-2),
+    33: mt(1),
+    34: mt(-2),
+    '17business': mt(1),
+    66: mt(-2),
+    76: mt(-4),
+    '21it_campus': mt(-1),
+    75: mt(-2),
+    37: mt(-2),
+    28: mt(-2),
+    63: mt(-2),
+    77: mt(-2),
+    87: mt(1),
+    56: mt(-1),
+    53: mt(1),
+    agent_development: mt(-9),
+    74: mt(-7),
+    '13geek': mt(-4),
     // 逐行互相关精测 (xcorr): 84 已验证 13.49→0
-    '68': mt(-2), '38': mt(-2),
-    '11fresh': mt(5), '93': mt(-1), '24': mt(2),
-    '10front_end': mt(-2), '20campus_simple': mt(2), '22': mt(-1), '15simple_versatile': mt(2), '70': mt(2), 'duomotaidamoxingsuanfa': mt(1),
-    '102': mt(-2),
-    '103': mt(-1),
-    '104': mt(-1),
-    '105': mt(-1),
-    '107': mt(2),
-    '109': mt(2),
-    '46': mt(-2),
-    '59': mt(-1),
-    '69': mt(-1),
-    '83': mt(-1),
-    '88': mt(-1),
-    '89': mt(-2),
-    '94': mt(-2),
-    '96': mt(-1),
-    '97': mt(-1),
-    '98': mt(-2),
-    '99': mt(-2),
-    '39': mt(-2),
-    '41': mt(-2),
-    '44': mt(-1),
-    '47': mt(-2),
-    '48': mt(-2),
-    '54': mt(-1),
-    '57': mt(-1),
-    '60': mt(-1),
-    '61': mt(-1),
-    '90': mt(-1),
-    '91': mt(-2),
+    68: mt(-2),
+    38: mt(-2),
+    '11fresh': mt(5),
+    93: mt(-1),
+    24: mt(2),
+    '10front_end': mt(-2),
+    '20campus_simple': mt(2),
+    22: mt(-1),
+    '15simple_versatile': mt(2),
+    70: mt(2),
+    duomotaidamoxingsuanfa: mt(1),
+    102: mt(-2),
+    103: mt(-1),
+    104: mt(-1),
+    105: mt(-1),
+    107: mt(2),
+    109: mt(2),
+    46: mt(-2),
+    59: mt(-1),
+    69: mt(-1),
+    83: mt(-1),
+    88: mt(-1),
+    89: mt(-2),
+    94: mt(-2),
+    96: mt(-1),
+    97: mt(-1),
+    98: mt(-2),
+    99: mt(-2),
+    39: mt(-2),
+    41: mt(-2),
+    44: mt(-1),
+    47: mt(-2),
+    48: mt(-2),
+    54: mt(-1),
+    57: mt(-1),
+    60: mt(-1),
+    61: mt(-1),
+    90: mt(-1),
+    91: mt(-2)
   }
   const offFix = OFFSET_MAP[name] || ''
   // prod の埋め込みフォントは投稿フォントスタック先頭のファミリーに一致
@@ -230,9 +376,7 @@ export async function onRequestPost(context) {
   // (attr 断片: テーマ変数 + ユーザー調整の Line_Height/font_size/para_spacing/
   //  justify/one-page/custom-css は必ず最後に置いて既定値を上書きさせる ——
   //  prod の style 連結順と同じ)。
-  const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}<style>${cloudFaces}${fonts}${markNormalize}${liFix}${offFix}${
-    fixedStyle
-  }</style></head><body>${fixedContent}${watermark}${fontWait}</body></html>`
+  const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}<style>${cloudFaces}${fonts}${markNormalize}${liFix}${offFix}${fixedStyle}</style></head><body>${fixedContent}${watermark}${fontWait}</body></html>`
   // 優先: 自托管 Chrome114 渲染サービス (prod と同一 Skia m114)
   if (env.RENDER_URL) {
     try {
@@ -249,7 +393,9 @@ export async function onRequestPost(context) {
         }
       }
       // 自托管失敗 → CF BR へフォールバック
-    } catch { /* fallthrough */ }
+    } catch {
+      /* fallthrough */
+    }
   }
   const endpoint = isPdf ? 'pdf' : 'screenshot'
   const body = isPdf

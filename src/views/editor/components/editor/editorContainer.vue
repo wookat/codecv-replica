@@ -15,27 +15,23 @@ const { writable } = reactiveWritable(resumeType.value)
 injectWritableModeAvatarEvent(writable, setAvatar)
 
 const editorStore = useEditorStore()
-// 线上版三模式：编辑(所见即所得) / 预览(只留纸面) / MD
-const mode = computed(() => (editorStore.previewMode ? 'preview' : writable.value ? 'edit' : 'md'))
-function setMode(m: 'edit' | 'preview' | 'md') {
-  editorStore.setPreviewMode(m === 'preview')
+// 生产版双模式：编辑(所见即所得) / MD —— 右栏即常显预览，无独立预览丸
+const mode = computed(() => (writable.value ? 'edit' : 'md'))
+function setMode(m: 'edit' | 'md') {
   if (m === 'edit' && !writable.value) editorStore.setWritableMode(document.body)
   if (m === 'md' && writable.value) editorStore.setWritableMode(document.body)
 }
 </script>
 
 <template>
-  <div class="markdown-edit noto-sans-sc" :class="{ 'preview-only': mode === 'preview' }">
-    <div class="mode-pills">
+  <div class="markdown-edit noto-sans-sc" :class="`mode-${mode}`">
+    <div class="toggle-edit-mode">
       <button
         :class="{ active: mode === 'edit' }"
         title="切换到所见即所得模式"
         @click="setMode('edit')"
       >
-        <i class="iconfont icon-write"></i>编辑
-      </button>
-      <button :class="{ active: mode === 'preview' }" @click="setMode('preview')">
-        <i class="iconfont icon-browse"></i>预览
+        <i class="iconfont icon-write"></i>
       </button>
       <button
         :class="{ active: mode === 'md' }"
@@ -45,15 +41,13 @@ function setMode(m: 'edit' | 'preview' | 'md') {
         MD
       </button>
     </div>
-    <template v-if="mode !== 'preview'">
-      <RichEditor :left="left" v-if="writable" />
-      <MDEditor :left="left" v-if="!writable" />
-      <div class="move absolute" @mousedown="down">
-        <span>.</span>
-        <span>.</span>
-        <span>.</span>
-      </div>
-    </template>
+    <RichEditor :left="left" v-if="writable" />
+    <MDEditor :left="left" v-if="!writable" />
+    <div class="move absolute" @mousedown="down">
+      <span>.</span>
+      <span>.</span>
+      <span>.</span>
+    </div>
   </div>
 </template>
 
@@ -65,52 +59,47 @@ function setMode(m: 'edit' | 'preview' | 'md') {
   font-size: 15px;
   margin: 0 0 10px 10px;
   border-radius: 10px;
-
-  &.preview-only {
-    margin: 0;
-    position: absolute;
-    top: 70px;
-    left: 12px;
-    z-index: 5;
-
-    .mode-pills {
-      position: fixed;
-      top: 66px;
-      left: 14px;
-    }
-  }
 }
-.mode-pills {
+/* 生产同款模式胶囊：p-0.5 圆角全丸 黑5%底，按钮 w-8 h-6，激活=主题色白字 */
+.toggle-edit-mode {
   position: absolute;
-  top: 6px;
-  right: 14px;
+  top: 11px;
+  right: 12px;
   z-index: 6;
-  display: flex;
-  background: var(--body-background);
-  border: 1px solid #e2e4e9;
-  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
   padding: 2px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 999px;
 
   button {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
     border: none;
     background: transparent;
-    padding: 4px 14px;
-    font-size: 13px;
+    width: 32px;
+    height: 24px;
+    font-size: 11px;
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
     border-radius: 999px;
     cursor: pointer;
     color: var(--font-color);
-    min-width: 34px;
+
+    i {
+      font-size: 13px;
+    }
 
     &.active {
       background: var(--theme);
       color: #fff;
     }
   }
+}
+.markdown-edit.mode-md .toggle-edit-mode {
+  top: 8px;
 }
 .move {
   width: 10px;

@@ -1,27 +1,100 @@
+/* 所见即所得编辑皮肤 —— 逐条对齐 codecvcv.com .tiptap 规则（已实测抓取） */
 .writable-edit-mode {
   background: var(--background);
-  color: var(--writable-font-color);
-  line-height: 22px;
-  font-size: 14px;
+  color: var(--writable-font-color, #333);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  border-radius: 0.75rem;
+  padding: 18px 45px 18px 52px;
+  position: relative;
+  outline: none;
+  min-width: 480px;
 
+  &:focus {
+    outline: none;
+  }
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  * {
+    line-height: 30px;
+  }
+
+  > p {
+    margin-top: 0.25rem;
+  }
+  > :first-child {
+    margin-top: 0;
+  }
+
+  /* 字段行 → 灰底圆角卡片 */
   .flex-layout {
     display: flex;
     align-items: center;
-    margin-top: 5px;
+    margin-top: 0.75rem;
+    margin-bottom: 0.75rem;
+
     .flex-layout-item {
-      margin-right: 10px;
-      flex: 1;
+      background-color: var(--body-background);
+      border-radius: 0.375rem;
+      flex: 1 1 0%;
+      margin-right: 1.25rem;
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+      position: relative;
+      color: #333;
+      min-width: 0;
+      overflow-wrap: anywhere;
+      transition:
+        background-color 0.16s,
+        box-shadow 0.16s;
+
+      &:hover {
+        background-color: rgba(148, 163, 184, 0.1);
+      }
+      &:last-child {
+        margin-right: 0;
+      }
+      /* 卡片间的分隔竖线 */
+      + .flex-layout-item::after {
+        content: '';
+        position: absolute;
+        left: -10px;
+        top: 0;
+        height: 100%;
+        width: 1px;
+        background-color: rgba(209, 213, 219, 0.4);
+      }
+      &:empty {
+        min-width: 100px;
+        padding-left: 10px;
+      }
+      &:empty::before {
+        content: '空内容';
+        color: #999;
+      }
+      /* 嵌套卡片（head/main 里再分栏） */
+      .flex-layout-item {
+        background-color: var(--background);
+        margin: 0.5rem;
+        box-shadow:
+          0 1px 3px 0 rgba(0, 0, 0, 0.1),
+          0 1px 2px -1px rgba(0, 0, 0, 0.1);
+      }
     }
   }
-  // 只有是两列布局的时候才起作用
-  & > .flex-layout {
+  > .flex-layout {
     align-items: flex-start;
   }
+
   ul,
   ol {
-    padding-left: 20px;
+    padding-left: 14px;
   }
-  li,
+  li {
+    margin-top: 5px;
+  }
   p {
     margin-top: 5px;
   }
@@ -29,13 +102,25 @@
     content: '请输入内容...';
     color: #999;
   }
+
+  b,
+  strong {
+    font-weight: 700;
+  }
+
+  /* 标题：纯黑加粗 + hover 右侧 H 徽标 */
   h1,
   h2,
   h3,
   h4,
   h5,
   h6 {
-    margin-top: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    margin: 8px 0;
+    position: relative;
+    border-bottom: none;
+    padding-bottom: 0;
   }
   h1 {
     font-size: 20px;
@@ -55,6 +140,169 @@
   h6 {
     font-size: 12px;
   }
+  h1::after,
+  h2::after,
+  h3::after,
+  h4::after,
+  h5::after,
+  h6::after {
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.04);
+    border-radius: 0.375rem;
+    color: inherit;
+    font-size: 10px;
+    font-weight: 400;
+    line-height: 1;
+    opacity: 0;
+    padding: 3px 0.375rem;
+  }
+  h1:hover::after,
+  h2:hover::after,
+  h3:hover::after,
+  h4:hover::after,
+  h5:hover::after,
+  h6:hover::after {
+    opacity: 1;
+  }
+  h1::after {
+    content: 'H1';
+  }
+  h2::after {
+    content: 'H2';
+  }
+  h3::after {
+    content: 'H3';
+  }
+  h4::after {
+    content: 'H4';
+  }
+  h5::after {
+    content: 'H5';
+  }
+  h6::after {
+    content: 'H6';
+  }
+
+  a {
+    color: var(--super-link);
+    pointer-events: none;
+    &:hover {
+      cursor: pointer;
+      opacity: 0.5;
+    }
+  }
+
+  .head-layout {
+    border-radius: 10px;
+    position: relative;
+  }
+  .resume-module {
+    cursor: pointer;
+    position: relative;
+    &:hover {
+      background-color: rgba(156, 163, 175, 0.2);
+      border-radius: 6px;
+    }
+  }
+
+  /* 行内代码 → 灰底胶囊 */
+  code,
+  code.single-code {
+    background-color: rgba(0, 0, 0, 0.06);
+    border-radius: 0.375rem;
+    cursor: pointer;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    margin-right: 0.25rem;
+    padding: 2px 0.375rem;
+    position: relative;
+    color: inherit;
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+    &::after {
+      content: none;
+    }
+  }
+  mark {
+    border-radius: 2px;
+    color: inherit;
+    padding: 0 1px;
+  }
+  u {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  blockquote {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    margin: 0;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    position: relative;
+    &::after,
+    &::before {
+      content: '';
+      height: 100%;
+      left: 0;
+      position: absolute;
+      top: 0;
+    }
+    &::before {
+      border-radius: 0.375rem;
+      width: 3px;
+      background-color: rgb(231, 229, 227);
+    }
+  }
+
+  table {
+    border-collapse: collapse;
+    margin: 0;
+    overflow: hidden;
+    table-layout: fixed;
+    text-align: center;
+    width: 100%;
+    td,
+    th {
+      border: 1px solid rgb(229, 231, 235);
+      box-sizing: border-box;
+      min-width: 1em;
+      padding: 3px 5px;
+      vertical-align: top;
+      > * {
+        margin-bottom: 0;
+      }
+      p {
+        margin: 0;
+      }
+    }
+    th {
+      background-color: rgba(241, 245, 249, 0.6);
+      font-weight: 700;
+    }
+  }
+
+  img {
+    cursor: pointer;
+    margin-top: 10px;
+    max-width: 100%;
+    min-width: 20mm;
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+  img[alt*='个人头像'] {
+    border-radius: 5px;
+    height: 24mm;
+    margin-top: 0.5rem;
+    object-fit: cover;
+    width: 20mm;
+  }
 
   i.iconfont {
     margin-right: 8px;
@@ -64,140 +312,88 @@
     }
   }
 
-  a {
-    color: var(--super-link);
-    &:hover {
-      opacity: 0.5;
-      cursor: pointer;
-    }
-  }
-  .head-layout {
-    border-radius: 10px;
+  .draggable-block {
     position: relative;
   }
-  img[alt*='个人头像'] {
-    width: 24mm;
-    height: 28mm;
-    border-radius: 5px;
-    margin: 0 10px;
-    object-fit: cover;
-    cursor: pointer;
-    &:hover {
-      opacity: 0.8;
-    }
-  }
-  img {
-    display: inline-block;
-    max-width: 100%;
-    cursor: pointer;
-    &:hover {
-      opacity: 0.8;
-    }
-  }
-
-  table {
-    width: 100%;
-    text-align: center;
-    tbody td:nth-child(1) {
-      border-left: 1px solid #eee;
-    }
-    thead {
-      color: #f8f8f8;
-      background-color: #b2c9d6;
-    }
-    thead th,
-    tbody td {
-      padding: 10px;
-    }
-    tbody td {
-      border-right: 1px solid #eee;
-      border-bottom: 1px solid #eee;
-    }
-  }
-
-  code.single-code {
-    color: var(--writableFontColor);
-    padding: 3px 10px;
-    background: transparent;
-    position: relative;
-    border-radius: 5px;
-
-    &::after {
-      content: '';
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      left: 0;
-      top: 0;
-      border-radius: 5px;
-      background: #ccc;
-      opacity: 0.2;
-    }
-  }
-
-  blockquote {
-    position: relative;
-    margin: 0;
-    font-size: 14px;
-    padding: 8px 15px;
-    margin: 12px 0;
-    &::after,
+  /* 拖拽手柄：悬停块级节点左侧出现 ⋮⋮ */
+  .drag-handle {
+    position: absolute;
+    left: -42px;
+    top: 0;
+    width: 18px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    cursor: grab;
+    color: #9ca3af;
+    user-select: none;
+    z-index: 3;
     &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 100%;
+      content: '⋮⋮';
+      font-size: 12px;
+      letter-spacing: -3px;
+      line-height: 1;
     }
-    &::after {
-      width: 100%;
-      opacity: 0.1;
-      background: #b2c9d6;
-    }
-    &::before {
-      position: absolute;
-      width: 5px;
-      background: #b2c9d6;
-      opacity: 0.3;
-    }
+  }
+  .flex-layout .drag-handle {
+    left: -49px;
+    top: 0;
+  }
+  h1 .drag-handle,
+  h2 .drag-handle,
+  h3 .drag-handle,
+  h4 .drag-handle,
+  h5 .drag-handle,
+  h6 .drag-handle {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  > :hover > .drag-handle,
+  .head-layout > :hover > .drag-handle,
+  .main-layout > :hover > .drag-handle,
+  .resume-module > :hover > .drag-handle,
+  .flex-layout > :hover > .drag-handle {
+    opacity: 1;
+  }
+  .is-draggable-hover {
+    background-color: var(--body-background);
+    border-radius: 0.375rem;
   }
 }
 
-/* ===== 生产版编辑模式卡片皮肤：字段行渲染为灰底胶囊卡 ===== */
-.writable-edit-mode {
-  .flex-layout-item {
-    background: #f3f4f6;
-    border-radius: 8px;
-    padding: 8px 14px;
-    margin-right: 10px;
-    line-height: 1.6;
+/* 编辑模式顶栏（h-48px，撤销/重做/表情/指南/智能 + 右侧模式胶囊） */
+.writable-edit-bar {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 52px;
+  padding-right: 6px;
+  background: var(--background);
+  border-radius: 10px 10px 0 0;
 
-    &:last-child {
-      margin-right: 0;
-    }
-  }
+  .bar-icons {
+    display: flex;
+    align-items: center;
+    gap: 6px;
 
-  h1, h2, h3 {
-    font-weight: 600;
-    border-bottom: none;
-    padding-bottom: 0;
-  }
-
-  ul, ol {
-    li {
-      list-style: none;
-      position: relative;
-      padding-left: 14px;
-
-      &::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0.65em;
-        width: 5px;
-        height: 5px;
-        border-radius: 50%;
-        background: #9ca3af;
+    i {
+      font-size: 18px;
+      padding: 4px 6px;
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--font-color);
+      &:hover {
+        background: var(--body-background);
+      }
+      &.dim {
+        opacity: 0.5;
+        pointer-events: none;
       }
     }
   }

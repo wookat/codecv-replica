@@ -1,4 +1,5 @@
 // 错别字/规范检查：常见简历错别字词典 + 通用规则
+import { ref } from 'vue'
 export interface ProofreadIssue {
   index: number // 在 md 中的字符偏移
   wrong: string
@@ -122,3 +123,6 @@ export function scanContent(md: string): ProofreadIssue[] {
   }
   return issues.sort((a, b) => a.index - b.index)
 }
+
+// 编辑栏「智能检查」按钮 → 打开错别字抽屉的跨组件信号
+export const proofreadBus = ref(0)
