@@ -66,9 +66,29 @@ export async function onRequestPost(context) {
 .markdown-transform-html mark code { background: transparent !important; }
 .markdown-transform-html mark:has(code) { border-radius: 5px; }
 .markdown-transform-html * { line-height: 20px; }`
+  // prod PDF ではラテン文字が TimesNewRomanPS(セリフ)で描かれるテンプレは
+  // 'Noto Sans SC'/'Noto Serif SC' 指定のものに限る(実測: Nunito は Nunito、
+  // 微软雅黑/阿里普惠/PingFang/FZKai は各フォント、Times 指定は Times のまま)。
+  // 先頭ファミリが Noto Sans/Serif SC(または未指定=既定 Noto)のときだけ
+  // 'Times New Roman' をスタック先頭に差して prod と同じ serif-Latin に揃える。
+  const stackMatch = (style || '').match(
+    /\.jufe \*\s*\{[^}]*font-family:\s*([^;]+);/
+  )
+  const callerStack = (stackMatch?.[1] || '').trim()
+  const firstFamily = callerStack.split(',')[0].replace(/['"]/g, '').trim()
+  const needsTimes =
+    callerStack === '' ||
+    firstFamily === 'Noto Sans SC' ||
+    firstFamily === 'Noto Serif SC'
+  const latinSerif = needsTimes
+    ? `.jufe * { font-family: 'Times New Roman', ${
+        callerStack ||
+        `'Noto Sans SC', 'Noto Serif SC', 'Nunito', sans-serif, serif`
+      }; }`
+    : ''
   const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}<style>${fonts}${markNormalize}${
     style || ''
-  }</style></head><body>${content}${watermark}${fontWait}</body></html>`
+  }${latinSerif}</style></head><body>${content}${watermark}${fontWait}</body></html>`
   const endpoint = isPdf ? 'pdf' : 'screenshot'
   const body = isPdf
     ? {
