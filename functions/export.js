@@ -200,6 +200,17 @@ export async function onRequestPost(context) {
     '97': mt(-1),
     '98': mt(-2),
     '99': mt(-2),
+    '39': mt(-2),
+    '41': mt(-2),
+    '44': mt(-1),
+    '47': mt(-2),
+    '48': mt(-2),
+    '54': mt(-1),
+    '57': mt(-1),
+    '60': mt(-1),
+    '61': mt(-1),
+    '90': mt(-1),
+    '91': mt(-2),
   }
   const offFix = OFFSET_MAP[name] || ''
   // prod の埋め込みフォントは投稿フォントスタック先頭のファミリーに一致
