@@ -108,6 +108,19 @@ export async function onRequestPost(context) {
             .then(r => r.text())
             // unicode-range スライスは相対 URL —— BR に渡す html はベース URL が無いため絶対化
             .then(css => css.replace(/url\(\/fonts\//g, `url(${origin}/fonts/`))
+            // Serif は prod 同様 CFF 輪郭の OTF (SourceHanSerifSC) を最優先 src に
+            // する —— VPS ローカル file:// から読むと Skia が Type3 埋込になる
+            // (整数 CharProcs ~93 個、prod の ~103 と同型)。
+            // file:// が届かない環境(CF BR)は次の woff2 src に自動フォールバック
+            // して CID 埋込の従来動作になる。
+            .then(css => {
+              if (f !== 'Noto Serif SC') return css
+              const w = fn.includes('-700') ? '700' : '400'
+              return css.replace(
+                'src:url(',
+                `src:url('file:///home/ubuntu/cv-render/fonts/shs-sc-${w}-sub.otf') format('opentype'),url(`
+              )
+            })
         )
       )
     )
