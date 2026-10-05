@@ -121,6 +121,8 @@
     position: relative;
     border-bottom: none;
     padding-bottom: 0;
+    /* 生产编辑态标题统一深灰（不随简历主题色） */
+    color: var(--writable-heading, #282c34) !important;
   }
   h1 {
     font-size: 20px;
