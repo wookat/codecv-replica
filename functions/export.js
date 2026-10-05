@@ -118,7 +118,12 @@ export async function onRequestPost(context) {
   // ・インスタンス中心(1588x2246 smask 実測): 偶数行 x=151+273c / 奇数行 x=287.5+273c,
   //   各行 y=122.5+215k で全 5 行 —— CSS px 換算済み(画像は2px/css)
   // ・ページ内 @font-face を効かせるため DOM 要素で生成(background SVG はフォント隔離)
-  const watermark = `<div id="wm" style="position:fixed;inset:0;z-index:2147483000;pointer-events:none"></div><script>(function(){var w=document.getElementById('wm');for(var r=0;r<7;r++){for(var c=-1;c<4;c++){var cx=(r%2?287.5:151)+273*c;var cy=122.5+215*r;var d=document.createElement('div');d.style.cssText='position:absolute;left:'+(cx-80)+'px;top:'+(cy-34)+'px;width:160px;text-align:center;transform:rotate(27.3deg);color:rgba(128,128,128,0.18);line-height:1.2';d.innerHTML='<div style="font-size:32px;font-weight:700;font-family:\\u5fae\\u8f6f\\u96c5\\u9ed1,Microsoft YaHei,sans-serif">CodeCV\\u7b80\\u5386</div><div style="font-size:15px;margin-top:9px;font-family:\\u5fae\\u8f6f\\u96c5\\u9ed1,Microsoft YaHei,sans-serif">www.codecvcv.com</div>';w.appendChild(d)}}})()</script>`
+  // prod の透かしは 1588x2246 の RGBA ラスタをページ全幅に敷く実装
+  // (prod PDF から実抽出したラスタを wm-raster.png として自ホスト)。
+  // position:fixed な img は paged media で全頁に自動繰返し、2px/css の
+  // 解像度・alpha・回転・グリッドすべて prod と画素一致する。
+  const wmImg = top => `<img src="${origin}/codecv-assets/wm-raster.png" style="position:${isPdf ? 'fixed' : 'absolute'};left:0;top:${top}px;width:794px;height:1123px;z-index:2147483000;pointer-events:none">`
+  const watermark = isPdf ? wmImg(0) : wmImg(0) + wmImg(1123) + wmImg(2246) + wmImg(3369)
   // prod の export リクエスト style フィールドに同梱される正規化ルールを同じく
   // 同梱（mark 内の色/背景を outer 側に正規化・全要素 line-height:20px 強制）
   const markNormalize = `.markdown-transform-html mark { color: inherit; }
