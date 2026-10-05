@@ -43,7 +43,7 @@ const CLOUD_FONT_URLS = {
 
 export async function onRequestPost(context) {
   const { request, env } = context
-  const { content, style, link, type } = await request.json()
+  const { content, style, link, name, type } = await request.json()
   const isPdf = Number(type) === 0
   if (!env.CF_ACCOUNT_ID || !env.BR_API_TOKEN) {
     return json(request, { msg: 'export service unavailable' }, 503)
@@ -93,8 +93,22 @@ export async function onRequestPost(context) {
 .markdown-transform-html mark[data-color] :not([data-color]) { color: inherit !important; }
 .markdown-transform-html mark code { background: transparent !important; }
 .markdown-transform-html mark:has(code) { border-radius: 5px; }
-.markdown-transform-html * { line-height: 20px; }
-.markdown-transform-html li { margin-top: 0; }`
+.markdown-transform-html * { line-height: 20px; }`
+  // prod エクスポートの li 間隔はテンプレ固有(実測: 全114 PDF の行ピッチで分類)。
+  // ・91 テンプレ: margin-top:5px → ピッチ 25px(18.7pt) — 既定(common.css :where ルール)のまま
+  // ・23 テンプレ: margin 実質0 → ピッチ 20px(15.0pt)
+  // ・6 テンプレ: li 行高 22px → ピッチ 22px(16.5pt)
+  const LI_MARGIN0 = new Set(
+    '17business 18art 19social 23 25 27 2concise 37 53 5graduation_reexam 70 71 72 74 75 76 77 87 9business duomotaidamoxingsuanfa shuziic youxikehuduankaifa'.split(
+      ' '
+    )
+  )
+  const LI_LH22 = new Set('21it_campus 60 64 73 78 79'.split(' '))
+  const liFix = LI_LH22.has(name)
+    ? `.markdown-transform-html li{line-height:22px;margin-top:0}`
+    : LI_MARGIN0.has(name)
+    ? `.markdown-transform-html li{margin-top:0}`
+    : ''
   // prod PDF ではラテン文字が TimesNewRomanPS(セリフ)で描かれるテンプレは
   // 'Noto Sans SC'/'Noto Serif SC' 指定のものに限る(実測: Nunito は Nunito、
   // 微软雅黑/阿里普惠/PingFang/FZKai は各フォント、Times 指定は Times のまま)。
@@ -112,7 +126,7 @@ export async function onRequestPost(context) {
     : ''
   const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}<style>${cloudFaces}${fonts}${markNormalize}${
     style || ''
-  }${latinSerif}</style></head><body>${content}${watermark}${fontWait}</body></html>`
+  }${latinSerif}${liFix}</style></head><body>${content}${watermark}${fontWait}</body></html>`
   const endpoint = isPdf ? 'pdf' : 'screenshot'
   const body = isPdf
     ? {
