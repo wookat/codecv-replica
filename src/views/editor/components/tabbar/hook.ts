@@ -155,20 +155,58 @@ export function usePrimaryColor(resumeType: string) {
 // 自定义字体
 export function useCustomFont(resumeType: string) {
   const cacheKey = MARKDOWN_FONT + '-' + resumeType
-  const fontOptions = [
-    {
-      value: 'Noto Serif SC',
-      label: '思源宋体'
-    },
-    {
-      value: 'Noto Sans SC',
-      label: '思源黑体'
-    },
-    {
-      value: 'Nunito',
-      label: 'Nunito(英文)'
-    }
+  // prod と同じ選択肢構成: ビルトイン3書体 + クラウド14書体(prod useCustomFont の
+  // fontOptions と同一順)。クラウド書体は /fonts/cvfonts/ の実バイナリを @font-face で登録。
+  const cloudFonts: Record<string, string> = {
+    'Times New Roman': 'times.ttf',
+    PingFangSC: 'pingfang.woff2',
+    微软雅黑: 'yahei.woff2',
+    'FZKai-Z03S': 'fzkai.ttf',
+    'FZXiaoBiaoSong-B05S': 'xbs.ttf',
+    仿宋_GB2312: 'fangsong.ttf',
+    阿里巴巴普惠体: 'puhuiti.ttf',
+    阿里妈妈数黑体: 'shuheiti.woff2',
+    'Alimama DongFangDaKai': 'dongfang.woff2',
+    钉钉进步体: 'dingtalk.ttf',
+    TBMCYXT: 'tbmc.woff2',
+    仓耳舒圆体: 'shuyuan.woff2',
+    仓耳渔阳体: 'yuyang.ttf',
+    庞门正道细线体: 'pmzd.ttf'
+  }
+  const freeFonts = [
+    { value: 'Noto Serif SC', label: '思源宋体' },
+    { value: 'Noto Sans SC', label: '思源黑体' },
+    { value: 'Nunito', label: 'Nunito' }
   ]
+  const proFonts = [
+    { value: 'Times New Roman', label: 'Times New Roman' },
+    { value: 'PingFangSC', label: '苹果方正' },
+    { value: '微软雅黑', label: '微软雅黑' },
+    { value: 'FZKai-Z03S', label: '方正楷体' },
+    { value: 'FZXiaoBiaoSong-B05S', label: '方正小标宋简' },
+    { value: '仿宋_GB2312', label: '仿宋_GB2312' },
+    { value: '阿里巴巴普惠体', label: '阿里巴巴普惠体' },
+    { value: '阿里妈妈数黑体', label: '阿里妈妈数黑体' },
+    { value: 'Alimama DongFangDaKai', label: '阿里妈妈东方大楷' },
+    { value: '钉钉进步体', label: '钉钉进步体' },
+    { value: 'TBMCYXT', label: '淘宝买菜体' },
+    { value: '仓耳舒圆体', label: '仓耳舒圆体' },
+    { value: '仓耳渔阳体', label: '仓耳渔阳体' },
+    { value: '庞门正道细线体', label: '庞门正道细线体' }
+  ]
+  const fontOptions = [...freeFonts, ...proFonts]
+  function registerCloudFonts() {
+    if (document.head.querySelector('style[data-cloud-fonts]')) return
+    const s = createStyle()
+    s.setAttribute('data-cloud-fonts', 'true')
+    s.textContent = Object.entries(cloudFonts)
+      .map(
+        ([fam, file]) => `@font-face { font-family: '${fam}'; src: url('/fonts/cvfonts/${file}'); }`
+      )
+      .join('\n')
+    document.head.appendChild(s)
+  }
+  registerCloudFonts()
   const font = ref(
     get(cacheKey) ? (get(cacheKey) as string) : getFontFamily(resumeType) || fontOptions[0].value
   )

@@ -14,10 +14,31 @@ const FACE_FILES = {
   'Noto Sans SC': ['face-noto-sans-sc-400.css', 'face-noto-sans-sc-700.css'],
   'Noto Serif SC': ['face-noto-serif-sc-400.css', 'face-noto-serif-sc-700.css'],
   Nunito: ['face-nunito-400.css', 'face-nunito-700.css'],
-  // prod の Latin 数字は TimesNewRomanPS —— メトリック互換の無償代替 Tinos を同姓で供給
-  'Times New Roman': ['face-times-new-roman-400.css', 'face-times-new-roman-700.css'],
+  // prod の Latin 数字は TimesNewRomanPS —— Regular は実バイナリ times.ttf、
+  // Bold は prod 側 TimesNewRomanPS-BoldMT に相当する Tinos-Bold を同姓で供給
+  'Times New Roman': ['face-times-new-roman-700.css'],
   // @font-face 本体と ~200 個の .icon-* クラス規則の2ファイル
   iconfont: ['face-iconfont-400.css', 'face-iconfont.css']
+}
+// prod のプロプライエタリ書体 —— prod 自身が tcb CDN で公開配信している実バイナリを
+// 本站 /fonts/cvfonts/ にミラー(pdffonts で内部名の一致を検証済み: MicrosoftYaHei /
+// PingFangSC / AlibabaPuHuiTi_2_55_Regular / FZKTJW--GB1-0 / TimesNewRomanPSMT)。
+// data-URI だと数 MB あるため URL src の @font-face で宣言(使用ファミリーだけ実 DL)。
+const CLOUD_FONT_URLS = {
+  'Times New Roman': 'times.ttf',
+  微软雅黑: 'yahei.woff2',
+  PingFangSC: 'pingfang.woff2',
+  阿里巴巴普惠体: 'puhuiti.ttf',
+  'FZKai-Z03S': 'fzkai.ttf',
+  'FZXiaoBiaoSong-B05S': 'xbs.ttf',
+  仿宋_GB2312: 'fangsong.ttf',
+  阿里妈妈数黑体: 'shuheiti.woff2',
+  'Alimama DongFangDaKai': 'dongfang.woff2',
+  钉钉进步体: 'dingtalk.ttf',
+  TBMCYXT: 'tbmc.woff2',
+  仓耳舒圆体: 'shuyuan.woff2',
+  仓耳渔阳体: 'yuyang.ttf',
+  庞门正道细线体: 'pmzd.ttf'
 }
 
 export async function onRequestPost(context) {
@@ -32,11 +53,18 @@ export async function onRequestPost(context) {
   // .jufe の font-family が Noto Sans SC/Noto Serif SC/Nunito を指すため、
   // レンダ側にもフォントを届けないとフォールバック書体で折返し位置がずれる。
   // googleapis は CF BR から到達不可のため本站自ホストの css を link で渡す。
-  const scan = `${content || ''}${style || ''}${link || ''}`.toLowerCase()
+  const scan = `${content || ''}${style || ''}${link || ''}`
   const families = ['Noto Sans SC', 'iconfont', 'Nunito', 'Times New Roman']
-  if (scan.includes('noto-serif-sc') || scan.includes('noto serif sc')) {
+  if (/noto[- ]serif[- ]sc/i.test(scan)) {
     families.push('Noto Serif SC')
   }
+  // URL src の @font-face は未使用フェイスを DL しないため全量宣言しても安い
+  const cloudFaces = Object.entries(CLOUD_FONT_URLS)
+    .map(
+      ([fam, file]) =>
+        `@font-face{font-family:'${fam}';src:url('${origin}/fonts/cvfonts/${file}');}`
+    )
+    .join('')
   const fonts = (
     await Promise.all(
       families.flatMap(f =>
@@ -81,7 +109,7 @@ export async function onRequestPost(context) {
         callerStack || `'Noto Sans SC', 'Noto Serif SC', 'Nunito', sans-serif, serif`
       }; }`
     : ''
-  const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}<style>${fonts}${markNormalize}${
+  const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}<style>${cloudFaces}${fonts}${markNormalize}${
     style || ''
   }${latinSerif}</style></head><body>${content}${watermark}${fontWait}</body></html>`
   const endpoint = isPdf ? 'pdf' : 'screenshot'
