@@ -98,9 +98,10 @@ export async function onRequestPost(context) {
   // prod の透かし実測(PDF内 1588x2246 ラスタ画像+SMask alpha≈0.18 から逆算):
   // ・2行構成「CodeCV简历」(bold ~32px) + 「www.codecvcv.com」(regular ~15px)
   // ・右下がり 27.3° 回転、色 #808080 / alpha 0.18 (白地合成 ≈ #E8E8E8)
-  // ・インスタンス中心: 偶数行 y=107+215k, x=200+272.5c / 奇数行 x オフセット +137
+  // ・インスタンス中心(1588x2246 smask 実測): 偶数行 x=151+273c / 奇数行 x=287.5+273c,
+  //   各行 y=122.5+215k で全 5 行 —— CSS px 換算済み(画像は2px/css)
   // ・ページ内 @font-face を効かせるため DOM 要素で生成(background SVG はフォント隔離)
-  const watermark = `<div id="wm" style="position:fixed;inset:0;z-index:2147483000;pointer-events:none"></div><script>(function(){var w=document.getElementById('wm');for(var r=0;r<7;r++){for(var c=-1;c<4;c++){var cx=(r%2?337:200)+272.5*c;var cy=107+215*r;var d=document.createElement('div');d.style.cssText='position:absolute;left:'+(cx-80)+'px;top:'+(cy-34)+'px;width:160px;text-align:center;transform:rotate(27.3deg);color:rgba(128,128,128,0.18);line-height:1.2';d.innerHTML='<div style="font-size:32px;font-weight:700;font-family:\\u5fae\\u8f6f\\u96c5\\u9ed1,Microsoft YaHei,sans-serif">CodeCV\\u7b80\\u5386</div><div style="font-size:15px;margin-top:9px;font-family:\\u5fae\\u8f6f\\u96c5\\u9ed1,Microsoft YaHei,sans-serif">www.codecvcv.com</div>';w.appendChild(d)}}})()</script>`
+  const watermark = `<div id="wm" style="position:fixed;inset:0;z-index:2147483000;pointer-events:none"></div><script>(function(){var w=document.getElementById('wm');for(var r=0;r<7;r++){for(var c=-1;c<4;c++){var cx=(r%2?287.5:151)+273*c;var cy=122.5+215*r;var d=document.createElement('div');d.style.cssText='position:absolute;left:'+(cx-80)+'px;top:'+(cy-34)+'px;width:160px;text-align:center;transform:rotate(27.3deg);color:rgba(128,128,128,0.18);line-height:1.2';d.innerHTML='<div style="font-size:32px;font-weight:700;font-family:\\u5fae\\u8f6f\\u96c5\\u9ed1,Microsoft YaHei,sans-serif">CodeCV\\u7b80\\u5386</div><div style="font-size:15px;margin-top:9px;font-family:\\u5fae\\u8f6f\\u96c5\\u9ed1,Microsoft YaHei,sans-serif">www.codecvcv.com</div>';w.appendChild(d)}}})()</script>`
   // prod の export リクエスト style フィールドに同梱される正規化ルールを同じく
   // 同梱（mark 内の色/背景を outer 側に正規化・全要素 line-height:20px 強制）
   const markNormalize = `.markdown-transform-html mark { color: inherit; }
@@ -120,9 +121,13 @@ export async function onRequestPost(context) {
   // (実測全114: Times 宣言テンプレだけ TimesNewRomanPS、他は先頭ファミリー
   // 自体がラテンも描く。Serif 宣言は NotoSerifSC、その他各書体)——
   // ラテン強制置換は不要のため行わない。
-  const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}<style>${cloudFaces}${fonts}${markNormalize}${
+  // 順序: skin link → フォント/markNormalize → liFix(テンプレ既定行距) → style
+  // (attr 断片: テーマ変数 + ユーザー調整の Line_Height/font_size/para_spacing/
+  //  justify/one-page/custom-css は必ず最後に置いて既定値を上書きさせる ——
+  //  prod の style 連結順と同じ)。
+  const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}<style>${cloudFaces}${fonts}${markNormalize}${liFix}${
     style || ''
-  }${liFix}</style></head><body>${content}${watermark}${fontWait}</body></html>`
+  }</style></head><body>${content}${watermark}${fontWait}</body></html>`
   const endpoint = isPdf ? 'pdf' : 'screenshot'
   const body = isPdf
     ? {
