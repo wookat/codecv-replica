@@ -80,9 +80,10 @@ export async function onRequestPost(context) {
     await Promise.all(
       families.flatMap(f =>
         (FACE_FILES[f] || []).map(fn =>
-          fetch(`${origin}/fonts/${fn}`, { headers: { 'accept-encoding': 'identity' } }).then(r =>
-            r.text()
-          )
+          fetch(`${origin}/fonts/${fn}`, { headers: { 'accept-encoding': 'identity' } })
+            .then(r => r.text())
+            // unicode-range スライスは相対 URL —— BR に渡す html はベース URL が無いため絶対化
+            .then(css => css.replace(/url\(\/fonts\//g, `url(${origin}/fonts/`))
         )
       )
     )
