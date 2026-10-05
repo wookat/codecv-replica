@@ -1,0 +1,260 @@
+@import "./iconfont.colors.css";
+
+:root {
+  --A4_width: 794px;
+  --A4_height: 1123px;
+  --icon_height: 1.3rem;
+  --super-link: #4572e3;
+  /* 简历缺 primaryColor/primaryBGColor 字段时的全局缺省值（老简历/导入简历）。
+     JS 注入的 :root 规则位于文档流更后侧，同优先级下会覆盖这里的默认值；
+     注入空值时声明无效被丢弃，同样回落到此处 */
+  --markdown-primary-color: #000;
+  --markdown-primary-bg-color: #333;
+}
+
+.markdown-transform-html {
+  width: var(--A4_width);
+  font-size: 14px;
+  /* 防止英文单词被截断 */
+  word-break: break-word;
+  /* 自动换行 & 保留空白符 */
+  white-space: pre-line;
+  padding: 30px 40px;
+  margin: 0 auto;
+  background: #fff;
+  z-index: 2;
+  position: relative;
+  overflow: hidden;
+  color: var(--markdown-primary-color);
+}
+
+.markdown-transform-html svg {
+  width: auto;
+  height: var(--icon_height);
+  vertical-align: -0.15em;
+  margin-right: 4px;
+}
+
+.markdown-transform-html .iconfont {
+  font-size: var(--icon_height);
+  margin-right: 4px;
+}
+
+.markdown-transform-html img {
+  max-width: 100%;
+  display: block;
+  margin: 0 auto;
+}
+
+/* 头像大小 */
+.markdown-transform-html img[alt*="个人头像"] {
+  width: 26mm;
+  height: 32mm;
+  position: relative;
+  object-fit: cover;
+}
+
+.markdown-transform-html a {
+  color: var(--super-link);
+}
+
+.markdown-transform-html :where(li, h3, h4) {
+  margin-top: 5px;
+}
+
+.markdown-transform-html h1 {
+  font-size: 25px;
+  line-height: 30px;
+}
+
+.markdown-transform-html h2 {
+  margin-top: 10px;
+  line-height: 25px;
+}
+
+.markdown-transform-html h3 {
+  font-size: 17px;
+  line-height: 25px;
+}
+
+.markdown-transform-html h4 {
+  font-size: 15px;
+}
+
+.markdown-transform-html h5 {
+  font-size: 13px;
+}
+
+.markdown-transform-html h6 {
+  font-size: 12px;
+}
+
+.markdown-transform-html :where(ul, ol) {
+  padding-left: 1.3em;
+}
+
+/* 紧跟其后才生效 */
+/* .markdown-transform-html ul + ol {
+  padding-left: 2.6em;
+} */
+
+.markdown-transform-html .flex-layout {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 5px;
+}
+
+.markdown-transform-html .flex-layout .flex-layout-item {
+  margin-right: 20px;
+}
+
+.markdown-transform-html .flex-layout .flex-layout-item:last-child {
+  margin-right: 0;
+}
+
+.markdown-transform-html table {
+  width: 100%;
+  text-align: center;
+}
+
+.markdown-transform-html table thead {
+  color: var(--markdown-primary-bg-color);
+  padding: 2px 8px;
+  line-height: 18px;
+  background: transparent;
+  position: relative;
+  border-radius: 5px;
+}
+
+.markdown-transform-html table thead th {
+  border-top: 1px solid #eee;
+  border-right: 1px solid #eee;
+}
+
+.markdown-transform-html table thead th:first-child {
+  border-left: 1px solid #eee;
+}
+
+.markdown-transform-html table thead::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  background-color: var(--markdown-primary-bg-color);
+  z-index: 0;
+  opacity: 0.07;
+}
+
+.markdown-transform-html table :where(thead th, tbody td) {
+  padding: 6px 8px;
+  font-size: 13px;
+}
+
+.markdown-transform-html table tbody td:first-child {
+  border-left: 1px solid #eee;
+}
+
+.markdown-transform-html table tbody td {
+  border-right: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+}
+
+.markdown-transform-html blockquote {
+  position: relative;
+  margin: 0;
+  font-size: 14px;
+  padding: 8px 15px;
+  margin: 12px 0;
+}
+
+.markdown-transform-html blockquote::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 0;
+  opacity: 0.1;
+  background: var(--markdown-primary-bg-color);
+}
+
+.markdown-transform-html blockquote::before {
+  position: absolute;
+  content: "";
+  display: block;
+  width: 5px;
+  background: var(--markdown-primary-bg-color);
+  height: 100%;
+  left: 0;
+  top: 0;
+  opacity: 0.3;
+}
+
+/* 单个代码块`code` */
+.markdown-transform-html code.single-code {
+  color: var(--markdown-primary-bg-color);
+  padding: 2px 8px;
+  line-height: 18px;
+  background: transparent;
+  position: relative;
+  border-radius: 5px;
+  font-size: 13px;
+}
+
+.single-code::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  border-radius: 4px;
+  background: var(--markdown-primary-bg-color);
+  z-index: 0;
+  opacity: 0.07;
+}
+
+hr {
+  border: none;
+  margin-top: 4px;
+  background: var(--markdown-primary-bg-color);
+  height: 1.5px;
+}
+
+.jufe-wrapper-page {
+  height: var(--A4_height);
+  width: var(--A4_width);
+  margin: 0 auto 10px auto;
+  background: white;
+  position: relative;
+}
+
+.jufe-wrapper-page-item {
+  width: var(--A4_width);
+  overflow: hidden;
+  position: relative;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+/* CodeCV 生产方言 !bg 背景色标记（标题内为整条色带，正文内为行内高亮） */
+.markdown-transform-html .font-bg {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 4px;
+}
+.markdown-transform-html h3 .font-bg,
+.markdown-transform-html h2 .font-bg {
+  display: block;
+  padding: 6px 14px;
+}
