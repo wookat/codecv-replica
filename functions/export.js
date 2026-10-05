@@ -176,13 +176,13 @@ export async function onRequestPost(context) {
     '100': mt(-2), '35': mt(-1), '32': mt(-2), '31': mt(-2), '36': mt(-1),
     '33': mt(-2), '34': mt(-2), '17business': mt(-3), '66': mt(-1),
     '76': mt(-4), '21it_campus': mt(-1), '75': mt(-1), '37': mt(-2),
-    '28': mt(-2), '63': mt(-1), '77': mt(-1), '87': mt(1), '56': mt(-1),
+    '28': mt(-2), '63': mt(-2), '77': mt(-2), '87': mt(1), '56': mt(-1),
     '27': mt(4), '53': mt(1),
     'agent_development': mt(-9), '74': mt(-7), '13geek': mt(-4),
     // 逐行互相关精测 (xcorr): 84 已验证 13.49→0
-    '68': mt(-4), '38': mt(-2),
+    '68': mt(-2), '38': mt(-2),
     '11fresh': mt(5), '93': mt(-1), '24': mt(4),
-    '10front_end': mt(-2), '20campus_simple': mt(2)
+    '10front_end': mt(-2), '20campus_simple': mt(2), '22': mt(-1), '15simple_versatile': mt(2), '70': mt(2), 'duomotaidamoxingsuanfa': mt(1)
   }
   const offFix = OFFSET_MAP[name] || ''
   // prod の埋め込みフォントは投稿フォントスタック先頭のファミリーに一致
