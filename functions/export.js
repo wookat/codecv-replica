@@ -63,8 +63,18 @@ export async function onRequestPost(context) {
   if (!env.CF_ACCOUNT_ID || !env.BR_API_TOKEN) {
     return json(request, { msg: 'export service unavailable' }, 503)
   }
-  const linkTag = link && link !== 'none' ? `<link rel="stylesheet" href="${link}">` : ''
   const origin = new URL(request.url).origin
+  // クライアントが渡すスキン link は localhost/相対 URL など BR から
+  // 到達不能な場合があるため、オリジンだけ本站に差し替える
+  // (ハッシュ付きバンドルパスは dist と一致するのでそのまま使える)。
+  let skinHref = ''
+  if (link && link !== 'none') {
+    try {
+      const u = new URL(link, origin)
+      skinHref = u.pathname.startsWith('/') ? `${origin}${u.pathname}${u.search}` : link
+    } catch { skinHref = link }
+  }
+  const linkTag = skinHref ? `<link rel="stylesheet" href="${skinHref}">` : ''
   // .jufe の font-family が Noto Sans SC/Noto Serif SC/Nunito を指すため、
   // レンダ側にもフォントを届けないとフォールバック書体で折返し位置がずれる。
   // googleapis は CF BR から到達不可のため本站自ホストの css を link で渡す。
