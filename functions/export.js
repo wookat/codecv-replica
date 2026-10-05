@@ -118,7 +118,13 @@ export async function onRequestPost(context) {
   // 23px 群: PingFangSC/PuHuiTi 系(実測 17.2pt) / 24px 群: Noto 一部(18.0pt)
   const LI_MT3 = new Set('26 56 57 59 85 89'.split(' '))
   const LI_MT4 = new Set('67 81 98 99 agent_development'.split(' '))
-  const liFix = LI_LH22.has(name)
+  // 行高自体が既定20pxと異なるテンプレ(実測の包行ピッチ由来):
+  // 57→18px, 81→19px
+  const LH_OVERRIDE = { 57: 18, 81: 19 }
+  const lh = LH_OVERRIDE[name]
+  const liFix = lh
+    ? `.markdown-transform-html *{line-height:${lh}px}.markdown-transform-html li{margin-top:5px}`
+    : LI_LH22.has(name)
     ? `.markdown-transform-html li{line-height:22px;margin-top:0}`
     : LI_MARGIN0.has(name)
     ? `.markdown-transform-html li{margin-top:0}`
