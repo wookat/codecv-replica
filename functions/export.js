@@ -173,9 +173,9 @@ export async function onRequestPost(context) {
     '9business': mt(4),
     // CID 系（prod CID TrueType）ピクセル実測スイープで採用 ——
     // 勝者のみ: mt∈[-8,+4] を全レンダ検証して決定 (audit/cidcal,cidsweep)
-    '100': mt(-2), '35': mt(-1), '32': mt(-2), '31': mt(-2), '36': mt(-1),
-    '33': mt(-2), '34': mt(-2), '17business': mt(-3), '66': mt(-1),
-    '76': mt(-4), '21it_campus': mt(-1), '75': mt(-1), '37': mt(-2),
+    '100': mt(-2), '35': mt(-1), '32': mt(1), '31': mt(1), '36': mt(-2),
+    '33': mt(1), '34': mt(-2), '17business': mt(1), '66': mt(-2),
+    '76': mt(-4), '21it_campus': mt(-1), '75': mt(-2), '37': mt(-2),
     '28': mt(-2), '63': mt(-2), '77': mt(-2), '87': mt(1), '56': mt(-1),
      '53': mt(1),
     'agent_development': mt(-9), '74': mt(-7), '13geek': mt(-4),
@@ -183,6 +183,23 @@ export async function onRequestPost(context) {
     '68': mt(-2), '38': mt(-2),
     '11fresh': mt(5), '93': mt(-1), '24': mt(2),
     '10front_end': mt(-2), '20campus_simple': mt(2), '22': mt(-1), '15simple_versatile': mt(2), '70': mt(2), 'duomotaidamoxingsuanfa': mt(1)
+    '102': mt(-2),
+    '103': mt(-1),
+    '104': mt(-1),
+    '105': mt(-1),
+    '107': mt(2),
+    '109': mt(2),
+    '46': mt(-2),
+    '59': mt(-1),
+    '69': mt(-1),
+    '83': mt(-1),
+    '88': mt(-1),
+    '89': mt(-2),
+    '94': mt(-2),
+    '96': mt(-1),
+    '97': mt(-1),
+    '98': mt(-2),
+    '99': mt(-2),
   }
   const offFix = OFFSET_MAP[name] || ''
   // prod の埋め込みフォントは投稿フォントスタック先頭のファミリーに一致
