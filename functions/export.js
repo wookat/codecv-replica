@@ -181,7 +181,7 @@ export async function onRequestPost(context) {
     'agent_development': mt(-9), '74': mt(-7), '13geek': mt(-4),
     // 逐行互相关精测 (xcorr): 84 已验证 13.49→0
     '68': mt(-4), '38': mt(-2),
-    '11fresh': mt(5), '93': mt(-1), '24': mt(1),
+    '11fresh': mt(5), '93': mt(-1), '24': mt(4),
     '10front_end': mt(-2), '20campus_simple': mt(2)
   }
   const offFix = OFFSET_MAP[name] || ''
