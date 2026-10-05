@@ -76,6 +76,12 @@ export async function onRequestPost(context) {
     } catch { skinHref = link }
   }
   const linkTag = skinHref ? `<link rel="stylesheet" href="${skinHref}">` : ''
+  // 描画 HTML は base URL を持たないため、content 内の相対/ローカル
+  // リソース参照を本站オリジンへ絶対化する(avatar 等の画像が BR で欠落する対策)
+  const fixedContent = (content || '')
+    .replace(/(src|href)=["'](\/[^"']*)["']/g, `$1="${origin}$2"`)
+    .replace(/url\((['"]?)(\/[^'")]+)\1\)/g, `url($1${origin}$2$1)`)
+    .replace(/https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?/g, origin)
   // .jufe の font-family が Noto Sans SC/Noto Serif SC/Nunito を指すため、
   // レンダ側にもフォントを届けないとフォールバック書体で折返し位置がずれる。
   // googleapis は CF BR から到達不可のため本站自ホストの css を link で渡す。
@@ -138,7 +144,7 @@ export async function onRequestPost(context) {
   //  prod の style 連結順と同じ)。
   const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}<style>${cloudFaces}${fonts}${markNormalize}${liFix}${
     style || ''
-  }</style></head><body>${content}${watermark}${fontWait}</body></html>`
+  }</style></head><body>${fixedContent}${watermark}${fontWait}</body></html>`
   const endpoint = isPdf ? 'pdf' : 'screenshot'
   const body = isPdf
     ? {
