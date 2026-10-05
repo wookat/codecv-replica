@@ -1,0 +1,76 @@
+@import url("../../common.css");
+.markdown-transform-html {
+    font-size: 14px;
+    padding: 20px 30px;
+    color: var(--markdown-primary-color);
+}
+.markdown-transform-html .head-layout {
+    position: relative;
+    color: #eee;
+}
+.markdown-transform-html .head-layout img[alt='个人头像'] {
+    height: 24mm;
+    width: 24mm;
+    border-radius: 50%;
+}
+.markdown-transform-html .head-layout .flex-layout {
+    height: 130px;
+    justify-content: space-around;
+    align-items: center;
+}
+.markdown-transform-html .head-layout::after {
+    content: '';
+    position: absolute;
+    left: -30px;
+    top: -20px;
+    width: calc(100% + 60px);
+    height: calc(100% + 20px);
+    z-index: -1;
+    background: var(--markdown-primary-bg-color);
+}
+.markdown-transform-html .main-layout {
+    padding: 0 20px;
+    margin-top: 20px;
+}
+.markdown-transform-html .main-layout > .flex-layout .flex-layout-item:last-child {
+    width: calc(100% - 150px);
+}
+.markdown-transform-html .main-layout > .flex-layout .flex-layout-item:last-child .flex-layout .flex-layout-item {
+    flex: 1;
+}
+.markdown-transform-html .main-layout > .flex-layout .flex-layout-item:last-child .flex-layout .flex-layout-item:last-child {
+    text-align: right;
+}
+.markdown-transform-html .main-layout > .flex-layout > .flex-layout-item:first-child {
+    flex: 1;
+}
+.markdown-transform-html .main-layout > .flex-layout > .flex-layout-item h4 {
+    text-align: center;
+}
+.markdown-transform-html .flex-layout {
+    padding-top: 10px;
+    align-items: flex-start;
+}
+.markdown-transform-html .flex-layout:first-child, .markdown-transform-html .flex-layout:nth-child(2) {
+    padding-top: 0;
+}
+.markdown-transform-html h2 {
+    margin-top: 10px;
+}
+.markdown-transform-html h2 i.iconfont {
+    color: var(--markdown-primary-bg-color);
+    font-size: 1.2rem;
+}
+.markdown-transform-html strong, .markdown-transform-html b, .markdown-transform-html h2, .markdown-transform-html h3, .markdown-transform-html h4, .markdown-transform-html h5, .markdown-transform-html h6 {
+    color: #000;
+}
+.markdown-transform-html p, .markdown-transform-html li {
+    margin-top: 8px;
+}
+.markdown-transform-html i.iconfont {
+    margin-right: 6px;
+}
+.markdown-transform-html ul, .markdown-transform-html ol {
+    margin-left: 15px;
+    padding-left: 0;
+}

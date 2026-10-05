@@ -1,0 +1,60 @@
+@import url("../../common.css");
+.markdown-transform-html {
+    color: var(--markdown-primary-color);
+    padding: 20px 30px;
+}
+.markdown-transform-html h1, .markdown-transform-html h2 {
+    margin-top: 10px;
+    color: var(--markdown-primary-bg-color);
+}
+.markdown-transform-html h2 {
+    font-size: 16px;
+    position: relative;
+    display: inline-block;
+    margin: 15px 0 10px 20px;
+}
+.markdown-transform-html h2::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: -6px;
+    left: -20px;
+    background: var(--markdown-primary-bg-color);
+    opacity: 0.1;
+    padding: 6px 20px;
+    border-radius: 30px;
+}
+.markdown-transform-html h3 {
+    font-size: 15px;
+    margin-top: 6px;
+}
+.markdown-transform-html .iconfont {
+    margin-right: 0.2em;
+    font-size: 1.1rem;
+}
+.markdown-transform-html .main-layout {
+    padding: 10px;
+}
+.markdown-transform-html .head-layout {
+    position: relative;
+    padding: 20px 20px 30px 10px;
+    color: white;
+}
+.markdown-transform-html .head-layout h1, .markdown-transform-html .head-layout h2 {
+    color: white;
+}
+.markdown-transform-html .head-layout::after {
+    content: '';
+    position: absolute;
+    background: var(--markdown-primary-bg-color);
+    width: 794px;
+    height: calc(100% + 30px);
+    z-index: -1;
+    top: -30px;
+    left: -30px;
+}
+.markdown-transform-html .head-layout a {
+    text-decoration: none;
+    color: white !important;
+}

@@ -1,0 +1,18 @@
+@import url("../../common.css");
+.markdown-transform-html h2 {
+    font-size: 16px;
+    padding-bottom: 2px;
+    color: var(--markdown-primary-bg-color);
+    position: relative;
+    border-bottom: 2px solid var(--markdown-primary-bg-color);
+}
+.markdown-transform-html p, .markdown-transform-html ul, .markdown-transform-html li {
+    margin-top: 4px;
+}
+.markdown-transform-html .head-layout {
+    margin-top: 20px;
+    text-align: center;
+}
+.markdown-transform-html .head-layout h1, .markdown-transform-html .head-layout h2, .markdown-transform-html .head-layout h3, .markdown-transform-html .head-layout h4, .markdown-transform-html .head-layout h5, .markdown-transform-html .head-layout h6 {
+    color: var(--markdown-primary-bg-color);
+}

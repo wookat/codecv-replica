@@ -1,0 +1,74 @@
+@import url("../../common.css");
+.markdown-transform-html b,
+.markdown-transform-html strong,
+.markdown-transform-html h1,
+.markdown-transform-html h3,
+.markdown-transform-html h4,
+.markdown-transform-html h5,
+.markdown-transform-html h6,
+.markdown-transform-html li::marker {
+  color: #333;
+}
+
+.markdown-transform-html a {
+  color: blue;
+  text-decoration: underline;
+}
+
+.markdown-transform-html .resume-module h2 {
+  font-size: 15px;
+  position: relative;
+  color: white;
+  padding: 2px 15px;
+  display: inline-block;
+}
+
+.markdown-transform-html .resume-module h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: -1;
+  width: 100%;
+  background: transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 30px solid var(--markdown-primary-bg-color);
+}
+
+.markdown-transform-html .resume-module h2::before {
+  content: "";
+  z-index: -1;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: calc(100% + 10px);
+  background: transparent;
+  border-right: 7px solid transparent;
+  border-bottom: 24px solid var(--markdown-primary-bg-color);
+  opacity: 0.2;
+}
+
+.markdown-transform-html .flex-layout-item {
+  flex: 1;
+  text-align: left;
+}
+
+.markdown-transform-html .flex-layout-item:last-child {
+  text-align: right;
+}
+
+.markdown-transform-html .resume-module {
+  position: relative;
+}
+
+.markdown-transform-html .resume-module::after {
+  position: absolute;
+  content: "";
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  top: 38px;
+  opacity: 0.3;
+  background: var(--markdown-primary-bg-color);
+}

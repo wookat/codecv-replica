@@ -1,0 +1,34 @@
+@charset "UTF-8";
+@import url("../../common.css");
+.markdown-transform-html {
+    padding: 30px 45px;
+    min-height: 297mm;
+}
+.markdown-transform-html::before {
+    position: absolute;
+    content: '';
+    background: linear-gradient(#ffeff2, #faf7ed, white, white, white);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+.markdown-transform-html h1, .markdown-transform-html h3 {
+    border-bottom: none;
+    padding-bottom: 10px;
+}
+.markdown-transform-html strong, .markdown-transform-html b, .markdown-transform-html h1, .markdown-transform-html h3, .markdown-transform-html h4, .markdown-transform-html h5, .markdown-transform-html h6, .markdown-transform-html li::marker {
+    color: #333;
+}
+.markdown-transform-html img[alt='个人头像'] {
+    width: 22mm;
+    height: 27mm;
+    border-radius: 5px;
+}
+.markdown-transform-html .resume-module h2 {
+    font-size: 16px;
+    padding-bottom: 3px;
+    border-bottom: 2px solid var(--markdown-primary-bg-color);
+    color: var(--markdown-primary-bg-color);
+}

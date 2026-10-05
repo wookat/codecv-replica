@@ -64,11 +64,12 @@ export async function onRequestPost(context) {
     return json(request, { msg: 'export service unavailable' }, 503)
   }
   const origin = new URL(request.url).origin
-  // クライアントが渡すスキン link は localhost/相対 URL など BR から
-  // 到達不能な場合があるため、オリジンだけ本站に差し替える
-  // (ハッシュ付きバンドルパスは dist と一致するのでそのまま使える)。
-  let skinHref = ''
-  if (link && link !== 'none') {
+  // prod と同じくスキン CSS はサーバー側で name から注入する
+  // (/css/style_<name>.css を全テンプレ分静的配備済み)。
+  // クライアントの link はフォールバックとしてオリジン差し替えで使う
+  // (localhost/相対 URL は BR から到達不能のため)。
+  let skinHref = name ? `${origin}/css/style_${name}.css` : ''
+  if (!skinHref && link && link !== 'none') {
     try {
       const u = new URL(link, origin)
       skinHref = u.pathname.startsWith('/') ? `${origin}${u.pathname}${u.search}` : link

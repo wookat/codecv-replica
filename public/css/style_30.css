@@ -1,0 +1,55 @@
+@charset "UTF-8";
+@import url("../../common.css");
+.markdown-transform-html {
+    font-size: 14px;
+    position: relative;
+}
+.markdown-transform-html::before {
+    content: '';
+    width: 100%;
+    height: 15px;
+    background: var(--markdown-primary-bg-color);
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+.markdown-transform-html h2 {
+    font-size: 16px;
+    margin-bottom: 16px;
+    padding-bottom: 2px;
+    position: relative;
+    color: white;
+    height: 30px;
+    line-height: 30px;
+    padding-left: 9px;
+}
+.markdown-transform-html h2::before, .markdown-transform-html h2::after {
+    position: absolute;
+    content: '';
+}
+.markdown-transform-html h2::after {
+    background: linear-gradient(to right, var(--markdown-primary-bg-color), white);
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    border-radius: 4px;
+}
+.markdown-transform-html h2::before {
+    content: '';
+    position: absolute;
+    left: 0px;
+    z-index: -1;
+    top: -7px;
+    width: 0;
+    height: 0;
+    border: 15px solid transparent;
+    border-right-color: var(--markdown-primary-bg-color);
+    transform: rotate(180deg) translateY(-50%);
+}
+.markdown-transform-html img[alt="个人头像"] {
+    border-radius: 5px;
+    width: 22mm;
+    height: 26mm;
+}

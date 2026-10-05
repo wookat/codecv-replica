@@ -1,0 +1,41 @@
+@import url("../../common.css");
+.markdown-transform-html h1 {
+    padding-bottom: 8px;
+    color: var(--markdown-primary-bg-color);
+}
+.markdown-transform-html h2 {
+    margin: 10px 0 8px 0;
+    padding-bottom: 4px;
+    font-size: 20px;
+    color: var(--markdown-primary-bg-color);
+    border-bottom: 3px solid var(--markdown-primary-bg-color);
+}
+.markdown-transform-html h2 i.iconfont {
+    font-size: 22px;
+}
+.markdown-transform-html a {
+    color: var(--markdown-primary-color);
+    text-decoration: none;
+}
+.markdown-transform-html .iconfont {
+    margin-right: 0.2em;
+}
+.markdown-transform-html ul li {
+    list-style: square;
+}
+.markdown-transform-html .head-layout h1, .markdown-transform-html .head-layout h2 {
+    letter-spacing: 8px;
+    border-bottom: none;
+}
+.markdown-transform-html .head-layout h1 strong, .markdown-transform-html .head-layout h1 b, .markdown-transform-html .head-layout h2 strong, .markdown-transform-html .head-layout h2 b {
+    margin-left: 20px;
+    letter-spacing: 2px;
+}
+
+.markdown-transform-html .head-layout i {
+    margin-right: 8px;
+}
+
+.markdown-transform-html p {
+    padding-top: 4px;
+}

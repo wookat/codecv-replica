@@ -1,0 +1,51 @@
+@import url("../../common.css");
+.markdown-transform-html h1, .markdown-transform-html h2, .markdown-transform-html h3, .markdown-transform-html h4, .markdown-transform-html h5, .markdown-transform-html h6, .markdown-transform-html a {
+    padding-bottom: 5px;
+    color: var(--markdown-primary-bg-color);
+}
+.markdown-transform-html strong, .markdown-transform-html b {
+    color: #333;
+}
+.markdown-transform-html thead {
+    color: white !important;
+    background: var(--markdown-primary-bg-color) !important;
+}
+.markdown-transform-html .resume-module h2 {
+    font-size: 16px;
+    position: relative;
+    height: 32px;
+    line-height: 32px !important;
+}
+.markdown-transform-html .resume-module h2 i.iconfont {
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    line-height: 30px !important;
+    font-size: 16px;
+    text-align: center;
+    background: var(--markdown-primary-bg-color);
+    color: white;
+}
+.markdown-transform-html .resume-module h2::before {
+    background: white;
+    position: absolute;
+    content: '';
+    top: 0;
+    left: 0;
+    width: 100px;
+    z-index: -1;
+    height: 100%;
+}
+.markdown-transform-html .resume-module h2::after {
+    content: '';
+    position: absolute;
+    height: 2px;
+    width: 100%;
+    background: var(--markdown-primary-bg-color);
+    top: 50%;
+    left: 0;
+    z-index: -2;
+    border-radius: 3px;
+    opacity: 0.2;
+    transform: translateY(-50%);
+}

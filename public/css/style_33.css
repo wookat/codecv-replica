@@ -1,0 +1,75 @@
+@charset "UTF-8";
+@import url("../../common.css");
+.markdown-transform-html {
+    font-size: 14px;
+}
+.markdown-transform-html .head-layout {
+    color: #f7f4f4;
+    position: relative;
+    margin-bottom: 45px;
+}
+.markdown-transform-html .head-layout::before {
+    content: '';
+    width: calc(100% + 80px);
+    left: -40px;
+    top: -35px;
+    height: 100%;
+    padding-bottom: 60px;
+    background: var(--markdown-primary-bg-color);
+    position: absolute;
+    z-index: -1;
+}
+.markdown-transform-html .resume-module {
+    position: relative;
+}
+.markdown-transform-html .resume-module::before {
+    width: 100%;
+    height: 1px;
+    opacity: 0.4;
+    background: var(--markdown-primary-bg-color);
+    content: '';
+    position: absolute;
+    top: 36.5px;
+    left: 0;
+}
+.markdown-transform-html h1, .markdown-transform-html h2, .markdown-transform-html h3, .markdown-transform-html h4, .markdown-transform-html h5, .markdown-transform-html h6 {
+    margin: 5px 0;
+}
+.markdown-transform-html h2 {
+    font-size: 16px;
+    position: relative;
+    color: white;
+    padding: 5px 14px;
+    text-align: center;
+    display: inline-block;
+    height: 33px;
+}
+.markdown-transform-html h2::before, .markdown-transform-html h2::after {
+    position: absolute;
+    content: '';
+}
+.markdown-transform-html h2::after {
+    background: var(--markdown-primary-bg-color);
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+.markdown-transform-html h2::before {
+    content: '';
+    position: absolute;
+    right: -23px;
+    top: 9.5px;
+    z-index: -1;
+    width: 0;
+    height: 0;
+    border: 23.5px solid transparent;
+    border-right-color: var(--markdown-primary-bg-color);
+    transform: rotate(-45deg);
+}
+.markdown-transform-html img[alt="个人头像"] {
+    border-radius: 5px;
+    width: 22mm;
+    height: 26mm;
+}
