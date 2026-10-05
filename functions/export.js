@@ -182,7 +182,7 @@ export async function onRequestPost(context) {
     // 逐行互相关精测 (xcorr): 84 已验证 13.49→0
     '68': mt(-2), '38': mt(-2),
     '11fresh': mt(5), '93': mt(-1), '24': mt(2),
-    '10front_end': mt(-2), '20campus_simple': mt(2), '22': mt(-1), '15simple_versatile': mt(2), '70': mt(2), 'duomotaidamoxingsuanfa': mt(1)
+    '10front_end': mt(-2), '20campus_simple': mt(2), '22': mt(-1), '15simple_versatile': mt(2), '70': mt(2), 'duomotaidamoxingsuanfa': mt(1),
     '102': mt(-2),
     '103': mt(-1),
     '104': mt(-1),
