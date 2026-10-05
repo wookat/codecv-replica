@@ -23,9 +23,20 @@ export const CUSTOM_CSS_STYLE = 'custom-css-style',
 export const renderCV = ref<HTMLElement>()
 export const step = ref<number>(90)
 export const pageSize = ref<number>(1)
+// 用户手动调过缩放后，容器自适应缩放便不再接管
+export const stepTouched = ref(false)
 
 export function setStep(val: number | any) {
+  stepTouched.value = true
   step.value = val
+}
+
+const A4_CSS_PX = 794
+
+export function fitStepToWidth(availWidth: number) {
+  if (stepTouched.value || !availWidth) return
+  const fit = Math.floor((((availWidth - 24) / A4_CSS_PX) * 100) / 10) * 10
+  step.value = Math.min(100, Math.max(30, fit))
 }
 
 function queryRenderCV() {

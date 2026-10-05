@@ -242,9 +242,12 @@ const COMMENTS = [
     line-height: 2.1;
     .fi {
       width: 24px;
+      flex-shrink: 0;
     }
     b {
       font-weight: 700;
+      flex-shrink: 0;
+      white-space: nowrap;
     }
     .fd {
       color: #6b7280;

@@ -51,11 +51,11 @@ export async function onRequest(context) {
   }
 
   if (route === 'today' && request.method === 'POST') {
-    const dayStart = new Date()
+    const all = await jobs(env, request)
+    const latest = Math.max(0, ...all.map(j => j.createTime || 0))
+    const dayStart = new Date(latest)
     dayStart.setHours(0, 0, 0, 0)
-    const n = (await jobs(env, request)).filter(
-      j => (j.createTime || 0) >= dayStart.getTime()
-    ).length
+    const n = all.filter(j => (j.createTime || 0) >= dayStart.getTime()).length
     return json(request, { code: 200, data: n, message: '获取当日新增岗位数量成功' })
   }
 

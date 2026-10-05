@@ -2,17 +2,28 @@
 import TabBar from '../tabbar/tabbar.vue'
 import { useRenderHTML, useResumeType } from '../../hook'
 import { useThemeConfig } from '@/common/global'
-import { step, pageSize } from '../tabbar/hook'
+import { step, pageSize, fitStepToWidth } from '../tabbar/hook'
+import { onMounted, onUnmounted, ref } from 'vue'
 
 defineEmits(['upload-avatar', 'html-convert'])
 
 const { resumeType } = useResumeType()
 const { isDark } = useThemeConfig()
 const { renderDOM } = useRenderHTML(resumeType)
+
+const outerEl = ref<HTMLElement>()
+let ro: ResizeObserver | undefined
+onMounted(() => {
+  if (!outerEl.value) return
+  fitStepToWidth(outerEl.value.clientWidth)
+  ro = new ResizeObserver(entries => fitStepToWidth(entries[0].contentRect.width))
+  ro.observe(outerEl.value)
+})
+onUnmounted(() => ro?.disconnect())
 </script>
 
 <template>
-  <div class="outer" :style="{ background: isDark ? '#282c34' : 'var(--bg-theme)' }">
+  <div ref="outerEl" class="outer" :style="{ background: isDark ? '#282c34' : 'var(--bg-theme)' }">
     <TabBar
       @html-convert="cnt => $emit('html-convert', cnt)"
       @upload-avatar="path => $emit('upload-avatar', path)"
