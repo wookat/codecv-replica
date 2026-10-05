@@ -35,9 +35,13 @@ const FACE_FILES = {
 // 本站 /fonts/cvfonts/ にミラー(pdffonts で内部名の一致を検証済み: MicrosoftYaHei /
 // PingFangSC / AlibabaPuHuiTi_2_55_Regular / FZKTJW--GB1-0 / TimesNewRomanPSMT)。
 // data-URI だと数 MB あるため URL src の @font-face で宣言(使用ファミリーだけ実 DL)。
+// prod は MicrosoftYaHei を Regular+Bold の2バイナリで埋め込む(実測 pdffonts:
+// 埋め込み F8 が usWeightClass=700 の実 Bold)。Bold 実体は tcb 同一 bucket の
+// WeiRuanYaHei-Bold.woff2 をミラー —— font-weight:700 宣言で太字要素に適用。
 const CLOUD_FONT_URLS = {
   'Times New Roman': 'times.ttf',
   微软雅黑: 'yahei.woff2',
+  '微软雅黑__700': 'yahei-bold.woff2',
   PingFangSC: 'pingfang.woff2',
   阿里巴巴普惠体: 'puhuiti.ttf',
   'FZKai-Z03S': 'fzkai.ttf',
@@ -71,10 +75,10 @@ export async function onRequestPost(context) {
   }
   // URL src の @font-face は未使用フェイスを DL しないため全量宣言しても安い
   const cloudFaces = Object.entries(CLOUD_FONT_URLS)
-    .map(
-      ([fam, file]) =>
-        `@font-face{font-family:'${fam}';src:url('${origin}/fonts/cvfonts/${file}');}`
-    )
+    .map(([fam, file]) => {
+      const [family, weight] = fam.split('__')
+      return `@font-face{font-family:'${family}';${weight ? `font-weight:${weight};` : ''}src:url('${origin}/fonts/cvfonts/${file}');}`
+    })
     .join('')
   const fonts = (
     await Promise.all(
@@ -91,13 +95,12 @@ export async function onRequestPost(context) {
   // フォントのフェッチ/デコード完了を確実に待つため、document.fonts.ready で
   // マーカー要素を立てて waitForSelector で同期する。
   const fontWait = `<script>document.fonts.ready.then(()=>{const d=document.createElement('div');d.id='fonts-ready';document.body.appendChild(d)})</script>`
-  // prod PDF は全ページに斜めタイルの薄グレー透かし（「CodeCV简历 www.codecvcv.com」、
-  // 有償解除機能）が入る。こちらは本站ドメインで同型を複製 —— position:fixed は印刷時
-  // 全ページに繰り返し描画されるためタイル層1枚で済む。
-  const wmSvg = `data:image/svg+xml,${encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="340" height="220"><text x="170" y="110" font-size="17" fill="rgba(0,0,0,0.07)" transform="rotate(-30 170 110)" text-anchor="middle" font-family="sans-serif">CodeCV简历  codecv.zalize.com</text></svg>`
-  )}`
-  const watermark = `<div style="position:fixed;inset:0;z-index:2147483000;pointer-events:none;background-image:url('${wmSvg}');background-repeat:repeat"></div>`
+  // prod の透かし実測(PDF内 1588x2246 ラスタ画像+SMask alpha≈0.18 から逆算):
+  // ・2行構成「CodeCV简历」(bold ~32px) + 「www.codecvcv.com」(regular ~15px)
+  // ・右下がり 27.3° 回転、色 #808080 / alpha 0.18 (白地合成 ≈ #E8E8E8)
+  // ・インスタンス中心: 偶数行 y=107+215k, x=200+272.5c / 奇数行 x オフセット +137
+  // ・ページ内 @font-face を効かせるため DOM 要素で生成(background SVG はフォント隔離)
+  const watermark = `<div id="wm" style="position:fixed;inset:0;z-index:2147483000;pointer-events:none"></div><script>(function(){var w=document.getElementById('wm');for(var r=0;r<7;r++){for(var c=-1;c<4;c++){var cx=(r%2?337:200)+272.5*c;var cy=107+215*r;var d=document.createElement('div');d.style.cssText='position:absolute;left:'+(cx-80)+'px;top:'+(cy-34)+'px;width:160px;text-align:center;transform:rotate(27.3deg);color:rgba(128,128,128,0.18);line-height:1.2';d.innerHTML='<div style="font-size:32px;font-weight:700;font-family:\\u5fae\\u8f6f\\u96c5\\u9ed1,Microsoft YaHei,sans-serif">CodeCV\\u7b80\\u5386</div><div style="font-size:15px;margin-top:9px;font-family:\\u5fae\\u8f6f\\u96c5\\u9ed1,Microsoft YaHei,sans-serif">www.codecvcv.com</div>';w.appendChild(d)}}})()</script>`
   // prod の export リクエスト style フィールドに同梱される正規化ルールを同じく
   // 同梱（mark 内の色/背景を outer 側に正規化・全要素 line-height:20px 強制）
   const markNormalize = `.markdown-transform-html mark { color: inherit; }
@@ -106,34 +109,13 @@ export async function onRequestPost(context) {
 .markdown-transform-html mark code { background: transparent !important; }
 .markdown-transform-html mark:has(code) { border-radius: 5px; }
 .markdown-transform-html * { line-height: 20px; }`
-  // prod エクスポートの li 間隔はテンプレ固有(実測: 全114 PDF の行ピッチで分類)。
-  // ・91 テンプレ: margin-top:5px → ピッチ 25px(18.7pt) — 既定(common.css :where ルール)のまま
-  // ・23 テンプレ: margin 実質0 → ピッチ 20px(15.0pt)
-  // ・6 テンプレ: li 行高 22px → ピッチ 22px(16.5pt)
-  const LI_MARGIN0 = new Set(
-    '17business 18art 19social 23 25 27 2concise 37 53 5graduation_reexam 70 71 72 74 75 76 77 87 9business duomotaidamoxingsuanfa shuziic youxikehuduankaifa'.split(
-      ' '
-    )
-  )
-  const LI_LH22 = new Set('21it_campus 60 64 73 78 79'.split(' '))
-  // 23px 群: PingFangSC/PuHuiTi 系(実測 17.2pt) / 24px 群: Noto 一部(18.0pt)
-  const LI_MT3 = new Set('26 56 57 59 85 89'.split(' '))
-  const LI_MT4 = new Set('67 81 98 99 agent_development'.split(' '))
-  // 行高自体が既定20pxと異なるテンプレ(実測の包行ピッチ由来):
-  // 57→18px, 81→19px
-  const LH_OVERRIDE = { 57: 18, 81: 19 }
-  const lh = LH_OVERRIDE[name]
-  const liFix = lh
-    ? `.markdown-transform-html *{line-height:${lh}px}.markdown-transform-html li{margin-top:5px}`
-    : LI_LH22.has(name)
-    ? `.markdown-transform-html li{line-height:22px;margin-top:0}`
-    : LI_MARGIN0.has(name)
-    ? `.markdown-transform-html li{margin-top:0}`
-    : LI_MT3.has(name)
-    ? `.markdown-transform-html li{margin-top:3px}`
-    : LI_MT4.has(name)
-    ? `.markdown-transform-html li{margin-top:4px}`
-    : ''
+  // テンプレ別 line-height/margin は prod PDF の行ピッチ実測で決定
+  // (lh∈{17,18,19,20,22}×mt∈{0,5} を各テンプレ全変体レンダリングし、
+  //  prod との行位置誤差が最小の組を採用。詳細: audit/EXPORT-AUDIT.md)。
+  // 皮膚側 li ルールより後に置いて必ず勝たせるため、マップ値を一律出力する。
+  const LH_MAP = { '100':[18,5],'101':[19,5],'102':[20,5],'103':[19,5],'104':[19,5],'105':[19,5],'106':[19,5],'107':[19,5],'108':[19,5],'109':[19,5],'10front_end':[20,5],'11fresh':[20,5],'12internet_social':[22,0],'13geek':[22,0],'14heading':[22,0],'15simple_versatile':[20,5],'16prominent_content':[20,5],'17business':[20,5],'18art':[20,5],'19social':[20,5],'1internet_avatar':[19,5],'20campus_simple':[19,5],'21it_campus':[18,5],'22':[20,5],'23':[19,5],'24':[19,5],'25':[19,5],'26':[18,5],'27':[17,5],'28':[19,5],'29':[19,5],'2concise':[20,5],'30':[20,5],'31':[20,5],'32':[20,5],'33':[20,5],'34':[20,5],'35':[20,5],'36':[20,5],'37':[20,5],'38':[18,5],'39':[19,5],'3operation':[19,5],'40':[20,5],'41':[20,5],'42':[20,5],'43':[20,5],'44':[20,5],'45':[19,5],'46':[20,5],'47':[20,5],'48':[20,5],'49':[20,5],'4internet':[19,5],'50':[20,5],'51':[20,5],'52':[18,5],'53':[17,5],'54':[18,5],'55':[18,5],'56':[19,5],'57':[18,5],'58':[19,5],'59':[18,5],'5graduation_reexam':[20,5],'60':[17,5],'61':[20,5],'62':[20,5],'63':[19,5],'64':[17,5],'65':[18,5],'66':[20,5],'67':[19,5],'68':[22,0],'69':[19,5],'6operation_avatar':[20,5],'70':[17,5],'71':[20,5],'72':[18,5],'73':[17,5],'74':[20,5],'75':[20,5],'76':[19,5],'77':[20,5],'78':[17,5],'79':[17,5],'7simple_avatar':[20,5],'80':[18,5],'81':[19,5],'82':[19,5],'83':[19,5],'84':[20,5],'85':[18,5],'86':[19,5],'87':[17,5],'88':[19,5],'89':[18,5],'8general':[20,5],'90':[19,5],'91':[19,5],'92':[19,5],'93':[19,5],'94':[19,5],'95':[19,5],'96':[19,5],'97':[20,5],'98':[19,5],'99':[19,5],'9business':[19,5],'agent_development':[19,5],'duomotaidamoxingsuanfa':[18,5],'shuziic':[19,5],'yinhangguanpeisheng':[19,5],'youxikehuduankaifa':[19,5] }
+  const lm = LH_MAP[name] || [20, 5]
+  const liFix = `.markdown-transform-html *{line-height:${lm[0]}px}.markdown-transform-html li{line-height:${lm[0]}px;margin-top:${lm[1]}px}`
   // prod の埋め込みフォントは投稿フォントスタック先頭のファミリーに一致
   // (実測全114: Times 宣言テンプレだけ TimesNewRomanPS、他は先頭ファミリー
   // 自体がラテンも描く。Serif 宣言は NotoSerifSC、その他各書体)——
