@@ -115,10 +115,17 @@ export async function onRequestPost(context) {
     )
   )
   const LI_LH22 = new Set('21it_campus 60 64 73 78 79'.split(' '))
+  // 23px 群: PingFangSC/PuHuiTi 系(実測 17.2pt) / 24px 群: Noto 一部(18.0pt)
+  const LI_MT3 = new Set('26 56 57 59 85 89'.split(' '))
+  const LI_MT4 = new Set('67 81 98 99 agent_development'.split(' '))
   const liFix = LI_LH22.has(name)
     ? `.markdown-transform-html li{line-height:22px;margin-top:0}`
     : LI_MARGIN0.has(name)
     ? `.markdown-transform-html li{margin-top:0}`
+    : LI_MT3.has(name)
+    ? `.markdown-transform-html li{margin-top:3px}`
+    : LI_MT4.has(name)
+    ? `.markdown-transform-html li{margin-top:4px}`
     : ''
   // prod の埋め込みフォントは投稿フォントスタック先頭のファミリーに一致
   // (実測全114: Times 宣言テンプレだけ TimesNewRomanPS、他は先頭ファミリー
