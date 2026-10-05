@@ -242,10 +242,10 @@ watch(proofreadBus, () => (proofreadVisible.value = true))
     row-gap: 8px;
 
     .operator-item {
-      margin-right: 10px;
+      margin-right: 8px;
     }
     .font-color-picker {
-      margin-right: 12px;
+      margin-right: 10px;
     }
     .main-color-picker {
       margin-right: 0;
@@ -280,10 +280,10 @@ watch(proofreadBus, () => (proofreadVisible.value = true))
       width: 80px;
     }
     .lh-select {
-      width: 70px;
+      width: 66px;
     }
     .font-select {
-      width: 90px;
+      width: 86px;
     }
     .proofread-btn {
       position: relative;
