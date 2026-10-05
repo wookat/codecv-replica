@@ -1,5 +1,5 @@
 import { getLocalStorage, removeLocalStorage, setLocalStorage } from '@/common/localstorage'
-import { createStyle, query, removeHeadStyle, convert, createDIV } from '@/utils'
+import { createStyle, query, removeHeadStyle, createDIV } from '@/utils'
 import { getFontFamily, getPrimaryBGColor, getPrimaryColor } from '@/templates/config'
 import { onActivated, onMounted, reactive, ref } from 'vue'
 
@@ -249,6 +249,7 @@ export function restResumeContent(resumeType: string) {
   localStorage.removeItem(`${PARA_SPACING}-${resumeType}`)
   localStorage.removeItem(`${JUSTIFY_TEXT}-${resumeType}`)
   localStorage.removeItem(`${BADGE_CONFIG}-${resumeType}`)
+  localStorage.removeItem(`page_margin-${resumeType}`)
   localStorage.removeItem(`markdown-content-${resumeType}`)
   location.reload()
 }
@@ -275,19 +276,41 @@ function reSplit() {
   renderCV && splitPage(renderCV)
 }
 
-// 行距（px 步进，作用于纸面文本行高）
+// 行距（生产同款下拉选择 10-39px，写 .markdown-transform-html *{line-height:Npx}）
 export function useLineHeight(resumeType: string) {
   const cacheKey = LINE_HEIGHT + '-' + resumeType
   const match = ((get(cacheKey) as string) || '').match(/line-height:\s*([\d.]+)px/)
-  const lineHeight = ref(match ? Number(match[1]) : 30)
+  const lineHeight = ref(match ? Number(match[1]) : 15)
+  const lineHeightOptions = Array.from({ length: 30 }, (_, i) => ({
+    value: i + 10,
+    label: i + 10 + 'px'
+  }))
 
   function apply(n: number) {
     lineHeight.value = n
-    upsertPersistStyle(cacheKey, `.jufe * { line-height: ${n}px !important; }`)
+    upsertPersistStyle(cacheKey, `.markdown-transform-html * { line-height: ${n}px; }`)
     reSplit()
   }
   onActivated(() => restorePersistStyle(cacheKey))
-  return { lineHeight, applyLineHeight: apply }
+  return { lineHeight, lineHeightOptions, applyLineHeight: apply }
+}
+
+// 页边距（生产同款两个步进器：上下页边距默认30 / 左右页边距默认50，写 .jufe{padding:V H}）
+export function usePageMargin(resumeType: string) {
+  const cacheKey = 'page_margin' + '-' + resumeType
+  const stored = ((get(cacheKey) as string) || '').match(/padding:\s*([\d.]+)px\s*([\d.]+)px/)
+  const pageMarginTB = ref(stored ? Number(stored[1]) : 30)
+  const pageMarginLR = ref(stored ? Number(stored[2]) : 50)
+
+  function apply() {
+    upsertPersistStyle(
+      cacheKey,
+      `/* SET_PADDING_START */\n.jufe { padding: ${pageMarginTB.value}px ${pageMarginLR.value}px; }\n/* SET_PADDING_END */`
+    )
+    reSplit()
+  }
+  onActivated(() => restorePersistStyle(cacheKey))
+  return { pageMarginTB, pageMarginLR, applyPageMargin: apply }
 }
 
 // 段距（px 步进，作用于段落/列表上下外边距）
@@ -349,20 +372,10 @@ export function useJustify(resumeType: string) {
   return { justified, toggleJustify }
 }
 
-// 智能一页：逐级缩字号+行距直到装进一页
+// 智能一页：生产同款算法——按系数逐级压缩各元素 margin-top 直到装进一页
 export function useOnePage(resumeType: string) {
   const cacheKey = AUTO_ONE_PAGE + '-' + resumeType,
     onePageApplied = ref(!!query(cacheKey) || !!get(cacheKey))
-
-  function applyShrink(baseSize: number) {
-    upsertPersistStyle(
-      cacheKey,
-      `.jufe { font-size: ${baseSize}px !important; } .jufe * { line-height: ${Math.round(
-        baseSize * 1.7
-      )}px !important; }`
-    )
-    reSplit()
-  }
 
   function smartOnePage() {
     const renderCV = queryRenderCV()
@@ -371,14 +384,26 @@ export function useOnePage(resumeType: string) {
       onePageApplied.value = true
       return
     }
-    const cur = parseFloat(getComputedStyle(renderCV).fontSize) || 15
-    for (let size = cur - 0.5; size >= 10; size -= 0.5) {
-      applyShrink(size)
+    // 采集各元素当前 margin-top 基线
+    const sels = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'ul', 'ol', 'blockquote']
+    const base = sels.map(sel => {
+      const el = renderCV.querySelector(sel)
+      const mt = el ? parseFloat(getComputedStyle(el).marginTop) || 0 : 0
+      return { sel, mt }
+    })
+    for (let k = 0.95; k >= -0.5; k -= 0.05) {
+      const css = base
+        .filter(b => b.mt)
+        .map(b => `.jufe ${b.sel} { margin-top: ${(b.mt * k).toFixed(4)}px!important; }`)
+        .join(' ')
+      upsertPersistStyle(cacheKey, css)
+      reSplit()
       if (pageSize.value <= 1) {
         onePageApplied.value = true
         return
       }
     }
+    onePageApplied.value = true
   }
 
   function toggleOnePage() {
@@ -466,46 +491,54 @@ export function useBadge(resumeType: string) {
   return { setBadge }
 }
 
-// 调节元素边距
+// 调节元素边距/字号（生产同款固定语义行：只显示简历模板中已经使用的元素）
 export function useAdjust(resumeType: string) {
   const visible = ref(false)
   const properties = reactive<IElementProperty[]>([])
   const cacheKey = ADJUST_RESUME_MARGIN_TOP + '-' + resumeType
   interface IElementProperty {
     name: string
+    selector: string
     marginTop: number
     marginBottom: number
-    tagName: string
-    className: string
+    fontSize: number
   }
+
+  // 生产弹层的语义元素表（按出现顺序）
+  const SEMANTIC_ELEMENTS: Array<[string, string]> = [
+    ['一级标题', 'h1'],
+    ['二级标题', 'h2'],
+    ['三级标题', 'h3'],
+    ['四级标题', 'h4'],
+    ['五级标题', 'h5'],
+    ['六级标题', 'h6'],
+    ['简历模块', '.resume-module'],
+    ['左右布局', '.flex-layout'],
+    ['左右布局项', '.flex-layout-item'],
+    ['链接', 'a'],
+    ['粗体', 'strong'],
+    ['正文', 'p'],
+    ['列表项', 'li'],
+    ['无序列表', 'ul'],
+    ['有序列表', 'ol'],
+    ['引用', 'blockquote'],
+    ['分割线', 'hr']
+  ]
 
   function getProperties(element: HTMLElement): IElementProperty[] {
     const curProperties: IElementProperty[] = []
-    const seenTags = new Set<string>() // 用于记录已经处理过的标签名
-    const seenClassNames = new Set<string>() // 用于记录已经处理过的类名
-
-    function helper(el: HTMLElement) {
-      if (el !== element) {
-        const computedStyle = window.getComputedStyle(el) // 获取计算后的样式
-        const marginTop = parseInt(computedStyle.marginTop) // 获取 marginTop 值
-        const marginBottom = parseInt(computedStyle.marginBottom)
-        const tagName = el.tagName.toLowerCase() // 获取标签名，转换为小写
-        const className = el.className.split(' ')[0] || '' // 获取类名，如果没有则用 'No Class' 代替
-        const name = convert(className || tagName)
-
-        // 判断标签名和类名是否已经处理过，如果没有，则将其加入结果数组，并添加到 seenTags 和 seenClassNames 集合中
-        if (!seenTags.has(tagName) || !seenClassNames.has(className)) {
-          curProperties.push({ tagName, name, marginBottom, marginTop, className })
-          seenTags.add(tagName)
-          seenClassNames.add(className)
-        }
-      }
-      // 遍历当前元素的所有子节点，并递归调用该函数
-      const children = el.children
-      for (let i = 0; i < children.length; i++) helper(children[i] as HTMLElement)
+    for (const [name, selector] of SEMANTIC_ELEMENTS) {
+      const el = element.querySelector(selector) as HTMLElement | null
+      if (!el) continue
+      const cs = window.getComputedStyle(el)
+      curProperties.push({
+        name,
+        selector,
+        marginTop: Math.round(parseFloat(cs.marginTop) || 0),
+        marginBottom: Math.round(parseFloat(cs.marginBottom) || 0),
+        fontSize: Math.round(parseFloat(cs.fontSize) || 13)
+      })
     }
-
-    helper(element) // 调用递归函数开始获取 marginTop 和 lineHeight 值
     return curProperties
   }
 
@@ -529,8 +562,7 @@ export function useAdjust(resumeType: string) {
       styleDOM.setAttribute(cacheKey, 'true')
     }
     for (const property of properties) {
-      const target = property.className ? `.${property.className}` : property.tagName
-      cssText += `.jufe ${target} {margin-top: ${property.marginTop}px!important; margin-bottom: ${property.marginBottom}px!important;}`
+      cssText += `.jufe ${property.selector} {margin-top: ${property.marginTop}px!important; margin-bottom: ${property.marginBottom}px!important; font-size: ${property.fontSize}px!important;}`
     }
     styleDOM.textContent = cssText
     priorityInsert(isAppend, styleDOM)

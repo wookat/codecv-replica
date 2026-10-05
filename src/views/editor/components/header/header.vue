@@ -9,7 +9,8 @@ import { useResumeType } from '../../hook'
 import { cloudPush } from '@/api/modules/cloudResume'
 import { successMessage, warningMessage } from '@/common/message'
 import ProofreadDrawer from '../proofread/proofread.vue'
-import { ref } from 'vue'
+import HistoryDrawer from './historyDrawer.vue'
+import { computed, onMounted, ref } from 'vue'
 
 const emit = defineEmits([
   'download-dynamic',
@@ -25,9 +26,16 @@ const { open, toggle } = useSwitch()
 const editorStore = useEditorStore()
 const { resumeType } = useResumeType()
 const proofreadVisible = ref(false)
+const historyVisible = ref(false)
+// 生产同款未保存提示：内容与最近一次保存不一致 → 显示「简历已变更请及时保存」
+// 初始内容在兄弟组件挂载阶段才注入，延迟到挂载后取基线避免首载误标
+const lastSaved = ref(editorStore.MDContent)
+onMounted(() => setTimeout(() => (lastSaved.value = editorStore.MDContent), 0))
+const dirty = computed(() => editorStore.MDContent !== lastSaved.value)
 
 function save() {
   cloudPush(resumeType.value, editorStore.MDContent)
+  lastSaved.value = editorStore.MDContent
   successMessage('已保存')
 }
 function undo() {
@@ -54,9 +62,19 @@ function undo() {
     />
     <div class="right">
       <span class="watermark-pill" @click="$router.push('/member')">移除水印</span>
+      <span v-if="dirty" class="dirty-hint">简历已变更请及时保存</span>
       <ExportTotal />
       <el-tooltip content="撤销">
         <i class="iconfont icon-undo font-20 hover undo" @click="undo"></i>
+      </el-tooltip>
+      <el-tooltip content="历史记录" effect="light">
+        <div class="resume-history lx-cp lx-scale" @click="historyVisible = true">
+          <svg class="hist-icon" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M512 85.333333c235.648 0 426.666667 191.018667 426.666667 426.666667s-191.018667 426.666667-426.666667 426.666667S85.333333 747.648 85.333333 512h85.333334a341.333333 341.333333 0 1 0 59.093333-192H341.333333v85.333333H85.333333v-256h85.333334V256a425.813333 425.813333 0 0 1 341.333333-170.666667z m42.666667 213.333334v195.626666l138.368 138.368-60.373334 60.373334L469.333333 529.621333V298.666667h85.333334z"
+            />
+          </svg>
+        </div>
       </el-tooltip>
       <button class="save-btn btn" @click="save">保存</button>
       <el-dropdown class="export-dropdown" trigger="click">
@@ -73,25 +91,11 @@ function undo() {
           </el-dropdown-menu>
         </template>
       </el-dropdown>
-      <el-dropdown trigger="click">
-        <span class="more-dots hover">⋮</span>
-        <template #dropdown>
-          <el-dropdown-menu>
-            <el-dropdown-item>
-              <label for="import_md" class="import-label">
-                导入MD
-                <input accept=".md" id="import_md" type="file" @change="importFile" />
-              </label>
-            </el-dropdown-item>
-            <el-dropdown-item @click="emit('print-page')">打印</el-dropdown-item>
-            <el-dropdown-item @click="toggle">问题反馈</el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
     </div>
   </div>
   <Contact :open="open" @toggle="toggle" />
   <ProofreadDrawer v-model="proofreadVisible" />
+  <HistoryDrawer v-model="historyVisible" :resume-type="resumeType" />
 </template>
 
 <style lang="scss" scoped>
@@ -164,12 +168,28 @@ function undo() {
     background: var(--theme);
     color: #fff;
   }
-  .more-dots {
+  .dirty-hint {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--font-color);
+    opacity: 0.8;
+    white-space: nowrap;
+  }
+  .resume-history {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 20px;
-    font-weight: 700;
-    line-height: 1;
-    padding: 0 4px;
+    transition: transform 0.15s ease;
+    &:hover {
+      transform: scale(1.1);
+    }
+    .hist-icon {
+      width: 20px;
+      height: 20px;
+      fill: #333;
+    }
   }
   .icon-back {
     cursor: pointer;

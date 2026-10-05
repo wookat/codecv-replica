@@ -50,6 +50,38 @@ export function cloudPush(type: string, content: string) {
   )
 }
 
+interface ResumeVersion {
+  _id: number
+  id: string
+  updateTime: number
+}
+
+export async function cloudHistoryPage(type: string): Promise<ResumeVersion[]> {
+  const h = headers()
+  if (!h) return []
+  try {
+    const res = await fetch(`/api/resume/page?type=${encodeURIComponent(type)}`, { headers: h })
+    const data = await res.json()
+    return data.code === 200 ? data.data : []
+  } catch {
+    return []
+  }
+}
+
+export async function cloudHistoryGet(
+  id: number
+): Promise<{ content: string; style: string } | null> {
+  const h = headers()
+  if (!h) return null
+  try {
+    const res = await fetch(`/api/resume/get?id=${id}`, { headers: h })
+    const data = await res.json()
+    return data.code === 200 ? data.data : null
+  } catch {
+    return null
+  }
+}
+
 export async function cloudDelete(type: string) {
   const h = headers()
   if (!h) return

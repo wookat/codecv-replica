@@ -4,7 +4,12 @@ import RichEditor from './rich-editor/editor.vue'
 import MDEditor from './md-editor/editor.vue'
 import useEditorStore from '@/store/modules/editor'
 import { useResumeType, useAvatar } from '../../hook'
-import { reactiveWritable, useMoveLayout, injectWritableModeAvatarEvent } from './hook'
+import {
+  reactiveWritable,
+  useMoveLayout,
+  injectWritableModeAvatarEvent,
+  useOverlayDrag
+} from './hook'
 
 const { resumeType } = useResumeType()
 const { left, down } = useMoveLayout()
@@ -13,6 +18,7 @@ const { setAvatar } = useAvatar(resumeType.value)
 const { writable } = reactiveWritable(resumeType.value)
 
 injectWritableModeAvatarEvent(writable, setAvatar)
+useOverlayDrag(resumeType)
 
 const editorStore = useEditorStore()
 // 生产版双模式：编辑(所见即所得) / MD —— 右栏即常显预览，无独立预览丸

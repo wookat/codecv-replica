@@ -1,6 +1,30 @@
-// /api/resume/list|save|delete —— 登录用户的云端简历存储（resume_type 维度 upsert）
+// /api/resume/list|save|delete|history/page|history/get —— 登录用户的云端简历存储 + 历史版本
 import { json, readBody } from '../../_lib.js'
 import { currentUserRow } from '../../_auth.js'
+
+const VERSION_MAX_AGE_MS = 365 * 24 * 3600 * 1000 // 仅保留近一年（与生产一致）
+
+async function maybeSaveVersion(db, uid, type, content, style) {
+  // 最近一次版本在 30 分钟内且内容一致则不新增，避免自动保存刷屏
+  const last = await db
+    .prepare(
+      'SELECT content, created_at FROM resume_versions WHERE user_id = ? AND resume_type = ? ORDER BY created_at DESC LIMIT 1'
+    )
+    .bind(uid, type)
+    .first()
+  if (last && last.content === content && Date.now() - last.created_at < 30 * 60 * 1000) return
+  await db
+    .prepare(
+      'INSERT INTO resume_versions (user_id, resume_type, content, style, created_at) VALUES (?,?,?,?,?)'
+    )
+    .bind(uid, type, content, style || '', Date.now())
+    .run()
+  // 惰性清理一年前的版本
+  await db
+    .prepare('DELETE FROM resume_versions WHERE user_id = ? AND created_at < ?')
+    .bind(uid, Date.now() - VERSION_MAX_AGE_MS)
+    .run()
+}
 
 export async function onRequest(context) {
   const { request, env } = context
@@ -46,7 +70,30 @@ export async function onRequest(context) {
       )
       .bind(uid, type, uid, type)
       .run()
+    await maybeSaveVersion(db, uid, type, content, style)
     return json(request, { code: 200, message: '保存成功' })
+  }
+
+  // 版本列表：对照生产 {data:[{_id, id, updateTime}]}
+  if (route === 'page') {
+    const { results } = await db
+      .prepare(
+        'SELECT id AS _id, resume_type AS id, created_at AS updateTime FROM resume_versions WHERE user_id = ? AND resume_type = ? ORDER BY created_at DESC LIMIT 100'
+      )
+      .bind(uid, q.type || q.id || '')
+      .all()
+    return json(request, { code: 200, data: results })
+  }
+
+  if (route === 'get') {
+    const row = await db
+      .prepare(
+        'SELECT content, style, created_at FROM resume_versions WHERE id = ? AND user_id = ?'
+      )
+      .bind(q.id || q._id || 0, uid)
+      .first()
+    if (!row) return json(request, { code: 404, msg: '版本不存在' }, 404)
+    return json(request, { code: 200, data: row })
   }
 
   if (route === 'delete' && request.method === 'POST') {

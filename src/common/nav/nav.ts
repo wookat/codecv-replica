@@ -2,7 +2,7 @@ const nav = [
   {
     name: '导入简历',
     multiple: true,
-    children: ['导入MD']
+    children: ['导入MD', '打印']
   },
   {
     name: '简历模板',

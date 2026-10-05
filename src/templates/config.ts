@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import { TYPE_ORDER } from './order'
+import { getLocalStorage } from '@/common/localstorage'
 
 const initialCVState: Map<string, string[]> = new Map()
 
@@ -71,7 +72,20 @@ export type AvatarConfig = { url: string; top: number; left: number; type?: stri
 export function getAvatarConfig(type: string): AvatarConfig | null {
   const av = templates.value.find(t => t.type === type)?.avatar
   if (!av) return null
-  return typeof av === 'string' ? { url: av, top: 30, left: 660, type: 'square' } : av
+  const base: AvatarConfig =
+    typeof av === 'string' ? { url: av, top: 30, left: 660, type: 'square' } : { ...av }
+  // 用户在编辑器内拖拽头像后持久化于 localStorage，叠加覆盖模板默认坐标
+  try {
+    const raw = getLocalStorage(`avatar_pos-${type}`) as string | null
+    const pos = raw ? JSON.parse(raw) : null
+    if (pos && typeof pos.top === 'number' && typeof pos.left === 'number') {
+      base.top = pos.top
+      base.left = pos.left
+    }
+  } catch {
+    /* ignore */
+  }
+  return base
 }
 
 export function getPrimaryBGColor(type: string) {

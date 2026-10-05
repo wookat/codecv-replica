@@ -5,6 +5,7 @@ import { clickedTarget } from '../../hook'
 import { setClickedLinkText, setClickedLinkURL } from './toolbar/components/linkInput/hook'
 import { getPickerFile } from '@/utils/uploader'
 import { queryDOM } from '@/utils'
+import { getLocalStorage, setLocalStorage } from '@/common/localstorage'
 
 export function reactiveWritable(resumeType: string) {
   const editorStore = useEditorStore()
@@ -45,6 +46,59 @@ export function useMoveLayout() {
     window.removeEventListener('mousemove', move)
   })
   return { left, down, top }
+}
+
+// 证件照/校徽覆盖层拖拽：预览纸面内按住图片拖动重新定位（生产同款）
+// 位置持久化：头像 → avatar_pos-<type>（getAvatarConfig 读取覆盖），校徽 → badge_config-<type>
+export function useOverlayDrag(resumeType: Ref<string>) {
+  function down(e: MouseEvent) {
+    const img = (e.target as HTMLElement).closest?.(
+      '.cv-avatar-overlay,.cv-badge-overlay'
+    ) as HTMLImageElement | null
+    if (!img) return
+    e.preventDefault()
+    e.stopPropagation()
+    // 纸面有缩放：位移按宿主元素实际缩放比换算
+    const host = img.closest('.markdown-transform-html,.writable-edit-mode,.jufe') as HTMLElement
+    const scale =
+      host && host.offsetWidth ? host.getBoundingClientRect().width / host.offsetWidth : 1
+    const sx = e.clientX,
+      sy = e.clientY
+    const bt = parseFloat(img.style.top) || 0,
+      bl = parseFloat(img.style.left) || 0
+    const move = (ev: MouseEvent) => {
+      img.style.top = bt + (ev.clientY - sy) / (scale || 1) + 'px'
+      img.style.left = bl + (ev.clientX - sx) / (scale || 1) + 'px'
+    }
+    const up = (ev: MouseEvent) => {
+      window.removeEventListener('mousemove', move)
+      window.removeEventListener('mouseup', up)
+      const top = Math.round(bt + (ev.clientY - sy) / (scale || 1))
+      const left = Math.round(bl + (ev.clientX - sx) / (scale || 1))
+      img.style.top = top + 'px'
+      img.style.left = left + 'px'
+      const isBadge = img.classList.contains('cv-badge-overlay')
+      const key = isBadge ? `badge_config-${resumeType.value}` : `avatar_pos-${resumeType.value}`
+      if (isBadge) {
+        const raw = getLocalStorage(key) as string | null
+        if (!raw) return
+        try {
+          const cfg = JSON.parse(raw)
+          cfg.top = top
+          cfg.left = left
+          setLocalStorage(key, JSON.stringify(cfg))
+        } catch {
+          /* ignore */
+        }
+      } else {
+        setLocalStorage(key, JSON.stringify({ top, left }))
+      }
+    }
+    window.addEventListener('mousemove', move)
+    window.addEventListener('mouseup', up)
+  }
+  document.addEventListener('mousedown', down)
+  onDeactivated(() => document.removeEventListener('mousedown', down))
 }
 
 export function injectWritableModeAvatarEvent(

@@ -13,19 +13,17 @@ import {
   useCustomCSS,
   usePrimaryColor,
   useAdjust,
-  useFollowRoll,
   useLineHeight,
-  useParaSpacing,
-  useFontSize,
+  usePageMargin,
   useJustify,
   useOnePage,
-  useBadge,
-  restResumeContent
+  useBadge
 } from './hook'
 import { oneDark } from '@codemirror/theme-one-dark'
 import { useThemeConfig } from '@/common/global'
 import { useResumeType } from '../../hook'
 import ProofreadDrawer from '../proofread/proofread.vue'
+import TranslateDialog from './translateDialog.vue'
 import { proofreadBus } from '../proofread/proofread'
 import { ref, watch } from 'vue'
 
@@ -38,16 +36,15 @@ const { fontOptions, font, setFont } = useCustomFont(resumeType.value)
 const { setAvatar } = useAvatar(emits)
 const { primaryColor, setPrimaryColor } = usePrimaryBGColor(resumeType.value)
 const { adjustMargin, visible, confirmAdjustment, properties } = useAdjust(resumeType.value)
-const { followRoll, setFollowRoll } = useFollowRoll()
-const { lineHeight, applyLineHeight } = useLineHeight(resumeType.value)
-const { paraSpacing, applyParaSpacing } = useParaSpacing(resumeType.value)
-const { fontSize, fontSizeOptions, applyFontSize } = useFontSize(resumeType.value)
+const { lineHeight, lineHeightOptions, applyLineHeight } = useLineHeight(resumeType.value)
+const { pageMarginTB, pageMarginLR, applyPageMargin } = usePageMargin(resumeType.value)
 const { justified, toggleJustify } = useJustify(resumeType.value)
 const { toggleOnePage, onePageApplied } = useOnePage(resumeType.value)
 const { setBadge } = useBadge(resumeType.value)
 const { isDark } = useThemeConfig()
 
 const proofreadVisible = ref(false)
+const translateVisible = ref(false)
 watch(proofreadBus, () => (proofreadVisible.value = true))
 </script>
 
@@ -63,15 +60,18 @@ watch(proofreadBus, () => (proofreadVisible.value = true))
       show-stops
     />
     <div class="operator-level2">
+      <el-tooltip content="简历内容翻译，支持大部分主流语言" effect="light">
+        <i class="operator-item iconfont icon-translate" @click="translateVisible = true"></i>
+      </el-tooltip>
+      <el-tooltip content="编写CSS" effect="light">
+        <i class="operator-item iconfont icon-diy scale-110" @click="toggleDialog"></i
+      ></el-tooltip>
+      <el-tooltip content="调整简历中内容边距/字号" effect="light">
+        <i class="iconfont icon-adjust operator-item" @click="adjustMargin"></i>
+      </el-tooltip>
       <div class="operator-item font-color-picker">
         <el-color-picker @change="setColor" size="small" v-model="color" />
       </div>
-      <el-tooltip content="编写CSS" effect="light">
-        <i class="operator-item iconfont icon-diy" @click="toggleDialog"></i
-      ></el-tooltip>
-      <el-tooltip content="调整元素上下边距" effect="light">
-        <i class="iconfont icon-adjust operator-item" @click="adjustMargin"></i>
-      </el-tooltip>
       <div class="operator-item main-color-picker">
         <el-color-picker @change="setPrimaryColor" size="small" v-model="primaryColor" />
       </div>
@@ -87,7 +87,7 @@ watch(proofreadBus, () => (proofreadVisible.value = true))
       </el-tooltip>
       <input type="file" id="upload-badge" accept=".png,.jpg,.jpeg" @change="setBadge" />
       <el-tooltip
-        :content="onePageApplied ? '恢复多页排版' : '自动缩小字号行距装进一页'"
+        :content="onePageApplied ? '恢复多页排版' : '智能压缩边距装进一页'"
         effect="light"
       >
         <button
@@ -108,66 +108,64 @@ watch(proofreadBus, () => (proofreadVisible.value = true))
         </button>
       </el-tooltip>
       <el-tooltip content="错别字检查" effect="light">
-        <button class="operator-item text-btn" @click="proofreadVisible = true">错别字检查</button>
+        <button class="operator-item text-btn proofread-btn" @click="proofreadVisible = true">
+          错别字检查
+          <span class="proofread-new-dot" title="新功能"></span>
+        </button>
       </el-tooltip>
 
-      <el-input-number
-        class="operator-item num-step"
-        size="small"
-        v-model="lineHeight"
-        :min="18"
-        :max="60"
-        :step="2"
-        @change="(n: number | undefined) => n != null && applyLineHeight(n)"
-      />
-      <el-input-number
-        class="operator-item num-step"
-        size="small"
-        v-model="paraSpacing"
-        :min="0"
-        :max="60"
-        :step="2"
-        @change="(n: number | undefined) => n != null && applyParaSpacing(n)"
-      />
-      <el-select
-        v-model="fontSize"
-        class="operator-item size-select"
-        size="small"
-        @change="(n: number) => applyFontSize(n)"
-      >
-        <el-option v-for="o in fontSizeOptions" :key="o.value" :label="o.label" :value="o.value" />
-      </el-select>
-      <el-select v-model="font" class="operator-item font-select" @change="setFont" size="small">
-        <el-option
-          v-for="item in fontOptions"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value"
-        />
-      </el-select>
-      <el-popconfirm
-        width="240"
-        confirm-button-text="是的"
-        cancel-button-text="点错了"
-        title="你想重置简历的所有内容吗？"
-        @confirm="restResumeContent(resumeType)"
-      >
-        <template #reference>
-          <i class="operator-item iconfont icon-refresh ml-20"></i>
-        </template>
-      </el-popconfirm>
-      <el-tooltip content="跟随滚动" effect="light">
-        <el-switch
-          class="operator-item follow-roll"
+      <el-tooltip content="调整上下页边距" effect="light">
+        <el-input-number
+          class="operator-item margin-step"
           size="small"
-          v-model="followRoll"
-          @change="setFollowRoll"
+          v-model="pageMarginTB"
+          :min="0"
+          :max="100"
+          :step="2"
+          @change="applyPageMargin"
         />
+      </el-tooltip>
+      <el-tooltip content="调整左右页边距" effect="light">
+        <el-input-number
+          class="operator-item margin-step"
+          size="small"
+          v-model="pageMarginLR"
+          :min="0"
+          :max="100"
+          :step="2"
+          @change="applyPageMargin"
+        />
+      </el-tooltip>
+      <el-tooltip content="行距" effect="light">
+        <el-select
+          v-model="lineHeight"
+          class="operator-item lh-select"
+          size="small"
+          @change="(n: number) => applyLineHeight(n)"
+        >
+          <el-option
+            v-for="o in lineHeightOptions"
+            :key="o.value"
+            :label="o.label"
+            :value="o.value"
+          />
+        </el-select>
+      </el-tooltip>
+      <el-tooltip content="字体设置" effect="light">
+        <el-select v-model="font" class="operator-item font-select" @change="setFont" size="small">
+          <el-option
+            v-for="item in fontOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
       </el-tooltip>
     </div>
     <br />
   </div>
   <ProofreadDrawer v-model="proofreadVisible" />
+  <TranslateDialog v-model="translateVisible" :resume-type="resumeType" />
   <!-- 弹出框 -->
   <ToastModal v-if="cssDialog" :flag="cssDialog" @close="cssDialog = false" width="400px">
     <h4 class="mb-10">编写CSS样式让它作用在模板上</h4>
@@ -183,30 +181,35 @@ watch(proofreadBus, () => (proofreadVisible.value = true))
     <button class="btn primary cursor hover" @click="setStyle">确认</button>
     <button class="btn primary cursor hover" @click="removeStyle">重置</button>
   </ToastModal>
-  <!-- 调整边距 -->
+  <!-- 调整边距/字号（生产同款固定语义行） -->
   <ToastModal
     v-if="visible"
     :flag="visible"
     @close="confirmAdjustment"
-    :width="properties.length ? '525px' : '310px'"
+    :width="properties.length ? '560px' : '310px'"
   >
-    <div class="properties-container flex" v-if="properties.length">
+    <div class="properties-container" v-if="properties.length">
       <div class="properties-header">
-        <span>元素名称</span>
-        <span>上边距 (px)</span>
-        <span>下边距 (px)</span>
+        <span>目标元素</span>
+        <span>上边距(px)</span>
+        <span>下边距(px)</span>
+        <span>字体大小(px)</span>
       </div>
       <div class="properties-item" v-for="(property, idx) in properties" :key="idx">
-        <el-space>
-          <span>{{ property.name }} ({{ property.className || property.tagName }})</span>
-          <el-input-number size="small" v-model="property.marginTop" />
-          <el-input-number size="small" v-model="property.marginBottom" />
-        </el-space>
+        <span class="prop-name text-sm">{{ property.name }}</span>
+        <el-input-number size="small" class="prop-num" v-model="property.marginTop" />
+        <el-input-number size="small" class="prop-num" v-model="property.marginBottom" />
+        <el-input-number size="small" class="prop-num" :min="12" v-model="property.fontSize" />
+      </div>
+      <div class="properties-actions">
+        <button class="btn primary cursor hover" @click="confirmAdjustment">确认调整</button>
+        <button class="btn cursor hover" @click="visible = false">取消调整</button>
       </div>
     </div>
     <Empty v-else title="简历中还没有内容 可以先写点东西" />
-    <br />
-    <h5 style="color: var(--strong-color)">PS: 只显示简历模板中已经使用的</h5>
+    <h5 class="properties-foot" style="color: var(--strong-color)">
+      PS: 只显示简历模板中已经使用的
+    </h5>
   </ToastModal>
 </template>
 
@@ -273,20 +276,35 @@ watch(proofreadBus, () => (proofreadVisible.value = true))
         border-radius: 6px;
       }
     }
-    .num-step {
-      width: 92px;
+    .margin-step {
+      width: 80px;
     }
-    .size-select {
-      width: 78px;
+    .lh-select {
+      width: 70px;
     }
     .font-select {
-      width: 110px;
+      width: 90px;
+    }
+    .proofread-btn {
+      position: relative;
+    }
+    .proofread-new-dot {
+      position: absolute;
+      top: -4px;
+      right: -6px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #f56c6c;
     }
 
     i.iconfont {
       color: #f8f8f8;
       font-size: 24px;
       cursor: pointer;
+      &.scale-110 {
+        transform: scale(1.1);
+      }
       &:hover {
         opacity: 0.8;
       }
@@ -295,29 +313,38 @@ watch(proofreadBus, () => (proofreadVisible.value = true))
 }
 
 .properties-container {
-  flex-wrap: wrap;
-  flex-direction: column;
-  overflow: scroll;
+  max-height: 60vh;
+  overflow-y: auto;
   .properties-header {
-    padding-bottom: 30px;
-    position: relative;
-    span {
-      font-weight: 600;
-      position: absolute;
-    }
-    span:nth-child(2) {
-      transform: translateX(210px);
-    }
-    span:nth-child(3) {
-      transform: translateX(340px);
-    }
+    display: grid;
+    grid-template-columns: 110px 120px 120px 130px;
+    column-gap: 10px;
+    font-weight: 600;
+    font-size: 13px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   }
   .properties-item {
+    display: grid;
+    grid-template-columns: 110px 120px 120px 130px;
+    column-gap: 10px;
+    align-items: center;
     margin-top: 10px;
-    span {
-      width: 200px;
+    .prop-name {
       font-size: 14px;
+      width: 110px;
+    }
+    .prop-num {
+      width: 100px;
     }
   }
+  .properties-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+  }
+}
+.properties-foot {
+  margin-top: 14px;
 }
 </style>
