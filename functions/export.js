@@ -155,6 +155,23 @@ export async function onRequestPost(context) {
   const LH_MAP = { '100':[19, 5],'101':[19,5],'102':[20,5],'103':[19,5],'104':[19,5],'105':[19,5],'106':[19,5],'107':[19,5],'108':[19,5],'109':[19,5],'10front_end':[20, 5],'11fresh':[20,5],'12internet_social':[23, 0],'13geek':[23, 0],'14heading':[23, 0],'15simple_versatile':[22, 5],'16prominent_content':[20,5],'17business':[21, 5],'18art':[21, 5],'19social':[21, 5],'1internet_avatar':[20, 5],'20campus_simple':[19,5],'21it_campus':[18,5],'22':[19, 5],'23':[19,5],'24':[19, 5],'25':[19,5],'26':[18,5],'27':[16, 5],'28':[20, 5],'29':[19,5],'2concise':[20,5],'30':[20,5],'31':[21, 5],'32':[21, 5],'33':[21, 5],'34':[21, 5],'35':[21, 5],'36':[20,5],'37':[20,5],'38':[19, 5],'39':[19,5],'3operation':[20, 5],'40':[20,5],'41':[20,5],'42':[20,5],'43':[20,5],'44':[20,5],'45':[19,5],'46':[20,5],'47':[20,5],'48':[20,5],'49':[20,5],'4internet':[20, 5],'50':[20,5],'51':[20,5],'52':[18,5],'53':[16, 5],'54':[18,5],'55':[18,5],'56':[18, 5],'57':[18,5],'58':[19,5],'59':[18,5],'5graduation_reexam':[20, 5],'60':[17,5],'61':[20,5],'62':[20,5],'63':[19,5],'64':[17,5],'65':[18,5],'66':[20,5],'67':[19,5],'68':[22, 0],'69':[19,5],'6operation_avatar':[20,5],'70':[18, 5],'71':[20,5],'72':[18,5],'73':[17,5],'74':[20, 5],'75':[20,5],'76':[20, 5],'77':[20,5],'78':[17,5],'79':[17,5],'7simple_avatar':[21, 5],'80':[18,5],'81':[19,5],'82':[19,5],'83':[19,5],'84':[20, 5],'85':[18,5],'86':[19,5],'87':[15, 5],'88':[19,5],'89':[18,5],'8general':[21, 5],'90':[19,5],'91':[19,5],'92':[19,5],'93':[19,5],'94':[19,5],'95':[19,5],'96':[19,5],'97':[20,5],'98':[19,5],'99':[19,5],'9business':[20, 5],'agent_development':[19,5],'duomotaidamoxingsuanfa':[18, 5],'shuziic':[19,5],'yinhangguanpeisheng':[19,5],'youxikehuduankaifa':[19,5] }
   const lm = LH_MAP[name] || [20, 5]
   const liFix = `.markdown-transform-html *{line-height:${lm[0]}px}.markdown-transform-html li{line-height:${lm[0]}px;margin-top:${lm[1]}px}`
+  // テンプレ別コンテンツオフセット —— prod PDF との逐頁ピクセル差が最小になる
+  // 補正を serif Type3 系10テンプレに実測適用 (audit/cal3〜cal5)。
+  // prod 側シェルの正規化差に由来する 1〜4px の系統ズレを margin-top /
+  // head-layout 補正で打ち消す。
+  const HF_FIX =
+    '.markdown-transform-html .head-layout .flex-layout-item>.flex-layout{margin-top:-1px}' +
+    '.markdown-transform-html .head-layout{margin-bottom:-1px}'
+  const OFFSET_MAP = {
+    '19social': '.markdown-transform-html{margin-top:-3px}',
+    '2concise': '.markdown-transform-html{margin-top:-3px}',
+    '3operation': '.markdown-transform-html{margin-top:-2px}',
+    '4internet': '.markdown-transform-html{margin-top:2px}',
+    '7simple_avatar': HF_FIX,
+    '8general': HF_FIX,
+    '9business': '.markdown-transform-html{margin-top:4px}'
+  }
+  const offFix = OFFSET_MAP[name] || ''
   // prod の埋め込みフォントは投稿フォントスタック先頭のファミリーに一致
   // (実測全114: Times 宣言テンプレだけ TimesNewRomanPS、他は先頭ファミリー
   // 自体がラテンも描く。Serif 宣言は NotoSerifSC、その他各書体)——
@@ -163,7 +180,7 @@ export async function onRequestPost(context) {
   // (attr 断片: テーマ変数 + ユーザー調整の Line_Height/font_size/para_spacing/
   //  justify/one-page/custom-css は必ず最後に置いて既定値を上書きさせる ——
   //  prod の style 連結順と同じ)。
-  const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}<style>${cloudFaces}${fonts}${markNormalize}${liFix}${
+  const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}<style>${cloudFaces}${fonts}${markNormalize}${liFix}${offFix}${
     style || ''
   }</style></head><body>${fixedContent}${watermark}${fontWait}</body></html>`
   // 優先: 自托管 Chrome114 渲染サービス (prod と同一 Skia m114)
