@@ -83,10 +83,7 @@ watch(proofreadBus, () => (proofreadVisible.value = true))
       <el-tooltip content="证件照（支持形状裁剪/拖拽/缩放）" effect="light">
         <button
           class="operator-item text-btn"
-          @click="
-            photoKind = 'avatar'
-            photoVisible = true
-          "
+          @click=";(photoKind = 'avatar'), (photoVisible = true)"
         >
           证件照
         </button>
@@ -94,10 +91,7 @@ watch(proofreadBus, () => (proofreadVisible.value = true))
       <el-tooltip content="校徽（拖拽图中校徽可调整位置，右下角可缩放）" effect="light">
         <button
           class="operator-item text-btn"
-          @click="
-            photoKind = 'badge'
-            photoVisible = true
-          "
+          @click=";(photoKind = 'badge'), (photoVisible = true)"
         >
           校徽
         </button>

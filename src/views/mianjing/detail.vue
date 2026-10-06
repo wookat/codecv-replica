@@ -9,10 +9,18 @@ import {
   MianjingCompany,
   MianjingItem
 } from '@/api/modules/site'
-import { createComment, listComments } from '@/api/modules/share'
+import {
+  engagementComment,
+  engagementCommentDelete,
+  engagementComments,
+  engagementReaction,
+  engagementState,
+  EngageComment
+} from '@/api/modules/engagement'
 import { extractToc, localAsset, logoColor, renderArticle, TocItem } from '@/utils/article'
 import { currentUser } from '@/utils/auth'
 import LoginModal from '@/components/LoginModal.vue'
+import { fetchUserInfo } from '@/api/modules/cloudResume'
 
 const route = useRoute()
 const doc = ref<MianjingItem | null>(null)
@@ -22,31 +30,46 @@ const toc = ref<TocItem[]>([])
 const html = ref('')
 const loading = ref(true)
 const progress = ref(0)
+// 点赞/收藏 → 真实 engagement 后端（对齐生产 like-count/fav-count/已收藏提示）
 const liked = ref(false)
 const fav = ref(false)
+const likeCount = ref(0)
+const commentCount = ref(0)
 
-// ---- 评论区 ----
-interface Cmt {
-  id: number
-  nickname: string
-  content: string
-  created_at: number
+async function toggleReact(kind: 'like' | 'fav') {
+  if (!currentUser()) {
+    loginModal.value = true
+    return
+  }
+  const res = await engagementReaction('mianjing', docId.value, kind)
+  if (!res) return ElMessage.error('操作失败，请重试')
+  if (kind === 'like') liked.value = res.active
+  else {
+    fav.value = res.active
+    ElMessage.success(res.active ? '已收藏，可在「我的面经-我的收藏」查看' : '已取消收藏')
+  }
+  likeCount.value = res.likeCount
+  commentCount.value = res.commentCount
 }
+
+// ---- 评论区（生产同款：快捷回复/回复/删除） ----
+type Cmt = EngageComment
 const comments = ref<Cmt[]>([])
 const cmtDraft = ref('')
 const cmtPosting = ref(false)
+const replyTo = ref<Cmt | null>(null)
+const myUid = ref(0)
 const loginModal = ref(false)
 const docId = computed(() => String(route.params.docId))
+
+const QUICK = ['感谢分享，收藏了！', '干货满满', '蹲一个后续', '祝大家 offer 多多']
+const quick = (t: string) => (cmtDraft.value = t)
 
 const cmtFmt = (ts: number) => new Date(ts).toLocaleString('zh-CN', { hour12: false })
 
 async function loadComments() {
-  try {
-    const res = await listComments(docId.value)
-    if (res?.code === 200) comments.value = res.data ?? []
-  } catch {
-    /* ignore */
-  }
+  comments.value = await engagementComments('mianjing', docId.value)
+  commentCount.value = comments.value.length
 }
 
 async function postComment() {
@@ -58,18 +81,27 @@ async function postComment() {
   }
   cmtPosting.value = true
   try {
-    const res = await createComment(docId.value, text)
+    const res = await engagementComment('mianjing', docId.value, text, replyTo.value?.id || 0)
     if (res?.code === 401) {
       loginModal.value = true
       return
     }
     if (res?.code !== 200) return ElMessage.error(res?.msg || '评论失败')
     cmtDraft.value = ''
+    replyTo.value = null
     ElMessage.success('评论成功')
     await loadComments()
   } finally {
     cmtPosting.value = false
   }
+}
+
+async function delComment(c: Cmt) {
+  const res = await engagementCommentDelete(c.id)
+  if (res.code === 200) {
+    ElMessage.success('评论已删除')
+    loadComments()
+  } else ElMessage.error(res.msg || '删除失败')
 }
 
 function gotoComments() {
@@ -140,6 +172,17 @@ onMounted(async () => {
       })
       .catch((e: unknown) => console.warn('获取最热面经失败:', e))
     loadComments()
+    engagementState('mianjing', docId.value).then(s => {
+      if (s) {
+        liked.value = s.liked
+        fav.value = s.faved
+        likeCount.value = s.likeCount
+        commentCount.value = s.commentCount
+      }
+    })
+    fetchUserInfo().then(info => {
+      if (info) myUid.value = info.uid
+    })
   } catch (e) {
     console.error('获取面经详情失败:', e)
   } finally {
@@ -155,7 +198,12 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
     <div class="read-progress" :style="{ transform: `scaleX(${progress})` }"></div>
 
     <div class="dock">
-      <button class="dock-btn" :class="{ on: liked }" aria-label="点赞" @click="liked = !liked">
+      <button
+        class="dock-btn"
+        :class="{ on: liked }"
+        aria-label="点赞"
+        @click="toggleReact('like')"
+      >
         <svg
           viewBox="0 0 24 24"
           fill="none"
@@ -169,6 +217,7 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
           />
           <path d="M7 10v12" />
         </svg>
+        <span v-if="likeCount" class="dock-cnt">{{ likeCount }}</span>
       </button>
       <button class="dock-btn" aria-label="评论" @click="gotoComments">
         <svg
@@ -184,7 +233,7 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
           />
         </svg>
       </button>
-      <button class="dock-btn" aria-label="收藏" :class="{ on: fav }" @click="fav = !fav">
+      <button class="dock-btn" aria-label="收藏" :class="{ on: fav }" @click="toggleReact('fav')">
         <svg
           viewBox="0 0 24 24"
           fill="none"
@@ -336,13 +385,22 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 
             <!-- 评论区 -->
             <div id="mj-comments" class="d-card cmt-card">
-              <h3 class="cmt-title">评论（{{ comments.length }}）</h3>
+              <h3 class="cmt-title">全部评论（{{ comments.length }}）</h3>
+              <div class="cmt-quick">
+                <button v-for="q in QUICK" :key="q" class="q-chip" @click="quick(q)">
+                  {{ q }}
+                </button>
+              </div>
+              <div v-if="replyTo" class="cmt-replying">
+                回复 {{ replyTo.nickname }}：{{ replyTo.content.slice(0, 30) }}
+                <span class="cancel" @click="replyTo = null">取消回复</span>
+              </div>
               <div class="cmt-input">
                 <textarea
                   v-model="cmtDraft"
                   rows="3"
                   maxlength="500"
-                  placeholder="写下你的看法、补充或提问…"
+                  :placeholder="replyTo ? `回复 ${replyTo.nickname}…` : '写下你的看法、补充或提问…'"
                 ></textarea>
                 <div class="cmt-bar">
                   <span class="cmt-hint">{{ cmtDraft.length }}/500</span>
@@ -358,6 +416,13 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
                     <p class="c-meta">
                       <b>{{ c.nickname || '匿名用户' }}</b>
                       <time>{{ cmtFmt(c.created_at) }}</time>
+                      <button class="c-op" @click="replyTo = c">回复</button>
+                      <button v-if="c.user_id === myUid" class="c-op danger" @click="delComment(c)">
+                        删除
+                      </button>
+                    </p>
+                    <p v-if="c.parent_id" class="c-quote">
+                      回复 {{ c.parent_nickname }}：{{ (c.parent_content || '').slice(0, 50) }}
                     </p>
                     <p class="c-text">{{ c.content }}</p>
                   </div>
@@ -628,5 +693,77 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
     opacity: 0.45;
     text-align: center;
   }
+}
+.dock-btn {
+  position: relative;
+}
+.dock-cnt {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--theme);
+  color: #fff;
+  font-size: 10px;
+  line-height: 16px;
+  padding: 0 4px;
+  text-align: center;
+}
+.cmt-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+  .q-chip {
+    border: 1px solid #e2e4e9;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 999px;
+    padding: 4px 14px;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--font-color);
+    &:hover {
+      border-color: var(--theme);
+      color: var(--theme);
+    }
+  }
+}
+.cmt-replying {
+  font-size: 12px;
+  color: #909399;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  .cancel {
+    color: var(--theme);
+    cursor: pointer;
+    margin-left: 8px;
+  }
+}
+.c-op {
+  border: none;
+  background: none;
+  color: #b5b8bf;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0 4px;
+  &:hover {
+    color: var(--theme);
+  }
+  &.danger:hover {
+    color: #f56c6c;
+  }
+}
+.c-quote {
+  font-size: 12px;
+  color: #909399;
+  background: rgba(0, 0, 0, 0.04);
+  border-left: 3px solid #ddd;
+  border-radius: 4px;
+  padding: 6px 10px;
+  margin: 6px 0;
 }
 </style>
