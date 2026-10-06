@@ -43,7 +43,9 @@ export async function onRequest(context) {
   if (route === 'list') {
     const { results } = await db
       .prepare(
-        'SELECT resume_type AS type, name, md AS content, style, link, updated_at FROM resumes WHERE user_id = ? ORDER BY updated_at DESC'
+        `SELECT resume_type AS type, name, md AS content, style, link,
+                created_at, updated_at, export_count, is_public, view_num
+         FROM resumes WHERE user_id = ? ORDER BY updated_at DESC`
       )
       .bind(uid)
       .all()
@@ -53,13 +55,48 @@ export async function onRequest(context) {
   if (route === 'save' && request.method === 'POST') {
     const { type, name = '', content = '', style = '', link = '' } = q
     if (!type) return json(request, { code: 400, msg: '缺少简历类型' })
+    const existed = await db
+      .prepare(
+        'SELECT name, md, style, link, created_at, is_public, view_num, export_count FROM resumes WHERE user_id = ? AND resume_type = ? ORDER BY updated_at DESC LIMIT 1'
+      )
+      .bind(uid, type)
+      .first()
+    if (!existed) {
+      // 新建简历配额：非会员上限 2 份（与生产免费档一致），会员不限
+      const isMember = (auth.row.vip_expire || 0) > Date.now()
+      if (!isMember) {
+        const cnt = await db
+          .prepare('SELECT COUNT(*) AS c FROM resumes WHERE user_id = ?')
+          .bind(uid)
+          .first()
+        if ((cnt?.c || 0) >= 2)
+          return json(request, { code: 403, msg: '免费版最多创建2份简历，升级会员不限份数' }, 403)
+      }
+    }
+    const now = Date.now()
+    // merge 语义：只传 name 等局部字段时保留原内容（对照生产 /cv/update 全字段合并）
+    const md = 'content' in q ? content : existed?.md ?? ''
+    const stl = 'style' in q ? style : existed?.style ?? ''
+    const lnk = 'link' in q ? link : existed?.link ?? ''
+    const nm = 'name' in q ? name : existed?.name ?? name
     await db
       .prepare(
-        `INSERT INTO resumes (user_id, name, resume_type, md, style, link, updated_at)
-         VALUES (?,?,?,?,?,?,?)
-         ON CONFLICT(id) DO NOTHING`
+        `INSERT INTO resumes (user_id, name, resume_type, md, style, link, created_at, updated_at, export_count, is_public, view_num)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?)`
       )
-      .bind(uid, name, type, content, style, link, Date.now())
+      .bind(
+        uid,
+        nm,
+        type,
+        md,
+        stl,
+        lnk,
+        existed?.created_at || now,
+        now,
+        existed?.export_count || 0,
+        existed?.is_public || 0,
+        existed?.view_num || 0
+      )
       .run()
     // upsert by (user_id, resume_type)：先删后插，保持单行
     await db
@@ -70,8 +107,60 @@ export async function onRequest(context) {
       )
       .bind(uid, type, uid, type)
       .run()
-    await maybeSaveVersion(db, uid, type, content, style)
+    await maybeSaveVersion(db, uid, type, md, stl)
     return json(request, { code: 200, message: '保存成功' })
+  }
+
+  // 简历副本：对照生产 /api/cv/copy
+  if (route === 'copy' && request.method === 'POST') {
+    const { type } = q
+    const row = await db
+      .prepare(
+        'SELECT name, md, style, link FROM resumes WHERE user_id = ? AND resume_type = ? ORDER BY updated_at DESC LIMIT 1'
+      )
+      .bind(uid, type)
+      .first()
+    if (!row) return json(request, { code: 404, msg: '简历不存在' })
+    const isMember = (auth.row.vip_expire || 0) > Date.now()
+    if (!isMember) {
+      const cnt = await db
+        .prepare('SELECT COUNT(*) AS c FROM resumes WHERE user_id = ?')
+        .bind(uid)
+        .first()
+      if ((cnt?.c || 0) >= 2)
+        return json(request, { code: 403, msg: '免费版最多创建2份简历，升级会员不限份数' }, 403)
+    }
+    const newType = `${type}~${Date.now().toString(36)}`
+    const now = Date.now()
+    await db
+      .prepare(
+        `INSERT INTO resumes (user_id, name, resume_type, md, style, link, created_at, updated_at)
+         VALUES (?,?,?,?,?,?,?,?)`
+      )
+      .bind(uid, `${row.name || '未命名简历'}-副本`, newType, row.md, row.style, row.link, now, now)
+      .run()
+    return json(request, { code: 200, data: { type: newType }, message: '已创建副本' })
+  }
+
+  // 导出计数：对照生产 /api/export/incCount 的简历维度
+  if (route === 'incExport' && request.method === 'POST') {
+    await db
+      .prepare(
+        'UPDATE resumes SET export_count = export_count + 1 WHERE user_id = ? AND resume_type = ?'
+      )
+      .bind(uid, q.type)
+      .run()
+    return json(request, { code: 200, message: 'ok' })
+  }
+
+  // 分享开关：对照生产 cv.isPublic + viewNum
+  if (route === 'share' && request.method === 'POST') {
+    const { type, isPublic } = q
+    await db
+      .prepare('UPDATE resumes SET is_public = ? WHERE user_id = ? AND resume_type = ?')
+      .bind(isPublic ? 1 : 0, uid, type)
+      .run()
+    return json(request, { code: 200, message: isPublic ? '已公开' : '已取消公开' })
   }
 
   // 版本列表：对照生产 {data:[{_id, id, updateTime}]}

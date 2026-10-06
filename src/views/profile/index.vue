@@ -2,18 +2,26 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { templates } from '@/templates/config'
-import { cloudDelete, syncLocalCloud } from '@/api/modules/cloudResume'
+import { templates, resolveTemplateType } from '@/templates/config'
+import {
+  cloudCopy,
+  cloudDelete,
+  cloudListMeta,
+  fetchUserInfo,
+  syncLocalCloud,
+  type CloudResumeMeta,
+  type UserInfo
+} from '@/api/modules/cloudResume'
 import { createShare } from '@/api/modules/share'
 import { currentUser, logoutLocal } from '@/utils/auth'
+import { setLocalStorage } from '@/common/localstorage'
 import LoginModal from '@/components/LoginModal.vue'
 
 const router = useRouter()
 const user = ref(currentUser())
+const info = ref<UserInfo | null>(null)
 const loginModal = ref(false)
-const resumes = ref<
-  { type: string; name: string; tplName: string; img: string; content: string }[]
->([])
+const resumes = ref<CloudResumeMeta[]>([])
 
 const guides = [
   {
@@ -26,29 +34,35 @@ const guides = [
   }
 ]
 
-function scan() {
-  const list: typeof resumes.value = []
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i) ?? ''
-    if (!key.startsWith('markdown-content-')) continue
-    const type = key.slice('markdown-content-'.length)
-    try {
-      const raw = JSON.parse(localStorage.getItem(key) || '{}')
-      const md: string = raw?.value ?? ''
-      if (!md) continue
-      const firstLine = md.split('\n').find(l => l.trim().startsWith('#'))
-      const name =
-        firstLine
-          ?.replace(/^#+\s*/, '')
-          .replace(/!bg\[|\]\([^)]*\)|\*/g, '')
-          .trim() || '未命名简历'
-      const tpl = templates.value.find(t => t.type === type)
-      list.push({ type, name, tplName: tpl?.name ?? type, img: tpl?.img ?? '', content: md })
-    } catch {
-      /* ignore */
-    }
+// 简历封面按实例键回落母版模板
+const tplOf = (type: string) =>
+  templates.value.find(t => t.type === resolveTemplateType(type.split('~')[0]))
+
+const fmt = (ts?: number) => {
+  if (!ts) return '-'
+  const d = new Date(ts)
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(
+    d.getMinutes()
+  )}:${p(d.getSeconds())}`
+}
+
+const quotaText = computed(() => {
+  if (!info.value) return ''
+  return info.value.cv < 0 ? '无限制' : String(info.value.cv)
+})
+const remainText = computed(() => {
+  if (!info.value) return ''
+  if (info.value.cv < 0) return '无限'
+  return String(Math.max(0, info.value.cv - resumes.value.length))
+})
+
+async function scan() {
+  if (!user.value) {
+    resumes.value = []
+    return
   }
-  resumes.value = list
+  resumes.value = await cloudListMeta()
 }
 
 const has = computed(() => resumes.value.length > 0)
@@ -57,7 +71,18 @@ function edit(type: string) {
   router.push(`/editor/${type}`)
 }
 
-async function share(r: (typeof resumes.value)[number]) {
+async function copy(r: CloudResumeMeta) {
+  const res = await cloudCopy(r.type)
+  if (res?.code !== 200 || !res.data?.type) {
+    return ElMessage.error(res?.msg || '创建副本失败')
+  }
+  // 云端已有副本行；本地同步实例内容，编辑器即可直接打开
+  setLocalStorage(`markdown-content-${res.data.type}`, r.content || '')
+  await scan()
+  ElMessage.success('已创建副本')
+}
+
+async function share(r: CloudResumeMeta) {
   const res = await createShare({ type: r.type, name: r.name, content: r.content })
   if (res?.code !== 200) return ElMessage.error(res?.msg || '分享失败')
   const link = `${location.origin}/#/share/${res.data.id}`
@@ -74,20 +99,36 @@ async function remove(type: string) {
     type: 'warning'
   })
   localStorage.removeItem(`markdown-content-${type}`)
-  cloudDelete(type)
-  scan()
+  await cloudDelete(type)
+  await scan()
   ElMessage.success('已删除')
+}
+
+function create() {
+  if (info.value && info.value.cv >= 0 && resumes.value.length >= info.value.cv) {
+    ElMessageBox.confirm('免费版最多创建2份简历，升级会员不限份数', '简历数量已达上限', {
+      confirmButtonText: '升级会员',
+      cancelButtonText: '知道了',
+      type: 'warning'
+    }).then(() => router.push('/member'))
+    return
+  }
+  router.push('/jianlimoban')
 }
 
 function logout() {
   logoutLocal()
   user.value = null
+  info.value = null
   ElMessage.success('已退出登录')
 }
 
 onMounted(async () => {
-  if (user.value) await syncLocalCloud()
-  scan()
+  if (user.value) {
+    await syncLocalCloud()
+    info.value = await fetchUserInfo()
+    await scan()
+  }
 })
 </script>
 
@@ -125,24 +166,32 @@ onMounted(async () => {
         <div class="pm-head">
           <h1>
             我的简历
-            <span v-if="user" class="cnt">{{ resumes.length }}/{{ '无限制' }}</span>
+            <span v-if="user" class="cnt">{{ resumes.length }}/{{ quotaText }}</span>
           </h1>
           <router-link to="/invite" class="invite-btn">🎁 邀请赚佣金</router-link>
         </div>
 
-        <div v-if="user && has" class="rv-grid">
+        <div v-if="user && has" class="rv-list">
           <div v-for="r in resumes" :key="r.type" class="rv-card">
             <div class="rv-img" @click="edit(r.type)">
-              <img v-if="r.img" :src="r.img" :alt="r.tplName" loading="lazy" />
+              <img
+                v-if="tplOf(r.type)?.img"
+                :src="tplOf(r.type)?.img"
+                alt="简历封面"
+                loading="lazy"
+              />
               <div class="rv-mask"><span>继续编辑</span></div>
             </div>
             <div class="rv-info">
-              <p class="rn">{{ r.name }}</p>
-              <p class="rt">模板：{{ r.tplName }}</p>
+              <p class="rn">简历名称：{{ r.name || '未命名简历' }}</p>
+              <p class="rm">创建时间：{{ fmt(r.created_at) }}</p>
+              <p class="rm">上次编辑：{{ fmt(r.updated_at) }}</p>
+              <p class="rm">累计导出份数：{{ r.export_count || 0 }} 份</p>
               <div class="rv-actions">
                 <button class="a" @click="edit(r.type)">编辑</button>
-                <button class="a" @click="share(r)">分享</button>
                 <button class="a danger" @click="remove(r.type)">删除</button>
+                <button class="a" @click="copy(r)">副本</button>
+                <button class="a" @click="share(r)">分享</button>
               </div>
             </div>
           </div>
@@ -153,17 +202,19 @@ onMounted(async () => {
           <p class="pe-title">
             {{ user ? '这里空空如也，您还没有创建过简历～' : '您还没有登录请先登录再查看' }}
           </p>
-          <div v-if="user" class="pe-acts">
-            <router-link to="/jianlimoban" class="pf-btn">手动创建</router-link>
-            <router-link to="/resume/import" class="pf-btn ghost">导入简历</router-link>
-          </div>
-          <button v-else class="pf-btn" @click="loginModal = true">去登录</button>
+          <button v-if="!user" class="pf-btn" @click="loginModal = true">去登录</button>
         </div>
 
-        <p v-if="user" class="pf-quota">
-          <b>温馨提示</b>：您还可以再创建 <span>无限</span>份简历
-          ，如果您在编写简历过程中遇到任何使用上的问题，都可以通过右下角方式联系网站客服，我们会尽快解决。
-        </p>
+        <template v-if="user">
+          <p class="pf-quota">
+            <b>提示</b>：您还可以再创建 <span>{{ remainText }}</span
+            >份简历，如果您在编写简历过程中遇到任何使用上的问题，都可以通过右下角方式联系网站客服，我们会尽快解决。
+          </p>
+          <div class="pf-actions">
+            <button class="pf-btn" @click="create">创建简历</button>
+            <router-link to="/resume/import" class="pf-btn ghost">导入已有简历</router-link>
+          </div>
+        </template>
       </div>
     </div>
     <LoginModal v-if="loginModal" @close="loginModal = false" />
@@ -278,26 +329,27 @@ onMounted(async () => {
     }
   }
 }
-.rv-grid {
-  display: grid;
-  gap: 20px;
-  grid-template-columns: 1fr;
-  @media (min-width: 1024px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
+// 生产同款横向简历卡：左封面缩略图 + 右元信息 + 操作钮
+.rv-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 .rv-card {
-  background: var(--body-background);
-  border-radius: 12px;
-  overflow: hidden;
   display: flex;
+  gap: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 10px;
+  padding: 14px;
   .rv-img {
     position: relative;
-    width: 150px;
-    aspect-ratio: 210 / 230;
+    width: 120px;
+    aspect-ratio: 210 / 297;
     overflow: hidden;
     cursor: pointer;
     flex-shrink: 0;
+    border-radius: 6px;
+    background: #f5f5f5;
     img {
       width: 100%;
       height: 100%;
@@ -316,8 +368,8 @@ onMounted(async () => {
       transition: opacity 0.25s;
       span {
         color: #fff;
-        font-size: 14px;
-        padding: 8px 16px;
+        font-size: 12px;
+        padding: 6px 12px;
         border: 1px solid #fff;
         border-radius: 999px;
       }
@@ -327,9 +379,10 @@ onMounted(async () => {
     }
   }
   .rv-info {
-    padding: 12px;
     flex: 1;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
     .rn {
       font-size: 14px;
       font-weight: 600;
@@ -338,13 +391,14 @@ onMounted(async () => {
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .rt {
-      margin-top: 4px;
-      font-size: 12px;
-      color: #9ca3af;
+    .rm {
+      margin-top: 6px;
+      font-size: 13px;
+      color: #666;
     }
     .rv-actions {
-      margin-top: 10px;
+      margin-top: auto;
+      padding-top: 10px;
       display: flex;
       gap: 8px;
       .a {
@@ -353,7 +407,7 @@ onMounted(async () => {
         color: var(--font-color);
         font-size: 12px;
         border-radius: 6px;
-        padding: 5px 12px;
+        padding: 5px 14px;
         cursor: pointer;
         &:hover {
           color: var(--theme);
@@ -376,17 +430,31 @@ onMounted(async () => {
     margin-top: 16px;
     font-size: 15px;
   }
-  .pe-acts {
-    margin-top: 20px;
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-  }
   .pf-btn {
     margin-top: 20px;
   }
-  .pe-acts .pf-btn {
-    margin-top: 0;
+}
+.pf-quota {
+  margin-top: 20px;
+  font-size: 12px;
+  color: #999;
+  b {
+    color: var(--theme);
+    margin-right: 4px;
+  }
+  span {
+    color: var(--theme);
+    margin: 0 2px;
+  }
+}
+.pf-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 14px;
+  .pf-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 12px 0;
   }
 }
 .pf-btn {
@@ -407,19 +475,6 @@ onMounted(async () => {
     background: transparent;
     color: var(--theme);
     border: 1px solid var(--theme);
-  }
-}
-.pf-quota {
-  margin-top: 20px;
-  font-size: 12px;
-  color: #999;
-  b {
-    color: var(--theme);
-    margin-right: 4px;
-  }
-  span {
-    color: var(--theme);
-    margin: 0 2px;
   }
 }
 </style>

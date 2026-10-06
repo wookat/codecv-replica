@@ -62,10 +62,45 @@ export function useOverlayDrag(resumeType: Ref<string>) {
     const host = img.closest('.markdown-transform-html,.writable-edit-mode,.jufe') as HTMLElement
     const scale =
       host && host.offsetWidth ? host.getBoundingClientRect().width / host.offsetWidth : 1
+    const rect = img.getBoundingClientRect()
+    // 生产同款缩放：命中图右下角 14px 热区 → 拖宽（证件照/校徽均可缩放）
+    const nearCorner =
+      Math.abs(e.clientX - rect.right) <= 14 && Math.abs(e.clientY - rect.bottom) <= 14
     const sx = e.clientX,
       sy = e.clientY
     const bt = parseFloat(img.style.top) || 0,
       bl = parseFloat(img.style.left) || 0
+    const bw = parseFloat(img.style.width) || img.offsetWidth || 0
+    if (nearCorner && bw) {
+      e.preventDefault()
+      const moveR = (ev: MouseEvent) => {
+        const w = Math.max(16, bw + (ev.clientX - sx) / (scale || 1))
+        img.style.width = w + 'px'
+        img.style.height = 'auto'
+      }
+      const upR = (ev: MouseEvent) => {
+        window.removeEventListener('mousemove', moveR)
+        window.removeEventListener('mouseup', upR)
+        const w = Math.round(Math.max(16, bw + (ev.clientX - sx) / (scale || 1)))
+        img.style.width = w + 'px'
+        const isBadge = img.classList.contains('cv-badge-overlay')
+        const cfgKey = isBadge
+          ? `badge_config-${resumeType.value}`
+          : `avatar-cfg-${resumeType.value}`
+        const raw = getLocalStorage(cfgKey) as string | null
+        if (!raw) return
+        try {
+          const cfg = JSON.parse(raw)
+          cfg.width = w
+          setLocalStorage(cfgKey, JSON.stringify(cfg))
+        } catch {
+          /* ignore */
+        }
+      }
+      window.addEventListener('mousemove', moveR)
+      window.addEventListener('mouseup', upR)
+      return
+    }
     const move = (ev: MouseEvent) => {
       img.style.top = bt + (ev.clientY - sy) / (scale || 1) + 'px'
       img.style.left = bl + (ev.clientX - sx) / (scale || 1) + 'px'
@@ -78,20 +113,22 @@ export function useOverlayDrag(resumeType: Ref<string>) {
       img.style.top = top + 'px'
       img.style.left = left + 'px'
       const isBadge = img.classList.contains('cv-badge-overlay')
-      const key = isBadge ? `badge_config-${resumeType.value}` : `avatar_pos-${resumeType.value}`
-      if (isBadge) {
-        const raw = getLocalStorage(key) as string | null
-        if (!raw) return
+      const cfgKey = isBadge ? `badge_config-${resumeType.value}` : `avatar-cfg-${resumeType.value}`
+      const existing = getLocalStorage(cfgKey) as string | null
+      if (existing) {
         try {
-          const cfg = JSON.parse(raw)
+          const cfg = JSON.parse(existing)
           cfg.top = top
           cfg.left = left
-          setLocalStorage(key, JSON.stringify(cfg))
+          setLocalStorage(cfgKey, JSON.stringify(cfg))
+          return
         } catch {
           /* ignore */
         }
-      } else {
-        setLocalStorage(key, JSON.stringify({ top, left }))
+      }
+      if (!isBadge) {
+        // 模板默认头像的拖拽位置走 avatar_pos 覆盖（getAvatarConfig 读取）
+        setLocalStorage(`avatar_pos-${resumeType.value}`, JSON.stringify({ top, left }))
       }
     }
     window.addEventListener('mousemove', move)

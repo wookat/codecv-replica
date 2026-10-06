@@ -53,5 +53,43 @@ export async function onRequest(context) {
       : json(request, { code: 404, msg: '分享不存在或已过期' })
   }
 
+  // 公开简历查看：对照生产 /api/cv/share/view —— 计数 + 返回内容（仅公开的）
+  if (route === 'view') {
+    const type = url.searchParams.get('type')
+    if (!type) return json(request, { code: 400, msg: '缺少简历类型' })
+    const row = await db
+      .prepare(
+        'SELECT name, md AS content, style, view_num, is_public FROM resumes WHERE resume_type = ? AND is_public = 1 ORDER BY updated_at DESC LIMIT 1'
+      )
+      .bind(type)
+      .first()
+    if (!row) return json(request, { code: 404, msg: '简历不存在或未公开' }, 404)
+    await db
+      .prepare('UPDATE resumes SET view_num = view_num + 1 WHERE resume_type = ? AND is_public = 1')
+      .bind(type)
+      .run()
+    return json(request, {
+      code: 200,
+      data: { ...row, viewNum: (row.view_num || 0) + 1 },
+      message: '查询成功'
+    })
+  }
+
+  // 分享状态（编辑器弹层用）：{isPublic, viewNum}
+  if (route === 'state') {
+    const type = url.searchParams.get('type')
+    if (!type) return json(request, { code: 400, msg: '缺少简历类型' })
+    const row = await db
+      .prepare(
+        'SELECT is_public, view_num FROM resumes WHERE resume_type = ? ORDER BY updated_at DESC LIMIT 1'
+      )
+      .bind(type)
+      .first()
+    return json(request, {
+      code: 200,
+      data: { isPublic: !!row?.is_public, viewNum: row?.view_num || 0 }
+    })
+  }
+
   return json(request, { code: 404, msg: 'not found' }, 404)
 }

@@ -3,11 +3,15 @@
 import { ref, watch } from 'vue'
 import useEditorStore from '@/store/modules/editor'
 import { errorMessage, successMessage, warningMessage } from '@/common/message'
+import { cloudSave } from '@/api/modules/cloudResume'
+import { setLocalStorage } from '@/common/localstorage'
+import { useRouter } from 'vue-router'
 
 const props = defineProps<{ modelValue: boolean; resumeType: string }>()
 const emit = defineEmits(['update:modelValue'])
 
 const editorStore = useEditorStore()
+const router = useRouter()
 const visible = ref(false)
 const langs = ['英文', '中文', '日语', '韩语', '法语', '德语', '西班牙语', '俄语']
 const target = ref('英文')
@@ -79,6 +83,27 @@ function apply() {
   visible.value = false
   successMessage('翻译已应用')
 }
+
+// 另存为：翻译结果保存为一份新简历（本地实例 + 云端），跳转编辑
+async function saveAsNew() {
+  if (!translated.value) return
+  const newType = `${props.resumeType}~${Date.now().toString(36)}`
+  setLocalStorage(`markdown-content-${newType}`, translated.value)
+  const tk = token()
+  if (tk) {
+    const res = await cloudSave({
+      type: newType,
+      content: translated.value,
+      name: `${props.resumeType}-译文`
+    })
+    if (res.code === 200) successMessage('已另存为新简历（云端）')
+  } else {
+    successMessage('已另存为新简历（本地）')
+  }
+  translated.value = ''
+  visible.value = false
+  router.push(`/editor?type=${newType}`).then(() => location.reload())
+}
 </script>
 
 <template>
@@ -111,6 +136,7 @@ function apply() {
         <pre class="tl-content">{{ translated }}</pre>
         <div class="tl-actions">
           <button class="btn primary tl-btn" @click="apply">应用翻译</button>
+          <button class="btn primary tl-btn save-as" @click="saveAsNew">另存为新简历</button>
           <button class="btn tl-btn ghost" @click="translated = ''">返回</button>
         </div>
       </div>
@@ -175,6 +201,10 @@ function apply() {
   padding: 7px 20px;
   border-radius: 8px;
   font-size: 14px;
+}
+.save-as {
+  background: var(--theme);
+  color: #fff;
 }
 .tl-quota {
   margin-top: 14px;

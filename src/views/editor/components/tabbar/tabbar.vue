@@ -24,6 +24,7 @@ import { useThemeConfig } from '@/common/global'
 import { useResumeType } from '../../hook'
 import ProofreadDrawer from '../proofread/proofread.vue'
 import TranslateDialog from './translateDialog.vue'
+import PhotoDialog from './photoDialog.vue'
 import { proofreadBus } from '../proofread/proofread'
 import { ref, watch } from 'vue'
 
@@ -34,6 +35,7 @@ const { cssDialog, cssText, toggleDialog, setStyle, removeStyle } = useCustomCSS
 const { color, setColor } = usePrimaryColor(resumeType.value)
 const { fontOptions, font, setFont } = useCustomFont(resumeType.value)
 const { setAvatar } = useAvatar(emits)
+void setAvatar // 旧入口占位：证件照改走 photoDialog（upload-avatar 仍由 render 层透传）
 const { primaryColor, setPrimaryColor } = usePrimaryBGColor(resumeType.value)
 const { adjustMargin, visible, confirmAdjustment, properties } = useAdjust(resumeType.value)
 const { lineHeight, lineHeightOptions, applyLineHeight } = useLineHeight(resumeType.value)
@@ -41,10 +43,13 @@ const { pageMarginTB, pageMarginLR, applyPageMargin } = usePageMargin(resumeType
 const { justified, toggleJustify } = useJustify(resumeType.value)
 const { toggleOnePage, onePageApplied } = useOnePage(resumeType.value)
 const { setBadge } = useBadge(resumeType.value)
+void setBadge // 校徽改走 photoDialog
 const { isDark } = useThemeConfig()
 
 const proofreadVisible = ref(false)
 const translateVisible = ref(false)
+const photoVisible = ref(false)
+const photoKind = ref<'avatar' | 'badge'>('avatar')
 watch(proofreadBus, () => (proofreadVisible.value = true))
 </script>
 
@@ -75,17 +80,28 @@ watch(proofreadBus, () => (proofreadVisible.value = true))
       <div class="operator-item main-color-picker">
         <el-color-picker @change="setPrimaryColor" size="small" v-model="primaryColor" />
       </div>
-      <el-tooltip
-        content="上传前请确保你想上传的位置在编辑器中存在 ![个人头像](...) 此占位符"
-        effect="light"
-      >
-        <label for="upload-avatar" class="operator-item text-btn"> 证件照 </label>
+      <el-tooltip content="证件照（支持形状裁剪/拖拽/缩放）" effect="light">
+        <button
+          class="operator-item text-btn"
+          @click="
+            photoKind = 'avatar'
+            photoVisible = true
+          "
+        >
+          证件照
+        </button>
       </el-tooltip>
-      <input type="file" id="upload-avatar" accept=".png,.jpg,.jpeg" @change="setAvatar" />
-      <el-tooltip content="上传校徽（拖拽图中校徽可调整位置）" effect="light">
-        <label for="upload-badge" class="operator-item text-btn">校徽</label>
+      <el-tooltip content="校徽（拖拽图中校徽可调整位置，右下角可缩放）" effect="light">
+        <button
+          class="operator-item text-btn"
+          @click="
+            photoKind = 'badge'
+            photoVisible = true
+          "
+        >
+          校徽
+        </button>
       </el-tooltip>
-      <input type="file" id="upload-badge" accept=".png,.jpg,.jpeg" @change="setBadge" />
       <el-tooltip
         :content="onePageApplied ? '恢复多页排版' : '智能压缩边距装进一页'"
         effect="light"
@@ -166,6 +182,7 @@ watch(proofreadBus, () => (proofreadVisible.value = true))
   </div>
   <ProofreadDrawer v-model="proofreadVisible" />
   <TranslateDialog v-model="translateVisible" :resume-type="resumeType" />
+  <PhotoDialog v-model="photoVisible" :kind="photoKind" :resume-type="resumeType" />
   <!-- 弹出框 -->
   <ToastModal v-if="cssDialog" :flag="cssDialog" @close="cssDialog = false" width="400px">
     <h4 class="mb-10">编写CSS样式让它作用在模板上</h4>
@@ -251,7 +268,8 @@ watch(proofreadBus, () => (proofreadVisible.value = true))
       margin-right: 0;
     }
     #upload-avatar,
-    #upload-badge {
+    #upload-badge,
+    .hidden-input {
       width: 0;
       height: 0;
     }

@@ -12,8 +12,9 @@ const MARKDOWN_CONTENT = 'markdown-content'
 const WRITABLE = 'writable'
 
 export const getCurrentTypeContent = (type: string): string => {
+  const base = type.split('~')[0] // 副本实例键回落到母版模板内容
   for (const template of templates.value) {
-    if (type === template.type) {
+    if (base === template.type) {
       return template.content
     }
   }

@@ -6,10 +6,11 @@ import Contact from '@/components/contact.vue'
 import ExportTotal from '@/components/exportTotal.vue'
 import useEditorStore from '@/store/modules/editor'
 import { useResumeType } from '../../hook'
-import { cloudPush } from '@/api/modules/cloudResume'
+import { cloudPush, cloudSaveName, cloudIncExport } from '@/api/modules/cloudResume'
 import { successMessage, warningMessage } from '@/common/message'
 import ProofreadDrawer from '../proofread/proofread.vue'
 import HistoryDrawer from './historyDrawer.vue'
+import ShareDialog from './shareDialog.vue'
 import { computed, onMounted, ref } from 'vue'
 
 const emit = defineEmits([
@@ -27,6 +28,7 @@ const editorStore = useEditorStore()
 const { resumeType } = useResumeType()
 const proofreadVisible = ref(false)
 const historyVisible = ref(false)
+const shareVisible = ref(false)
 // 生产同款未保存提示：内容与最近一次保存不一致 → 显示「简历已变更请及时保存」
 // 初始内容在兄弟组件挂载阶段才注入，延迟到挂载后取基线避免首载误标
 const lastSaved = ref(editorStore.MDContent)
@@ -38,10 +40,21 @@ function save() {
   lastSaved.value = editorStore.MDContent
   successMessage('已保存')
 }
+// 导出计数：对照生产「累计导出」——PDF/PNG 类导出都递增
+function exportFile2(kind: 'dynamic' | 'native' | 'picture' | 'md') {
+  if (kind !== 'md') cloudIncExport(resumeType.value)
+  exportFile(kind)
+}
 function undo() {
   const prev = editorStore.undo()
   if (prev === null) return warningMessage('没有可撤销的内容')
   editorStore.setMDContent(prev, resumeType.value)
+}
+// 生产同款「点击修改简历名称」：blur/回车即持久化到简历记录
+function saveName() {
+  const name = fileName.value.trim()
+  if (!name) return
+  cloudSaveName(resumeType.value, name)
 }
 </script>
 
@@ -51,8 +64,14 @@ function undo() {
       <el-tooltip content="返回上一页">
         <i class="iconfont icon-back font-20 hover" @click="$router.back()"></i>
       </el-tooltip>
-      <input id="resume-name-input" type="text" v-model="fileName" />
-      <i class="iconfont icon-write font-20 hover pencil"></i>
+      <input
+        id="resume-name-input"
+        type="text"
+        v-model="fileName"
+        @blur="saveName"
+        @keyup.enter=";($event.target as HTMLInputElement).blur()"
+      />
+      <i class="iconfont icon-write font-20 hover pencil" @click="saveName"></i>
     </div>
     <nav-menu
       @export-md="exportFile('md')"
@@ -76,15 +95,18 @@ function undo() {
           </svg>
         </div>
       </el-tooltip>
+      <el-tooltip content="分享" effect="light">
+        <i class="iconfont icon-share font-20 hover share-ic" @click="shareVisible = true"></i>
+      </el-tooltip>
       <button class="save-btn btn" @click="save">保存</button>
       <el-dropdown class="export-dropdown" trigger="click">
         <button class="export-btn btn">导出</button>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item @click="exportFile('dynamic')">PDF</el-dropdown-item>
-            <el-dropdown-item @click="exportFile('picture')">PNG</el-dropdown-item>
+            <el-dropdown-item @click="exportFile2('dynamic')">PDF</el-dropdown-item>
+            <el-dropdown-item @click="exportFile2('picture')">PNG</el-dropdown-item>
             <el-dropdown-item @click="exportFile('md')">MD</el-dropdown-item>
-            <el-dropdown-item @click="exportFile('native')">PDF(备用)</el-dropdown-item>
+            <el-dropdown-item @click="exportFile2('native')">PDF(备用)</el-dropdown-item>
             <el-dropdown-item divided @click="proofreadVisible = true">
               导出前建议检查错别字 →
             </el-dropdown-item>
@@ -96,6 +118,7 @@ function undo() {
   <Contact :open="open" @toggle="toggle" />
   <ProofreadDrawer v-model="proofreadVisible" />
   <HistoryDrawer v-model="historyVisible" :resume-type="resumeType" />
+  <ShareDialog v-model="shareVisible" :resume-type="resumeType" :resume-name="fileName" />
 </template>
 
 <style lang="scss" scoped>
@@ -148,7 +171,8 @@ function undo() {
     cursor: pointer;
     white-space: nowrap;
   }
-  .undo {
+  .undo,
+  .share-ic {
     cursor: pointer;
   }
   .btn {

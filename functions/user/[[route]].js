@@ -86,6 +86,36 @@ export async function onRequest(context) {
     return json(request, { code: 200, msg: '更新成功' })
   }
 
+  // 用户信息 + 配额：对照生产 /api/user/info {uid,nickName,member_expires,cv,ai,ec,...}
+  if (route === 'info') {
+    const tok = q.token || (request.headers.get('authorization') || '').replace(/^Bearer\s+/i, '')
+    const username = await tokenUser(kv, tok)
+    if (!username) return json(request, { code: 401, msg: '登录状态已失效' })
+    const row = await db.prepare('SELECT * FROM users WHERE username = ?').bind(username).first()
+    if (!row) return json(request, { code: 401, msg: '用户不存在' })
+    const isMember = (row.vip_expire || 0) > Date.now()
+    const ec = await db
+      .prepare('SELECT COALESCE(SUM(export_count),0) AS c FROM resumes WHERE user_id = ?')
+      .bind(row.id)
+      .first()
+    const cvUsed = await db
+      .prepare('SELECT COUNT(*) AS c FROM resumes WHERE user_id = ?')
+      .bind(row.id)
+      .first()
+    return json(request, {
+      code: 200,
+      msg: '查询成功',
+      data: {
+        ...publicUser(row),
+        member_expires: row.vip_expire || 0,
+        cv: isMember ? -1 : 2,
+        cvUsed: cvUsed?.c || 0,
+        ai: isMember ? -1 : 3,
+        ec: ec?.c || 0
+      }
+    })
+  }
+
   if (route === 'queryUserById') {
     const row = await db.prepare('SELECT * FROM users WHERE id = ?').bind(q.uid).first()
     return row

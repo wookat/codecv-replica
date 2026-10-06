@@ -8,6 +8,7 @@ export const wOpen = window.open
 export const skinLinkMap: Record<string, string> = {}
 
 export async function importCSS(name: string) {
+  name = name.split('~')[0] // 实例键 → 模板皮肤目录
   const before = new Set(Array.from(document.querySelectorAll('link')).map(l => l.href))
   const res = await import(`../templates/modules/${name}/style.scss`)
   const added = Array.from(document.querySelectorAll('link')).find(l => !before.has(l.href))

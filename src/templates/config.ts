@@ -56,6 +56,7 @@ templates.value.sort((a, b) => (ORDER.get(a.type) ?? 9999) - (ORDER.get(b.type) 
 // 以及 slug 去掉 cv- 前缀（agent-development），统一回落到真实 type
 export function resolveTemplateType(param: string): string {
   if (!param) return param
+  param = param.split('~')[0] // 简历副本实例键 agent_development~m5x → 模板 agent_development
   const hit = templates.value.find(
     t =>
       t.type === param ||
@@ -66,26 +67,54 @@ export function resolveTemplateType(param: string): string {
   return hit?.type ?? param
 }
 
-export type AvatarConfig = { url: string; top: number; left: number; type?: string }
+export type AvatarConfig = {
+  url: string
+  top: number
+  left: number
+  type?: string
+  width?: number
+}
 
 // 生产数据把证件照作为模板层配置（url/top/left）下发，不属于 md 内容
 export function getAvatarConfig(type: string): AvatarConfig | null {
-  const av = templates.value.find(t => t.type === type)?.avatar
+  const base = type.split('~')[0]
+  const av = templates.value.find(t => t.type === base)?.avatar
+  // 用户上传的证件照配置（对照生产 cv.avatar {url,top,left,type}）——无模板默认也可生效
+  try {
+    const upRaw = getLocalStorage(`avatar-cfg-${type}`) as string | null
+    if (upRaw) {
+      const up = JSON.parse(upRaw)
+      const cfg: AvatarConfig =
+        typeof av === 'string'
+          ? { url: av, top: 30, left: 660, type: 'square' }
+          : { url: '', top: 30, left: 660, ...(av || {}) }
+      Object.assign(cfg, {
+        url: up.url || cfg.url,
+        top: up.top ?? cfg.top ?? 30,
+        left: up.left ?? cfg.left ?? 660,
+        width: up.width ?? cfg.width,
+        type: up.shape || cfg.type || 'square'
+      })
+      return cfg.url ? cfg : null
+    }
+  } catch {
+    /* ignore */
+  }
   if (!av) return null
-  const base: AvatarConfig =
+  const cfg: AvatarConfig =
     typeof av === 'string' ? { url: av, top: 30, left: 660, type: 'square' } : { ...av }
   // 用户在编辑器内拖拽头像后持久化于 localStorage，叠加覆盖模板默认坐标
   try {
     const raw = getLocalStorage(`avatar_pos-${type}`) as string | null
     const pos = raw ? JSON.parse(raw) : null
     if (pos && typeof pos.top === 'number' && typeof pos.left === 'number') {
-      base.top = pos.top
-      base.left = pos.left
+      cfg.top = pos.top
+      cfg.left = pos.left
     }
   } catch {
     /* ignore */
   }
-  return base
+  return cfg
 }
 
 export function getPrimaryBGColor(type: string) {

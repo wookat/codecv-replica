@@ -4,12 +4,13 @@ import { useRoute } from 'vue-router'
 import { allOverlaysHTML, convertDOM } from '@/utils/moduleCombine'
 import { templates } from '@/templates/config'
 import { applyTemplateTheme, importCSS } from '@/utils'
-import { getShare } from '@/api/modules/share'
+import { getShare, shareView } from '@/api/modules/share'
 
 const route = useRoute()
 const html = ref('')
 const name = ref('')
 const type = ref('')
+const viewNum = ref(0)
 
 const SHARE_KEY = 'codecv-share'
 
@@ -23,6 +24,17 @@ function render(type_: string, name_: string, md: string) {
 
 onMounted(async () => {
   const id = route.params.id as string
+  // 公开简历分享：/share/<resume_type> 实时内容 + 被查看计数（对照生产 cv.share/view）
+  try {
+    const res = await shareView(id)
+    if (res?.code === 200 && res.data?.content) {
+      viewNum.value = res.data.viewNum || 0
+      render(res.data.type || id, res.data.name, res.data.content)
+      return
+    }
+  } catch {
+    /* 非公开简历回落快照分享 */
+  }
   try {
     const res = await getShare(id)
     if (res?.code === 200 && res.data?.content) {
@@ -50,7 +62,10 @@ const tpl = computed(() => templates.value.find(t => t.type === type.value))
   <div class="sh-page">
     <div v-if="html" class="sh-wrap">
       <div class="sh-head">
-        <h1>{{ name || tpl?.name || '分享的简历' }}</h1>
+        <h1>
+          {{ name || tpl?.name || '分享的简历' }}
+          <span v-if="viewNum" class="view-num">已被查看 {{ viewNum }} 次</span>
+        </h1>
         <router-link :to="`/editor/${type}`" class="sh-btn">用同款模板</router-link>
       </div>
       <div class="cv-preview markdown-transform-html jufe" v-html="html"></div>
@@ -78,6 +93,12 @@ const tpl = computed(() => templates.value.find(t => t.type === type.value))
     font-size: 20px;
     font-weight: 700;
     color: var(--font-color);
+    .view-num {
+      font-size: 12px;
+      font-weight: 400;
+      color: #909399;
+      margin-left: 10px;
+    }
   }
 }
 .sh-btn {

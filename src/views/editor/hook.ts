@@ -80,14 +80,16 @@ export function useRenderHTML(resumeType: Ref<string>) {
 
 export function useResumeType() {
   const route = useRoute()
-  //初始化也需要填上值 否则后续更新不一致会导致刷新死循环
-  const resumeType = ref(
-    route.query.type ? resolveTemplateType(String(route.query.type)) : '10front_end'
-  )
+  // 实例键 = 解析后的模板 type + 保留 `~副本后缀`（内容/配置按实例隔离）
+  const resolveKey = (v: unknown) => {
+    if (!v) return '10front_end'
+    const s = String(v)
+    const [base, suffix] = s.split('~')
+    return resolveTemplateType(base) + (suffix ? `~${suffix}` : '')
+  }
+  const resumeType = ref(resolveKey(route.query.type))
   onActivated(() => {
-    resumeType.value = route.query.type
-      ? resolveTemplateType(String(route.query.type))
-      : '10front_end'
+    resumeType.value = resolveKey(route.query.type)
   })
   return {
     resumeType

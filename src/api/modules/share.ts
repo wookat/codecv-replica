@@ -21,6 +21,12 @@ export const createShare = (p: { type: string; name: string; content: string }) 
   post('/api/share/create', p)
 export const getShare = (id: string) => get(`/api/share/get?id=${encodeURIComponent(id)}`)
 
+// 公开简历（对照生产 cv.isPublic/viewNum + /api/cv/share/view）
+export const shareState = (type: string) => get(`/api/share/state?type=${encodeURIComponent(type)}`)
+export const shareToggle = (type: string, isPublic: boolean) =>
+  post('/api/resume/share', { type, isPublic })
+export const shareView = (type: string) => get(`/api/share/view?type=${encodeURIComponent(type)}`)
+
 export const submitMianjing = (f: object) => post('/api/mianjing/submit', f)
 export const myMianjing = () => get('/api/mianjing/mine')
 export const delMianjing = (id: number | string) => post('/api/mianjing/del-mine', { id })
