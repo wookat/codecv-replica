@@ -6,7 +6,7 @@ import AccountSettings from '@/components/AccountSettings.vue'
 import useUserStore from '@/store/modules/user'
 import { currentUser, logoutLocal, type LocalUser } from '@/utils/auth'
 import { getLocalStorage } from '@/common/localstorage'
-import { notifyUnreadCount } from '@/api/modules/notification'
+import { notifyList, notifyRead, notifyUnreadCount, type Notice } from '@/api/modules/notification'
 
 const router = useRouter()
 const store = useUserStore()
@@ -20,6 +20,55 @@ const unread = ref(0)
 async function refreshUnread() {
   unread.value = user.value ? await notifyUnreadCount() : 0
 }
+
+/* 生产同款通知面板：铃铛点击 → 340px 面板（消息通知/全部已读/列表/快捷入口） */
+const notices = ref<Notice[]>([])
+const noticesLoading = ref(false)
+const noticesLoaded = ref(false)
+const SHOW = 20
+
+async function loadNotices() {
+  if (!user.value) return
+  noticesLoading.value = true
+  try {
+    notices.value = await notifyList()
+    noticesLoaded.value = true
+  } finally {
+    noticesLoading.value = false
+  }
+}
+
+async function readAll() {
+  await notifyRead()
+  notices.value = notices.value.map(n => ({ ...n, is_read: 1 }))
+  unread.value = 0
+}
+
+async function openNotice(n: Notice) {
+  if (!n.is_read) {
+    await notifyRead(n.id)
+    n.is_read = 1
+    unread.value = Math.max(0, unread.value - 1)
+  }
+  if (n.link) router.push(n.link)
+}
+
+const fmtTime = (t: number) => {
+  const d = new Date(+t)
+  return `${d.getMonth() + 1}-${String(d.getDate()).padStart(2, '0')} ${String(
+    d.getHours()
+  ).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}
+
+// 生产面板底部快捷入口（grid-cols-2）
+const quickLinks = [
+  { title: '个人资料', act: () => (settings.value = true) },
+  { title: '我的简历', act: () => router.push('/profile') },
+  { title: '我的投递', act: () => router.push('/progress') },
+  { title: '我的面经', act: () => router.push('/mianjing/mine') },
+  { title: '我的订单', act: () => router.push('/order') },
+  { title: '我的邀请', act: () => router.push('/user/invite') }
+]
 
 // 与生产一致的用户菜单项
 const menuItems = [
@@ -97,9 +146,16 @@ function logout() {
       </div>
     </el-popover>
     <div class="divider"></div>
-    <el-popover v-if="user" placement="bottom-end" :width="60" trigger="hover">
+    <el-popover
+      v-if="user"
+      placement="bottom-end"
+      :width="340"
+      trigger="click"
+      popper-class="bell-panel"
+      @show="loadNotices"
+    >
       <template #reference>
-        <span class="bell" @click="router.push('/notify')">
+        <span class="bell">
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -114,7 +170,38 @@ function logout() {
           <i v-if="unread" class="bell-dot">{{ unread > 99 ? '99+' : unread }}</i>
         </span>
       </template>
-      <span class="bell-tip">查看通知</span>
+      <div class="np">
+        <div class="np-head">
+          <span class="np-title">消息通知</span>
+          <button v-if="unread" class="np-readall" @click="readAll">全部已读</button>
+        </div>
+        <div class="np-body">
+          <p v-if="noticesLoading" class="np-state">加载中…</p>
+          <p v-else-if="noticesLoaded && !notices.length" class="np-state">
+            还没有通知，互动消息会在这里出现
+          </p>
+          <template v-else>
+            <button
+              v-for="n in notices.slice(0, SHOW)"
+              :key="n.id"
+              class="np-item"
+              @click="openNotice(n)"
+            >
+              <i v-if="!n.is_read" class="np-dot"></i>
+              <span class="np-main">
+                <span class="np-t">{{ n.title || n.content }}</span>
+                <span class="np-time">{{ fmtTime(n.created_at) }}</span>
+              </span>
+            </button>
+            <p v-if="notices.length > SHOW" class="np-state small">没有更多了</p>
+          </template>
+        </div>
+        <div class="np-links">
+          <button v-for="q in quickLinks" :key="q.title" class="np-link" @click="q.act">
+            {{ q.title }}
+          </button>
+        </div>
+      </div>
     </el-popover>
     <el-dropdown v-if="user">
       <span class="u-entry">
@@ -215,9 +302,104 @@ function logout() {
     padding: 0 3px;
   }
 }
-.bell-tip {
-  font-size: 13px;
-  white-space: nowrap;
+/* 生产同款通知面板（340px，消息通知/全部已读/列表/快捷入口栅格） */
+.np {
+  margin: -12px;
+  .np-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px 8px;
+    .np-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--font-color);
+    }
+    .np-readall {
+      border: none;
+      background: transparent;
+      font-size: 12px;
+      color: var(--theme);
+      cursor: pointer;
+      padding: 2px 4px;
+    }
+  }
+  .np-body {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 0 8px;
+    .np-state {
+      font-size: 12px;
+      color: #909399;
+      text-align: center;
+      padding: 34px 0;
+      &.small {
+        padding: 8px 0;
+      }
+    }
+    .np-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      width: 100%;
+      border: none;
+      background: transparent;
+      text-align: left;
+      padding: 9px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      &:hover {
+        background: rgba(0, 0, 0, 0.04);
+      }
+      .np-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #f56c6c;
+        margin-top: 6px;
+        flex-shrink: 0;
+      }
+      .np-main {
+        min-width: 0;
+        flex: 1;
+        .np-t {
+          display: block;
+          font-size: 13px;
+          color: var(--font-color);
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .np-time {
+          display: block;
+          font-size: 11px;
+          color: #b5b8bf;
+          margin-top: 2px;
+        }
+      }
+    }
+  }
+  .np-links {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+    padding: 8px;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    margin-top: 4px;
+    .np-link {
+      border: none;
+      background: transparent;
+      font-size: 13px;
+      color: var(--font-color);
+      padding: 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      &:hover {
+        background: rgba(0, 0, 0, 0.04);
+      }
+    }
+  }
 }
 .login-btn {
   height: 36px;

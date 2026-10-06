@@ -125,47 +125,43 @@ const bucketOf = (s: string) =>
     ? 'closed'
     : 'all'
 
+// 生产六桶配色与图标：全部(橙) 待投递(琥珀) 投递中(蓝) 面试中(紫) Offer(绿) 流程终止(红)
 const BUCKETS = [
-  { key: '', bucket: 'all', label: '全部', color: '#FF6B3D', from: '#FF9A62', to: '#FF5C38' },
+  { key: '', bucket: 'all', label: '全部', color: '#FF6B3D', icon: 'iconfont icon-orderedlist' },
   {
     key: 'pending',
     bucket: 'pending',
     label: '待投递',
     color: '#F7A325',
-    from: '#FFC94D',
-    to: '#FF9502'
+    icon: 'iconfont icon-tag'
   },
   {
     key: 'applied',
     bucket: 'applied',
     label: '投递中',
     color: '#2F80ED',
-    from: '#56CCF2',
-    to: '#2F80ED'
+    icon: 'iconfont icon-goto'
   },
   {
     key: 'interviewing',
     bucket: 'interviewing',
     label: '面试中',
     color: '#7C3AED',
-    from: '#A78BFA',
-    to: '#6D28D9'
+    icon: 'iconfont icon-message'
   },
   {
     key: 'offer',
     bucket: 'offer',
     label: 'Offer',
     color: '#0F9D77',
-    from: '#6EE7B7',
-    to: '#0F9D77'
+    icon: 'iconfont icon-trophy'
   },
   {
     key: 'closed',
     bucket: 'closed',
     label: '流程终止',
     color: '#E11D48',
-    from: '#FB7185',
-    to: '#E11D48'
+    icon: 'iconfont icon-error'
   }
 ]
 
@@ -393,24 +389,29 @@ onMounted(load)
     </div>
 
     <template v-else>
-      <!-- 六桶统计卡（对照生产渐变卡） -->
+      <!-- 六桶统计卡（对齐生产：白底卡片内彩色图标块+数字+标签） -->
       <section class="stats6">
         <div
           v-for="b in BUCKETS"
           :key="b.key"
           class="bkt"
           :class="{ active: statusFilter === b.bucket || (!statusFilter && b.bucket === 'all') }"
-          :style="{ background: `linear-gradient(135deg, ${b.from}, ${b.to})` }"
           @click="
             statusFilter = statusFilter === b.bucket ? '' : b.bucket === 'all' ? '' : b.bucket
           "
         >
+          <span class="bic" :style="{ background: b.color }">
+            <i :class="b.icon"></i>
+          </span>
           <span class="bn">{{ bucketCounts[b.bucket] }}</span>
           <span class="bl">{{ b.label }}</span>
         </div>
       </section>
 
       <section class="toolbar">
+        <span class="cnt"
+          >共 <b>{{ filtered.length }}</b> 条投递记录</span
+        >
         <el-input
           v-model="keywordInput"
           class="kw"
@@ -421,10 +422,10 @@ onMounted(load)
         <el-select v-model="channel" placeholder="全部类型" clearable class="ch">
           <el-option v-for="c in channelOptions" :key="c" :label="c" :value="c" />
         </el-select>
-        <el-button class="ord" @click="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'">
-          {{ sortOrder === 'asc' ? '最早投递在前' : '最近投递在前' }}
-        </el-button>
-        <button class="add-btn" @click="openEdit()">+ 手动添加投递记录</button>
+        <button class="ord" @click="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'">
+          ↕ {{ sortOrder === 'asc' ? '最早投递在前' : '最近投递在前' }}
+        </button>
+        <button class="add-btn" @click="openEdit()">+ 添加记录</button>
       </section>
 
       <p v-if="filterLabel" class="filter-label">
@@ -436,86 +437,116 @@ onMounted(load)
         >
       </p>
 
-      <section v-if="filtered.length" class="list" v-loading="loading">
-        <div v-for="r in filtered" :key="r.job_id" class="row">
-          <span class="avatar" :style="{ background: avatarBg(companyOf(r)) }">
-            {{ avatarChar(r) }}
-          </span>
-          <div class="main">
-            <p class="t">
-              {{ companyOf(r) }}
-              <span v-if="postOf(r)" class="post">{{ postOf(r) }}</span>
-            </p>
-            <p class="meta">
-              <span v-if="r.snapshot?.workLocation || r.workLocation">
-                {{ r.snapshot?.workLocation || r.workLocation }}
-              </span>
-              <span v-if="r.snapshot?.channel || r.channel" class="chip">
-                {{ r.snapshot?.channel || r.channel }}
-              </span>
-              <span class="ptime">投递时间 {{ fmtDate(r.post_time || r.update_time) }}</span>
-              <span v-if="r.mark" class="mark">备注：{{ r.mark }}</span>
-            </p>
-          </div>
-          <div class="side">
-            <button
-              v-if="r.link || r.snapshot?.referralMethod"
-              class="op link-op"
-              :title="r.status === '待投递' ? '去投递（转为已投递）' : '打开投递链接'"
-              @click="openLink(r)"
-            >
-              🔗
-            </button>
-            <el-popover
-              trigger="click"
-              :width="150"
-              popper-class="status-pop"
-              placement="bottom-start"
-            >
-              <template #reference>
-                <span
-                  class="status"
-                  data-status-trigger
-                  :style="{
-                    background: statusColor(r.status) + '1a',
-                    color: statusColor(r.status)
-                  }"
-                >
-                  <i class="dot" :style="{ background: statusColor(r.status) }"></i>
-                  {{ r.status }}
-                </span>
-              </template>
-              <div class="sp-list">
-                <button
-                  v-for="s in PROGRESS_NEXT"
-                  :key="s"
-                  class="sp-item"
-                  :class="{ on: r.status === s }"
-                  @click="setStatus(r, s)"
-                >
-                  <i class="dot" :style="{ background: statusColor(s) }"></i>{{ s }}
+      <!-- 生产同款表格：公司/岗位 | 类型 | 投递时间 | 当前状态 | 操作 -->
+      <section class="tbl-wrap" v-loading="loading">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th class="c-job">公司 / 岗位</th>
+              <th class="c-type">类型</th>
+              <th class="c-time">
+                <button class="th-sort" @click="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'">
+                  投递时间 <i class="arr">{{ sortOrder === 'asc' ? '▲' : '▼' }}</i>
                 </button>
-              </div>
-            </el-popover>
-            <span class="time" @click="timelineRow = r" :class="{ 'has-tl': r.events?.length }"
-              >最近更新 {{ fmtTime(r.update_time) }}</span
-            >
-            <div class="ops">
-              <button class="op" @click="openEdit(r)">编辑</button>
-              <button class="op danger" @click="remove(r)">删除</button>
-            </div>
-          </div>
-        </div>
+              </th>
+              <th class="c-status">当前状态</th>
+              <th class="c-ops">操作</th>
+            </tr>
+          </thead>
+          <tbody v-if="filtered.length">
+            <tr v-for="r in filtered" :key="r.job_id">
+              <td class="c-job">
+                <span class="avatar" :style="{ background: avatarBg(companyOf(r)) }">
+                  {{ avatarChar(r) }}
+                </span>
+                <div class="jt">
+                  <p class="cn">{{ companyOf(r) }}</p>
+                  <p v-if="postOf(r)" class="pt">{{ postOf(r) }}</p>
+                  <p class="meta">
+                    <span v-if="r.snapshot?.workLocation || r.workLocation">
+                      {{ r.snapshot?.workLocation || r.workLocation }}
+                    </span>
+                    <span v-if="r.mark" class="mark">备注：{{ r.mark }}</span>
+                  </p>
+                </div>
+              </td>
+              <td class="c-type">
+                <span v-if="r.snapshot?.channel || r.channel" class="chip">
+                  {{ r.snapshot?.channel || r.channel }}
+                </span>
+                <span v-else>—</span>
+              </td>
+              <td class="c-time">{{ fmtDate(r.post_time || r.update_time) }}</td>
+              <td class="c-status">
+                <el-popover
+                  trigger="click"
+                  :width="150"
+                  popper-class="status-pop"
+                  placement="bottom-start"
+                >
+                  <template #reference>
+                    <span
+                      class="status"
+                      data-status-trigger
+                      :style="{
+                        background: statusColor(r.status) + '1a',
+                        color: statusColor(r.status)
+                      }"
+                    >
+                      <i class="dot" :style="{ background: statusColor(r.status) }"></i>
+                      {{ r.status }}
+                    </span>
+                  </template>
+                  <div class="sp-list">
+                    <button
+                      v-for="s in PROGRESS_NEXT"
+                      :key="s"
+                      class="sp-item"
+                      :class="{ on: r.status === s }"
+                      @click="setStatus(r, s)"
+                    >
+                      <i class="dot" :style="{ background: statusColor(s) }"></i>{{ s }}
+                    </button>
+                  </div>
+                </el-popover>
+                <span class="time" @click="timelineRow = r" :class="{ 'has-tl': r.events?.length }"
+                  >最近更新 {{ fmtTime(r.update_time) }}</span
+                >
+              </td>
+              <td class="c-ops">
+                <button
+                  v-if="r.link || r.snapshot?.referralMethod"
+                  class="op"
+                  :title="r.status === '待投递' ? '去投递（转为已投递）' : '打开投递链接'"
+                  @click="openLink(r)"
+                >
+                  🔗
+                </button>
+                <button class="op" @click="openEdit(r)">编辑</button>
+                <button class="op danger" @click="remove(r)">删除</button>
+              </td>
+            </tr>
+          </tbody>
+          <tbody v-else>
+            <tr>
+              <td colspan="5" class="empty-td">
+                <div class="empty-icon">📄</div>
+                <p>
+                  {{
+                    filterLabel
+                      ? '当前筛选条件下暂无投递记录'
+                      : '还没有投递记录，从校招列表开始你的第一投吧'
+                  }}
+                </p>
+                <div class="empty-acts">
+                  <router-link to="/jobs" class="b primary">去校招列表投递</router-link>
+                  <button class="b" @click="openEdit()">手动添加</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </section>
-
-      <div v-else class="empty-card">
-        <h2>{{ filterLabel ? '当前筛选条件下暂无投递记录' : '还没有投递记录' }}</h2>
-        <p>在校招信息列表点「投递记录」，或手动添加一条</p>
-        <div class="empty-acts">
-          <router-link to="/jobs" class="b primary">去逛校招信息</router-link>
-          <button class="b" @click="openEdit()">手动记录</button>
-        </div>
-      </div>
     </template>
 
     <!-- 添加/编辑弹层（生产字段序） -->
@@ -678,60 +709,99 @@ onMounted(load)
     font-size: 15px;
   }
 }
-/* 六桶渐变统计卡（对齐生产） */
+/* 六桶统计卡（对齐生产：白底卡片内彩色图标块+数字+标签） */
 .stats6 {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 12px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   .bkt {
-    border-radius: 12px;
-    padding: 16px 14px;
-    color: #fff;
+    display: grid;
+    grid-template-columns: 42px auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: 10px;
+    padding: 8px 12px;
+    border-radius: 10px;
     cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    transition: transform 0.15s, box-shadow 0.15s;
-    &:hover {
-      transform: translateY(-2px);
-    }
+    transition: background 0.15s;
     &.active {
-      box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--theme);
+      background: rgba(255, 107, 61, 0.1);
+    }
+    &:hover {
+      background: rgba(0, 0, 0, 0.03);
+    }
+    .bic {
+      grid-row: 1 / 3;
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      i {
+        font-size: 22px;
+      }
     }
     .bn {
-      font-size: 26px;
+      font-size: 20px;
       font-weight: 700;
-      line-height: 1.2;
+      line-height: 1.1;
     }
     .bl {
-      font-size: 13px;
-      opacity: 0.95;
+      font-size: 12px;
+      color: #909399;
+      margin-top: 2px;
     }
   }
 }
 .toolbar {
   display: flex;
+  align-items: center;
   gap: 10px;
-  margin: 16px 0 4px;
+  margin: 14px 0 10px;
   flex-wrap: wrap;
+  .cnt {
+    font-size: 13px;
+    color: #909399;
+    margin-right: auto;
+    b {
+      color: var(--theme);
+      font-weight: 600;
+    }
+  }
   .kw {
-    flex: 1;
-    min-width: 220px;
+    width: 240px;
   }
   .ch {
-    width: 140px;
+    width: 130px;
   }
   .ord {
-    margin-left: 0;
+    border: none;
+    background: transparent;
+    color: #909399;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px 6px;
+    &:hover {
+      color: var(--theme);
+    }
   }
   .add-btn {
-    border: none;
-    background: var(--theme);
-    color: #fff;
+    border: 1px dashed #c8c9cc;
+    background: transparent;
+    color: #606266;
     border-radius: 8px;
-    padding: 0 16px;
-    font-size: 14px;
+    padding: 7px 14px;
+    font-size: 13px;
     cursor: pointer;
+    &:hover {
+      border-color: var(--theme);
+      color: var(--theme);
+    }
   }
 }
 .filter-label {
@@ -744,116 +814,182 @@ onMounted(load)
     margin-left: 8px;
   }
 }
-.list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 6px;
-}
-.row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  border: 1px solid #eee;
+/* 生产同款记录表格 */
+.tbl-wrap {
+  background: #fff;
   border-radius: 12px;
-  padding: 14px 16px;
-  background: var(--background);
-  &:hover {
-    border-color: #ddd;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow-x: auto;
+}
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+  th {
+    text-align: left;
+    font-size: 12px;
+    font-weight: 400;
+    color: #909399;
+    padding: 14px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    .th-sort {
+      border: none;
+      background: transparent;
+      font-size: 12px;
+      color: var(--theme);
+      cursor: pointer;
+      padding: 0;
+      .arr {
+        font-size: 9px;
+        font-style: normal;
+      }
+    }
   }
-  .avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
+  td {
+    padding: 14px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid #f6f6f6;
+    vertical-align: middle;
+  }
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+  tbody tr:hover td {
+    background: #fafbfc;
+  }
+  .c-job {
+    width: 38%;
+  }
+  .c-type {
+    width: 12%;
+  }
+  .c-time {
+    width: 14%;
+    color: #909399;
+  }
+  .c-status {
+    width: 22%;
+  }
+  .c-ops {
+    width: 14%;
+  }
+  .c-job .avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
     color: #fff;
     font-weight: 700;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-    font-size: 16px;
+    font-size: 15px;
+    margin-right: 10px;
+    vertical-align: top;
   }
-  .main {
-    flex: 1;
-    min-width: 0;
-    .t {
+  .jt {
+    display: inline-block;
+    vertical-align: top;
+    max-width: calc(100% - 55px);
+    .cn {
       font-weight: 600;
+      font-size: 14px;
       margin: 0;
-      .post {
-        font-weight: 400;
-        color: #606266;
-        margin-left: 8px;
-        font-size: 13px;
-      }
+    }
+    .pt {
+      font-size: 12px;
+      color: #606266;
+      margin: 2px 0 0;
     }
     .meta {
       font-size: 12px;
-      color: #909399;
-      margin: 5px 0 0;
+      color: #b5b8bf;
+      margin: 3px 0 0;
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
-      .chip {
-        background: rgba(0, 0, 0, 0.05);
-        border-radius: 4px;
-        padding: 1px 6px;
-      }
-      .mark {
-        color: #b5b8bf;
+    }
+  }
+  .chip {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 12px;
+    color: #606266;
+  }
+  .status {
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+  }
+  .time {
+    font-size: 12px;
+    color: #c0c4cc;
+    margin-left: 8px;
+    &.has-tl {
+      color: var(--theme);
+      cursor: pointer;
+      &:hover {
+        text-decoration: underline;
       }
     }
   }
-  .side {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
-    .status {
-      border-radius: 999px;
-      padding: 4px 12px;
-      font-size: 12px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      .dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-      }
+  .op {
+    border: none;
+    background: transparent;
+    color: #909399;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 6px;
+    &:hover {
+      color: var(--theme);
+      background: rgba(0, 0, 0, 0.04);
     }
-    .time {
-      font-size: 12px;
-      color: #c0c4cc;
-      &.has-tl {
-        color: var(--theme);
-        cursor: pointer;
-        &:hover {
-          text-decoration: underline;
-        }
-      }
+    &.danger:hover {
+      color: #f56c6c;
     }
-    .ops {
-      display: flex;
-      gap: 6px;
+  }
+  .empty-td {
+    text-align: center;
+    padding: 60px 20px;
+    .empty-icon {
+      font-size: 42px;
+      opacity: 0.5;
+      margin-bottom: 12px;
     }
-    .op {
-      border: none;
-      background: transparent;
+    p {
       color: #909399;
       font-size: 13px;
-      cursor: pointer;
-      padding: 4px 6px;
-      border-radius: 6px;
-      &:hover {
-        color: var(--theme);
-        background: rgba(0, 0, 0, 0.04);
-      }
-      &.danger:hover {
-        color: #f56c6c;
-      }
-      &.link-op {
-        font-size: 15px;
+      margin: 0 0 20px;
+    }
+    .empty-acts {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      .b {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 8px 22px;
+        font-size: 14px;
+        cursor: pointer;
+        background: #fff;
+        color: var(--font-color);
+        text-decoration: none;
+        display: inline-block;
+        &.primary {
+          background: var(--theme);
+          color: #fff;
+          border-color: var(--theme);
+        }
       }
     }
   }
@@ -908,41 +1044,6 @@ onMounted(load)
     display: inline-block;
   }
 }
-.empty-card {
-  text-align: center;
-  padding: 50px 20px;
-  border: 1px dashed #ddd;
-  border-radius: 14px;
-  margin-top: 16px;
-  h2 {
-    font-size: 17px;
-    margin-bottom: 8px;
-  }
-  p {
-    color: #909399;
-    font-size: 13px;
-    margin: 0 0 20px;
-  }
-  .empty-acts {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    .b {
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 8px 22px;
-      font-size: 14px;
-      cursor: pointer;
-      background: #fff;
-      color: var(--font-color);
-      &.primary {
-        background: var(--theme);
-        color: #fff;
-        border-color: var(--theme);
-      }
-    }
-  }
-}
 .no-tl {
   color: #909399;
   text-align: center;
@@ -950,13 +1051,15 @@ onMounted(load)
 }
 @media (max-width: 860px) {
   .stats6 {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
   }
-  .row {
-    flex-wrap: wrap;
-    .side {
+  .toolbar {
+    .cnt {
       width: 100%;
-      justify-content: flex-end;
+    }
+    .kw {
+      width: 100%;
     }
   }
 }

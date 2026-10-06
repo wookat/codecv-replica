@@ -1,4 +1,5 @@
 import { RouteRecordRaw, createRouter, createWebHashHistory } from 'vue-router'
+import Layout from '@/layout/main.vue'
 
 /* 统一导入路由 */
 const routeFiles = import.meta.glob('./modules/*.ts', { eager: true })
@@ -20,9 +21,15 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/download/index.vue')
   },
   {
-    path: '/:pathMatch(.*)*',
-    name: 'NotFound',
-    component: () => import('@/views/404/index.vue')
+    path: '/',
+    component: Layout,
+    children: [
+      {
+        path: ':pathMatch(.*)*',
+        name: 'NotFound',
+        component: () => import('@/views/404/index.vue')
+      }
+    ]
   }
 ]
 
@@ -51,7 +58,8 @@ const routeTitles: Record<string, string> = {
   cv: '编辑简历 - CodeCV简历',
   'mp-editor': '编辑简历 - CodeCV简历',
   'export-resume': '导出简历 - CodeCV简历',
-  'template-category': '简历模板 - CodeCV简历'
+  'template-category': '简历模板 - CodeCV简历',
+  NotFound: '404页面不存在|页面找不到|访问错误 - CodeCV简历'
 }
 
 const router = createRouter({
