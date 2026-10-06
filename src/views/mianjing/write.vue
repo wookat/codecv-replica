@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { mianjingMeta, MianjingCompany, MianjingPosition } from '@/api/modules/site'
@@ -71,6 +71,20 @@ const TPLS = [
 
 function applyTpl(t: (typeof TPLS)[number]) {
   form.value.contentMd = t.body
+  autoSave()
+  nextTick(() => {
+    const ta = document.querySelector<HTMLTextAreaElement>('.mw-body')
+    if (ta) {
+      ta.style.height = 'auto'
+      ta.style.height = `${ta.scrollHeight}px`
+    }
+  })
+}
+
+function onBodyInput(e: Event) {
+  const ta = e.target as HTMLTextAreaElement
+  ta.style.height = 'auto'
+  ta.style.height = `${ta.scrollHeight}px`
   autoSave()
 }
 
@@ -210,7 +224,7 @@ async function submit() {
         v-model="form.contentMd"
         class="mw-body"
         placeholder="输入 / 唤起块菜单开始书写，或从下方选择模板…"
-        @input="autoSave"
+        @input="onBodyInput"
       ></textarea>
 
       <p class="mw-tpl-tip">从模板开始 选一个结构快速上手，也可以直接在上方自由书写</p>
@@ -449,7 +463,7 @@ async function submit() {
 }
 .mw-body {
   width: 100%;
-  min-height: 320px;
+  min-height: 110px;
   border: none;
   outline: none;
   resize: none;
