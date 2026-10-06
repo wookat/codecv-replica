@@ -687,3 +687,20 @@
     font-weight: 600;
   }
 }
+
+.scroll-sentinel {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sentinel-loading {
+  font-size: 13px;
+  color: #9ca3af;
+}
+.scroll-end {
+  text-align: center;
+  font-size: 12px;
+  color: #b5b8bf;
+  padding: 12px 0;
+}

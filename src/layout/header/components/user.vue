@@ -6,6 +6,7 @@ import AccountSettings from '@/components/AccountSettings.vue'
 import useUserStore from '@/store/modules/user'
 import { currentUser, logoutLocal, type LocalUser } from '@/utils/auth'
 import { getLocalStorage } from '@/common/localstorage'
+import { notifyUnreadCount } from '@/api/modules/notification'
 
 const router = useRouter()
 const store = useUserStore()
@@ -14,6 +15,11 @@ const settings = ref(false)
 const redeemOpen = ref(false)
 const redeemCode = ref('')
 const redeemMsg = ref('')
+const unread = ref(0)
+
+async function refreshUnread() {
+  unread.value = user.value ? await notifyUnreadCount() : 0
+}
 
 // 与生产一致的用户菜单项
 const menuItems = [
@@ -50,6 +56,7 @@ async function redeem() {
 }
 onMounted(() => {
   user.value = currentUser()
+  refreshUnread()
 })
 watch(
   () => store.loginState.logined,
@@ -90,6 +97,25 @@ function logout() {
       </div>
     </el-popover>
     <div class="divider"></div>
+    <el-popover v-if="user" placement="bottom-end" :width="60" trigger="hover">
+      <template #reference>
+        <span class="bell" @click="router.push('/notify')">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+          </svg>
+          <i v-if="unread" class="bell-dot">{{ unread > 99 ? '99+' : unread }}</i>
+        </span>
+      </template>
+      <span class="bell-tip">查看通知</span>
+    </el-popover>
     <el-dropdown v-if="user">
       <span class="u-entry">
         <img v-if="store.userInfo.avatar" :src="store.userInfo.avatar" class="u-avatar" />
@@ -163,6 +189,35 @@ function logout() {
   width: 1px;
   height: 20px;
   background: rgba(0, 0, 0, 0.1);
+}
+.bell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+  .bell-dot {
+    position: absolute;
+    top: -6px;
+    right: -8px;
+    min-width: 15px;
+    height: 15px;
+    border-radius: 999px;
+    background: #f56c6c;
+    color: #fff;
+    font-size: 9px;
+    font-style: normal;
+    line-height: 15px;
+    text-align: center;
+    padding: 0 3px;
+  }
+}
+.bell-tip {
+  font-size: 13px;
+  white-space: nowrap;
 }
 .login-btn {
   height: 36px;

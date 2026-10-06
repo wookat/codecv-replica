@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { mianjingList, mianjingMeta, MianjingCompany, MianjingItem } from '@/api/modules/site'
 import { localAsset, logoColor } from '@/utils/article'
 
@@ -45,7 +45,12 @@ const resultClass = (r?: string) =>
     ? 'mj-chip--gray'
     : 'mj-chip--amber'
 
-async function load() {
+// 生产同款无限滚动：哨兵触发 append 加载，筛选变化时重置
+const sentinel = ref<HTMLElement | null>(null)
+const hasMore = computed(() => list.value.length < total.value)
+
+async function load(append = false) {
+  if (loading.value) return
   try {
     loading.value = true
     const res = await mianjingList({
@@ -55,13 +60,29 @@ async function load() {
       batch: batch.value || undefined,
       position: position.value || undefined
     })
-    list.value = res?.data ?? []
+    const rows = res?.data ?? []
+    list.value = append ? [...list.value, ...rows] : rows
     total.value = res?.total ?? 0
   } catch (e) {
     console.error('获取面经列表失败:', e)
   } finally {
     loading.value = false
   }
+}
+
+let observer: IntersectionObserver | null = null
+function setupObserver() {
+  observer?.disconnect()
+  observer = new IntersectionObserver(
+    entries => {
+      if (entries[0].isIntersecting && hasMore.value && !loading.value) {
+        current.value++
+        load(true)
+      }
+    },
+    { rootMargin: '200px' }
+  )
+  if (sentinel.value) observer.observe(sentinel.value)
 }
 
 const hotList = computed(() =>
@@ -77,6 +98,7 @@ function pick(key: 'batch' | 'position', v: string) {
   if (key === 'batch') batch.value = batch.value === v ? '' : v
   else position.value = position.value === v ? '' : v
   current.value = 1
+  list.value = []
   load()
 }
 
@@ -86,6 +108,7 @@ function onKeyword(v: string) {
   debounce = setTimeout(() => {
     keyword.value = v
     current.value = 1
+    list.value = []
     load()
   }, 300)
 }
@@ -103,7 +126,7 @@ const companyOf = (m: MianjingItem) => companies.value.find(c => c.slug === m.co
 const isHot = (m: MianjingItem) => (m.viewCount ?? 0) >= 100
 
 onMounted(async () => {
-  load()
+  load().then(setupObserver)
   try {
     const [cs, st, ps, all] = await Promise.all([
       mianjingMeta('companies'),
@@ -133,6 +156,8 @@ onMounted(async () => {
     console.error('获取面经元数据失败:', e)
   }
 })
+
+onUnmounted(() => observer?.disconnect())
 </script>
 
 <template>
@@ -367,16 +392,10 @@ onMounted(async () => {
           </router-link>
           <el-empty v-if="!loading && !shown.length" description="暂无面经" />
         </div>
-        <div class="pager" v-if="total > pageSize">
-          <el-pagination
-            v-model:current-page="current"
-            :page-size="pageSize"
-            :total="total"
-            background
-            layout="prev, pager, next"
-            @current-change="load"
-          />
+        <div v-if="hasMore" ref="sentinel" class="scroll-sentinel">
+          <span v-if="loading" class="sentinel-loading">加载中…</span>
         </div>
+        <p v-else-if="list.length" class="scroll-end">已加载全部 {{ total }} 篇</p>
       </main>
 
       <aside class="mj-aside">
