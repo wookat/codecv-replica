@@ -270,11 +270,11 @@ export async function onRequest(context) {
   if (route === 'history/page') {
     const { results } = await db
       .prepare(
-        `SELECT v.id, v.resume_id AS resumeId, r.name, r.resume_type AS resumeType,
+        `SELECT v.id, v.resume_type AS resumeType, r.name,
                 u.username, u.nickname, v.created_at AS createdAt
          FROM resume_versions v
-         LEFT JOIN resumes r ON r.id = v.resume_id
-         LEFT JOIN users u ON u.id = r.user_id
+         LEFT JOIN resumes r ON r.resume_type = v.resume_type AND r.user_id = v.user_id
+         LEFT JOIN users u ON u.id = v.user_id
          ORDER BY v.created_at DESC LIMIT 500`
       )
       .all()
@@ -290,8 +290,8 @@ export async function onRequest(context) {
     const v = await db.prepare('SELECT * FROM resume_versions WHERE id = ?').bind(+q.id).first()
     if (!v) return json(request, { code: 404, msg: '版本不存在' })
     await db
-      .prepare('UPDATE resumes SET md = ?, style = ?, updated_at = ? WHERE id = ?')
-      .bind(v.md ?? '', v.style ?? '', now, v.resume_id)
+      .prepare('UPDATE resumes SET md = ?, style = ?, updated_at = ? WHERE resume_type = ? AND user_id = ?')
+      .bind(v.content ?? '', v.style ?? '', now, v.resume_type, v.user_id)
       .run()
     return json(request, { code: 200, message: '已回滚' })
   }
