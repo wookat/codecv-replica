@@ -25,7 +25,11 @@ const useEditorStore = defineStore('editorStore', {
   state: () => ({
     MDContent: '',
     nativeContent: '',
-    writable: Boolean(getLocalStorage(WRITABLE)) || false,
+    // 生产版默认进入「编辑」所见即所得模式；用户显式切到 MD 才持久化 false
+    writable: (() => {
+      const raw = localStorage.getItem(WRITABLE)
+      return raw === null ? true : Boolean(getLocalStorage(WRITABLE))
+    })(),
     // 预览模式：隐藏左侧编辑器 只看纸面（对齐线上版三模式切换）
     previewMode: false,
     // 编辑历史栈 用于顶栏撤销按钮

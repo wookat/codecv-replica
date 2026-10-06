@@ -38,7 +38,12 @@ defineEmits(['export-md', 'import-md', 'export-picture', 'print-page'])
       </template>
       <!-- 不是级联菜单走这里 -->
       <template v-else>
-        <router-link :to="navItem.path || ''">{{ navItem.name }}</router-link>
+        <a v-if="navItem.external" :href="navItem.path" target="_blank" rel="noopener noreferrer"
+          >{{ navItem.name }}<i v-if="navItem.hot" class="hot-tag">🔥</i></a
+        >
+        <router-link v-else :to="navItem.path || ''"
+          >{{ navItem.name }}<i v-if="navItem.hot" class="hot-tag">🔥</i></router-link
+        >
       </template>
     </li>
   </ul>
@@ -70,5 +75,15 @@ label[for='import_md'] {
   li {
     margin-right: 10px;
   }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+.hot-tag {
+  font-style: normal;
+  font-size: 10px;
+  margin-left: 1px;
+  vertical-align: super;
 }
 </style>

@@ -65,9 +65,6 @@ watch(proofreadBus, () => (proofreadVisible.value = true))
       show-stops
     />
     <div class="operator-level2">
-      <el-tooltip content="简历内容翻译，支持大部分主流语言" effect="light">
-        <i class="operator-item iconfont icon-translate" @click="translateVisible = true"></i>
-      </el-tooltip>
       <el-tooltip content="编写CSS" effect="light">
         <i class="operator-item iconfont icon-diy scale-110" @click="toggleDialog"></i
       ></el-tooltip>

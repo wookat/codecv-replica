@@ -46,9 +46,7 @@
       color: #333;
       min-width: 0;
       overflow-wrap: anywhere;
-      transition:
-        background-color 0.16s,
-        box-shadow 0.16s;
+      transition: background-color 0.16s, box-shadow 0.16s;
 
       &:hover {
         background-color: rgba(148, 163, 184, 0.1);
@@ -78,9 +76,7 @@
       .flex-layout-item {
         background-color: var(--background);
         margin: 0.5rem;
-        box-shadow:
-          0 1px 3px 0 rgba(0, 0, 0, 0.1),
-          0 1px 2px -1px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
       }
     }
   }
@@ -317,26 +313,48 @@
   .draggable-block {
     position: relative;
   }
-  /* 拖拽手柄：悬停块级节点左侧出现 ⋮⋮ */
+  /* 拖拽手柄：悬停块级节点左侧出现 ⋮⋮ + ＋（对齐生产 tiptap drag-handle） */
   .drag-handle {
     position: absolute;
-    left: -42px;
+    left: -46px;
     top: 0;
-    width: 18px;
     height: 24px;
     display: flex;
     align-items: center;
-    justify-content: center;
     opacity: 0;
-    cursor: grab;
     color: #9ca3af;
     user-select: none;
     z-index: 3;
-    &::before {
-      content: '⋮⋮';
-      font-size: 12px;
-      letter-spacing: -3px;
-      line-height: 1;
+    .drag-btn {
+      width: 16px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      &::before {
+        content: '⋮⋮';
+        font-size: 12px;
+        letter-spacing: -3px;
+        line-height: 1;
+      }
+    }
+    .add-btn {
+      width: 18px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      margin-left: 4px;
+      &::before {
+        content: '+';
+        font-size: 14px;
+        line-height: 1;
+      }
+      &:hover {
+        color: #f6a22f;
+      }
     }
   }
   .flex-layout .drag-handle {

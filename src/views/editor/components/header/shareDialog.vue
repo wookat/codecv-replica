@@ -52,7 +52,8 @@ async function copyLink() {
 </script>
 
 <template>
-  <el-dialog v-model="visible" title="分享简历" width="440px" class="share-dialog">
+  <!-- 生产同款「简历分享」弹层：公开访问 / 被查看次数 / 分享链接 -->
+  <el-dialog v-model="visible" title="简历分享" width="360px" class="share-dialog">
     <div v-if="!logged" class="need-login">请先登录后再使用分享</div>
     <template v-else>
       <div class="row">
@@ -60,29 +61,18 @@ async function copyLink() {
         <el-switch
           v-model="isPublic"
           :loading="loading"
-          active-text="已公开"
-          inactive-text="未公开"
-          inline-prompt
           @change="(v: string | number | boolean) => toggle(!!v)"
         />
       </div>
-      <template v-if="isPublic">
-        <div class="row link-row">
-          <input
-            class="link"
-            :value="link"
-            readonly
-            @focus=";($event.target as HTMLInputElement).select()"
-          />
-          <button class="copy" @click="copyLink">复制链接</button>
-        </div>
-        <p class="hint">
-          该简历已被查看 <b>{{ viewNum }}</b> 次，任何获得链接的人都可以查看
-        </p>
-      </template>
-      <p v-else class="hint">
-        开启公开访问后，任何获得链接的人都可以查看该简历（实时同步最新内容）
-      </p>
+      <div class="row">
+        <span>被查看</span>
+        <span>{{ viewNum }} 次</span>
+      </div>
+      <div class="row link-row">
+        <span>分享链接</span>
+        <a class="link" :href="link" target="_blank" rel="noopener noreferrer">{{ link }}</a>
+        <i class="iconfont icon-copy copy-ic" title="复制链接" @click="copyLink"></i>
+      </div>
     </template>
   </el-dialog>
 </template>
@@ -101,34 +91,25 @@ async function copyLink() {
   font-size: 14px;
 }
 .link-row {
-  gap: 10px;
+  gap: 8px;
+  justify-content: flex-start;
   .link {
     flex: 1;
     min-width: 0;
-    border: 1px solid #e2e4e9;
-    border-radius: 6px;
-    padding: 7px 10px;
-    font-size: 13px;
-    color: #606266;
-    background: #f8f8f8;
-  }
-  .copy {
-    border: none;
-    background: var(--theme);
-    color: #fff;
-    border-radius: 6px;
-    padding: 7px 14px;
-    font-size: 13px;
-    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
-  }
-}
-.hint {
-  font-size: 12px;
-  color: #909399;
-  margin: 4px 0 0;
-  b {
+    font-size: 13px;
     color: var(--theme);
+    text-decoration: none;
+  }
+  .copy-ic {
+    font-size: 15px;
+    color: #909399;
+    cursor: pointer;
+    &:hover {
+      color: var(--theme);
+    }
   }
 }
 </style>

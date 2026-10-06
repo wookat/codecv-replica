@@ -49,9 +49,32 @@ export function useToggleEditorMode(resumeType: string) {
       const h = document.createElement('div')
       h.className = HANDLE
       h.contentEditable = 'false'
-      h.title = '拖拽移动/节点操作'
-      h.draggable = true
-      h.addEventListener('dragstart', ev => {
+      // 生产版手柄 = ⋮⋮ 拖拽钮 + ＋ 添加内容钮
+      const grip = document.createElement('div')
+      grip.className = 'drag-btn'
+      grip.title = '拖拽移动/节点操作'
+      grip.draggable = true
+      const add = document.createElement('div')
+      add.className = 'add-btn'
+      add.title = '添加内容'
+      add.addEventListener('click', ev => {
+        ev.stopPropagation()
+        const p = document.createElement('p')
+        p.innerHTML = '<br>'
+        el.parentElement?.insertBefore(p, el.nextSibling)
+        ObserverContent()
+        nextTick(() => {
+          const range = document.createRange()
+          range.selectNodeContents(p)
+          range.collapse(false)
+          const sel = window.getSelection()
+          sel?.removeAllRanges()
+          sel?.addRange(range)
+        })
+      })
+      h.appendChild(grip)
+      h.appendChild(add)
+      grip.addEventListener('dragstart', ev => {
         dragEl = el as HTMLElement
         ev.dataTransfer?.setData('text/plain', '')
         ev.dataTransfer?.setDragImage(el as HTMLElement, 0, 0)

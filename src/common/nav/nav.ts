@@ -25,8 +25,16 @@ const nav = [
     tooltip: false
   },
   {
+    name: '网申助手',
+    path: 'https://assist.codecvcv.com?utm_source=codecv_nav',
+    external: true,
+    hot: true,
+    tooltip: false
+  },
+  {
     name: '秋招岗位汇总',
     path: '/jobs',
+    hot: true,
     tooltip: false
   }
 ]

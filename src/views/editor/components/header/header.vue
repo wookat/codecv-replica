@@ -7,7 +7,7 @@ import ExportTotal from '@/components/exportTotal.vue'
 import useEditorStore from '@/store/modules/editor'
 import { useResumeType } from '../../hook'
 import { cloudPush, cloudSaveName, cloudIncExport } from '@/api/modules/cloudResume'
-import { successMessage, warningMessage } from '@/common/message'
+import { successMessage } from '@/common/message'
 import ProofreadDrawer from '../proofread/proofread.vue'
 import HistoryDrawer from './historyDrawer.vue'
 import ShareDialog from './shareDialog.vue'
@@ -45,11 +45,6 @@ function exportFile2(kind: 'dynamic' | 'native' | 'picture' | 'md') {
   if (kind !== 'md') cloudIncExport(resumeType.value)
   exportFile(kind)
 }
-function undo() {
-  const prev = editorStore.undo()
-  if (prev === null) return warningMessage('没有可撤销的内容')
-  editorStore.setMDContent(prev, resumeType.value)
-}
 // 生产同款「点击修改简历名称」：blur/回车即持久化到简历记录
 function saveName() {
   const name = fileName.value.trim()
@@ -83,9 +78,6 @@ function saveName() {
       <span class="watermark-pill" @click="$router.push('/member')">移除水印</span>
       <span v-if="dirty" class="dirty-hint">简历已变更请及时保存</span>
       <ExportTotal />
-      <el-tooltip content="撤销">
-        <i class="iconfont icon-undo font-20 hover undo" @click="undo"></i>
-      </el-tooltip>
       <el-tooltip content="历史记录" effect="light">
         <div class="resume-history lx-cp lx-scale" @click="historyVisible = true">
           <svg class="hist-icon" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
@@ -94,9 +86,6 @@ function saveName() {
             />
           </svg>
         </div>
-      </el-tooltip>
-      <el-tooltip content="分享" effect="light">
-        <i class="iconfont icon-share font-20 hover share-ic" @click="shareVisible = true"></i>
       </el-tooltip>
       <button class="save-btn btn" @click="save">保存</button>
       <el-dropdown class="export-dropdown" trigger="click">
@@ -113,6 +102,10 @@ function saveName() {
           </el-dropdown-menu>
         </template>
       </el-dropdown>
+      <!-- 生产同款右侧 ⋮ 分享入口 -->
+      <el-tooltip content="简历分享" effect="light">
+        <div class="share-dots lx-cp" @click="shareVisible = true"><i></i><i></i><i></i></div>
+      </el-tooltip>
     </div>
   </div>
   <Contact :open="open" @toggle="toggle" />
@@ -171,9 +164,28 @@ function saveName() {
     cursor: pointer;
     white-space: nowrap;
   }
-  .undo,
-  .share-ic {
+  /* 生产同款竖三点分享钮 */
+  .share-dots {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    width: 28px;
+    height: 36px;
+    margin-left: 6px;
     cursor: pointer;
+    border-radius: 6px;
+    &:hover {
+      background: var(--body-background);
+    }
+    i {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--font-color);
+      display: block;
+    }
   }
   .btn {
     outline: none;

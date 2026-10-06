@@ -18,7 +18,8 @@ export function reactiveWritable(resumeType: string) {
 
 // 左右移动伸缩布局
 export function useMoveLayout() {
-  const left = ref(550)
+  // 生产版左栏默认宽 500px（1440 视口下实测），可拖动伸缩
+  const left = ref(500)
   let flag = false
 
   function move(event: MouseEvent) {
