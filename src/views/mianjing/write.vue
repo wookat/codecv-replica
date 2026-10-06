@@ -496,8 +496,9 @@ async function submit() {
   border: 1px solid rgba(0, 0, 0, 0.07);
   background: var(--background);
   cursor: pointer;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  column-gap: 12px;
   transition: box-shadow 0.15s ease, border-color 0.15s ease;
   font-family: inherit;
   &:hover {
@@ -513,23 +514,27 @@ async function submit() {
     justify-content: center;
     background: rgba(255, 87, 34, 0.1);
     color: var(--theme);
+    grid-row: 1;
     svg {
       width: 20px;
       height: 20px;
     }
   }
   .mw-tpl-title {
-    margin-top: 10px;
-    font-size: 14.5px;
+    grid-row: 1;
+    align-self: center;
+    font-size: 15px;
     font-weight: 600;
   }
   .mw-tpl-desc {
-    margin-top: 4px;
+    grid-column: 1 / -1;
+    margin-top: 10px;
     font-size: 12.5px;
     color: rgba(0, 0, 0, 0.45);
   }
   .mw-tpl-secs {
-    margin-top: 10px;
+    grid-column: 1 / -1;
+    margin-top: 14px;
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
