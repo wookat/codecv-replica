@@ -35,14 +35,12 @@ export function useToggleEditorMode(resumeType: string) {
     const root = DOMTree.value
     if (!root) return
     root.querySelectorAll('.' + HANDLE).forEach(e => e.remove())
-    const targets: Element[] = []
-    for (const el of Array.from(root.children)) if (isBlock(el)) targets.push(el)
-    for (const mod of Array.from(
-      root.querySelectorAll('.resume-module, .head-layout, .main-layout')
-    ))
-      for (const el of Array.from(mod.children)) if (isBlock(el)) targets.push(el)
-    for (const fl of Array.from(root.querySelectorAll('.flex-layout')))
-      for (const el of Array.from(fl.children)) if (isBlock(el)) targets.push(el)
+    // 生产同款：所有块级节点（模块/行/卡片内标题段落列表等）都挂 ⋮⋮ 手柄
+    const targets = Array.from(
+      root.querySelectorAll(
+        'h1,h2,h3,h4,h5,h6,p,ul,ol,blockquote,pre,table,.resume-module,.head-layout,.main-layout,.flex-layout,.flex-layout-item'
+      )
+    ).filter(el => isBlock(el) && !el.closest('td,th') && !el.closest('.' + HANDLE))
     for (const el of targets) {
       if (el.querySelector(':scope > .' + HANDLE)) continue
       el.classList.add('draggable-block')
