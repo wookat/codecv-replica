@@ -66,6 +66,22 @@ export async function onRequest(context) {
   const auth = await currentUserRow(env, request, q)
   if (!auth) return json(request, { code: 401, msg: '请先登录' })
 
+  // GET /api/engagement/favs — 我的收藏列表（面经）
+  if (route === 'favs') {
+    const { results } = await db
+      .prepare(
+        `SELECT r.target_id AS id, r.created_at AS fav_time,
+                s.title, s.company_name, s.round, s.batch, s.grade, s.result
+         FROM reactions r LEFT JOIN mianjing_submissions s
+           ON s.id = CAST(r.target_id AS INTEGER)
+         WHERE r.user_id = ? AND r.kind = 'fav' AND r.target_type = 'mianjing'
+         ORDER BY r.created_at DESC LIMIT 200`
+      )
+      .bind(auth.row.id)
+      .all()
+    return json(request, { code: 200, data: { list: results, total: results.length } })
+  }
+
   if (route === 'reaction') {
     const { targetType = 'mianjing', targetId, kind } = q
     if (!['like', 'fav'].includes(kind)) return json(request, { code: 400, msg: '未知互动类型' })

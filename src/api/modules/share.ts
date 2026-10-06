@@ -30,6 +30,7 @@ export const shareView = (type: string) => get(`/api/share/view?type=${encodeURI
 export const submitMianjing = (f: object) => post('/api/mianjing/submit', f)
 export const myMianjing = () => get('/api/mianjing/mine')
 export const delMianjing = (id: number | string) => post('/api/mianjing/del-mine', { id })
+export const myFavMianjing = () => get('/api/engagement/favs')
 
 export const listComments = (doc: string) => get(`/api/comment/list?doc=${encodeURIComponent(doc)}`)
 export const createComment = (doc: string, content: string) =>

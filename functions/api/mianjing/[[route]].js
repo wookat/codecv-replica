@@ -49,8 +49,32 @@ export async function onRequest(context) {
   }
 
   if (route === 'detail') {
+    const id = q.id || q._id || ''
+    // srv-{id}：用户投稿详情（approved 公开，pending 仅本人可见）
+    if (String(id).startsWith('srv-') && env.DB) {
+      const row = await env.DB.prepare(
+        `SELECT s.id AS _id, s.title, s.company_name AS companyName, s.company_slug AS companySlug,
+                s.position_slug AS positionSlug, s.grade, s.batch, s.round, s.result,
+                s.school, s.major, s.anonymous, s.content_md AS contentMd, s.status,
+                s.created_at AS create_time, s.user_id,
+                u.nickname AS authorName
+         FROM mianjing_submissions s LEFT JOIN users u ON u.id = s.user_id
+         WHERE s.id = ?`
+      )
+        .bind(+String(id).slice(4))
+        .first()
+      if (!row) return json(request, { code: 404, data: null, message: '面经不存在' })
+      if (row.status !== 'approved') {
+        const auth = await currentUserRow(env, request, q)
+        if (!auth || auth.row.id !== row.user_id)
+          return json(request, { code: 404, data: null, message: '面经审核中' })
+      }
+      if (row.anonymous) row.authorName = '匿名用户'
+      delete row.user_id
+      return json(request, { code: 200, data: row, message: '查询成功' })
+    }
     const details = await loadSeed(env, request, 'mianjing-detail.json', {})
-    const hit = details[q.id || q._id]
+    const hit = details[id]
     return json(
       request,
       hit
