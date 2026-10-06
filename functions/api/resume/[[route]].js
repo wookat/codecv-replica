@@ -144,11 +144,28 @@ export async function onRequest(context) {
 
   // 导出计数：对照生产 /api/export/incCount 的简历维度
   if (route === 'incExport' && request.method === 'POST') {
+    await db.batch([
+      db
+        .prepare(
+          'UPDATE resumes SET export_count = export_count + 1 WHERE user_id = ? AND resume_type = ?'
+        )
+        .bind(uid, q.type),
+      db
+        .prepare(
+          'INSERT INTO export_events (user_id, resume_type, kind, created_at) VALUES (?,?,?,?)'
+        )
+        .bind(uid, String(q.type || ''), String(q.kind || 'pdf'), Date.now())
+    ])
+    return json(request, { code: 200, message: 'ok' })
+  }
+
+  // 校对事件埋点：错别字抽屉触发时记录
+  if (route === 'proofreadEvent' && request.method === 'POST') {
     await db
       .prepare(
-        'UPDATE resumes SET export_count = export_count + 1 WHERE user_id = ? AND resume_type = ?'
+        'INSERT INTO proofread_events (user_id, resume_type, created_at, meta) VALUES (?,?,?,?)'
       )
-      .bind(uid, q.type)
+      .bind(uid, String(q.type || ''), Date.now(), String(q.meta || ''))
       .run()
     return json(request, { code: 200, message: 'ok' })
   }

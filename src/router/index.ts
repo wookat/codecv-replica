@@ -27,6 +27,100 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/mianjing/write.vue')
   },
   {
+    // 后台管理：独立外壳（侧边栏布局，非站点导航）
+    path: '/admin',
+    component: () => import('@/views/admin/AdminLayout.vue'),
+    redirect: '/admin/workbench',
+    children: [
+      {
+        path: 'workbench',
+        name: 'admin-workbench',
+        component: () => import('@/views/admin/workbench.vue')
+      },
+      {
+        path: 'statistics',
+        name: 'admin-statistics',
+        component: () => import('@/views/admin/statistics.vue')
+      },
+      { path: 'user', name: 'admin-user', component: () => import('@/views/admin/user.vue') },
+      { path: 'resume', name: 'admin-resume', component: () => import('@/views/admin/resume.vue') },
+      {
+        path: 'resume/:id',
+        name: 'admin-resume-edit',
+        component: () => import('@/views/admin/resumeEdit.vue')
+      },
+      {
+        path: 'template',
+        name: 'admin-template',
+        component: () => import('@/views/admin/template.vue')
+      },
+      {
+        path: 'history',
+        name: 'admin-history',
+        component: () => import('@/views/admin/history.vue')
+      },
+      { path: 'post', name: 'admin-post', component: () => import('@/views/admin/post.vue') },
+      {
+        path: 'post/add',
+        name: 'admin-post-add',
+        component: () => import('@/views/admin/postEdit.vue')
+      },
+      {
+        path: 'post/edit/:id',
+        name: 'admin-post-edit',
+        component: () => import('@/views/admin/postEdit.vue')
+      },
+      {
+        path: 'mianjing',
+        name: 'admin-mianjing',
+        component: () => import('@/views/admin/mianjing.vue')
+      },
+      {
+        path: 'mianjing/comments',
+        name: 'admin-mianjing-comments',
+        component: () => import('@/views/admin/mianjingComments.vue')
+      },
+      {
+        path: 'mianjing/activity',
+        name: 'admin-mianjing-activity',
+        component: () => import('@/views/admin/mianjingActivity.vue')
+      },
+      { path: 'topic', name: 'admin-topic', component: () => import('@/views/admin/topic.vue') },
+      { path: 'order', name: 'admin-order', component: () => import('@/views/admin/order.vue') },
+      {
+        path: 'vipCode',
+        name: 'admin-vipcode',
+        component: () => import('@/views/admin/vipCode.vue')
+      },
+      { path: 'invite', name: 'admin-invite', component: () => import('@/views/admin/invite.vue') },
+      {
+        path: 'progress',
+        name: 'admin-progress',
+        component: () => import('@/views/admin/progress.vue')
+      },
+      {
+        path: 'advertiseSpace',
+        name: 'admin-adspace',
+        component: () => import('@/views/admin/advertiseSpace.vue')
+      },
+      {
+        path: 'advertise',
+        name: 'admin-advertise',
+        component: () => import('@/views/admin/advertise.vue')
+      },
+      {
+        path: 'exportStats',
+        name: 'admin-export-stats',
+        component: () => import('@/views/admin/exportStats.vue')
+      },
+      {
+        path: 'proofreadStats',
+        name: 'admin-proofread-stats',
+        component: () => import('@/views/admin/proofreadStats.vue')
+      }
+    ]
+  },
+  {
     path: '/',
     component: Layout,
     children: [

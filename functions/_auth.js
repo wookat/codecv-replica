@@ -74,5 +74,6 @@ export const publicUser = row => ({
   school: row.school,
   avatar: row.avatar,
   origin: row.origin,
-  vipExpire: row.vip_expire ?? 0
+  vipExpire: row.vip_expire ?? 0,
+  isAdmin: !!row.is_admin
 })

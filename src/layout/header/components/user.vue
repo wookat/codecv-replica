@@ -70,17 +70,22 @@ const quickLinks = [
   { title: '我的邀请', act: () => router.push('/user/invite') }
 ]
 
-// 与生产一致的用户菜单项
-const menuItems = [
-  { title: '个人资料', act: () => (settings.value = true) },
-  { title: '我的简历', act: () => router.push('/profile') },
-  { title: '我的投递', act: () => router.push('/progress') },
-  { title: '我的面经', act: () => router.push('/mianjing/mine') },
-  { title: '我的订单', act: () => router.push('/order') },
-  { title: '会员中心', act: () => router.push('/member') },
-  { title: '我的邀请', act: () => router.push('/user/invite') },
-  { title: '兑换码', act: () => (redeemOpen.value = true) }
-]
+// 与生产一致的用户菜单项（管理员追加后台入口）
+const menuItems = computed(() => {
+  const items = [
+    { title: '个人资料', act: () => (settings.value = true) },
+    { title: '我的简历', act: () => router.push('/profile') },
+    { title: '我的投递', act: () => router.push('/progress') },
+    { title: '我的面经', act: () => router.push('/mianjing/mine') },
+    { title: '我的订单', act: () => router.push('/order') },
+    { title: '会员中心', act: () => router.push('/member') },
+    { title: '我的邀请', act: () => router.push('/user/invite') },
+    { title: '兑换码', act: () => (redeemOpen.value = true) }
+  ]
+  if ((store.userInfo as any).isAdmin)
+    items.push({ title: '后台管理', act: () => router.push('/admin') })
+  return items
+})
 
 const nickName = computed(() => store.userInfo.nickName || user.value?.name || '')
 const avatarLetter = computed(() => (nickName.value || 'U').slice(0, 1).toUpperCase())

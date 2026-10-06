@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { templates } from '@/templates/config'
 import { TEMPLATE_CATEGORIES } from '@/common/categories'
@@ -107,8 +107,19 @@ const tplTags = (t: any): string[] => (Array.isArray(t.tags) ? t.tags : [])
 const sort = ref<'综合排序' | '最新上传' | '最多下载'>('综合排序')
 const SORTS = ['综合排序', '最新上传', '最多下载'] as const
 
+// 后台下架的模板（admin/template/delete 生效后前台隐藏）
+const hiddenTypes = ref<Set<string>>(new Set())
+onMounted(() => {
+  fetch('/api/template/hidden')
+    .then(r => r.json())
+    .then(res => {
+      if (res?.code === 200) hiddenTypes.value = new Set(res.data)
+    })
+    .catch(() => undefined)
+})
+
 const shown = computed(() => {
-  let rows = templates.value
+  let rows = templates.value.filter(t => !hiddenTypes.value.has(t.type))
   const t = tag.value
   if (t && t !== '全部') {
     rows = rows.filter(

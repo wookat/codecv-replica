@@ -38,6 +38,48 @@ export async function onRequest(context) {
         return false
       return true
     })
+    // 审核通过的投稿并入面经大全（形状与种子条目一致）
+    if (env.DB) {
+      try {
+        const { results: subs } = await env.DB.prepare(
+          `SELECT s.id, s.title, s.company_name, s.company_slug, s.position_slug, s.grade,
+                  s.batch, s.round, s.result, s.content_md, s.created_at, s.anonymous,
+                  u.nickname AS authorName
+           FROM mianjing_submissions s LEFT JOIN users u ON u.id = s.user_id
+           WHERE s.status = 'approved' ORDER BY s.created_at DESC LIMIT 200`
+        ).all()
+        for (const s of subs) {
+          if (
+            (company && s.company_slug !== company && s.company_name !== company) ||
+            (position && s.position_slug !== position) ||
+            (grade && String(s.grade) !== String(grade)) ||
+            (batch && s.batch !== batch && s.batch !== (BATCH_MAP[batch] ?? batch)) ||
+            (round && s.round !== round) ||
+            (keyword && !sub(s.title, keyword) && !sub(s.company_name, keyword))
+          )
+            continue
+          filtered.push({
+            _id: `srv-${s.id}`,
+            title: s.title,
+            companyName: s.company_name,
+            companySlug: s.company_slug,
+            positionSlug: s.position_slug,
+            grade: s.grade,
+            batch: s.batch,
+            round: s.round,
+            result: s.result,
+            author: s.anonymous ? '匿名用户' : s.authorName || 'CodeCV用户',
+            summary: String(s.content_md || '').slice(0, 80),
+            publishTime: s.created_at,
+            viewCount: 0,
+            likeCount: 0,
+            commentCount: 0
+          })
+        }
+      } catch {
+        /* D1 不可用时仅出种子 */
+      }
+    }
     filtered.sort((a, b) => (b.publishTime || 0) - (a.publishTime || 0))
     const start = (cur - 1) * pageSize
     return json(request, {

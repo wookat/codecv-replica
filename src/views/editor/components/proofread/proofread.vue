@@ -7,6 +7,7 @@ import { successMessage } from '@/common/message'
 import { useRoute, useRouter } from 'vue-router'
 import { getLocalStorage, setLocalStorage } from '@/common/localstorage'
 import { fetchUserInfo } from '@/api/modules/cloudResume'
+import { trackProofread } from '@/api/modules/share'
 
 const props = defineProps<{ modelValue: boolean }>()
 const emit = defineEmits(['update:modelValue'])
@@ -47,6 +48,7 @@ watch(
     if (v) {
       loadIgnored()
       rescan()
+      trackProofread(typeKey.value, issues.value.length)
       const info = await fetchUserInfo()
       member.value = info ? (info.member_expires || 0) > Date.now() : false
     }

@@ -35,3 +35,7 @@ export const myFavMianjing = () => get('/api/engagement/favs')
 export const listComments = (doc: string) => get(`/api/comment/list?doc=${encodeURIComponent(doc)}`)
 export const createComment = (doc: string, content: string) =>
   post('/api/comment/create', { doc, content })
+
+// 校对埋点：错别字抽屉打开时上报（admin proofread/stats）
+export const trackProofread = (type: string, count: number) =>
+  post('/api/resume/proofreadEvent', { type, meta: String(count) }).catch(() => undefined)
