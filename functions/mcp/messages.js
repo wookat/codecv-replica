@@ -29,9 +29,9 @@ export async function onRequest(context) {
     outs.push(r)
     if (session) {
       session.enqueue(r) // 快路径：POST 与 SSE 同 isolate，直接推流
-    } else {
-      // 跨 isolate：写 KV 队列，SSE 端轮询 list+get+delete 派发到流上
-      await env.UPSTASH_KV.put(`mcpr:${sid}:${crypto.randomUUID()}`, JSON.stringify(r), {
+    } else if (r.id != null) {
+      // 跨 isolate：以 RPC id 作键尾写 KV 队列，SSE 端窗口探测 get+delete 派发到流上
+      await env.UPSTASH_KV.put(`mcpr:${sid}:${r.id}`, JSON.stringify(r), {
         expirationTtl: 120
       })
     }

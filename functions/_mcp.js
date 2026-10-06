@@ -289,20 +289,32 @@ export function openSseStream(request, env) {
           /* noop */
         }
       }, 20000)
+      // POST 侧以 JSON-RPC id 作键尾写 mcpr:<sid>:<id> —— 键名可预测，get 新键=缓存未命中=强读；
+      // list 传播有延迟，只作低频兜底捞非常规 id
+      let nextId = 0
+      let tick = 0
       poll = setInterval(async () => {
         try {
-          const l = await env.UPSTASH_KV.list({ prefix: `mcpr:${sessionId}:` })
-          for (const k of l.keys) {
-            if (emitted.has(k.name)) continue
-            const v = await env.UPSTASH_KV.get(k.name)
+          tick++
+          const names = []
+          for (let i = nextId; i < nextId + 8; i++) names.push(`mcpr:${sessionId}:${i}`)
+          if (tick % 8 === 0) {
+            const l = await env.UPSTASH_KV.list({ prefix: `mcpr:${sessionId}:` })
+            for (const k of l.keys) if (!emitted.has(k.name)) names.push(k.name)
+          }
+          for (const name of names) {
+            if (emitted.has(name)) continue
+            const v = await env.UPSTASH_KV.get(name)
             if (v == null) continue
-            emitted.add(k.name)
+            emitted.add(name)
             try {
               controller.enqueue(enc.encode(`event: message\ndata: ${v}\n\n`))
             } catch {
               /* 流已关 */
             }
-            await env.UPSTASH_KV.delete(k.name)
+            const m = name.match(/:(\d+)$/)
+            if (m) nextId = Math.max(nextId, +m[1] + 1)
+            await env.UPSTASH_KV.delete(name)
           }
         } catch {
           /* KV 抖动时下一拍重试 */
