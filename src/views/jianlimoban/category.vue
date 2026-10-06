@@ -159,6 +159,15 @@ const sumTitle = computed(() => {
   return n.includes('简历模板') ? `${n}汇总` : `${n}简历模板汇总`
 })
 
+// 生产 SEO title：{去掉简历模板后缀的短名}简历模板_{短名}个人简历免费下载 - CodeCV简历
+watchEffect(() => {
+  if (route.name !== 'template-category') return
+  const n = cat.value?.name ?? ''
+  if (!n) return
+  const short = n.replace(/简历模板$/, '')
+  document.title = `${short}简历模板_${short}个人简历免费下载 - CodeCV简历`
+})
+
 const hotRank = computed(() =>
   [...templates.value].sort((a, b) => +(b.hot || 0) - +(a.hot || 0)).slice(0, 15)
 )
