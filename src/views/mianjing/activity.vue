@@ -9,16 +9,75 @@ const loading = ref(false)
 const user = ref(currentUser())
 const myHeat = ref(0)
 const myCount = ref(0)
-
-const PRIZES = [
+const myRank = ref('未上榜')
+const seasonName = ref('面经创作大赛 - 第一期')
+const seasonRange = ref('09-18 00:00 — 10-01 00:00')
+const seasonStatus = ref('已结算')
+const heroRight = ref({ t: '本期已结算，奖励已发放', s: '下一期敬请期待' })
+const joinCount = ref(0)
+const PRIZES = ref<{ range: string; prize: string; desc: string; crown?: boolean }[]>([
   { range: '热度榜第 1-3 名', prize: '终身会员', desc: '终身有效，一次冲榜永久受益', crown: true },
   { range: '热度榜第 4-8 名', prize: '年度会员', desc: '会员时长自动顺延，不覆盖已有会员' },
   { range: '热度榜第 9-14 名', prize: '季度会员', desc: '会员时长自动顺延，不覆盖已有会员' },
   { range: '热度榜第 15-24 名', prize: '月度会员', desc: '会员时长自动顺延，不覆盖已有会员' }
-]
+])
+
+const fmtD = (ts: number) => {
+  const d = new Date(ts)
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`
+}
 
 onMounted(async () => {
   loading.value = true
+  try {
+    const res = await fetch('/api/mianjing/activity').then(r => r.json())
+    const act = res?.data?.activity
+    if (act) {
+      const s = act.season || {}
+      if (s.name) seasonName.value = s.name
+      if (s.startTime && s.endTime) seasonRange.value = `${fmtD(s.startTime)} — ${fmtD(s.endTime)}`
+      if (act.phase === 'live') {
+        seasonStatus.value = '进行中'
+        heroRight.value = { t: '活动火热进行中', s: '现在冲榜还不晚' }
+      } else if (act.phase === 'upcoming') {
+        seasonStatus.value = '未开始'
+        heroRight.value = { t: '新赛季即将开始', s: '敬请期待' }
+      }
+      if (act.rules?.tiers?.length) {
+        PRIZES.value = act.rules.tiers.map((t: any, i: number) => ({
+          range: `热度榜第 ${t.from}-${t.to} 名`,
+          prize: t.label,
+          desc:
+            t.role === 'fvip' ? '终身有效，一次冲榜永久受益' : '会员时长自动顺延，不覆盖已有会员',
+          crown: i === 0
+        }))
+      }
+      joinCount.value = act.counts?.participants || 0
+      list.value = (act.board || []).map((b: any) => ({
+        _id: b._id || `srv-${b.id}`,
+        title: b.title,
+        companyName: b.companyName,
+        companySlug: b.companySlug || '',
+        companyLogo: b.companyLogo || '',
+        viewCount: b.heat ?? b.viewCount ?? 0,
+        author: b.author
+      })) as any
+      if (user.value) {
+        const me = user.value.name
+        const mine = (act.board || []).filter((b: any) => b.author === me)
+        myCount.value = mine.length
+        myHeat.value = mine.reduce((s: number, m: any) => s + (m.heat || 0), 0)
+        const idx = (act.board || []).findIndex((b: any) => b.author === me)
+        if (idx >= 0) myRank.value = `第 ${idx + 1} 名`
+      }
+      loading.value = false
+      return
+    }
+  } catch (e) {
+    console.error(e)
+  }
+  // 端点不可用回退：种子话题过滤
   try {
     const [ts, res] = await Promise.all([
       mianjingMeta('topics'),
@@ -31,7 +90,7 @@ onMounted(async () => {
       null
     const slug = topic?.slug
     list.value = (res?.data ?? []).filter(m => m.topicSlug === slug || !slug)
-    // 我的活动：统计本人参赛作品与热度（生产同款三张统计卡）
+    joinCount.value = list.value.length
     if (user.value) {
       const mine = list.value.filter(
         m => (m as any).userName === user.value?.name || (m as any).author === user.value?.name
@@ -39,8 +98,6 @@ onMounted(async () => {
       myCount.value = mine.length
       myHeat.value = mine.reduce((s, m) => s + (m.viewCount ?? 0), 0)
     }
-  } catch (e) {
-    console.error(e)
   } finally {
     loading.value = false
   }
@@ -68,11 +125,11 @@ onMounted(async () => {
               <path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z" />
               <path d="M6 9H4.5a1 1 0 0 1 0-5H6" />
             </svg>
-            已结算
+            {{ seasonStatus }}
           </span>
-          <span class="date">09-18 00:00 — 10-01 00:00</span>
+          <span class="date">{{ seasonRange }}</span>
         </div>
-        <h1>面经创作大赛 - 第一期</h1>
+        <h1>{{ seasonName }}</h1>
         <p class="desc">
           投稿时携带话题 <b>#面经创作大赛</b> 即参赛：<b>热度冲榜</b>，赢终身 / 年度 / 季度 /
           月度会员。每期都是新起点，现在上车不算晚。
@@ -91,7 +148,7 @@ onMounted(async () => {
             <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
             <path d="M16 3.13a4 4 0 0 1 0 7.75" />
           </svg>
-          {{ list.length }} 人参赛
+          {{ joinCount || list.length }} 人参赛
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -107,7 +164,7 @@ onMounted(async () => {
             <path d="M16 17H8" />
             <path d="M10 9H8" />
           </svg>
-          {{ list.length }} 篇参赛作品
+          {{ list.length }} 篇上榜作品
         </p>
         <div class="hero-actions">
           <router-link to="/mianjing/write" class="mj-btn">
@@ -144,8 +201,8 @@ onMounted(async () => {
           <path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z" />
           <path d="M6 9H4.5a1 1 0 0 1 0-5H6" />
         </svg>
-        <p class="hr-t">本期已结算，奖励已发放</p>
-        <p class="hr-s">下一期敬请期待</p>
+        <p class="hr-t">{{ heroRight.t }}</p>
+        <p class="hr-s">{{ heroRight.s }}</p>
       </div>
     </header>
 
@@ -203,7 +260,7 @@ onMounted(async () => {
       </h2>
       <div class="my-stats">
         <div class="cell">
-          <b>未上榜</b>
+          <b>{{ myRank }}</b>
           <span>当前最佳名次</span>
         </div>
         <div class="cell">

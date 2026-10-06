@@ -125,6 +125,98 @@ export async function onRequest(context) {
     )
   }
 
+  // ---------- 创作大赛（生产同款聚合：赛季+话题+规则+榜单） ----------
+  if (route === 'activity') {
+    const meta = await loadSeed(env, request, 'mianjing-meta.json', {})
+    const topic =
+      (meta.topics || []).find(t => t.slug === 'topic-2d075e13') ||
+      (meta.topics || []).find(t => (t.name || '').includes('大赛')) ||
+      (meta.topics || [])[0] ||
+      null
+    let season = null
+    const seasons = env.DB
+      ? (await env.DB.prepare('SELECT * FROM admin_seasons ORDER BY id DESC LIMIT 1').all()).results
+      : []
+    if (seasons?.length) {
+      const s = seasons[0]
+      season = {
+        _id: String(s.id),
+        name: s.name,
+        startTime: s.start_at,
+        endTime: s.end_at,
+        status: s.status,
+        settleTime: s.status === 'settled' ? s.end_at : null,
+        results: s.results ? JSON.parse(s.results) : null
+      }
+    } else {
+      // 种子默认赛季（对齐 prod 第一期时间窗）
+      season = {
+        _id: 'ee44a9f241334e2ebc91e87655852ad7',
+        name: '面经创作大赛 - 第一期',
+        startTime: 1789660800000,
+        endTime: 1790784000000,
+        status: 'settled',
+        settleTime: 1790582105940,
+        results: null
+      }
+    }
+    const now = Date.now()
+    const phase =
+      season.status === 'settled' ? 'ended' : now < season.startTime ? 'upcoming' : 'live'
+    // 榜单：参赛话题下按热度（浏览+赞+评+藏）排序的投稿
+    let board = season.results
+    if (!board) {
+      const subs = env.DB
+        ? (
+            await env.DB.prepare(
+              `SELECT s.id, s.title, s.company_name AS companyName, s.position_slug AS positionSlug,
+                      u.nickname, u.username, s.anonymous,
+                      COALESCE((SELECT COUNT(*) FROM reactions r WHERE r.doc_id = 'srv-' || s.id),0) AS reacts,
+                      COALESCE((SELECT COUNT(*) FROM comments c WHERE c.doc_id = 'srv-' || s.id),0) AS comments
+               FROM mianjing_submissions s LEFT JOIN users u ON u.id = s.user_id
+               WHERE s.status = 'approved'`
+            ).all()
+          ).results
+        : []
+      board = (subs || [])
+        .map(s => ({
+          ...s,
+          author: s.anonymous ? '匿名用户' : s.nickname || s.username,
+          heat: (s.reacts || 0) * 3 + (s.comments || 0) * 2
+        }))
+        .sort((a, b) => b.heat - a.heat)
+        .slice(0, 30)
+    }
+    const participants = env.DB
+      ? (
+          await env.DB.prepare(
+            "SELECT COUNT(DISTINCT user_id) n FROM mianjing_submissions WHERE status != 'rejected'"
+          ).first()
+        )?.n || 0
+      : 0
+    return json(request, {
+      code: 200,
+      data: {
+        activity: {
+          season: { ...season, results: undefined },
+          topic,
+          phase,
+          rules: {
+            tiers: [
+              { from: 1, to: 3, role: 'fvip', label: '终身会员' },
+              { from: 4, to: 8, role: 'yvip', label: '年度会员' },
+              { from: 9, to: 14, role: 'pvip', label: '季度会员' },
+              { from: 15, to: 24, role: 'vip', label: '月度会员' }
+            ]
+          },
+          counts: { eligible: board.length, participants },
+          board
+        }
+      },
+      message: '获取成功'
+    })
+  }
+
   const META = ['companies', 'positions', 'topics', 'stats', 'company-facets', 'topic-facets']
   if (META.includes(route)) {
     const meta = await loadSeed(env, request, 'mianjing-meta.json', {})

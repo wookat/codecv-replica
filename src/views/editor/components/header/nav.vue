@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import nav from '@/common/nav/nav'
 
-defineEmits(['export-md', 'import-md', 'export-picture', 'print-page'])
+defineEmits(['export-md', 'import-md', 'export-picture', 'print-page', 'ai-helper'])
 </script>
 
 <template>
@@ -38,7 +38,14 @@ defineEmits(['export-md', 'import-md', 'export-picture', 'print-page'])
       </template>
       <!-- 不是级联菜单走这里 -->
       <template v-else>
-        <a v-if="navItem.external" :href="navItem.path" target="_blank" rel="noopener noreferrer"
+        <span v-if="navItem.act === 'ai'" class="ai-link" @click="$emit('ai-helper')">
+          {{ navItem.name }}<i class="hot-tag">🔥</i>
+        </span>
+        <a
+          v-else-if="navItem.external"
+          :href="navItem.path"
+          target="_blank"
+          rel="noopener noreferrer"
           >{{ navItem.name }}<i v-if="navItem.hot" class="hot-tag">🔥</i></a
         >
         <router-link v-else :to="navItem.path || ''"
@@ -85,5 +92,9 @@ label[for='import_md'] {
   font-size: 10px;
   margin-left: 1px;
   vertical-align: super;
+}
+.ai-link {
+  cursor: pointer;
+  color: var(--theme);
 }
 </style>

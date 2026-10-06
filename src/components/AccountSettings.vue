@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import useUserStore from '@/store/modules/user'
 import { updateUserInfo } from '@/api/modules/user'
+import { getLocalStorage } from '@/common/localstorage'
 import PWDUpdate from '@/components/pwd-update/PWDUpdate.vue'
 
 const props = defineProps<{ modelValue: boolean }>()
@@ -11,8 +12,17 @@ const emit = defineEmits(['update:modelValue'])
 const store = useUserStore()
 const active = ref('profile')
 const saving = ref(false)
+const schools = ref<string[]>([])
 
 const sexOptions = ['', '男', '女']
+
+// 生产同款学校 datalist（/api/schools 需登录）
+fetch('/api/schools', {
+  headers: { Authorization: `Bearer ${(getLocalStorage('TOKEN') as string) || ''}` }
+})
+  .then(r => r.json())
+  .then(d => (schools.value = d?.data || []))
+  .catch(() => undefined)
 
 async function saveProfile() {
   saving.value = true
@@ -60,7 +70,15 @@ void props
           </label>
           <label class="f">
             <span>学校</span>
-            <input v-model="store.userInfo.school" class="ti" placeholder="例如：上海交通大学" />
+            <input
+              v-model="store.userInfo.school"
+              class="ti"
+              list="codecv-schools"
+              placeholder="例如：上海交通大学"
+            />
+            <datalist id="codecv-schools">
+              <option v-for="s in schools" :key="s" :value="s" />
+            </datalist>
           </label>
           <button class="save-btn" :disabled="saving" @click="saveProfile">
             {{ saving ? '保存中…' : '保存资料' }}

@@ -372,3 +372,17 @@ a.ripple-effect {
   white-space: nowrap;
   border-width: 0;
 }
+
+/* PDF(备用) 打印层：屏幕下隐藏，打印时独占（生产同款 .codecv-print-only 技术） */
+.codecv-print-only {
+  display: none;
+}
+@media print {
+  body > *:not(.codecv-print-only) {
+    display: none !important;
+  }
+  .codecv-print-only {
+    display: block !important;
+    position: static !important;
+  }
+}

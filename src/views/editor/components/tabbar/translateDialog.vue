@@ -1,11 +1,13 @@
 <script setup lang="ts">
 // 生产同款「简历语言翻译」弹层：选语言 → 开始翻译 → 二次确认后应用
-import { ref, watch } from 'vue'
+import { nextTick, ref, watch } from 'vue'
 import useEditorStore from '@/store/modules/editor'
 import { errorMessage, successMessage, warningMessage } from '@/common/message'
 import { cloudSave } from '@/api/modules/cloudResume'
-import { setLocalStorage } from '@/common/localstorage'
+import { getLocalStorage, setLocalStorage } from '@/common/localstorage'
 import { useRouter } from 'vue-router'
+import { convertDOM, allOverlaysHTML } from '@/utils/moduleCombine'
+import { importCSS } from '@/utils'
 
 const props = defineProps<{ modelValue: boolean; resumeType: string }>()
 const emit = defineEmits(['update:modelValue'])
@@ -26,9 +28,7 @@ watch(
     translated.value = ''
     if (v) {
       try {
-        const token = localStorage.getItem('token')
-        const raw = token ? JSON.parse(token) : null
-        const tk = raw?.value || raw
+        const tk = token()
         const res = await fetch('/api/translate', {
           headers: { Authorization: `Bearer ${tk}` }
         })
@@ -44,14 +44,7 @@ watch(
 watch(visible, v => emit('update:modelValue', v))
 
 function token() {
-  const raw = localStorage.getItem('token')
-  if (!raw) return null
-  try {
-    const p = JSON.parse(raw)
-    return p.value || p
-  } catch {
-    return raw
-  }
+  return (getLocalStorage('TOKEN') as string) || null
 }
 
 async function start() {
@@ -69,6 +62,7 @@ async function start() {
     if (data.code !== 200) return warningMessage(data.msg || '翻译失败')
     translated.value = data.data.content
     remaining.value = data.data.remaining
+    renderPreview()
   } catch (e) {
     errorMessage('翻译服务暂不可用')
     console.error(e)
@@ -104,6 +98,20 @@ async function saveAsNew() {
   visible.value = false
   router.push(`/editor?type=${newType}`).then(() => location.reload())
 }
+
+// 生产同款「翻译结果预览」：渲染翻译后的简历效果（非 raw 文本）
+const previewEl = ref<HTMLElement>()
+async function renderPreview() {
+  await nextTick()
+  if (!previewEl.value || !translated.value) return
+  const base = props.resumeType.split('~')[0]
+  try {
+    await importCSS(base)
+  } catch {
+    /* 皮肤加载失败仍预览内容 */
+  }
+  previewEl.value.innerHTML = convertDOM(translated.value).innerHTML + allOverlaysHTML(base)
+}
 </script>
 
 <template>
@@ -132,12 +140,16 @@ async function saveAsNew() {
 
       <div v-else class="tl-dialog tl-preview">
         <span class="tl-close" @click="visible = false">✕</span>
-        <h3 class="tl-title">翻译预览（确认后替换）</h3>
-        <pre class="tl-content">{{ translated }}</pre>
+        <h3 class="tl-title">翻译结果预览</h3>
+        <p class="tl-sub">翻译后的简历效果</p>
+        <div class="tl-render">
+          <div ref="previewEl" class="markdown-transform-html jufe"></div>
+        </div>
+        <p class="tl-note ok">翻译完成，请确认预览效果</p>
         <div class="tl-actions">
-          <button class="btn primary tl-btn" @click="apply">应用翻译</button>
-          <button class="btn primary tl-btn save-as" @click="saveAsNew">另存为新简历</button>
-          <button class="btn tl-btn ghost" @click="translated = ''">返回</button>
+          <button class="btn primary tl-btn" @click="apply">替换简历内容</button>
+          <button class="btn primary tl-btn save-as" @click="saveAsNew">另存为文件</button>
+          <button class="btn tl-btn ghost" @click="translated = ''">取消翻译</button>
         </div>
       </div>
     </div>
@@ -211,15 +223,30 @@ async function saveAsNew() {
   font-size: 13px;
   opacity: 0.7;
 }
-.tl-content {
+.tl-sub {
+  font-size: 13px;
+  color: #909399;
+  margin: -10px 0 10px;
+}
+.tl-note.ok {
+  color: #67c23a;
+  margin-top: 10px;
+}
+.tl-render {
   max-height: 46vh;
   overflow: auto;
-  font-size: 13px;
-  line-height: 1.7;
-  white-space: pre-wrap;
-  word-break: break-word;
-  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e4e9;
   border-radius: 8px;
-  padding: 12px;
+  background: #f5f5f5;
+  .jufe {
+    transform-origin: top left;
+    transform: scale(0.52);
+    width: 794px;
+    margin: 0 auto;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+.tl-preview {
+  width: 680px;
 }
 </style>

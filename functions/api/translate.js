@@ -1,17 +1,17 @@
 // POST /api/translate {content, target} —— 简历整文翻译（对照生产「简历语言翻译」）
-// 翻译源用 MyMemory 免费接口（无需 key），配额按天计（KV: tq:<uid>:<yyyymmdd>）
+// 翻译走 LLM 中转（env.GP_LLM_API_KEY + api.aicdks.com），配额按天计（KV: tq:<uid>:<yyyymmdd>）
 import { json, readBody } from '../_lib.js'
 import { currentUserRow } from '../_auth.js'
 
 const LANG_MAP = {
-  英文: 'en',
-  中文: 'zh-CN',
-  日语: 'ja',
-  韩语: 'ko',
-  法语: 'fr',
-  德语: 'de',
-  西班牙语: 'es',
-  俄语: 'ru'
+  英文: '英语',
+  中文: '简体中文',
+  日语: '日语',
+  韩语: '韩语',
+  法语: '法语',
+  德语: '德语',
+  西班牙语: '西班牙语',
+  俄语: '俄语'
 }
 const DAILY_QUOTA = 3
 
@@ -28,19 +28,26 @@ async function remaining(env, uid) {
   return Math.max(0, DAILY_QUOTA - used)
 }
 
-// 纯标记行（分栏/图标/图片/代码围栏等）原样保留，不做翻译
-const SKIP_RE = /^\s*(:::|\|?[-: |]+\||```|\$|#+\s*!|!\[|icon:[a-z0-9_-]+\s*$)/i
-
-async function translateLine(line, pair) {
-  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(
-    line
-  )}&langpair=${encodeURIComponent(pair)}`
-  const res = await fetch(url, { headers: { 'User-Agent': 'cv-replica/1.0' } })
-  if (!res.ok) throw new Error('translate failed ' + res.status)
+async function llmTranslate(env, content, target) {
+  const res = await fetch('https://api.aicdks.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.GP_LLM_API_KEY}` },
+    body: JSON.stringify({
+      model: env.AI_MODEL || 'hf-deepseek-v3',
+      max_tokens: 8192,
+      temperature: 0.3,
+      messages: [
+        {
+          role: 'system',
+          content: `你是专业简历翻译器。把用户给的 Markdown 简历完整翻译为${target}。保持 Markdown 结构与标记不变（#、##、::: 分栏、icon: 标记、图片语法、加粗、表格），只翻译自然语言文字；人名/公司名/学校名用通用写法或拼音。只输出翻译后的 Markdown 正文，不要解释、不要代码块标记。`
+        },
+        { role: 'user', content: content.slice(0, 8000) }
+      ]
+    })
+  })
+  if (!res.ok) throw new Error('relay ' + res.status)
   const data = await res.json()
-  const text = data?.responseData?.translatedText
-  if (!text || /MYMEMORY WARNING|QUERY LENGTH LIMIT/i.test(text)) throw new Error('translate quota')
-  return text
+  return data?.choices?.[0]?.message?.content || ''
 }
 
 export async function onRequest(context) {
@@ -63,31 +70,13 @@ export async function onRequest(context) {
     const left = await remaining(env, uid)
     if (left <= 0) return json(request, { code: 429, msg: '今日翻译次数已用完' })
 
-    // 源语言启发：含 CJK → zh-CN，否则 en
-    const src = /[぀-ヿ一-鿿]/.test(content) ? 'zh-CN' : 'en'
-    const pair = `${src}|${target}`
-
-    const lines = content.split('\n')
-    const out = []
-    for (const line of lines) {
-      const t = line.trim()
-      if (!t || SKIP_RE.test(line) || t.length < 2) {
-        out.push(line)
-        continue
-      }
-      // 超长行按句切半翻译再拼接（MyMemory 单请求 ~500 字符）
-      if (t.length > 400) {
-        const parts = t.match(/[^。；;，,]+[。；;，,]?/g) || [t]
-        const translated = []
-        for (const part of parts) {
-          if (!part.trim()) continue
-          translated.push(await translateLine(part.slice(0, 450), pair))
-        }
-        out.push(translated.join(' '))
-      } else {
-        out.push(await translateLine(line.slice(0, 450), pair))
-      }
+    let translated
+    try {
+      translated = await llmTranslate(env, content, target)
+    } catch (e) {
+      return json(request, { code: 500, msg: '翻译服务暂不可用：' + e.message }, 500)
     }
+    if (!translated.trim()) return json(request, { code: 500, msg: '翻译结果为空' }, 500)
 
     if (env.UPSTASH_KV) {
       const key = quotaKey(uid)
@@ -96,7 +85,7 @@ export async function onRequest(context) {
     }
     return json(request, {
       code: 200,
-      data: { content: out.join('\n'), remaining: await remaining(env, uid) }
+      data: { content: translated, remaining: await remaining(env, uid) }
     })
   }
 

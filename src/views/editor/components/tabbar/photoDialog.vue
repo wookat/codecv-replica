@@ -21,13 +21,20 @@ const router = useRouter()
 const visible = ref(false)
 const member = ref(false)
 
-// 形状：对照生产 矩形/圆角矩形/圆形/长条形
-const SHAPES = [
-  { key: 'square', label: '矩形' },
-  { key: 'round-square', label: '圆角矩形' },
-  { key: 'circle', label: '圆形' },
-  { key: 'banner', label: '长条形' }
-]
+// 形状（对照生产）：证件照 矩形/圆角矩形/圆形/长条形；校徽仅 长条形/圆形
+const SHAPES = computed(() =>
+  props.kind === 'badge'
+    ? [
+        { key: 'square', label: '长条形' },
+        { key: 'circle', label: '圆形' }
+      ]
+    : [
+        { key: 'square', label: '矩形' },
+        { key: 'round-square', label: '圆角矩形' },
+        { key: 'circle', label: '圆形' },
+        { key: 'banner', label: '长条形' }
+      ]
+)
 const cfgKey = computed(() =>
   props.kind === 'avatar' ? `avatar-cfg-${props.resumeType}` : `badge_config-${props.resumeType}`
 )
@@ -66,7 +73,11 @@ watch(
 watch(visible, v => emit('update:modelValue', v))
 
 const title = computed(() => (props.kind === 'avatar' ? '证件照' : '校徽'))
-const sizeLimit = computed(() => (member.value ? 10 : 2))
+// 限额（生产同款）：证件照 免费2MB/会员10MB；校徽 免费200KB/会员10MB
+const sizeLimit = computed(() => (member.value ? 10 : props.kind === 'badge' ? 0.2 : 2))
+const limitLabel = computed(() =>
+  props.kind === 'badge' && !member.value ? '200KB' : `${sizeLimit.value}MB`
+)
 
 function pick(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]
@@ -74,7 +85,7 @@ function pick(e: Event) {
   if (!file) return
   if (file.size > sizeLimit.value * 1024 * 1024) {
     ElMessageBox.confirm(
-      `图片大小超过 ${sizeLimit.value}MB 上限${member.value ? '' : '（会员可上传 10MB）'}`,
+      `普通用户上传图片不能大于 ${limitLabel.value}${member.value ? '' : '，会员可上传 10MB'}`,
       '文件过大',
       member.value
         ? { confirmButtonText: '知道了', showCancelButton: false }
@@ -107,7 +118,7 @@ function confirm() {
     top: prev?.top ?? (props.kind === 'avatar' ? 30 : 10),
     left: prev?.left ?? (props.kind === 'avatar' ? 660 : 10),
     width: prev?.width,
-    ...(props.kind === 'avatar' ? { shape: picked.value.shape } : {})
+    shape: picked.value.shape
   }
   setLocalStorage(cfgKey.value, JSON.stringify(next))
   cfg.value = next

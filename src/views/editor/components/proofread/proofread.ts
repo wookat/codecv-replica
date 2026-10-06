@@ -7,6 +7,7 @@ export interface ProofreadIssue {
   ctx: string // 上下文片段
   kind: 'typo' | 'format'
   msg: string
+  severity?: 'high' | 'low' // 生产同款：仅 high 可批量修正
 }
 
 const TYPO_PAIRS: [string, string][] = [

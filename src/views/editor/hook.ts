@@ -1,5 +1,5 @@
 import { onActivated, onDeactivated, onMounted, Ref, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useDebounceFn } from '@vueuse/core'
 
 import { getLocalStorage } from '@/common/localstorage'
@@ -17,7 +17,7 @@ import { ensureEmptyPreWhiteSpace, splitPage } from './components/tabbar/hook'
 import useEditorStore from '@/store/modules/editor'
 import { resolveTemplateType } from '@/templates/config'
 import { allOverlaysHTML, convertDOM } from '@/utils/moduleCombine'
-import { resumeExport } from '@/api/modules/resume'
+import { resumeExport, setExportCount, setTemplateCondition } from '@/api/modules/resume'
 import {
   CUSTOM_CSS_STYLE,
   CUSTOM_MARKDOWN_PRIMARY_COLOR,
@@ -97,8 +97,7 @@ export function useResumeType() {
 }
 // 导出简历｜markdown内容
 export function useDownLoad(type: Ref<string>) {
-  const router = useRouter(),
-    editorStore = useEditorStore(),
+  const editorStore = useEditorStore(),
     { showLoading, closeLoading } = useLoading()
   // 导出前处理PDF中的样式
   const exportPreHandler = async () => {
@@ -166,9 +165,54 @@ export function useDownLoad(type: Ref<string>) {
     closeLoading()
   }
 
-  const downloadNative = () => {
-    editorStore.setNativeContent((<HTMLElement>queryDOM('.jufe')).innerHTML)
-    router.push({ path: '/download', query: { type: type.value } })
+  // PDF(备用)：生产同款原地 window.print——克隆预览 DOM 进 .codecv-print-only 覆盖层，
+  // 移除编辑控件/数据属性，注入皮肤样式+水印栅格，@media print 只显示该层
+  const downloadNative = async () => {
+    const dom = queryDOM('.re-render .reference-dom') || queryDOM('.jufe')
+    if (!dom) return
+    const clone = (dom as HTMLElement).cloneNode(true) as HTMLElement
+    clone
+      .querySelectorAll('.resume-module .down,.resume-module .up,.remove-module')
+      .forEach(el => el.remove())
+    // 剥掉编辑态数据属性 + 绝对化图片路径
+    const stripAttrs = (root: HTMLElement) => {
+      for (const el of [root, ...Array.from(root.querySelectorAll<HTMLElement>('*'))]) {
+        el.removeAttribute('data-md-line')
+        for (const a of Array.from(el.attributes))
+          if (a.name.startsWith('data-v-')) el.removeAttribute(a.name)
+      }
+    }
+    stripAttrs(clone)
+    clone.querySelectorAll('img').forEach(img => {
+      const src = img.getAttribute('src')
+      if (src && !/^(https?:|data:|blob:)/.test(src)) img.src = new URL(src, location.origin).href
+    })
+
+    // 打印层：克隆 + 皮肤样式 + 水印栅格（prod 同构 /codecv-assets/wm-raster.png）
+    const { style, link } = await exportPreHandler()
+    const wrap = document.createElement('div')
+    wrap.className = 'codecv-print-only'
+    const linkTag = link !== 'none' ? `<link rel="stylesheet" href="${link}">` : ''
+    wrap.innerHTML = `${linkTag}<style>${style}
+.codecv-print-only .jufe{width:210mm;min-height:295mm;margin:0 auto;position:relative;}</style>`
+    wrap.appendChild(clone)
+    const wm = document.createElement('img')
+    wm.src = `${location.origin}/codecv-assets/wm-raster.png`
+    wm.style.cssText =
+      'position:fixed;left:0;top:0;width:794px;height:1123px;z-index:2147483000;pointer-events:none'
+    wrap.appendChild(wm)
+    document.body.appendChild(wrap)
+    const cleanup = () => {
+      window.removeEventListener('afterprint', cleanup)
+      wrap.remove()
+    }
+    window.addEventListener('afterprint', cleanup)
+    setExportCount()
+    setTemplateCondition({ name: type.value })
+    setTimeout(() => {
+      window.print()
+      setTimeout(cleanup, 1000) // 个别浏览器不触发 afterprint 的兜底
+    }, 60)
   }
 
   const downloadMD = () => {

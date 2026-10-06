@@ -76,13 +76,22 @@ export function badgeOverlayHTML(type: string) {
   const raw = getLocalStorage(`badge_config-${type}`) as string | null
   if (!raw) return ''
   try {
-    const cfg = JSON.parse(raw) as { url: string; top: number; left: number; width?: number }
+    const cfg = JSON.parse(raw) as {
+      url: string
+      top: number
+      left: number
+      width?: number
+      shape?: string
+    }
     const src = /^(https?:|data:|blob:)/.test(cfg.url)
       ? cfg.url
       : `${location.origin}${cfg.url.startsWith('/') ? '' : '/'}${cfg.url}`
+    // 校徽形状（生产同款）：长条形(square)/圆形(circle)
+    const radius =
+      cfg.shape === 'circle' ? 'border-radius:50%;aspect-ratio:1/1;object-fit:cover;' : ''
     return `<img alt="校徽" class="cv-badge-overlay" src="${src}" style="position:absolute;top:${
       cfg.top
-    }px;left:${cfg.left}px;width:${cfg.width || 56}px;z-index:3;">`
+    }px;left:${cfg.left}px;width:${cfg.width || 56}px;z-index:3;${radius}">`
   } catch {
     return ''
   }

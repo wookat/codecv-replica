@@ -6,8 +6,6 @@ export interface IResumeConfig {
   type?: number
 }
 
-const UPSTASH_BASE_URL = import.meta.env.VITE_UPSTASH_BASE_URL as string
-
 export async function resumeExport(data: IResumeConfig) {
   const res = await fetch(import.meta.env.VITE_EXPORT_URL as string, {
     method: 'POST',
@@ -19,67 +17,33 @@ export async function resumeExport(data: IResumeConfig) {
   return await res.json()
 }
 
+// 全站累计导出：对照生产 /api/export/queryCount|incCount（本地 KV 桩已废弃）
 export function getExportCount() {
-  return new Promise((resolve, reject) => {
-    fetch(`${UPSTASH_BASE_URL}/get/count`, {
-      headers: {
-        Authorization: import.meta.env.VITE_UPSTASH_GET_TOKEN as string
-      }
-    })
+  return new Promise(resolve => {
+    fetch('/api/export/queryCount')
       .then(response => response.json())
       .then(data => resolve(data.result))
-      .catch(reject)
+      .catch(() => resolve('0'))
   })
 }
 
 export async function setExportCount() {
-  let count: string
-  try {
-    count = (await getExportCount()) as string
-  } catch {
-    return Promise.resolve('获取失败...')
-  }
-  return new Promise(resolve => {
-    fetch(`${UPSTASH_BASE_URL}/set/count/${parseInt(count) + 1}`, {
-      headers: {
-        Authorization: import.meta.env.VITE_UPSTASH_SET_TOKEN as string
-      }
-    })
-      .then(response => response.json())
-      .then(data => resolve(data.result))
-      .catch(resolve)
-  })
+  fetch('/api/export/incCount', { method: 'POST', body: '{}' }).catch(() => undefined)
+  return Promise.resolve('ok')
 }
 
+// 模板下载计数：对照生产 template/stats——以 export_events 聚合，不再走 Upstash
 export async function getTemplateCondition() {
-  const res = await fetch(`${UPSTASH_BASE_URL}/get/templateData`, {
-    headers: {
-      Authorization: import.meta.env.VITE_UPSTASH_GET_TOKEN as string
-    }
-  })
+  const res = await fetch('/api/template/stats')
   return await res.json()
 }
 
 export async function setTemplateCondition(params: { name: string }) {
-  let data,
-    templateData: { [key: string]: string } = {}
-  try {
-    data = await getTemplateCondition()
-  } catch {
-    return Promise.resolve({ msg: '获取模板数据失败...', result: null })
-  }
-  if (data.result) {
-    templateData = JSON.parse(data.result)
-  }
-  templateData[`t${params.name}`] = String(+(templateData[`t${params.name}`] || 0) + 1)
-  const res = await fetch(`${UPSTASH_BASE_URL}/set/templateData`, {
+  fetch('/api/export/incCount', {
     method: 'POST',
-    body: JSON.stringify(templateData),
-    headers: {
-      Authorization: import.meta.env.VITE_UPSTASH_SET_TOKEN as string
-    }
-  })
-  return await res.json()
+    body: JSON.stringify({ type: params.name })
+  }).catch(() => undefined)
+  return Promise.resolve({ msg: 'ok', result: null })
 }
 // 获取 Gitee 仓库 star 数量
 export function queryGiteeRepoStars() {

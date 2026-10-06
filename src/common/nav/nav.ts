@@ -32,6 +32,12 @@ const nav = [
     tooltip: false
   },
   {
+    name: 'AI助手',
+    act: 'ai',
+    hot: true,
+    tooltip: false
+  },
+  {
     name: '秋招岗位汇总',
     path: '/jobs',
     hot: true,

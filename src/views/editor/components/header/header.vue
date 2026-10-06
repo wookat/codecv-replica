@@ -11,6 +11,7 @@ import { successMessage } from '@/common/message'
 import ProofreadDrawer from '../proofread/proofread.vue'
 import HistoryDrawer from './historyDrawer.vue'
 import ShareDialog from './shareDialog.vue'
+import AiHelper from './aiHelper.vue'
 import { computed, onMounted, ref } from 'vue'
 
 const emit = defineEmits([
@@ -29,6 +30,7 @@ const { resumeType } = useResumeType()
 const proofreadVisible = ref(false)
 const historyVisible = ref(false)
 const shareVisible = ref(false)
+const aiVisible = ref(false)
 // 生产同款未保存提示：内容与最近一次保存不一致 → 显示「简历已变更请及时保存」
 // 初始内容在兄弟组件挂载阶段才注入，延迟到挂载后取基线避免首载误标
 const lastSaved = ref(editorStore.MDContent)
@@ -73,6 +75,7 @@ function saveName() {
       @import-md="importFile"
       @export-picture="exportFile('picture')"
       @print-page="emit('print-page')"
+      @ai-helper="aiVisible = true"
     />
     <div class="right">
       <span class="watermark-pill" @click="$router.push('/member')">移除水印</span>
@@ -112,6 +115,7 @@ function saveName() {
   <ProofreadDrawer v-model="proofreadVisible" />
   <HistoryDrawer v-model="historyVisible" :resume-type="resumeType" />
   <ShareDialog v-model="shareVisible" :resume-type="resumeType" :resume-name="fileName" />
+  <AiHelper v-model="aiVisible" :file-name="fileName" @import-md="importFile" />
 </template>
 
 <style lang="scss" scoped>

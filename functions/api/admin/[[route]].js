@@ -290,7 +290,9 @@ export async function onRequest(context) {
     const v = await db.prepare('SELECT * FROM resume_versions WHERE id = ?').bind(+q.id).first()
     if (!v) return json(request, { code: 404, msg: '版本不存在' })
     await db
-      .prepare('UPDATE resumes SET md = ?, style = ?, updated_at = ? WHERE resume_type = ? AND user_id = ?')
+      .prepare(
+        'UPDATE resumes SET md = ?, style = ?, updated_at = ? WHERE resume_type = ? AND user_id = ?'
+      )
       .bind(v.content ?? '', v.style ?? '', now, v.resume_type, v.user_id)
       .run()
     return json(request, { code: 200, message: '已回滚' })
