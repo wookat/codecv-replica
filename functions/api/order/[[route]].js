@@ -47,9 +47,32 @@ export async function onRequest(context) {
       )
       .bind(Date.now(), q.orderNo, uid)
       .run()
-    return r.meta.changes
-      ? json(request, { code: 200, message: '支付成功（模拟）' })
-      : json(request, { code: 400, msg: '订单不存在或已支付' })
+    if (!r.meta.changes) return json(request, { code: 400, msg: '订单不存在或已支付' })
+
+    // 邀请返佣：被邀请人首笔已支付订单给邀请人记 10% 佣金（与生产规则一致）
+    const paidCount = await db
+      .prepare("SELECT COUNT(*) AS c FROM orders WHERE user_id = ? AND status = 'paid'")
+      .bind(uid)
+      .first()
+    if (paidCount && paidCount.c === 1 && auth.row.inviter) {
+      const inviter = await db
+        .prepare('SELECT id FROM users WHERE username = ?')
+        .bind(auth.row.inviter)
+        .first()
+      const order = await db
+        .prepare('SELECT amount FROM orders WHERE order_no = ?')
+        .bind(q.orderNo)
+        .first()
+      if (inviter && order) {
+        await db
+          .prepare(
+            'INSERT INTO invites (inviter_id, invitee_id, order_no, commission, created_at) VALUES (?,?,?,?,?)'
+          )
+          .bind(inviter.id, uid, q.orderNo, Math.round(order.amount * 0.1), Date.now())
+          .run()
+      }
+    }
+    return json(request, { code: 200, message: '支付成功（模拟）' })
   }
 
   return json(request, { code: 404, msg: 'not found' }, 404)

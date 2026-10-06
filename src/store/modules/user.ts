@@ -48,7 +48,10 @@ const useUserStore = defineStore('userStore', {
         return
       }
       const cb = isLogin ? login : registerUser
-      cb(user).then((res: any) => {
+      const payload = isLogin
+        ? user
+        : { ...user, invite: localStorage.getItem('INVITE') || undefined }
+      cb(payload).then((res: any) => {
         if (res.code === 200) {
           this.loginState.logined = true
           this.loginModelToggle()

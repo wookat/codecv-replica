@@ -25,11 +25,12 @@ export async function onRequest(context) {
     const exist = await db.prepare('SELECT id FROM users WHERE username = ?').bind(username).first()
     if (exist) return json(request, { code: 400, msg: '用户名已被注册' })
     const { salt, hash } = await hashPassword(password)
+    const inviter = typeof q.invite === 'string' && q.invite !== username ? q.invite : ''
     const r = await db
       .prepare(
-        'INSERT INTO users (username, pwd_hash, salt, nickname, origin, created_at) VALUES (?,?,?,?,?,?)'
+        'INSERT INTO users (username, pwd_hash, salt, nickname, origin, inviter, created_at) VALUES (?,?,?,?,?,?,?)'
       )
-      .bind(username, hash, salt, username, 'web', Date.now())
+      .bind(username, hash, salt, username, 'web', inviter, Date.now())
       .run()
     const row = await db
       .prepare('SELECT * FROM users WHERE id = ?')

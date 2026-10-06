@@ -44,9 +44,10 @@ const tiers: Tier[] = [
   {
     name: '年度会员',
     price: '69.99',
+    del: '¥99.99',
     unit: '约 0.19元 / 天',
-    gradient: 'navy-grad',
-    badge: '立减20元',
+    gradient: 'blue-grad',
+    badge: '立减30元',
     rights: [
       ['会员有效时长', '365天'],
       ['导入/导出简历', '无限制'],
@@ -65,8 +66,9 @@ const tiers: Tier[] = [
   {
     name: '季度会员',
     price: '35.99',
+    del: '¥49.99',
     unit: '约 0.40元 / 天',
-    gradient: 'navy-grad',
+    gradient: 'blue-grad',
     badge: '立减14元',
     rights: [
       ['会员有效时长', '90天'],
@@ -87,8 +89,7 @@ const tiers: Tier[] = [
     name: '月度会员',
     price: '18.99',
     unit: '约 0.63元 / 天',
-    gradient: 'navy-grad',
-    badge: '立减6元',
+    gradient: 'blue-grad',
     rights: [
       ['会员有效时长', '30天'],
       ['导入/导出简历', '无限制'],
@@ -306,6 +307,9 @@ async function upgrade(t: Tier) {
   &.navy-grad {
     background: linear-gradient(135deg, rgba(0, 0, 0, 0.65), #374151);
   }
+  &.blue-grad {
+    background: linear-gradient(135deg, #627a92, #4c5f74);
+  }
   .badge {
     position: absolute;
     top: -10px;
@@ -359,16 +363,29 @@ async function upgrade(t: Tier) {
   border-radius: 0 0 12px 12px;
   padding: 16px;
   background: var(--background);
+  text-align: center;
   .rights-title {
+    position: relative;
+    display: inline-block;
     text-align: center;
     font-weight: 700;
     font-size: 14px;
     margin-bottom: 24px;
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -8px -18px;
+      border: 2.5px solid #f6d24b;
+      border-radius: 50%;
+      transform: rotate(-4deg);
+      pointer-events: none;
+    }
   }
   .rights-list {
     display: flex;
     flex-direction: column;
     gap: 16px;
+    text-align: left;
   }
   .right-row {
     display: flex;

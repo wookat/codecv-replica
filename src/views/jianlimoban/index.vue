@@ -95,7 +95,6 @@ const TAG_TABS = [
   '半导体',
   '芯片',
   '云计算',
-  '数据分析',
   '区块链',
   '会计学',
   '软件工程',
@@ -190,9 +189,14 @@ watch(
             draggable="false"
           />
         </router-link>
-        <router-link to="/mianjing" class="promo banner-mj">
-          <img src="/prod-assets/mj-banner.webp" alt="面经广告位" draggable="false" />
-        </router-link>
+        <a
+          href="https://assist.codecvcv.com?utm_source=codecv"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="promo banner-mj"
+        >
+          <img src="/prod-assets/codecv.webp" alt="网申助手广告位" draggable="false" />
+        </a>
       </div>
     </div>
 

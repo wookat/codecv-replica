@@ -285,14 +285,20 @@ onMounted(() => {
               draggable="false"
             />
           </router-link>
-          <router-link to="/template" target="_blank" class="ad-link" aria-label="在线免费制作简历">
+          <a
+            href="https://assist.codecvcv.com?utm_source=codecv"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="ad-link"
+            aria-label="网申助手——求职网申请表单一键自动填写"
+          >
             <img
-              src="/ads/codecv.webp"
-              alt="简历制作工具——在线免费制作，200+ 校招模板即套即用，支持导出 PDF"
+              src="/ads/assist.webp"
+              alt="网申助手：找个班上，网申不用反复填，一键填写更快投递"
               loading="lazy"
               draggable="false"
             />
-          </router-link>
+          </a>
         </div>
       </section>
 

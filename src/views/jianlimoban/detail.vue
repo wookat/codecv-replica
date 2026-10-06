@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { resolveTemplateType, templates } from '@/templates/config'
 import { convertDOM } from '@/utils/moduleCombine'
@@ -22,9 +22,19 @@ const related = computed<any[]>(() => {
 const seoHtml = computed(() => {
   if (!tpl.value) return ''
   try {
-    return convertDOM(tpl.value.content).innerHTML
+    // 生产同款 sr-only SEO 块：页面 h1 只有一个（模板名），简历正文标题降为 h2
+    return convertDOM(tpl.value.content)
+      .innerHTML.replace(/<h1/g, '<h2')
+      .replace(/<\/h1>/g, '</h2>')
   } catch {
     return ''
+  }
+})
+
+watchEffect(() => {
+  if (tpl.value) {
+    const n = `${tpl.value.name}简历模板`
+    document.title = `${n}免费下载_${n}制作 - CodeCV简历`
   }
 })
 
@@ -133,7 +143,6 @@ function useTemplate() {
               </div>
             </div>
           </section>
-
           <section v-if="related.length" class="rel">
             <div class="rel-head">
               <h2>相关简历模板推荐</h2>
@@ -148,9 +157,9 @@ function useTemplate() {
                     <span class="use-btn">使用模板</span>
                   </router-link>
                   <div class="rc-info">
-                    <router-link :to="`/jianlimoban/${t.type}`" class="rc-name">{{
-                      t.name
-                    }}</router-link>
+                    <h3 class="rc-name">
+                      <router-link :to="`/jianlimoban/${t.type}`">{{ t.name }}</router-link>
+                    </h3>
                     <div class="rc-tags">
                       <span v-for="x in (t.tags ?? []).slice(0, 3)" :key="x">{{ x }}</span>
                     </div>
@@ -168,6 +177,11 @@ function useTemplate() {
               <p class="fq">{{ f.q }}</p>
               <p class="fa">{{ f.a }}</p>
             </div>
+          </section>
+
+          <section class="cta">
+            <h2>立即使用「{{ tpl.name }}」简历模板</h2>
+            <button class="primary" @click="useTemplate"><span>点击使用该模板</span></button>
           </section>
         </div>
       </div>
@@ -358,9 +372,9 @@ export default { name: 'jianlimoban-detail' }
       list-style: none;
       padding: 0;
       margin: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 16px;
     }
     li {
       display: flex;
@@ -369,7 +383,7 @@ export default { name: 'jianlimoban-detail' }
       font-size: 13px;
       span {
         color: #9ca3af;
-        width: 56px;
+        flex-shrink: 0;
       }
       b {
         font-weight: 500;
@@ -460,16 +474,18 @@ export default { name: 'jianlimoban-detail' }
     }
   }
   .rc-name {
+    margin: 0;
     font-size: 14px;
     font-weight: 600;
-    color: var(--font-color);
-    text-decoration: none;
-    display: block;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    &:hover {
-      color: var(--theme);
+    a {
+      color: var(--font-color);
+      text-decoration: none;
+      &:hover {
+        color: var(--theme);
+      }
     }
   }
   .rc-tags {
@@ -498,6 +514,31 @@ export default { name: 'jianlimoban-detail' }
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+}
+.cta {
+  margin-top: 40px;
+  padding: 40px 0 48px;
+  text-align: center;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 24px;
+  }
+  .primary {
+    padding: 13px 56px;
+    border: none;
+    border-radius: 999px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 500;
+    background: linear-gradient(90deg, #ff7449, #ff9a44);
+    cursor: pointer;
+    transition: all 0.2s;
+    &:hover {
+      filter: brightness(1.05);
+    }
   }
 }
 .faq {

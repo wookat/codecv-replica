@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import outNav from '@/common/nav/outNav'
 import User from './user.vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+function goNav(item: { path: string; external?: boolean }) {
+  if (item.external) window.open(item.path, '_blank')
+  else router.push(item.path)
+}
 </script>
 
 <template>
@@ -19,11 +26,11 @@ import User from './user.vue'
         </button>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item
-              :key="idx"
-              v-for="(navItem, idx) in outNav"
-              @click="$router.push(navItem.path)"
-              >{{ navItem.name }}</el-dropdown-item
+            <el-dropdown-item :key="idx" v-for="(navItem, idx) in outNav" @click="goNav(navItem)"
+              >{{ navItem.name
+              }}<span v-if="navItem.badge" class="m-badge">{{
+                navItem.badge
+              }}</span></el-dropdown-item
             >
           </el-dropdown-menu>
         </template>
@@ -53,6 +60,13 @@ import User from './user.vue'
     display: flex;
     align-items: center;
     gap: 10px;
+  }
+  .m-badge {
+    font-size: 9px;
+    font-weight: 700;
+    color: orangered;
+    vertical-align: super;
+    margin-left: 2px;
   }
   .m-burger {
     width: 36px;

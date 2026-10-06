@@ -92,6 +92,12 @@ export default {
       path: '/mp-editor/:id',
       name: 'mp-editor',
       component: () => import('@/views/mp-editor/index.vue')
+    },
+    {
+      // 复刻线上版分类落地页：挂在 Layout 内（生产有顶栏/页脚），静态路由优先于该动态段
+      path: '/:templateCategory',
+      name: 'template-category',
+      component: () => import('@/views/jianlimoban/category.vue')
     }
   ]
 }

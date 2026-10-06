@@ -15,7 +15,8 @@ import outNav from '@/common/nav/outNav'
         target="_blank"
         rel="noopener noreferrer"
         class="nav-link"
-        >{{ navItem.name }}</a
+        >{{ navItem.name
+        }}<span v-if="navItem.badge" class="nav-badge">{{ navItem.badge }}</span></a
       >
       <router-link v-else :to="navItem.path" class="nav-link"
         >{{ navItem.name

@@ -21,6 +21,13 @@ const outNav = [
     tooltip: false
   },
   {
+    name: '网申助手',
+    path: 'https://assist.codecvcv.com?utm_source=codecv_nav',
+    badge: 'NEW',
+    external: true,
+    tooltip: false
+  },
+  {
     name: '求职攻略',
     path: '/strategy',
     tooltip: false
