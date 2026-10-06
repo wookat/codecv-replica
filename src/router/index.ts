@@ -59,6 +59,7 @@ const routeTitles: Record<string, string> = {
   'mp-editor': '编辑简历 - CodeCV简历',
   'export-resume': '导出简历 - CodeCV简历',
   'template-category': '简历模板 - CodeCV简历',
+  'page-404': '404页面不存在|页面找不到|访问错误 - CodeCV简历',
   NotFound: '404页面不存在|页面找不到|访问错误 - CodeCV简历'
 }
 

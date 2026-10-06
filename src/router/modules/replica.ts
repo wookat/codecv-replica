@@ -94,6 +94,12 @@ export default {
       component: () => import('@/views/mp-editor/index.vue')
     },
     {
+      // 404 落地页：必须排在 /:templateCategory 动态段之前，否则 /404 会被当成分类名
+      path: '/404',
+      name: 'page-404',
+      component: () => import('@/views/404/index.vue')
+    },
+    {
       // 复刻线上版分类落地页：挂在 Layout 内（生产有顶栏/页脚），静态路由优先于该动态段
       path: '/:templateCategory',
       name: 'template-category',
