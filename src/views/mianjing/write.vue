@@ -463,7 +463,7 @@ async function submit() {
 }
 .mw-body {
   width: 100%;
-  min-height: 110px;
+  min-height: 60px;
   border: none;
   outline: none;
   resize: none;
