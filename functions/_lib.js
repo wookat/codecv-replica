@@ -36,3 +36,19 @@ export const sub = (field, v) =>
   String(field ?? '')
     .toLowerCase()
     .includes(String(v).toLowerCase())
+
+// 会员档位（对齐生产 Pp/Rp 矩阵）：免费版 1份简历/200KB 上传；
+// 月4份·季5份·年15份·终身不限，上传 2MB（终身 10MB）
+export const VIP_TIERS = {
+  月度会员: { days: 30, cv: 4, uploadMB: 2 },
+  季度会员: { days: 90, cv: 5, uploadMB: 2 },
+  年度会员: { days: 365, cv: 15, uploadMB: 2 },
+  终身会员: { days: 36500, cv: -1, uploadMB: 10 }
+}
+export function memberTier(row) {
+  const exp = Number(row?.vip_expire) || 0
+  if (exp <= Date.now()) return null
+  return VIP_TIERS[row?.vip_plan] || VIP_TIERS['月度会员']
+}
+export const cvQuota = row => (memberTier(row) ? memberTier(row).cv : 1)
+export const uploadLimitMB = row => (memberTier(row) ? memberTier(row).uploadMB : 0.2)

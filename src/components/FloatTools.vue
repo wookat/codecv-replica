@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import useEditorStore from '@/store/modules/editor'
 
 const route = useRoute()
 const router = useRouter()
@@ -19,11 +20,18 @@ onMounted(() => {
 })
 onUnmounted(() => window.removeEventListener('scroll', onScroll))
 
+const editorStore = useEditorStore()
+
 const tools = [
   {
     icon: 'problem',
     tip: '点击查看简历编写教程',
-    act: () => window.open('https://www.yuque.com/xiongleixin/saqnu1/sl2ai75t6xgbhg86')
+    act: () =>
+      window.open(
+        editorStore.writable
+          ? 'https://www.yuque.com/xiongleixin/saqnu1/rxhlykmem82qbb8m'
+          : 'https://www.yuque.com/xiongleixin/saqnu1/sl2ai75t6xgbhg86'
+      )
   },
   {
     icon: 'wechat',
@@ -64,13 +72,31 @@ const tools = [
         <i :class="`icon-${t.icon}`" class="iconfont"></i>
       </div>
     </template>
-    <div v-if="panel" class="ft-panel" @click="panel = ''">
-      <img
-        :src="panel === 'wechat' ? '/prod-assets/wechat.jpg' : '/prod-assets/feedback-qr.png'"
-        :alt="panel === 'wechat' ? '作者微信' : '产品共建交流群'"
-      />
-      <p>{{ panel === 'wechat' ? '扫码添加作者微信' : '扫码加入交流群' }}</p>
-    </div>
+    <Teleport to="body">
+      <div v-if="panel" class="ft-mask" @click="panel = ''">
+        <div
+          v-if="panel === 'wechat'"
+          class="flex justify-center bg-white flex-col gap-2 pt-5 rounded-xl items-center ft-card"
+          @click.stop
+        >
+          <h4 class="text-black">微信扫码联系客服</h4>
+          <img
+            src="/prod-assets/wechat-qr.jpg"
+            class="w-64 rounded-lg"
+            draggable="false"
+            alt="客服联系方式"
+          />
+        </div>
+        <div v-else class="ft-group" @click.stop>
+          <img
+            src="/prod-assets/group-qr.webp"
+            draggable="false"
+            class="w-[300px] rounded-lg"
+            alt="共建交流群"
+          />
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -115,26 +141,31 @@ const tools = [
   margin: 4px 0;
   background: rgba(0, 0, 0, 0.08);
 }
-.ft-panel {
-  position: absolute;
-  right: 44px;
-  top: 0;
-  width: 180px;
-  background: var(--background);
-  border-radius: 10px;
-  padding: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+.ft-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  img {
-    width: 100%;
-    border-radius: 8px;
-    display: block;
+  .ft-card {
+    padding: 20px 24px 24px;
+    cursor: default;
+    h4 {
+      color: #111;
+      font-size: 16px;
+      margin: 0;
+    }
+    img {
+      width: 256px;
+    }
   }
-  p {
-    margin-top: 8px;
-    text-align: center;
-    font-size: 12px;
-    color: var(--font-color);
+  .ft-group img {
+    width: 300px;
+    border-radius: 8px;
+    cursor: default;
   }
 }
 </style>

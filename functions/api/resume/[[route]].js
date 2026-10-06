@@ -1,5 +1,5 @@
 // /api/resume/list|save|delete|history/page|history/get —— 登录用户的云端简历存储 + 历史版本
-import { json, readBody } from '../../_lib.js'
+import { json, readBody, cvQuota } from '../../_lib.js'
 import { currentUserRow } from '../../_auth.js'
 
 const VERSION_MAX_AGE_MS = 365 * 24 * 3600 * 1000 // 仅保留近一年（与生产一致）
@@ -62,15 +62,19 @@ export async function onRequest(context) {
       .bind(uid, type)
       .first()
     if (!existed) {
-      // 新建简历配额：非会员上限 2 份（与生产免费档一致），会员不限
-      const isMember = (auth.row.vip_expire || 0) > Date.now()
-      if (!isMember) {
+      // 新建简历配额（生产矩阵）：非会员 1 份，月4/季5/年15，终身不限（cvQuota -1）
+      const quota = cvQuota(auth.row)
+      if (quota >= 0) {
         const cnt = await db
           .prepare('SELECT COUNT(*) AS c FROM resumes WHERE user_id = ?')
           .bind(uid)
           .first()
-        if ((cnt?.c || 0) >= 2)
-          return json(request, { code: 403, msg: '免费版最多创建2份简历，升级会员不限份数' }, 403)
+        if ((cnt?.c || 0) >= quota)
+          return json(
+            request,
+            { code: 403, msg: `当前档位最多创建${quota}份简历，升级会员可拥有更多` },
+            403
+          )
       }
     }
     const now = Date.now()
@@ -121,14 +125,18 @@ export async function onRequest(context) {
       .bind(uid, type)
       .first()
     if (!row) return json(request, { code: 404, msg: '简历不存在' })
-    const isMember = (auth.row.vip_expire || 0) > Date.now()
-    if (!isMember) {
+    const quota = cvQuota(auth.row)
+    if (quota >= 0) {
       const cnt = await db
         .prepare('SELECT COUNT(*) AS c FROM resumes WHERE user_id = ?')
         .bind(uid)
         .first()
-      if ((cnt?.c || 0) >= 2)
-        return json(request, { code: 403, msg: '免费版最多创建2份简历，升级会员不限份数' }, 403)
+      if ((cnt?.c || 0) >= quota)
+        return json(
+          request,
+          { code: 403, msg: `当前档位最多创建${quota}份简历，升级会员可拥有更多` },
+          403
+        )
     }
     const newType = `${type}~${Date.now().toString(36)}`
     const now = Date.now()

@@ -6,7 +6,7 @@ import Contact from '@/components/contact.vue'
 import ExportTotal from '@/components/exportTotal.vue'
 import useEditorStore from '@/store/modules/editor'
 import { useResumeType } from '../../hook'
-import { cloudPush, cloudSaveName, cloudIncExport } from '@/api/modules/cloudResume'
+import { cloudPush, cloudSaveName, cloudIncExport, cloudListMeta } from '@/api/modules/cloudResume'
 import { successMessage } from '@/common/message'
 import ProofreadDrawer from '../proofread/proofread.vue'
 import HistoryDrawer from './historyDrawer.vue'
@@ -42,6 +42,12 @@ function save() {
   lastSaved.value = editorStore.MDContent
   successMessage('已保存')
 }
+// 生产口径：标题输入框显示该简历的名称（云端 name），未命名回落到站点默认名
+onMounted(async () => {
+  const metas = await cloudListMeta()
+  const mine = metas.find(m => m.type === resumeType.value)
+  fileName.value = mine?.name || '免费在线简历制作工具CodeCV简历'
+})
 // 导出计数：对照生产「累计导出」——PDF/PNG 类导出都递增
 function exportFile2(kind: 'dynamic' | 'native' | 'picture' | 'md') {
   if (kind !== 'md') cloudIncExport(resumeType.value)
@@ -91,7 +97,7 @@ function saveName() {
         </div>
       </el-tooltip>
       <button class="save-btn btn" @click="save">保存</button>
-      <el-dropdown class="export-dropdown" trigger="click">
+      <el-dropdown class="export-dropdown export-group" trigger="click">
         <button class="export-btn btn">导出</button>
         <template #dropdown>
           <el-dropdown-menu>

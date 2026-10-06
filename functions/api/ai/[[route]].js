@@ -90,6 +90,78 @@ export async function onRequest({ request, env }) {
     }
   }
 
+  // perf: {content,targetPosition?,userId} → SSE 流式润色（生产同款 /api/ai/perf）
+  if (route === 'perf') {
+    const q0 = await consumeQuota(env, cur)
+    if (q0.left === 0)
+      return json({ code: -999, message: '剩余可使用AI次数不足，开通会员可无限制使用' })
+    const pos = body.targetPosition ? `，目标岗位：${body.targetPosition}` : ''
+    const upstream = await fetch(RELAY, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${env.GP_LLM_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: env.AI_MODEL || MODEL,
+        max_tokens: 2048,
+        temperature: 0.6,
+        stream: true,
+        messages: [
+          {
+            role: 'system',
+            content:
+              '你是简历润色助手：优化用户给出的简历片段，动词开头、量化成果、简洁专业，保持事实与结构不变。只输出润色后的文本，不要解释、不要代码块。'
+          },
+          { role: 'user', content: `润色以下内容${pos}：\n${String(body.content || '')}` }
+        ]
+      })
+    })
+    if (!upstream.ok || !upstream.body)
+      return json({ code: 500, message: `relay ${upstream.status}` }, 500)
+    const { readable, writable } = new TransformStream()
+    const writer = writable.getWriter()
+    const enc = new TextEncoder()
+    const dec = new TextDecoder()
+    ;(async () => {
+      const reader = upstream.body.getReader()
+      let buf = ''
+      try {
+        for (;;) {
+          const { done, value } = await reader.read()
+          if (done) break
+          buf += dec.decode(value, { stream: true })
+          const parts = buf.split('\n')
+          buf = parts.pop() || ''
+          for (const line of parts) {
+            const t = line.trim()
+            if (!t.startsWith('data:')) continue
+            const payload = t.slice(5).trim()
+            if (payload === '[DONE]') continue
+            try {
+              const d = JSON.parse(payload)
+              const delta = d?.choices?.[0]?.delta?.content || ''
+              if (delta)
+                await writer.write(enc.encode(`data: {"text":${JSON.stringify(delta)}}\n\n`))
+            } catch {
+              /* 片段不完整跳过 */
+            }
+          }
+        }
+        await writer.write(enc.encode('data: {"done":true}\n\n'))
+      } catch (e) {
+        await writer.write(
+          enc.encode(`data: {"error":${JSON.stringify(String(e?.message || e))}}\n\n`)
+        )
+      } finally {
+        await writer.close()
+      }
+    })()
+    return new Response(readable, {
+      headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache' }
+    })
+  }
+
   // proofread: {content} → {code:200,result:{issues:[...]}}
   if (route === 'proofread') {
     try {

@@ -127,7 +127,9 @@ async function generate() {
   }
 }
 
+// 生产同款 example()：示例同时填入目标岗位「前端开发工程师」
 function example() {
+  if (aigcMode.value !== 1) pf.value = '前端开发工程师'
   desc.value = mode.value.example
 }
 
@@ -162,9 +164,9 @@ const renderedDiag = computed(() => md2html(aigcRes.value))
     <h4 class="ai-title">AI简历助手</h4>
     <div class="row">
       <span class="lb w80">模式选择</span>
-      <el-select v-model="aigcMode" class="grow">
-        <el-option v-for="(m, i) in MODES" :key="i" :label="m.label" :value="i" />
-      </el-select>
+      <el-radio-group v-model="aigcMode" class="grow">
+        <el-radio v-for="(m, i) in MODES" :key="i" :value="i">{{ m.label }}</el-radio>
+      </el-radio-group>
     </div>
     <div v-if="aigcMode !== 1" class="row">
       <span class="lb w100">目标岗位</span>

@@ -20,6 +20,7 @@ const noop = () => undefined
 const router = useRouter()
 const visible = ref(false)
 const member = ref(false)
+const uploadMB = ref(0.2)
 
 // 形状（对照生产）：证件照 矩形/圆角矩形/圆形/长条形；校徽仅 长条形/圆形
 const SHAPES = computed(() =>
@@ -67,17 +68,16 @@ watch(
       loadCfg()
       const info = await fetchUserInfo()
       member.value = (info?.member_expires || 0) > Date.now()
+      uploadMB.value = Number(info?.uploadMB) || 0.2
     }
   }
 )
 watch(visible, v => emit('update:modelValue', v))
 
 const title = computed(() => (props.kind === 'avatar' ? '证件照' : '校徽'))
-// 限额（生产同款）：证件照 免费2MB/会员10MB；校徽 免费200KB/会员10MB
-const sizeLimit = computed(() => (member.value ? 10 : props.kind === 'badge' ? 0.2 : 2))
-const limitLabel = computed(() =>
-  props.kind === 'badge' && !member.value ? '200KB' : `${sizeLimit.value}MB`
-)
+// 限额（生产矩阵）：非会员 200KB，月/季/年会员 2MB，终身会员 10MB（由 /user/info 下发）
+const sizeLimit = computed(() => uploadMB.value)
+const limitLabel = computed(() => (sizeLimit.value < 1 ? '200KB' : `${sizeLimit.value}MB`))
 
 function pick(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]
@@ -85,7 +85,7 @@ function pick(e: Event) {
   if (!file) return
   if (file.size > sizeLimit.value * 1024 * 1024) {
     ElMessageBox.confirm(
-      `普通用户上传图片不能大于 ${limitLabel.value}${member.value ? '' : '，会员可上传 10MB'}`,
+      `普通用户上传图片不能大于 ${limitLabel.value}${member.value ? '' : '，会员可上传 2MB'}`,
       '文件过大',
       member.value
         ? { confirmButtonText: '知道了', showCancelButton: false }
@@ -211,7 +211,7 @@ function remove() {
           <span class="up-plus">+</span>
           <span>点击上传{{ title }}</span>
           <span class="up-limit"
-            >支持 PNG/JPG/WebP，最大 {{ sizeLimit }}MB{{ member ? '' : '（会员 10MB）' }}</span
+            >支持 PNG/JPG/WebP，最大 {{ limitLabel }}{{ member ? '' : '（会员 2MB）' }}</span
           >
         </div>
       </label>

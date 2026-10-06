@@ -187,8 +187,10 @@ export interface UserInfo {
   nickName: string
   username: string
   member_expires: number
+  member_plan?: string
   cv: number
   cvUsed: number
+  uploadMB?: number
   ai: number
   ec: number
   avatar: string

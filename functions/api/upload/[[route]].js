@@ -1,6 +1,6 @@
 // 图片上传：POST /api/upload（登录）→ KV img:<id> 存二进制，GET /api/upload/<id> 回图
 // 对齐生产语义：multipart 上传返回 {code,url}，前端把 url 插进编辑器
-import { json } from '../../_lib.js'
+import { json, uploadLimitMB } from '../../_lib.js'
 import { currentUserRow } from '../../_auth.js'
 
 const id16 = () =>
@@ -43,12 +43,13 @@ export async function onRequestPost(context) {
     mime = ct.split(';')[0] || mime
   }
   if (!/^image\//.test(mime)) return json(request, { code: 400, msg: '仅支持图片' }, 400)
-  const vip = (me.row.vip_expire ?? 0) > Date.now()
-  const limit = vip ? 10 * 1024 * 1024 : 2 * 1024 * 1024
+  // 生产配额矩阵：非会员 200KB，月/季/年会员 2MB，终身会员 10MB
+  const mb = uploadLimitMB(me.row)
+  const limit = mb * 1024 * 1024
   if (buf.byteLength > limit)
     return json(
       request,
-      { code: 413, msg: vip ? '图片不能超过10MB' : '免费版图片不能超过2MB' },
+      { code: 413, msg: mb < 1 ? '图片不能超过200KB' : `图片不能超过${mb}MB` },
       413
     )
   const id = id16()

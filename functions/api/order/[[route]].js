@@ -1,5 +1,5 @@
 // /api/order/create|list|pay —— 会员订单流（pay 为模拟支付标记；真实收款渠道待接）
-import { json, readBody } from '../../_lib.js'
+import { json, readBody, VIP_TIERS } from '../../_lib.js'
 import { currentUserRow } from '../../_auth.js'
 
 export async function onRequest(context) {
@@ -48,6 +48,22 @@ export async function onRequest(context) {
       .bind(Date.now(), q.orderNo, uid)
       .run()
     if (!r.meta.changes) return json(request, { code: 400, msg: '订单不存在或已支付' })
+
+    // 支付完成开通会员：按订单档位累加有效期并记录档位（生产语义）
+    const paidOrder = await db
+      .prepare('SELECT plan FROM orders WHERE order_no = ?')
+      .bind(q.orderNo)
+      .first()
+    const planName = String(paidOrder?.plan || '')
+    const tierName = Object.keys(VIP_TIERS).find(k => planName.includes(k.replace('会员', '')))
+    if (tierName) {
+      const me = await db.prepare('SELECT vip_expire FROM users WHERE id = ?').bind(uid).first()
+      const base = Math.max(Date.now(), Number(me?.vip_expire) || 0)
+      await db
+        .prepare('UPDATE users SET vip_expire = ?, vip_plan = ? WHERE id = ?')
+        .bind(base + VIP_TIERS[tierName].days * 86400 * 1000, tierName, uid)
+        .run()
+    }
 
     // 邀请返佣：被邀请人首笔已支付订单给邀请人记 10% 佣金（与生产规则一致）
     const paidCount = await db

@@ -1,5 +1,5 @@
 // /user/* —— CodeCV OSS 前端契约：register/login/logout/verify/update/queryUserById/pwdUpdate
-import { json, readBody } from '../_lib.js'
+import { json, readBody, memberTier } from '../_lib.js'
 import {
   hashPassword,
   verifyPassword,
@@ -94,7 +94,8 @@ export async function onRequest(context) {
     if (!username) return json(request, { code: 401, msg: '登录状态已失效' })
     const row = await db.prepare('SELECT * FROM users WHERE username = ?').bind(username).first()
     if (!row) return json(request, { code: 401, msg: '用户不存在' })
-    const isMember = (row.vip_expire || 0) > Date.now()
+    const tier = memberTier(row)
+    const isMember = !!tier
     const ec = await db
       .prepare('SELECT COALESCE(SUM(export_count),0) AS c FROM resumes WHERE user_id = ?')
       .bind(row.id)
@@ -109,8 +110,10 @@ export async function onRequest(context) {
       data: {
         ...publicUser(row),
         member_expires: row.vip_expire || 0,
-        cv: isMember ? -1 : 2,
+        member_plan: row.vip_plan || '',
+        cv: isMember ? tier.cv : 1,
         cvUsed: cvUsed?.c || 0,
+        uploadMB: isMember ? tier.uploadMB : 0.2,
         ai: isMember ? -1 : 3,
         ec: ec?.c || 0
       }

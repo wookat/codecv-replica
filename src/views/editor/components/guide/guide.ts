@@ -3,102 +3,65 @@ import 'driver.js/dist/driver.css'
 import './popover.scss'
 import { getLocalStorage, setLocalStorage } from '@/common/localstorage'
 
+// 生产逐字引导配置（driver.js 7 步，从 entry chunk 提取）
 const driverObj = driver({
-  popoverClass: 'popover-container',
+  popoverClass: 'guide-container',
   showProgress: true,
   nextBtnText: '下一步',
   prevBtnText: '上一步',
   doneBtnText: '开始使用',
+  allowClose: true,
   steps: [
     {
-      element: '.editor-toolbar',
-      popover: {
-        title: '创作工具栏',
-        description: '你可以使用该工具栏快速编写简历排版'
-      }
-    },
-    {
-      element: '.icon-write',
+      element: '.toggle-edit-mode',
       popover: {
         title: '编辑模式切换',
         description:
-          '现支持两种模式，你可以使用 <strong style="color: var(--strong-color)">markdown</strong> 或 <strong style="color: var(--strong-color)">富文本</strong> 的方式来编写，不用担心切换后数据丢失，因为它们之间的数据是同步的～'
+          '现支持两种模式，你可以选择 <strong style="color: var(--strong-color)">markdown</strong>模式或<strong style="color: var(--strong-color)">所见即所得</strong> 模式来编写，且不用担心切换后数据丢失，因为它们之间的数据是同步的～'
+      }
+    },
+    {
+      element: '.menu-guide',
+      popover: {
+        title: '简历排版编写指南',
+        description: '如果你不知道怎么去编写排版，你可以花三分钟看看该指南～'
+      }
+    },
+    {
+      element: '.move',
+      popover: {
+        title: '编辑器宽度控制',
+        description: '如果你觉得编辑区域太窄，可以拖动该区域来改变编辑器的宽度'
       }
     },
     {
       element: '.operator-level2',
       popover: {
         title: '简历工具栏',
+        description: '你可以通过这些工具来调整你想要看到的简历效果'
+      }
+    },
+    {
+      element: '.lx-avatar-tool',
+      popover: {
+        title: '证件照上传/更换',
         description:
-          '你可以通过这些工具来调整你想要看到的简历效果，接下来我将给你介绍一下每一个工具的使用'
+          '你可以在此处上传/更换你的证件照<strong style="color: var(--strong-color)">（可拖拽）</strong>，当然你也可以在左侧编辑器中上传<strong style="color: var(--strong-color)">（编辑器中上传不支持拖拽）</strong>，可根据自身需求来弹性设置~'
       }
     },
     {
-      element: '.icon-adjust',
+      element: '.export-group',
       popover: {
-        title: '调节元素边距',
+        title: '导出简历',
         description:
-          '如果你对简历中某个元素的排版并不满意，你可以通过该功能对指定元素的上下边距进行调整'
+          '在此处你可以选择你想导出的<strong style="color: var(--strong-color)">简历格式</strong>'
       }
     },
     {
-      element: '.icon-zhengjian',
+      element: '.resume-history',
       popover: {
-        title: '证件照',
-        description: '此功能为上传证件照'
-      }
-    },
-
-    {
-      element: '.icon-diy',
-      popover: {
-        title: '自定义CSS',
-        description:
-          '如果你有能力编写CSS，那么你可以在此处编辑CSS来调整简历效果，注意，CSS都需要写在.jufe类下确保生效'
-      }
-    },
-    {
-      element: '.font-color-picker',
-      popover: { title: '自定义字体颜色', description: '简历的颜色可以由你自己自由控制' }
-    },
-    {
-      element: '.main-color-picker',
-      popover: { title: '自定义主色调', description: '同样，主色调也可以自由调整' }
-    },
-    {
-      element: '.icon-refresh',
-      popover: {
-        title: '重置内容',
-        description: '如果你想清空所有改动回到最初的样子，请使用该功能，该操作不可逆！'
-      }
-    },
-    {
-      element: '.follow-roll',
-      popover: {
-        title: '跟随滚动',
-        description: '同时要滚动左右两个容器太麻烦了？把这个打开吧！'
-      }
-    },
-    {
-      element: '.font-select',
-      popover: {
-        title: '设置字体',
-        description: '你可以根据自己喜好选择字体效果～'
-      }
-    },
-    {
-      element: '.el-dropdown-link',
-      popover: {
-        title: '导出简历内容',
-        description:
-          '如果你想保存你的简历内容，请在此处<strong style="color: var(--strong-color)">导出MD</strong>文件，想继续编写时导入即可'
-      }
-    },
-    {
-      element: '.use-guide',
-      popover: {
-        title: '使用引导',
-        description: '如果你想再次查看使用指引，请点击这里'
+        title: '简历历史记录',
+        description: '你可以在此处查看你保存过的历史版本，可用于回溯'
       }
     }
   ]

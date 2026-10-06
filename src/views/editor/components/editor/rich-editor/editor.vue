@@ -1,9 +1,8 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useToggleEditorMode } from './hook'
 import { checkMouseSelect, selectIcon } from '../toolbar/hook'
 import { useResumeType } from '../../../hook'
-import { startGuide } from '../../guide/guide'
-import { proofreadBus } from '../../proofread/proofread'
 import RichToolbar from '../toolbar/richTool.vue'
 import SideTool from './sideTool.vue'
 import TagStyle from './tagStyle.vue'
@@ -11,23 +10,73 @@ import ColumnResize from './columnResize.vue'
 import LinkMenu from './linkMenu.vue'
 import ImgResize from './imgResize.vue'
 import SlashMenu from './slashMenu.vue'
+import BubbleMenu from './bubbleMenu.vue'
 import './writable.scss'
 
 defineProps<{ left: number }>()
 
 const { resumeType } = useResumeType()
 const { DOMTree, ObserverContent, editorStore, undo } = useToggleEditorMode(resumeType.value)
+
+// 生产左栏同款：指南图标打开外部语雀排版指南；末位为日/夜间主题切换（html.dark）
+const GUIDE_DOC = 'https://www.yuque.com/xiongleixin/saqnu1/rxhlykmem82qbb8m'
+const openGuideDoc = () => window.open(GUIDE_DOC, '_blank')
+const isDark = ref(document.documentElement.classList.contains('dark'))
+const toggleDark = () => {
+  isDark.value = !isDark.value
+  document.documentElement.classList.toggle('dark', isDark.value)
+  localStorage.setItem('editor-theme', isDark.value ? 'dark' : 'light')
+}
+if (localStorage.getItem('editor-theme') === 'dark') {
+  document.documentElement.classList.add('dark')
+  isDark.value = true
+}
+
+// 撤销/重做可用态（生产同款禁用半透明）
+const canUndo = ref(false)
+const canRedo = ref(false)
+const refreshUndo = () => {
+  try {
+    canUndo.value = document.queryCommandEnabled('undo')
+    canRedo.value = document.queryCommandEnabled('redo')
+  } catch {
+    /* jsdom/不支持的浏览器 */
+  }
+}
+const redo = () => {
+  document.execCommand('redo')
+  refreshUndo()
+  ObserverContent()
+}
 </script>
 
 <template>
-  <!-- 生产版编辑顶栏：撤销/重做/表情/指南/智能 + 右侧胶囊由 editorContainer 提供 -->
+  <!-- 生产版编辑顶栏：撤销/重做/图标选择/排版指南/主题切换 + 右侧胶囊由 editorContainer 提供 -->
   <div class="writable-edit-bar">
     <div class="bar-icons">
-      <i class="iconfont icon-undo" title="撤销" @click="undo"></i>
-      <i class="iconfont icon-redo1 dim" title="重做"></i>
-      <i class="iconfont icon-emoji" title="表情" @click="selectIcon = true"></i>
-      <i class="iconfont icon-problem" title="使用指南" @click="startGuide()"></i>
-      <i class="iconfont icon-shine" title="智能检查" @click="proofreadBus++"></i>
+      <i
+        class="iconfont icon-undo btn"
+        :class="{ dim: !canUndo }"
+        title="撤销"
+        @click="
+          () => {
+            undo()
+            refreshUndo()
+          }
+        "
+      ></i>
+      <i class="iconfont icon-redo1 btn" :class="{ dim: !canRedo }" title="重做" @click="redo"></i>
+      <i class="iconfont icon-emoji btn" title="图标选择 /icon" @click="selectIcon = true"></i>
+      <i
+        class="menu-guide iconfont icon-problem btn"
+        title="🎈花5分钟了解排版编写指南"
+        @click="openGuideDoc"
+      ></i>
+      <i
+        :class="`iconfont btn ${isDark ? 'icon-moon' : 'icon-shine'}`"
+        :title="isDark ? '切换日间主题' : '切换夜间主题'"
+        @click="toggleDark"
+      ></i>
     </div>
   </div>
   <!-- rich-toolbar 仅保留其弹窗（图标/链接/多栏/表格），按钮行对编辑模式隐藏 -->
@@ -42,6 +91,7 @@ const { DOMTree, ObserverContent, editorStore, undo } = useToggleEditorMode(resu
   <LinkMenu />
   <ImgResize />
   <SlashMenu />
+  <BubbleMenu />
   <div
     ref="DOMTree"
     @click="checkMouseSelect"
@@ -49,6 +99,7 @@ const { DOMTree, ObserverContent, editorStore, undo } = useToggleEditorMode(resu
     class="writable-edit-mode"
     contenteditable
     spellcheck="false"
+    @keyup="refreshUndo"
     :style="{ height: 'calc(100vh - 88px)', width: `${left}px`, overflowY: 'scroll' }"
   ></div>
 </template>

@@ -87,7 +87,7 @@ async function remove(type: string) {
 
 function create() {
   if (info.value && info.value.cv >= 0 && resumes.value.length >= info.value.cv) {
-    ElMessageBox.confirm('免费版最多创建2份简历，升级会员不限份数', '简历数量已达上限', {
+    ElMessageBox.confirm('免费版最多创建1份简历，升级会员可拥有更多份数', '简历数量已达上限', {
       confirmButtonText: '升级会员',
       cancelButtonText: '知道了',
       type: 'warning'

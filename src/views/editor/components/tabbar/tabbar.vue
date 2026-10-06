@@ -85,7 +85,7 @@ watch(proofreadBus, () => (proofreadVisible.value = true))
       </div>
       <el-tooltip content="证件照（支持形状裁剪/拖拽/缩放）" effect="light">
         <button
-          class="operator-item text-btn"
+          class="operator-item text-btn lx-avatar-tool"
           @click=";(photoKind = 'avatar'), (photoVisible = true)"
         >
           证件照

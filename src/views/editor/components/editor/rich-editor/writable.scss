@@ -448,3 +448,13 @@
     }
   }
 }
+
+/* 生产夜间主题：左栏主题切换翻 html.dark，编辑区变量暗化 */
+html.dark {
+  --body-background: #262626;
+  --writable-font-color: #d1d5db;
+}
+html.dark .writable-edit-mode {
+  --background: #1d1d1f;
+  color-scheme: dark;
+}

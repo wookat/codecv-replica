@@ -8,7 +8,8 @@ import FloatTools from '@/components/FloatTools.vue'
   <!-- 生产 /login 为独立全屏页：无头无脚 -->
   <Header v-if="!['/editor', '/login'].includes($route.path)" />
   <div id="main">
-    <FloatTools v-if="!['/editor', '/login'].includes($route.path)" />
+    <!-- 生产右侧悬浮工具栏全站挂载（编辑器页也有），仅登录页排除 -->
+    <FloatTools v-if="!['/login'].includes($route.path)" />
     <router-view v-slot="{ Component }">
       <keep-alive
         :max="10"
