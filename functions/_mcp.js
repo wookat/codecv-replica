@@ -86,10 +86,6 @@ export const TOOLS = [
 
 const PUBLIC_TOOLS = new Set(['list_templates', 'get_template'])
 
-// SSE 会话表（module 作用域；CF Pages Functions 同一 isolate 内共享）
-// sessionId -> { enqueue(payloadObj), close() }
-export const SSE_SESSIONS = new Map()
-
 async function maybeSaveVersion(db, uid, type, content, style) {
   const VERSION_MAX_AGE_MS = 30 * 60 * 1000
   const last = await db
@@ -258,93 +254,4 @@ export async function handleRpc(msg, env, request) {
   }
   if (method?.startsWith('notifications/')) return null
   return rpcError(id, -32601, `method not found: ${method}`)
-}
-
-// 打开一条 legacy SSE 通道：发 endpoint 事件 → 之后 POST /mcp/messages 的响应经本流回推
-// CF Pages Functions 按请求调度 isolate，POST 常落在别的实例上——本端除本地 Map 直推外，
-// 另用 KV 做会话队列：POST 写 mcpr:<sid>:<resid>，本端轮询 list(强一致,不走边缘缓存)+get+delete 派发
-export function openSseStream(request, env) {
-  const sessionId = crypto.randomUUID()
-  const enc = new TextEncoder()
-  const emitted = new Set()
-  let enqueue
-  let close
-  let ka
-  let poll
-  const stream = new ReadableStream({
-    start(controller) {
-      enqueue = payload => {
-        try {
-          controller.enqueue(enc.encode(`event: message\ndata: ${JSON.stringify(payload)}\n\n`))
-        } catch {
-          /* 流已关 */
-        }
-      }
-      const endpoint = `/mcp/messages?sessionId=${sessionId}`
-      controller.enqueue(enc.encode(`event: endpoint\ndata: ${endpoint}\n\n`))
-      ka = setInterval(() => {
-        try {
-          controller.enqueue(enc.encode(':ka\n\n'))
-        } catch {
-          /* noop */
-        }
-      }, 20000)
-      // POST 侧以 JSON-RPC id 作键尾写 mcpr:<sid>:<id> —— 键名可预测，get 新键=缓存未命中=强读；
-      // list 传播有延迟，只作低频兜底捞非常规 id
-      let nextId = 0
-      let tick = 0
-      poll = setInterval(async () => {
-        try {
-          tick++
-          const names = []
-          for (let i = nextId; i < nextId + 8; i++) names.push(`mcpr:${sessionId}:${i}`)
-          if (tick % 8 === 0) {
-            const l = await env.UPSTASH_KV.list({ prefix: `mcpr:${sessionId}:` })
-            for (const k of l.keys) if (!emitted.has(k.name)) names.push(k.name)
-          }
-          for (const name of names) {
-            if (emitted.has(name)) continue
-            const v = await env.UPSTASH_KV.get(name)
-            if (v == null) continue
-            emitted.add(name)
-            try {
-              controller.enqueue(enc.encode(`event: message\ndata: ${v}\n\n`))
-            } catch {
-              /* 流已关 */
-            }
-            const m = name.match(/:(\d+)$/)
-            if (m) nextId = Math.max(nextId, +m[1] + 1)
-            await env.UPSTASH_KV.delete(name)
-          }
-        } catch {
-          /* KV 抖动时下一拍重试 */
-        }
-      }, 700)
-      close = () => {
-        clearInterval(ka)
-        clearInterval(poll)
-        SSE_SESSIONS.delete(sessionId)
-        try {
-          controller.close()
-        } catch {
-          /* noop */
-        }
-      }
-      SSE_SESSIONS.set(sessionId, { enqueue, close })
-    },
-    cancel() {
-      clearInterval(ka)
-      clearInterval(poll)
-      SSE_SESSIONS.delete(sessionId)
-    }
-  })
-  const origin = request.headers.get('Origin')
-  return new Response(stream, {
-    headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      Connection: 'keep-alive',
-      ...(origin ? { 'Access-Control-Allow-Origin': origin } : {})
-    }
-  })
 }

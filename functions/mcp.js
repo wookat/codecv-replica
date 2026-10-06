@@ -5,7 +5,7 @@
 //   Auth: Authorization: Bearer <用户 token>（公开工具不需要；简历读写需要）
 // 覆盖客户端：Devin/Cursor/Claude Code/Codex/Windsurf/Zed/任意 streamable-http 或 SSE 客户端
 import { json, readBody } from './_lib.js'
-import { handleRpc, openSseStream, SERVER_INFO, PROTOCOL_VERSION, TOOLS } from './_mcp.js'
+import { handleRpc, SERVER_INFO, PROTOCOL_VERSION, TOOLS } from './_mcp.js'
 
 export async function onRequest(context) {
   const { request, env } = context
@@ -21,7 +21,12 @@ export async function onRequest(context) {
   }
   if (request.method === 'GET') {
     if ((request.headers.get('Accept') || '').includes('text/event-stream')) {
-      return openSseStream(request, env)
+      if (!env.MCP_SESSION) return json(request, { code: 501, msg: 'sse relay not bound' }, 501)
+      const sid = crypto.randomUUID()
+      const stub = env.MCP_SESSION.get(env.MCP_SESSION.idFromName(sid))
+      return stub.fetch(`https://mcp-session/stream?sid=${sid}`, {
+        headers: { Accept: 'text/event-stream' }
+      })
     }
     return json(request, {
       name: SERVER_INFO.name,
