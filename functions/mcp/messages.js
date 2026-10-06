@@ -17,20 +17,23 @@ export async function onRequest(context) {
   if (request.method !== 'POST') return json(request, { code: 405 }, 405)
 
   const url = new URL(request.url)
-  const session = SSE_SESSIONS.get(url.searchParams.get('sessionId') || '')
-  if (!session) {
-    // 会话不在本 isolate（CF 调度到别的实例）：客户端应重连 SSE
-    return json(request, { code: 404, msg: 'sse session not found' }, 404)
-  }
+  const sid = url.searchParams.get('sessionId') || ''
+  const session = SSE_SESSIONS.get(sid)
 
   const body = await readBody(request)
   const msgs = Array.isArray(body) ? body : [body]
   const outs = []
   for (const m of msgs) {
     const r = await handleRpc(m, env, request)
-    if (r) {
-      outs.push(r)
-      session.enqueue(r) // 尽力推送：同 isolate 且流未挂时经 SSE 回推
+    if (!r) continue
+    outs.push(r)
+    if (session) {
+      session.enqueue(r) // 快路径：POST 与 SSE 同 isolate，直接推流
+    } else {
+      // 跨 isolate：写 KV 队列，SSE 端轮询 list+get+delete 派发到流上
+      await env.UPSTASH_KV.put(`mcpr:${sid}:${crypto.randomUUID()}`, JSON.stringify(r), {
+        expirationTtl: 120
+      })
     }
   }
   // 宽松兜底：响应同时随 POST 直接返回（部分客户端读 body；严格 SSE 客户端请走 streamable-http 或 mcp-remote 桥）

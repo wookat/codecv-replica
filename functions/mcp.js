@@ -21,7 +21,7 @@ export async function onRequest(context) {
   }
   if (request.method === 'GET') {
     if ((request.headers.get('Accept') || '').includes('text/event-stream')) {
-      return openSseStream(request)
+      return openSseStream(request, env)
     }
     return json(request, {
       name: SERVER_INFO.name,

@@ -261,12 +261,16 @@ export async function handleRpc(msg, env, request) {
 }
 
 // 打开一条 legacy SSE 通道：发 endpoint 事件 → 之后 POST /mcp/messages 的响应经本流回推
-export function openSseStream(request) {
+// CF Pages Functions 按请求调度 isolate，POST 常落在别的实例上——本端除本地 Map 直推外，
+// 另用 KV 做会话队列：POST 写 mcpr:<sid>:<resid>，本端轮询 list(强一致,不走边缘缓存)+get+delete 派发
+export function openSseStream(request, env) {
   const sessionId = crypto.randomUUID()
   const enc = new TextEncoder()
+  const emitted = new Set()
   let enqueue
   let close
-  let interval
+  let ka
+  let poll
   const stream = new ReadableStream({
     start(controller) {
       enqueue = payload => {
@@ -278,15 +282,35 @@ export function openSseStream(request) {
       }
       const endpoint = `/mcp/messages?sessionId=${sessionId}`
       controller.enqueue(enc.encode(`event: endpoint\ndata: ${endpoint}\n\n`))
-      interval = setInterval(() => {
+      ka = setInterval(() => {
         try {
           controller.enqueue(enc.encode(':ka\n\n'))
         } catch {
           /* noop */
         }
       }, 20000)
+      poll = setInterval(async () => {
+        try {
+          const l = await env.UPSTASH_KV.list({ prefix: `mcpr:${sessionId}:` })
+          for (const k of l.keys) {
+            if (emitted.has(k.name)) continue
+            const v = await env.UPSTASH_KV.get(k.name)
+            if (v == null) continue
+            emitted.add(k.name)
+            try {
+              controller.enqueue(enc.encode(`event: message\ndata: ${v}\n\n`))
+            } catch {
+              /* 流已关 */
+            }
+            await env.UPSTASH_KV.delete(k.name)
+          }
+        } catch {
+          /* KV 抖动时下一拍重试 */
+        }
+      }, 700)
       close = () => {
-        clearInterval(interval)
+        clearInterval(ka)
+        clearInterval(poll)
         SSE_SESSIONS.delete(sessionId)
         try {
           controller.close()
@@ -297,7 +321,8 @@ export function openSseStream(request) {
       SSE_SESSIONS.set(sessionId, { enqueue, close })
     },
     cancel() {
-      clearInterval(interval)
+      clearInterval(ka)
+      clearInterval(poll)
       SSE_SESSIONS.delete(sessionId)
     }
   })
