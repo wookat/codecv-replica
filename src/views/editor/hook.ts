@@ -124,7 +124,9 @@ export function useDownLoad(type: Ref<string>) {
     }
     // 处理自定义生成的样式
     for (const attr of styleAttrs) {
-      const styleContent = document.head.querySelector(`style[${attr}-${type.value}]`)?.textContent
+      const styleContent = document.head.querySelector(
+        `style[${CSS.escape(`${attr}-${type.value}`)}]`
+      )?.textContent
       if (!styleContent) continue
       style += styleContent
     }

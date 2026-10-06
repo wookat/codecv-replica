@@ -69,7 +69,8 @@ export function createDIV() {
 }
 
 export function query(attr: string) {
-  return document.head.querySelector(`style[${attr}]`)
+  // attr 可能含 type~id 的 ~，属性选择器需 CSS.escape 转义
+  return document.head.querySelector(`style[${CSS.escape(attr)}]`)
 }
 
 export function removeHeadStyle(attr: string) {
