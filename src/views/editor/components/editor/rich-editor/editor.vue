@@ -10,6 +10,7 @@ import TagStyle from './tagStyle.vue'
 import ColumnResize from './columnResize.vue'
 import LinkMenu from './linkMenu.vue'
 import ImgResize from './imgResize.vue'
+import SlashMenu from './slashMenu.vue'
 import './writable.scss'
 
 defineProps<{ left: number }>()
@@ -40,6 +41,7 @@ const { DOMTree, ObserverContent, editorStore, undo } = useToggleEditorMode(resu
   <ColumnResize />
   <LinkMenu />
   <ImgResize />
+  <SlashMenu />
   <div
     ref="DOMTree"
     @click="checkMouseSelect"
