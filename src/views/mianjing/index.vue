@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { mianjingList, mianjingMeta, MianjingCompany, MianjingItem } from '@/api/modules/site'
 import { localAsset, logoColor } from '@/utils/article'
+import { fmtCN } from '@/utils/time'
 
 const loading = ref(false)
 const list = ref<MianjingItem[]>([])
@@ -113,14 +114,7 @@ function onKeyword(v: string) {
   }, 300)
 }
 
-const fmtTime = (ts?: number) => {
-  if (!ts) return ''
-  const d = new Date(ts)
-  return `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(
-    2,
-    '0'
-  )} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
-}
+const fmtTime = (ts?: number) => (ts ? fmtCN(ts) : '')
 
 const companyOf = (m: MianjingItem) => companies.value.find(c => c.slug === m.companySlug)
 const isHot = (m: MianjingItem) => (m.viewCount ?? 0) >= 100

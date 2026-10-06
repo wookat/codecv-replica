@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { delMianjing, myMianjing } from '@/api/modules/share'
 import { currentUser } from '@/utils/auth'
+import { fmtCN } from '@/utils/time'
 
 interface MineItem {
   _id: string
@@ -42,7 +43,7 @@ onMounted(async () => {
   }
 })
 
-const fmt = (ts?: number) => (ts ? new Date(ts).toLocaleString() : '')
+const fmt = (ts?: number) => (ts ? fmtCN(ts, true) : '')
 
 async function remove(id: string) {
   await ElMessageBox.confirm('确定删除这篇投稿吗？', '删除', { type: 'warning' })

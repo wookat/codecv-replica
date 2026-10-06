@@ -19,6 +19,7 @@ import {
 } from '@/api/modules/engagement'
 import { extractToc, localAsset, logoColor, renderArticle, TocItem } from '@/utils/article'
 import { currentUser } from '@/utils/auth'
+import { fmtCN } from '@/utils/time'
 import LoginModal from '@/components/LoginModal.vue'
 import { fetchUserInfo } from '@/api/modules/cloudResume'
 
@@ -65,7 +66,7 @@ const docId = computed(() => String(route.params.docId))
 const QUICK = ['感谢分享，收藏了！', '干货满满', '蹲一个后续', '祝大家 offer 多多']
 const quick = (t: string) => (cmtDraft.value = t)
 
-const cmtFmt = (ts: number) => new Date(ts).toLocaleString('zh-CN', { hour12: false })
+const cmtFmt = (ts: number) => fmtCN(ts, true)
 
 async function loadComments() {
   comments.value = await engagementComments('mianjing', docId.value)
@@ -126,13 +127,7 @@ const authorAvatar = computed(() => {
   return av ? `/prod-assets/avatar${av}.png` : '/prod-assets/avatar1.png'
 })
 
-const publishLabel = computed(() => {
-  const t = doc.value?.publishTime
-  if (!t) return ''
-  const d = new Date(t)
-  const p = (n: number) => String(n).padStart(2, '0')
-  return `${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`
-})
+const publishLabel = computed(() => (doc.value?.publishTime ? fmtCN(doc.value.publishTime) : ''))
 
 function onScroll() {
   const el = document.documentElement
@@ -154,6 +149,8 @@ onMounted(async () => {
   try {
     const res = await mianjingDetail(id)
     doc.value = res?.data ?? null
+    if (doc.value?.title && route.name === 'mianjing-detail')
+      document.title = `${doc.value.title} - CodeCV简历`
     if (doc.value?.contentMd) {
       html.value = renderArticle(doc.value.contentMd as string)
       toc.value = extractToc(doc.value.contentMd as string)

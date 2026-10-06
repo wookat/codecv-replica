@@ -3,6 +3,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { currentUser } from '@/utils/auth'
 import { getLocalStorage } from '@/common/localstorage'
 import { computed, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 interface InviteRow {
   id: number
@@ -17,6 +18,10 @@ interface InviteRow {
 
 const user = ref(currentUser())
 const records = ref<InviteRow[]>([])
+// /invite = 落地页（生产登录态也显示落地页）；/user/invite = 邀请记录表
+const route = useRoute()
+const router = useRouter()
+const isRecords = computed(() => route.name === 'user-invite')
 const page = ref(1)
 const PAGE_SIZE = 10
 
@@ -59,8 +64,8 @@ onMounted(load)
   <div class="iv-page">
     <h1 class="sr-only">邀请有赏_推荐好友_邀请返利_分享赚钱_邀请奖励计划</h1>
 
-    <!-- 登录态：我的邀请记录（与生产 /user/invite 一致） -->
-    <div v-if="user" class="iv-card">
+    <!-- /user/invite：我的邀请记录（与生产一致） -->
+    <div v-if="isRecords" class="iv-card">
       <div class="iv-head-row">
         <h2>
           我的邀请记录 <span class="cnt">（{{ records.length }}条）</span>
@@ -106,7 +111,7 @@ onMounted(load)
       </div>
     </div>
 
-    <!-- 游客态：邀请有赏落地页 -->
+    <!-- /invite：邀请有赏落地页（生产对游客与登录用户同一形态） -->
     <template v-else>
       <div class="iv-head">
         <div class="inner">
@@ -115,7 +120,10 @@ onMounted(load)
             感谢您喜欢我们的产品，如果您觉得好用的话，可以分享给您的同学朋友使用，邀请新人首次开通会员你将得到订单
             <span class="hl">10% 的佣金</span>（非优惠券/代金券）。
           </p>
-          <button class="iv-btn" @click="goLogin">登录后查看我的邀请链接</button>
+          <button v-if="user" class="iv-btn" @click="router.push('/user/invite')">
+            查看我的邀请记录
+          </button>
+          <button v-else class="iv-btn" @click="goLogin">登录后查看我的邀请链接</button>
         </div>
       </div>
       <div class="steps-card">

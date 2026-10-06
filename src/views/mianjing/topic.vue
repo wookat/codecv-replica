@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { mianjingList, mianjingMeta, MianjingItem } from '@/api/modules/site'
 import { logoColor, localAsset } from '@/utils/article'
+import { fmtCNDate } from '@/utils/time'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
@@ -18,11 +19,7 @@ const batchLabel = (m: MianjingItem) => {
     ] ?? m.batch
   return `${g}${b}`
 }
-const fmtTime = (ts?: number) => {
-  if (!ts) return ''
-  const d = new Date(ts)
-  return `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
+const fmtTime = (ts?: number) => (ts ? fmtCNDate(ts) : '')
 
 onMounted(async () => {
   loading.value = true
@@ -37,6 +34,8 @@ onMounted(async () => {
       name: slug.value
     }
     list.value = (res?.data ?? []).filter(m => m.topicSlug === slug.value)
+    if (route.name === 'mianjing-topic')
+      document.title = `${topic.value?.name ?? slug.value} - CodeCV简历`
   } catch (e) {
     console.error(e)
   } finally {

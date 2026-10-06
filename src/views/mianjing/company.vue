@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { mianjingList, mianjingMeta, MianjingCompany, MianjingItem } from '@/api/modules/site'
 import { localAsset, logoColor } from '@/utils/article'
+import { fmtCN } from '@/utils/time'
 
 const route = useRoute()
 const slug = computed(() => (route.params.slug ?? route.params.companySlug) as string)
@@ -83,14 +84,7 @@ const hotList = computed(() =>
   [...all.value].sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0)).slice(0, 5)
 )
 const isHot = (m: MianjingItem) => (m.viewCount ?? 0) >= 100
-const fmtTime = (ts?: number) => {
-  if (!ts) return ''
-  const d = new Date(ts)
-  return `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(
-    2,
-    '0'
-  )} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
-}
+const fmtTime = (ts?: number) => (ts ? fmtCN(ts) : '')
 
 async function load() {
   loading.value = true
@@ -98,6 +92,11 @@ async function load() {
     const res = await mianjingList({ current: 1, pageSize: 200, company: slug.value })
     all.value = res?.data ?? []
     list.value = all.value
+    // 生产标题形态：字节跳动面经 - 6篇 | CodeCV简历；异步返回时须确认仍在公司页，否则覆盖新路由标题
+    if (String(route.name).startsWith('mianjing-company'))
+      document.title = `${company.value?.name ?? slug.value}面经 - ${
+        all.value.length
+      }篇 | CodeCV简历`
   } catch (e) {
     console.error('获取公司面经失败:', e)
   } finally {
@@ -106,6 +105,10 @@ async function load() {
 }
 
 watch(slug, load)
+watch([company, all], () => {
+  if (all.value.length && String(route.name).startsWith('mianjing-company'))
+    document.title = `${company.value?.name ?? slug.value}面经 - ${all.value.length}篇 | CodeCV简历`
+})
 
 onMounted(async () => {
   load()

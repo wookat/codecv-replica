@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { postDetail } from '@/api/modules/site'
 import { extractToc, renderArticle, TocItem } from '@/utils/article'
+import { fmtCN } from '@/utils/time'
 import { templates } from '@/templates/config'
 
 const route = useRoute()
@@ -23,19 +24,14 @@ function scrollTo(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
 }
 
-const fmt = (ts?: number) => {
-  if (!ts) return ''
-  const d = new Date(ts)
-  const p = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(
-    d.getMinutes()
-  )}:${p(d.getSeconds())}`
-}
+const fmt = (ts?: number) => (ts ? fmtCN(ts, true) : '')
 
 onMounted(async () => {
   try {
     const res = await postDetail(route.params.id as string)
     post.value = res?.data ?? null
+    if (post.value?.title && route.name === 'post-detail')
+      document.title = `${post.value.title} - CodeCV简历`
     if (post.value?.contentMd) {
       html.value = renderArticle(post.value.contentMd)
       toc.value = extractToc(post.value.contentMd)
