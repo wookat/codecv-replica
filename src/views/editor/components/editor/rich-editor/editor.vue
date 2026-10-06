@@ -5,6 +5,8 @@ import { useResumeType } from '../../../hook'
 import { startGuide } from '../../guide/guide'
 import { proofreadBus } from '../../proofread/proofread'
 import RichToolbar from '../toolbar/richTool.vue'
+import SideTool from './sideTool.vue'
+import TagStyle from './tagStyle.vue'
 import './writable.scss'
 
 defineProps<{ left: number }>()
@@ -30,6 +32,8 @@ const { DOMTree, ObserverContent, editorStore, undo } = useToggleEditorMode(resu
     @toggle-editor-mode="editorStore.setWritableMode"
     @content-change="ObserverContent"
   />
+  <SideTool />
+  <TagStyle />
   <div
     ref="DOMTree"
     @click="checkMouseSelect"

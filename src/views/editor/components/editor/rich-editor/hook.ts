@@ -1,7 +1,7 @@
 import useEditorStore from '@/store/modules/editor'
 import { queryDOM } from '@/utils'
 import { resumeDOMStruct2Markdown } from '@/utils/dom2md'
-import { nextTick, onActivated, onMounted, ref } from 'vue'
+import { nextTick, onActivated, onBeforeUnmount, onMounted, ref } from 'vue'
 // 使用编辑模式
 export function useToggleEditorMode(resumeType: string) {
   const editorStore = useEditorStore(),
@@ -49,28 +49,28 @@ export function useToggleEditorMode(resumeType: string) {
       const h = document.createElement('div')
       h.className = HANDLE
       h.contentEditable = 'false'
-      // 生产版手柄 = ⋮⋮ 拖拽钮 + ＋ 添加内容钮
+      // 生产版手柄 = ⋮⋮ 拖拽钮（点击开 row-actions 菜单）+ ＋ 添加内容钮（点击开 insert 菜单）
       const grip = document.createElement('div')
       grip.className = 'drag-btn'
-      grip.title = '拖拽移动/节点操作'
       grip.draggable = true
+      grip.addEventListener('click', ev => {
+        ev.stopPropagation()
+        window.dispatchEvent(
+          new CustomEvent('side-tool-menu-trigger', {
+            detail: { mode: 'row-actions', block: el, anchorRect: h.getBoundingClientRect() }
+          })
+        )
+      })
       const add = document.createElement('div')
       add.className = 'add-btn'
       add.title = '添加内容'
       add.addEventListener('click', ev => {
         ev.stopPropagation()
-        const p = document.createElement('p')
-        p.innerHTML = '<br>'
-        el.parentElement?.insertBefore(p, el.nextSibling)
-        ObserverContent()
-        nextTick(() => {
-          const range = document.createRange()
-          range.selectNodeContents(p)
-          range.collapse(false)
-          const sel = window.getSelection()
-          sel?.removeAllRanges()
-          sel?.addRange(range)
-        })
+        window.dispatchEvent(
+          new CustomEvent('side-tool-menu-trigger', {
+            detail: { mode: 'insert', block: el, anchorRect: h.getBoundingClientRect() }
+          })
+        )
       })
       h.appendChild(grip)
       h.appendChild(add)
@@ -86,6 +86,9 @@ export function useToggleEditorMode(resumeType: string) {
         root
           .querySelectorAll('.is-draggable-hover')
           .forEach(x => x.classList.remove('is-draggable-hover'))
+        // 生产同款落点闪烁反馈
+        el.classList.add('is-dropped-flash')
+        window.setTimeout(() => el.classList.remove('is-dropped-flash'), 1300)
         ObserverContent()
       })
       el.appendChild(h)
@@ -122,10 +125,42 @@ export function useToggleEditorMode(resumeType: string) {
     target.classList.add('is-draggable-hover')
   }
 
+  // 生产同款空段落浮层：光标停在顶层空块时弹出 block-menu（正文/模块标题/小标题/左右布局/空白符）
+  let blockMenuTimer = 0
+  function onSelectionChange() {
+    const root = DOMTree.value
+    if (!root) return
+    window.clearTimeout(blockMenuTimer)
+    blockMenuTimer = window.setTimeout(() => {
+      const sel = window.getSelection()
+      if (!sel || !sel.isCollapsed || !sel.rangeCount) return
+      const node = sel.anchorNode
+      const el = (node?.nodeType === 1 ? node : node?.parentElement) as HTMLElement | null
+      if (!el || !root.contains(el)) return
+      // 找到直属 root 的块级祖先
+      let block = el
+      while (block.parentElement && block.parentElement !== root) {
+        block = block.parentElement
+      }
+      if (block.parentElement !== root) return
+      const isText =
+        !block.textContent?.trim() &&
+        ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(block.tagName)
+      if (!isText) return
+      const r = block.getBoundingClientRect()
+      window.dispatchEvent(
+        new CustomEvent('side-tool-menu-trigger', {
+          detail: { mode: 'block', block, anchorRect: r }
+        })
+      )
+    }, 120)
+  }
+
   onMounted(() => {
     const root = DOMTree.value
     if (root) {
       root.addEventListener('dragover', onDragOver)
+      document.addEventListener('selectionchange', onSelectionChange)
       // 新建节点（回车拆段等）出现时补挂手柄
       new MutationObserver(muts => {
         const need = muts.some(
@@ -137,6 +172,7 @@ export function useToggleEditorMode(resumeType: string) {
       }).observe(root, { childList: true, subtree: true })
     }
   })
+  onBeforeUnmount(() => document.removeEventListener('selectionchange', onSelectionChange))
 
   const fillContent = () => {
     if (editorStore.writable) {

@@ -25,7 +25,7 @@ import { useResumeType } from '../../hook'
 import ProofreadDrawer from '../proofread/proofread.vue'
 import TranslateDialog from './translateDialog.vue'
 import PhotoDialog from './photoDialog.vue'
-import { proofreadBus } from '../proofread/proofread'
+import { proofreadBus, proofreadState } from '../proofread/proofread'
 import { ref, watch } from 'vue'
 
 const emits = defineEmits(['upload-avatar', 'html-convert'])
@@ -121,7 +121,17 @@ watch(proofreadBus, () => (proofreadVisible.value = true))
         </button>
       </el-tooltip>
       <el-tooltip content="错别字检查" effect="light">
-        <button class="operator-item text-btn proofread-btn" @click="proofreadVisible = true">
+        <button
+          class="operator-item text-btn proofread-btn proofread-tool-btn"
+          :class="{
+            'proofread-tool-btn--found':
+              proofreadState.status === 'done' && proofreadState.found > 0,
+            'proofread-tool-btn--ok': proofreadState.status === 'done' && proofreadState.found === 0
+          }"
+          :disabled="proofreadState.status === 'checking'"
+          @click="proofreadVisible = true"
+        >
+          <span v-if="proofreadState.status === 'checking'" class="proofread-btn-spinner"></span>
           错别字检查
           <span class="proofread-new-dot" title="新功能"></span>
         </button>

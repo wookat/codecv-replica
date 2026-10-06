@@ -5,7 +5,7 @@
   font-size: 0.875rem;
   line-height: 1.25rem;
   border-radius: 0.75rem;
-  padding: 18px 45px 18px 52px;
+  padding: 54px 45px 18px 52px;
   position: relative;
   outline: none;
   min-width: 480px;
@@ -97,6 +97,23 @@
   p[breakLayout]:empty::before {
     content: '请输入内容...';
     color: #999;
+  }
+  /* 生产同款空节点占位 */
+  .is-empty::before {
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    letter-spacing: 0.05em;
+    line-height: 2rem;
+    pointer-events: none;
+    width: 100%;
+    color: #999;
+  }
+  p.is-empty {
+    line-height: 20px;
+  }
+  p.is-empty::before {
+    line-height: 1.25rem;
   }
 
   b,
@@ -380,6 +397,19 @@
   .is-draggable-hover {
     background-color: var(--body-background);
     border-radius: 0.375rem;
+  }
+  /* 生产同款拖放落点主题色闪烁 */
+  .is-dropped-flash {
+    animation: dropped-flash 1.2s ease-out;
+    border-radius: 0.375rem;
+  }
+  @keyframes dropped-flash {
+    0% {
+      background-color: color-mix(in srgb, var(--theme) 22%, transparent);
+    }
+    100% {
+      background-color: transparent;
+    }
   }
 }
 

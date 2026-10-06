@@ -8,6 +8,9 @@ export interface ProofreadIssue {
   kind: 'typo' | 'format'
   msg: string
   severity?: 'high' | 'low' // 生产同款：仅 high 可批量修正
+  type?: string // 生产同款分类：错别字/语病/格式…（meta 行展示）
+  reason?: string // 原因说明（meta 行尾）
+  module?: string // 所在章节名；定位不到时归「未能定位」
 }
 
 const TYPO_PAIRS: [string, string][] = [
@@ -103,7 +106,9 @@ export function scanContent(md: string): ProofreadIssue[] {
         right,
         ctx: md.slice(Math.max(0, idx - 12), idx + wrong.length + 12).replace(/\n/g, ' '),
         kind: 'typo',
-        msg: `「${wrong}」应为「${right}」`
+        msg: `「${wrong}」应为「${right}」`,
+        type: '错别字',
+        reason: `「${wrong}」应为「${right}」`
       })
       idx = md.indexOf(wrong, idx + 1)
     }
@@ -118,7 +123,10 @@ export function scanContent(md: string): ProofreadIssue[] {
         right: rule.right ? rule.right(m) : '',
         ctx: md.slice(Math.max(0, m.index - 12), m.index + m[0].length + 12).replace(/\n/g, ' '),
         kind: 'format',
-        msg: rule.msg(m)
+        msg: rule.msg(m),
+        type: '格式',
+        reason: rule.msg(m),
+        severity: 'low'
       })
     }
   }
@@ -127,3 +135,9 @@ export function scanContent(md: string): ProofreadIssue[] {
 
 // 编辑栏「智能检查」按钮 → 打开错别字抽屉的跨组件信号
 export const proofreadBus = ref(0)
+
+// 「错别字检查」操作按钮状态（prod：检查中 spinner / 发现问题红 / 全部干净绿）
+export const proofreadState = ref<{ status: 'idle' | 'checking' | 'done'; found: number }>({
+  status: 'idle',
+  found: 0
+})
