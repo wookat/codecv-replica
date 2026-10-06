@@ -101,7 +101,8 @@ onBeforeUnmount(() => {
         :style="{ top: state.top + 'px', left: state.left + 'px' }"
         @mousedown.stop
       >
-        <div class="chips">
+        <div class="panel-label">标签样式</div>
+        <div class="chips tag-grid">
           <button
             v-for="c in CHIPS"
             :key="c.name"
@@ -116,11 +117,15 @@ onBeforeUnmount(() => {
           </button>
         </div>
         <button class="custom-toggle" type="button" @click="custom = !custom">
-          <span>自定义</span><span class="arrow" :class="{ 'is-open': custom }">›</span>
+          <span>自定义颜色</span><span class="arrow" :class="{ 'is-open': custom }">›</span>
         </button>
         <div v-if="custom" class="custom-row">
-          <label>文字色<input type="color" v-model="fg" @input="applyFg" /></label>
-          <label>背景色<input type="color" v-model="bg" @input="applyBg" /></label>
+          <label class="custom-item"
+            ><span>文字</span><input type="color" v-model="fg" @input="applyFg"
+          /></label>
+          <label class="custom-item"
+            ><span>背景</span><input type="color" v-model="bg" @input="applyBg"
+          /></label>
         </div>
       </div>
     </Transition>
@@ -136,6 +141,11 @@ onBeforeUnmount(() => {
   padding: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.14);
   width: 320px;
+  .panel-label {
+    font-size: 12px;
+    color: #666;
+    padding: 2px 4px 6px;
+  }
   .chips {
     display: flex;
     flex-wrap: wrap;

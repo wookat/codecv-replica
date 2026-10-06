@@ -7,6 +7,7 @@ import { proofreadBus } from '../../proofread/proofread'
 import RichToolbar from '../toolbar/richTool.vue'
 import SideTool from './sideTool.vue'
 import TagStyle from './tagStyle.vue'
+import ColumnResize from './columnResize.vue'
 import './writable.scss'
 
 defineProps<{ left: number }>()
@@ -34,6 +35,7 @@ const { DOMTree, ObserverContent, editorStore, undo } = useToggleEditorMode(resu
   />
   <SideTool />
   <TagStyle />
+  <ColumnResize />
   <div
     ref="DOMTree"
     @click="checkMouseSelect"
