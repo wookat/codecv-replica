@@ -8,6 +8,8 @@ import RichToolbar from '../toolbar/richTool.vue'
 import SideTool from './sideTool.vue'
 import TagStyle from './tagStyle.vue'
 import ColumnResize from './columnResize.vue'
+import LinkMenu from './linkMenu.vue'
+import ImgResize from './imgResize.vue'
 import './writable.scss'
 
 defineProps<{ left: number }>()
@@ -36,6 +38,8 @@ const { DOMTree, ObserverContent, editorStore, undo } = useToggleEditorMode(resu
   <SideTool />
   <TagStyle />
   <ColumnResize />
+  <LinkMenu />
+  <ImgResize />
   <div
     ref="DOMTree"
     @click="checkMouseSelect"
