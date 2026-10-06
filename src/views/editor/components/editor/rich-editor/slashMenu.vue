@@ -290,7 +290,6 @@ function refresh() {
 }
 function close() {
   state.visible = false
-  anchorNode = null
 }
 const listRef = ref<HTMLElement>()
 function onKey(ev: KeyboardEvent) {
