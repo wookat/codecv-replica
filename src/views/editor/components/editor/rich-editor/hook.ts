@@ -1,4 +1,6 @@
 import useEditorStore from '@/store/modules/editor'
+import { TOKEN } from '@/store/modules/user'
+import { getLocalStorage } from '@/common/localstorage'
 import { queryDOM } from '@/utils'
 import { resumeDOMStruct2Markdown } from '@/utils/dom2md'
 import { nextTick, onActivated, onBeforeUnmount, onMounted, ref } from 'vue'
@@ -154,10 +156,58 @@ export function useToggleEditorMode(resumeType: string) {
     }, 120)
   }
 
+  // 生产同款粘贴图片：剪贴板含图片文件 → 上传(KV图床，未登录dataURL兜底) → 插入
+  async function onPaste(ev: ClipboardEvent) {
+    const file = Array.from(ev.clipboardData?.files || []).find(f => f.type.startsWith('image/'))
+    if (!file) return
+    ev.preventDefault()
+    let url = ''
+    try {
+      const token = (getLocalStorage(TOKEN) as string) || ''
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        body: fd
+      })
+      const data = await res.json()
+      if (data.code === 200) url = data.url
+    } catch {
+      /* fall through to dataURL */
+    }
+    if (!url) {
+      url = await new Promise<string>((resolve, reject) => {
+        const fr = new FileReader()
+        fr.onload = () => resolve(String(fr.result))
+        fr.onerror = reject
+        fr.readAsDataURL(file)
+      })
+    }
+    const img = document.createElement('img')
+    img.src = url
+    img.alt = file.name || 'image'
+    img.style.maxWidth = '100%'
+    const sel = getSelection()
+    const r = sel?.rangeCount ? sel.getRangeAt(0) : null
+    if (r && DOMTree.value?.contains(r.commonAncestorContainer)) {
+      r.deleteContents()
+      r.insertNode(img)
+      r.setStartAfter(img)
+      r.collapse(true)
+      sel?.removeAllRanges()
+      sel?.addRange(r)
+    } else {
+      DOMTree.value?.appendChild(img)
+    }
+    ObserverContent()
+  }
+
   onMounted(() => {
     const root = DOMTree.value
     if (root) {
       root.addEventListener('dragover', onDragOver)
+      root.addEventListener('paste', onPaste)
       document.addEventListener('selectionchange', onSelectionChange)
       // 新建节点（回车拆段等）出现时补挂手柄
       new MutationObserver(muts => {
