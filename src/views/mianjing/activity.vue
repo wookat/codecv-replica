@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { mianjingList, mianjingMeta, MianjingItem } from '@/api/modules/site'
+import { currentUser } from '@/utils/auth'
 import { logoColor, localAsset } from '@/utils/article'
 
 const list = ref<MianjingItem[]>([])
 const loading = ref(false)
+const user = ref(currentUser())
+const myHeat = ref(0)
+const myCount = ref(0)
 
 const PRIZES = [
   { range: '热度榜第 1-3 名', prize: '终身会员', desc: '终身有效，一次冲榜永久受益', crown: true },
@@ -27,6 +31,14 @@ onMounted(async () => {
       null
     const slug = topic?.slug
     list.value = (res?.data ?? []).filter(m => m.topicSlug === slug || !slug)
+    // 我的活动：统计本人参赛作品与热度（生产同款三张统计卡）
+    if (user.value) {
+      const mine = list.value.filter(
+        m => (m as any).userName === user.value?.name || (m as any).author === user.value?.name
+      )
+      myCount.value = mine.length
+      myHeat.value = mine.reduce((s, m) => s + (m.viewCount ?? 0), 0)
+    }
   } catch (e) {
     console.error(e)
   } finally {
@@ -173,7 +185,39 @@ onMounted(async () => {
       </div>
     </section>
 
-    <section class="login-card">
+    <section v-if="user" class="my-card">
+      <h2 class="sec-t">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
+          />
+        </svg>
+        我的活动
+      </h2>
+      <div class="my-stats">
+        <div class="cell">
+          <b>未上榜</b>
+          <span>当前最佳名次</span>
+        </div>
+        <div class="cell">
+          <b>{{ myHeat }}</b>
+          <span>累计热度</span>
+        </div>
+        <div class="cell">
+          <b>{{ myCount }}</b>
+          <span>参赛作品</span>
+        </div>
+      </div>
+      <p class="my-note">还没有参赛作品，投稿时带上话题 <b>#面经创作大赛</b> 即可冲榜。</p>
+    </section>
+    <section v-else class="login-card">
       <p>登录后查看我的名次、热度与获奖记录</p>
       <router-link to="/login" class="mj-btn sm">立即登录</router-link>
     </section>
@@ -427,6 +471,42 @@ onMounted(async () => {
     p {
       font-size: 14px;
       opacity: 0.7;
+    }
+  }
+  .my-card {
+    margin-top: 16px;
+    background: var(--background);
+    border-radius: 14px;
+    padding: 18px 24px;
+    .my-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      .cell {
+        text-align: center;
+        padding: 18px 8px;
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.03);
+        b {
+          display: block;
+          font-size: 20px;
+          color: var(--theme);
+        }
+        span {
+          margin-top: 6px;
+          display: block;
+          font-size: 12.5px;
+          opacity: 0.55;
+        }
+      }
+    }
+    .my-note {
+      margin-top: 14px;
+      font-size: 13px;
+      opacity: 0.6;
+      b {
+        color: var(--theme);
+      }
     }
   }
   .rank-card {

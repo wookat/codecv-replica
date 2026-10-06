@@ -23,11 +23,6 @@ export default {
       component: () => import('@/views/mianjing/activity.vue')
     },
     {
-      path: '/mianjing/write',
-      name: 'mianjing-write',
-      component: () => import('@/views/mianjing/write.vue')
-    },
-    {
       path: '/mianjing/mine',
       name: 'mianjing-mine',
       component: () => import('@/views/mianjing/mine.vue')
