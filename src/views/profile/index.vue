@@ -12,8 +12,8 @@ import {
   type CloudResumeMeta,
   type UserInfo
 } from '@/api/modules/cloudResume'
-import { createShare } from '@/api/modules/share'
-import { currentUser, logoutLocal } from '@/utils/auth'
+import { currentUser } from '@/utils/auth'
+import { fmtCN } from '@/utils/time'
 import { setLocalStorage } from '@/common/localstorage'
 import LoginModal from '@/components/LoginModal.vue'
 
@@ -38,14 +38,7 @@ const guides = [
 const tplOf = (type: string) =>
   templates.value.find(t => t.type === resolveTemplateType(type.split('~')[0]))
 
-const fmt = (ts?: number) => {
-  if (!ts) return '-'
-  const d = new Date(ts)
-  const p = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(
-    d.getMinutes()
-  )}:${p(d.getSeconds())}`
-}
+const fmt = (ts?: number) => (ts ? fmtCN(ts, true) : '-')
 
 const quotaText = computed(() => {
   if (!info.value) return ''
@@ -82,18 +75,6 @@ async function copy(r: CloudResumeMeta) {
   ElMessage.success('已创建副本')
 }
 
-async function share(r: CloudResumeMeta) {
-  const res = await createShare({ type: r.type, name: r.name, content: r.content })
-  if (res?.code !== 200) return ElMessage.error(res?.msg || '分享失败')
-  const link = `${location.origin}/#/share/${res.data.id}`
-  try {
-    await navigator.clipboard.writeText(link)
-    ElMessage.success('分享链接已复制到剪贴板')
-  } catch {
-    ElMessageBox.alert(link, '分享链接', { confirmButtonText: '知道了' })
-  }
-}
-
 async function remove(type: string) {
   await ElMessageBox.confirm('删除后不可恢复，确定删除这份简历吗？', '删除简历', {
     type: 'warning'
@@ -114,13 +95,6 @@ function create() {
     return
   }
   router.push('/jianlimoban')
-}
-
-function logout() {
-  logoutLocal()
-  user.value = null
-  info.value = null
-  ElMessage.success('已退出登录')
 }
 
 onMounted(async () => {
@@ -158,7 +132,6 @@ onMounted(async () => {
           rel="noopener"
           >{{ g.title }}</a
         >
-        <button v-if="user" class="pf-logout" @click="logout">退出登录</button>
       </aside>
 
       <!-- 右侧简历卡 -->
@@ -191,7 +164,6 @@ onMounted(async () => {
                 <button class="a" @click="edit(r.type)">编辑</button>
                 <button class="a danger" @click="remove(r.type)">删除</button>
                 <button class="a" @click="copy(r)">副本</button>
-                <button class="a" @click="share(r)">分享</button>
               </div>
             </div>
           </div>
@@ -277,19 +249,6 @@ onMounted(async () => {
       text-decoration: underline;
     }
   }
-  .pf-logout {
-    margin-top: 16px;
-    border: none;
-    background: rgba(0, 0, 0, 0.05);
-    color: #888;
-    font-size: 12px;
-    border-radius: 6px;
-    padding: 6px 14px;
-    cursor: pointer;
-    &:hover {
-      color: var(--theme);
-    }
-  }
   @media (max-width: 768px) {
     display: none;
   }
@@ -317,15 +276,13 @@ onMounted(async () => {
       margin-left: 4px;
     }
   }
+  // 生产右上角同款：橙色文字链，非按钮
   .invite-btn {
-    background: var(--theme);
-    color: #fff;
-    font-size: 13px;
-    padding: 8px 18px;
-    border-radius: 999px;
+    color: var(--theme);
+    font-size: 14px;
     text-decoration: none;
     &:hover {
-      opacity: 0.9;
+      opacity: 0.75;
     }
   }
 }
