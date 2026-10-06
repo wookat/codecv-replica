@@ -59,7 +59,7 @@ const positions = computed(() => {
     e.count++
     m.set(k, e)
   }
-  return [...m.values()]
+  return [...m.values()].sort((a, b) => b.count - a.count)
 })
 
 const shown = computed(() => {
@@ -140,7 +140,6 @@ onMounted(async () => {
     </nav>
 
     <header class="mj-card hero">
-      <div class="hero-blob" :style="{ background: logoColor(slug) }"></div>
       <div class="hero-in">
         <span class="mj-logo xl" :style="{ '--mj-logo-bg': logoColor(slug) } as any">
           <img
@@ -293,7 +292,7 @@ onMounted(async () => {
                   <path d="M12 6v6h4" /></svg
                 >{{ fmtTime(m.publishTime) }}</span
               >
-              <span class="f-ic"
+              <span v-if="(m as any).questionCount" class="f-ic"
                 ><svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -307,7 +306,7 @@ onMounted(async () => {
                   <path d="M13 19h8" />
                   <path d="m3 17 2 2 4-4" />
                   <path d="m3 7 2 2 4-4" /></svg
-                >{{ (m as any).questionCount ?? '—' }} 题</span
+                >{{ (m as any).questionCount }} 题</span
               >
               <span class="f-ic grow"></span>
               <span class="f-ic"
@@ -341,7 +340,21 @@ onMounted(async () => {
           >
             <span class="rk" :class="{ top: i < 3 }">{{ i + 1 }}</span>
             <span class="t">{{ m.title }}</span>
-            <span class="v">👁 {{ m.viewCount ?? 0 }}</span>
+            <span class="v"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"
+                />
+                <circle cx="12" cy="12" r="3" /></svg
+              >{{ m.viewCount ?? 0 }}</span
+            >
           </router-link>
         </div>
         <div class="mj-card rail-card share-card">
@@ -384,17 +397,6 @@ onMounted(async () => {
     position: relative;
     overflow: hidden;
     padding: 16px;
-  }
-  .hero-blob {
-    position: absolute;
-    top: -96px;
-    right: -64px;
-    width: 224px;
-    height: 224px;
-    border-radius: 999px;
-    filter: blur(48px);
-    opacity: 0.25;
-    pointer-events: none;
   }
   .hero-in {
     position: relative;
@@ -491,8 +493,15 @@ onMounted(async () => {
           white-space: nowrap;
         }
         .v {
+          display: inline-flex;
+          align-items: center;
+          gap: 3px;
           font-size: 12px;
           color: #bbb;
+          svg {
+            width: 13px;
+            height: 13px;
+          }
         }
         &:hover .t {
           color: var(--theme);

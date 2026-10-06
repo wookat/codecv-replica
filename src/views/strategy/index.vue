@@ -68,7 +68,9 @@ onMounted(load)
                 <p class="desc">{{ p.description }}</p>
                 <div class="pc-foot">
                   <div class="tags">
-                    <span v-for="t in p.tags" :key="t" class="tag">{{ t }}</span>
+                    <span v-for="t in (p.tags ?? []).slice(0, 3)" :key="t" class="tag">{{
+                      t
+                    }}</span>
                   </div>
                   <span class="meta">{{ p.viewNum }} 浏览</span>
                   <span class="meta tm">{{ rel(p.create_time) }}</span>

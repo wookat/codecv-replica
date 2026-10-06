@@ -139,9 +139,10 @@ onMounted(async () => {
       if (i.companySlug) cCount[i.companySlug] = (cCount[i.companySlug] ?? 0) + 1
       if (i.companyName) cCount[i.companyName] = (cCount[i.companyName] ?? 0) + 1
     })
-    positions.value = (Array.isArray(ps?.data) ? ps.data : []).filter(
-      (p: any) => (pCount[p.slug] ?? pCount[p.name] ?? 0) > 0
-    )
+    positions.value = (Array.isArray(ps?.data) ? ps.data : [])
+      .map((p: any) => ({ ...p, count: pCount[p.slug] ?? pCount[p.name] ?? 0 }))
+      .filter((p: any) => p.count > 0)
+      .sort((a: any, b: any) => b.count - a.count)
     companies.value = (Array.isArray(cs?.data) ? cs.data : [])
       .map((c: any) => ({ ...c, count: cCount[c.slug] ?? cCount[c.name] ?? 0 }))
       .filter(c => c.count > 0)
