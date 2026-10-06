@@ -171,7 +171,7 @@ export async function onRequest(context) {
             await env.DB.prepare(
               `SELECT s.id, s.title, s.company_name AS companyName, s.position_slug AS positionSlug,
                       u.nickname, u.username, s.anonymous,
-                      COALESCE((SELECT COUNT(*) FROM reactions r WHERE r.doc_id = 'srv-' || s.id),0) AS reacts,
+                      COALESCE((SELECT COUNT(*) FROM reactions r WHERE r.target_id = 'srv-' || s.id),0) AS reacts,
                       COALESCE((SELECT COUNT(*) FROM comments c WHERE c.doc_id = 'srv-' || s.id),0) AS comments
                FROM mianjing_submissions s LEFT JOIN users u ON u.id = s.user_id
                WHERE s.status = 'approved'`
