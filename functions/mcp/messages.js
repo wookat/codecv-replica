@@ -25,9 +25,14 @@ export async function onRequest(context) {
 
   const body = await readBody(request)
   const msgs = Array.isArray(body) ? body : [body]
+  const outs = []
   for (const m of msgs) {
     const r = await handleRpc(m, env, request)
-    if (r) session.enqueue(r)
+    if (r) {
+      outs.push(r)
+      session.enqueue(r) // 尽力推送：同 isolate 且流未挂时经 SSE 回推
+    }
   }
-  return new Response(null, { status: 202 })
+  // 宽松兜底：响应同时随 POST 直接返回（部分客户端读 body；严格 SSE 客户端请走 streamable-http 或 mcp-remote 桥）
+  return json(request, Array.isArray(body) ? outs : outs[0] ?? null)
 }
