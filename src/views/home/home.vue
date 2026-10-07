@@ -333,7 +333,7 @@ const COMMENTS = [
   white-space: nowrap;
   margin-top: 4px;
   &:first-of-type {
-    margin-top: 8px;
+    margin-top: 14px;
   }
   font-size: 16px;
   line-height: 36px;
@@ -360,7 +360,7 @@ const COMMENTS = [
 .hero-cta {
   /* 生产 flex gap-4 mt-10 */
   display: flex;
-  gap: 16px;
+  gap: 12px;
   margin-top: 40px;
 }
 .cta {
@@ -609,8 +609,8 @@ const COMMENTS = [
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  /* 生产 .ext：整宽 p-5 space-around → 图 x140 / 描述 x1000 */
-  padding: 0 20px;
+  /* 生产 .ext p-5：整宽 20px 全边距 space-around */
+  padding: 20px;
   @media (min-width: 768px) {
     flex-direction: row;
     justify-content: space-around;
@@ -626,6 +626,7 @@ const COMMENTS = [
   gap: 20px;
   font-size: 30px;
   font-weight: 700;
+  line-height: 36px;
   /* 生产的格式徽标用 serif（实测 Times New Roman） */
   font-family: 'Times New Roman', Times, serif;
   .pdf {
@@ -682,8 +683,7 @@ const COMMENTS = [
   padding-bottom: 60px;
 }
 .sec.ext {
-  /* 生产导出区底到评论头卡间留 ~20px */
-  padding-bottom: 20px;
+  padding-bottom: 0;
 }
 .cm-card {
   /* 生产 li.flex flex-col cursor-pointer bg-body p-5 m-2 rounded-xl */
