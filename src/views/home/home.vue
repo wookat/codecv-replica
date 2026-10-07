@@ -186,10 +186,11 @@ const COMMENTS = [
           v-for="(t, i) in newest"
           :key="t.type"
           :data-aos="['fade-right', 'fade-up', 'fade-up', 'fade-down', 'fade-down', 'fade-left'][i]"
+          @click="$router.push(`/jianlimoban/${t.type}`)"
         >
-          <!-- 生产：li.template>a 内 img+绝对定位角标+p（a 为内联元素，无 div 包裹） -->
+          <!-- 生产实测：a 仅覆盖卡底文字区(y1305 h80)，img 在 a 外为 li 直接子级 -->
+          <img :src="t.img" :alt="`模板使用人数统计`" loading="lazy" class="tc-img" />
           <router-link :to="`/jianlimoban/${t.type}`" class="tpl-card">
-            <img :src="t.img" :alt="`模板使用人数统计`" loading="lazy" class="tc-img" />
             <span class="use-badge">999+ 人使用过</span>
             <p class="tc-name">{{ t.name }}简历模板</p>
           </router-link>
@@ -434,6 +435,7 @@ const COMMENTS = [
     margin-bottom: 8px;
     &.nobg {
       background: transparent;
+      margin-bottom: 0;
     }
     /* 生产评论区 LI 距卡底 ~48px：卡底 padding40 + ul mt-4 已够，不再叠 mb-20 */
     &.mb20 {
@@ -475,15 +477,18 @@ const COMMENTS = [
     grid-template-columns: repeat(2, 1fr);
   }
 }
+.tc-img {
+  /* li 的 margin:20 已承担卡距，img 铺满内容盒（实测 w173=li 宽） */
+  width: 100%;
+  margin: 0;
+  border-radius: 6px;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  display: block;
+  cursor: pointer;
+}
 .tpl-card {
-  /* 生产 a.no-underline：内联元素，内含块级 p → 锚点盒尺寸=文本区 */
+  /* 生产 a.no-underline：内联元素，仅包角标+名称 → 锚点盒=卡底文字区 */
   text-decoration: none;
-  .tc-img {
-    width: 100%;
-    border-radius: 6px;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-    display: block;
-  }
   .use-badge {
     position: absolute;
     top: 0;
@@ -511,7 +516,7 @@ const COMMENTS = [
 .sec.ai {
   /* 生产 AI 区为整宽灰底条；顶距由透明标题卡 p-10 提供，底部留 20 */
   background: var(--body-background);
-  padding: 0 4px 20px;
+  padding: 0 4px;
   .ai-body {
     max-width: 1280px;
     margin: 0 auto;
