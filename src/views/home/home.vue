@@ -486,8 +486,11 @@ const COMMENTS = [
   cursor: pointer;
 }
 .tpl-card {
-  /* 生产 a.no-underline：内联元素，仅包角标+名称 → 锚点盒=卡底文字区 */
+  /* 生产 a.no-underline：内联元素，实测盒 y1305 h80（顶部盖住图底 ~35px） */
   text-decoration: none;
+  display: inline-block;
+  margin-top: -35px;
+  padding-top: 35px;
   .use-badge {
     position: absolute;
     top: 0;
@@ -516,6 +519,10 @@ const COMMENTS = [
   /* 生产 AI 区为整宽灰底条；顶距由透明标题卡 p-10 提供，底部留 20 */
   background: var(--body-background);
   padding: 0 4px;
+  /* 生产标题卡底到图距 ~48px：透明头卡底 padding 收到 25 */
+  .sec-head {
+    padding-bottom: 25px;
+  }
   .ai-body {
     max-width: 1280px;
     margin: 0 auto;
