@@ -588,7 +588,7 @@ watch(
   }
 }
 .jl-pager {
-  margin: 16px 0 20px 8px;
+  margin: 16px 0 15px 8px;
 }
 .resumes {
   display: grid;
