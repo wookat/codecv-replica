@@ -37,7 +37,7 @@ function copy() {
   navigator.clipboard?.writeText(link).then(() => ElMessage.success('邀请链接已复制'))
 }
 function goLogin() {
-  location.hash = '#/login'
+  location.href = '/login'
 }
 function settle() {
   ElMessageBox.alert('请通过右下角客服联系管理员进行佣金结算', '结算佣金', {

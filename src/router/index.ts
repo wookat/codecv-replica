@@ -1,4 +1,4 @@
-import { RouteRecordRaw, createRouter, createWebHashHistory } from 'vue-router'
+import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 import Layout from '@/layout/main.vue'
 
 /* 统一导入路由 */
@@ -173,7 +173,7 @@ const routeTitles: Record<string, string> = {
 
 const router = createRouter({
   routes: routeConfiguras.concat(routes),
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   scrollBehavior: (to, from, savePos) => {
     if (topInitList.includes(to.path)) return { top: 0 /*  behavior: 'smooth' */ }
     if (savePos) return savePos

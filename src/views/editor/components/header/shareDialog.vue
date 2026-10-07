@@ -13,7 +13,7 @@ const isPublic = ref(false)
 const viewNum = ref(0)
 const loading = ref(false)
 const logged = computed(() => !!currentUser())
-const link = computed(() => `${location.origin}/#/share/${props.resumeType}`)
+const link = computed(() => `${location.origin}/share/${props.resumeType}`)
 
 watch(
   () => props.modelValue,
