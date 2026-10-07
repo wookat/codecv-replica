@@ -519,9 +519,13 @@ const COMMENTS = [
   /* 生产 AI 区为整宽灰底条；顶距由透明标题卡 p-10 提供，底部留 20 */
   background: var(--body-background);
   padding: 0 4px;
-  /* 生产标题卡底到图距 ~48px：透明头卡底 padding 收到 25 */
+  /* 生产标题卡底到图距 ~48px：透明头卡底 padding 收到 25；h2→sub 距归零 */
   .sec-head {
-    padding-bottom: 25px;
+    /* h2→sub 距并入底 padding（总高不变，svg 不受影响） */
+    padding-bottom: 37px;
+    h2 {
+      margin-bottom: 0;
+    }
   }
   .ai-body {
     max-width: 1280px;
