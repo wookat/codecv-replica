@@ -31,15 +31,16 @@ import outNav from '@/common/nav/outNav'
 .site-nav {
   display: flex;
   align-items: center;
-  gap: 2px;
+  /* 生产项间距 4px */
+  gap: 4px;
   margin: 0;
   padding: 0;
   .nav-link {
     position: relative;
     display: inline-block;
     white-space: nowrap;
-    /* 生产链接高 37px（y12） */
-    padding: 8px 10px;
+    /* 生产链接高 37px（y12）、横向内距 14px */
+    padding: 8px 14px;
     font-size: 15px;
     font-weight: 500;
     color: var(--font-color);

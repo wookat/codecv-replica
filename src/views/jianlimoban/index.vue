@@ -175,8 +175,6 @@ watch(
 
 <template>
   <div class="jl-page">
-    <h1 class="sr-only">简历模板免费下载_个人简历模板在线制作</h1>
-
     <!-- 顶部：左分类行 + 右侧双推广位（生产布局） -->
     <div class="jl-top">
       <div class="cat-card">
@@ -228,13 +226,16 @@ watch(
       </div>
     </div>
 
-    <!-- 模板区（生产：专区横幅与标签/排序/网格同一张白卡） -->
+    <!-- 生产 DOM：专区横幅行为页直子，在筛选卡之外 -->
+    <div class="zone-row">
+      <router-link v-for="z in ZONE_BANNERS" :key="z.slug" :to="`/${z.slug}`" class="zone-card">
+        <img :src="z.img" :alt="z.alt" draggable="false" />
+      </router-link>
+    </div>
+    <!-- 生产 DOM：h1.sr-only 在筛选卡之前的 .w-full 内（y≈449） -->
+    <h1 class="sr-only">简历模板免费下载_个人简历模板在线制作</h1>
+    <!-- 模板区（生产筛选卡 p-2：标签/排序/网格） -->
     <div class="tpl-card">
-      <div class="zone-row">
-        <router-link v-for="z in ZONE_BANNERS" :key="z.slug" :to="`/${z.slug}`" class="zone-card">
-          <img :src="z.img" :alt="z.alt" draggable="false" />
-        </router-link>
-      </div>
       <div class="tpl-head">
         <ul class="tag-tabs">
           <li v-for="t in TAG_TABS" :key="t">
@@ -321,9 +322,10 @@ watch(
 
 <style lang="scss">
 .jl-page {
-  max-width: var(--max-width);
+  /* 生产 max-w-screen-xl(1280) + p-1：内容 x84 w1272 */
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 20px 26px 16px;
+  padding: 20px 4px 16px;
   color: var(--font-color);
   font-family: var(--font-noto-sans-sc);
 }
@@ -473,8 +475,9 @@ watch(
 .zone-row {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
-  margin-bottom: 20px;
+  /* 生产 5×242 卡、间距 ~15px */
+  gap: 15px;
+  margin: 16px 0;
   @media (max-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -484,7 +487,8 @@ watch(
   transition: transform 0.4s;
   img {
     width: 100%;
-    height: 118px;
+    /* 生产实测高 122px */
+    height: 122px;
     object-fit: cover;
     border-radius: 12px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
@@ -497,7 +501,8 @@ watch(
   margin-top: 16px;
   background: var(--background);
   border-radius: 12px;
-  padding: 12px;
+  /* 生产筛选卡 p-2 */
+  padding: 8px;
 }
 .tpl-head {
   display: flex;
@@ -654,7 +659,8 @@ watch(
     overflow: hidden;
     img {
       width: 100%;
-      aspect-ratio: 210 / 297;
+      /* 生产实测卡图 235×333 */
+      aspect-ratio: 235 / 333;
       object-fit: cover;
       border-radius: 6px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
