@@ -40,7 +40,7 @@ const batchLabel = (m: MianjingItem) => {
 }
 
 const resultClass = (r?: string) =>
-  r === '已offer' || r === 'offer'
+  r === '已offer' || r === 'offer' || r === '通过'
     ? 'mj-chip--green'
     : r === '已挂' || r === '淘汰'
     ? 'mj-chip--gray'

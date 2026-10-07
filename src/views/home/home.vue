@@ -365,12 +365,12 @@ const COMMENTS = [
   padding: 40px 20px 20px;
   text-align: center;
   h2 {
-    font-size: 28px;
-    font-weight: 800;
+    font-size: 36px;
+    font-weight: 700;
     margin: 0 0 12px;
   }
   .sub {
-    color: #9ca3af;
+    color: #999;
     font-size: 14px;
     margin: 0 0 34px;
   }
@@ -392,7 +392,6 @@ const COMMENTS = [
 .tpl-card {
   display: block;
   text-decoration: none;
-  color: var(--font-color);
   .tc-img {
     position: relative;
     border-radius: 8px;
@@ -412,10 +411,10 @@ const COMMENTS = [
       z-index: 2;
       padding: 4px 8px;
       border-radius: 0 0 8px 0;
-      background: linear-gradient(90deg, #ff7449, #ff9a44);
+      background: var(--theme);
       color: #fff;
-      font-size: 11px;
-      font-weight: 600;
+      font-size: 12px;
+      font-weight: 400;
     }
   }
   .tc-name {

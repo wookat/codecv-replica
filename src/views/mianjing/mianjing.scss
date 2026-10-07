@@ -341,7 +341,7 @@
   font-size: 12px;
   font-weight: 500;
   &--gray {
-    background: rgba(0, 0, 0, 0.05);
+    background: rgba(30, 41, 59, 0.09);
     color: var(--font-color);
   }
   &--amber {
@@ -349,8 +349,8 @@
     color: #b45309;
   }
   &--green {
-    background: #dcfce7;
-    color: #15803d;
+    background: rgba(16, 185, 129, 0.14);
+    color: #047857;
   }
 }
 

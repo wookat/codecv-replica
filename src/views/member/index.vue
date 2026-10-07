@@ -310,6 +310,7 @@ async function upgrade(t: Tier) {
 .tier {
   width: 280px;
   position: relative;
+  font-family: -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   padding: 28px 20px 20px;
   display: flex;
   flex-direction: column;
@@ -343,9 +344,11 @@ async function upgrade(t: Tier) {
     font-size: 30px;
     .sym {
       font-size: 16px;
+      color: #fff;
     }
     .yuan {
       font-size: 18px;
+      color: #fff;
     }
   }
   .tdel {
@@ -412,12 +415,14 @@ async function upgrade(t: Tier) {
   text-align: center;
   padding: 32px 0 20px;
   h2 {
-    font-size: 28px;
-    font-weight: 800;
+    font-family: -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    font-size: 36px;
+    font-weight: 700;
     margin: 0 0 12px;
+    padding-bottom: 20px;
   }
   .sub {
-    color: #9ca3af;
+    color: #999;
     font-size: 14px;
     margin: 0 0 34px;
   }
@@ -447,9 +452,10 @@ async function upgrade(t: Tier) {
   justify-content: space-between;
   min-height: 280px;
   .cm-content {
-    font-size: 13px;
+    font-family: -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    font-size: 14px;
     line-height: 1.8;
-    color: #4b5563;
+    color: #545a69;
     margin: 0 0 14px;
   }
   .cm-info {
