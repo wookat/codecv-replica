@@ -403,18 +403,25 @@ const COMMENTS = [
   height: 100%;
   align-items: center;
   justify-content: center;
-  /* 生产实测：锚点被压成 ~57px 槽位、img 居中溢出、视觉序为 DOM 反序 */
-  flex-direction: row-reverse;
+  position: relative;
   .fan-a {
-    display: flex;
-    justify-content: center;
-    position: relative;
-    width: 57px;
-    flex: none;
+    /* 生产 a.resume-cover: position:absolute + transform-origin:left bottom，
+       全部叠在容器中心同一点，绕左下角旋转展开成扇形 */
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 250px;
+    height: 350px;
+    margin-left: -125px;
+    margin-top: -175px;
+    transform-origin: left bottom;
+    transition: transform 0.3s;
     img {
       width: 250px;
+      height: 350px;
       max-width: none;
-      flex: none;
+      border-radius: 10px;
       box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
       display: block;
       cursor: pointer;
