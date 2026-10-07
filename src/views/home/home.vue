@@ -435,8 +435,9 @@ const COMMENTS = [
     &.nobg {
       background: transparent;
     }
+    /* 生产评论区 LI 距卡底 ~48px：卡底 padding40 + ul mt-4 已够，不再叠 mb-20 */
     &.mb20 {
-      margin-bottom: 80px;
+      margin-bottom: 8px;
     }
     h2 {
       font-size: 36px;
@@ -508,9 +509,9 @@ const COMMENTS = [
   }
 }
 .sec.ai {
-  /* 生产 AI 区为整宽灰底条；顶距由透明标题卡 p-10 提供，底部留 60 */
+  /* 生产 AI 区为整宽灰底条；顶距由透明标题卡 p-10 提供，底部留 20 */
   background: var(--body-background);
-  padding: 0 4px 60px;
+  padding: 0 4px 20px;
   .ai-body {
     max-width: 1280px;
     margin: 0 auto;
