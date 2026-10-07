@@ -27,6 +27,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/mianjing/write.vue')
   },
   {
+    // 生产 /login 为独立页（无顶栏/页脚）
+    path: '/login',
+    name: 'login',
+    component: () => import('@/views/login/index.vue')
+  },
+  {
     // 后台管理：独立外壳（侧边栏布局，非站点导航）
     path: '/admin',
     component: () => import('@/views/admin/AdminLayout.vue'),

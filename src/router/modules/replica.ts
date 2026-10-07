@@ -55,7 +55,6 @@ export default {
     },
     { path: '/profile', name: 'profile', component: () => import('@/views/profile/index.vue') },
     { path: '/notify', name: 'notify', component: () => import('@/views/notify/index.vue') },
-    { path: '/login', name: 'login', component: () => import('@/views/login/index.vue') },
     { path: '/member', name: 'member', component: () => import('@/views/member/index.vue') },
     { path: '/order', name: 'order', component: () => import('@/views/order/index.vue') },
     { path: '/feedback', name: 'feedback', component: () => import('@/views/feedback/index.vue') },

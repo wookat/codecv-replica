@@ -8,8 +8,8 @@ import useUserStore from '@/store/modules/user'
 const router = useRouter()
 const route = useRoute()
 const store = useUserStore()
-const tab = ref<'qr' | 'acct'>('qr')
 const agreed = ref(false)
+const showAcct = ref(false)
 const form = reactive({ username: '', password: '', verify: '' })
 
 onMounted(() => store.genVerify())
@@ -32,31 +32,38 @@ watch(
 
 <template>
   <div class="login-page">
+    <h1 class="sr-only">用户登录_微信扫码登录_简历制作工具登录_免费注册</h1>
     <router-link to="/" class="logo">
-      <img src="/static/svg/logo-BFLBP-GO.svg" alt="CodeCV简历" draggable="false" />
+      <img src="/static/svg/logo-BFLBP-GO.svg" alt="CodeCV简历Logo" draggable="false" />
     </router-link>
     <div class="login-wrap">
-      <img
-        src="/static/svg/login-page-CxicEn1V.svg"
-        class="illus"
-        alt="登录插画"
-        draggable="false"
-      />
+      <div class="illus-col">
+        <img
+          draggable="false"
+          src="/static/svg/login-page-CxicEn1V.svg"
+          class="illus"
+          alt="登录封面"
+        />
+      </div>
       <div class="vline"></div>
-      <div class="login-card">
-        <h1>登录 / 注册</h1>
+      <div class="login-col">
+        <h1 class="title">微信扫码登录注册</h1>
         <p class="sub">登录开启沉浸式简历编写体验</p>
-        <div class="tabs">
-          <span :class="{ on: tab === 'qr' }" @click="tab = 'qr'">微信扫码</span>
-          <span :class="{ on: tab === 'acct' }" @click="tab = 'acct'">账号密码</span>
+        <div class="qr-circle">
+          <img src="/prod-assets/miniprogram.webp" alt="微信扫码登录" class="qr" />
         </div>
-        <template v-if="tab === 'qr'">
-          <div class="qr-box">
-            <img src="/prod-assets/miniprogram.webp" alt="微信扫码登录" class="qr" />
-          </div>
-          <p class="qr-tip">请使用微信扫码完成登录</p>
-        </template>
-        <div v-else class="acct-form">
+        <p class="privacy">
+          扫码登录/注册表示您同意该<a
+            href="https://www.yuque.com/xiongleixin/saqnu1/qkvrw80dm615kai4"
+            rel="noopener noreferrer"
+            target="_blank"
+            >《用户隐私政策与服务协议》</a
+          >
+        </p>
+        <button class="acct-link" type="button" @click="showAcct = !showAcct">
+          账号密码登录/注册
+        </button>
+        <div v-if="showAcct" class="acct-form">
           <input v-model="form.username" class="acct-input" placeholder="用户名" maxlength="32" />
           <input
             v-model="form.password"
@@ -75,15 +82,15 @@ watch(
               @click="store.genVerify()"
             />
           </div>
+          <label class="agree">
+            <input v-model="agreed" type="checkbox" />
+            <span>我已阅读并同意协议</span>
+          </label>
           <div class="acct-btns">
             <button class="mock" @click="submit(true)">登录</button>
             <button class="mock ghost" @click="submit(false)">注册</button>
           </div>
         </div>
-        <label class="agree">
-          <input v-model="agreed" type="checkbox" />
-          <span>登录表示您同意该<a href="javascript:;">用户隐私政策与服务协议</a></span>
-        </label>
       </div>
     </div>
   </div>
@@ -92,96 +99,118 @@ watch(
 <style lang="scss">
 .login-page {
   position: relative;
-  min-height: calc(100vh - 60px);
-  background: var(--body-background);
+  min-height: 100vh;
+  background: var(--background);
   .logo {
     position: fixed;
-    top: 20px;
-    left: 30px;
+    top: 0;
+    left: 0;
+    padding: 12px 24px;
     z-index: 5;
     img {
       width: 80px;
       height: 60px;
-      transform: scale(1.4);
+      transform: scale(1.5);
       transform-origin: top left;
       object-fit: contain;
+      cursor: pointer;
+      transition: transform 0.2s;
+      &:hover {
+        transform: scale(1.25);
+      }
     }
   }
 }
 .login-wrap {
-  min-height: calc(100vh - 60px);
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 60px;
-  padding: 40px;
-  .illus {
-    width: 45%;
-    max-width: 600px;
-    @media (max-width: 900px) {
-      display: none;
+  align-items: center;
+  height: 100vh;
+  padding: 16px;
+  @media (min-width: 768px) {
+    padding: 112px 96px;
+  }
+  .illus-col {
+    flex: 1;
+    display: none;
+    @media (min-width: 768px) {
+      display: block;
+    }
+    .illus {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      display: block;
     }
   }
   .vline {
     width: 1px;
-    height: 420px;
-    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.15), transparent);
-    @media (max-width: 900px) {
-      display: none;
+    height: 100%;
+    margin: 0 112px;
+    background: #cbd5e1;
+    opacity: 0.5;
+    display: none;
+    @media (min-width: 768px) {
+      display: block;
     }
   }
 }
-.login-card {
+.login-col {
+  flex: 1;
+  max-width: 500px;
+  text-align: center;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
-  h1 {
+  gap: 20px;
+  .title {
+    color: #000;
+    font-size: 24px;
     margin: 0;
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--font-color);
   }
   .sub {
-    margin: 10px 0 20px;
-    font-size: 14px;
-    color: #9ca3af;
+    margin: 0 0 16px;
+    color: var(--font-color);
   }
-}
-.tabs {
-  display: flex;
-  gap: 28px;
-  margin-bottom: 20px;
-  span {
-    font-size: 15px;
-    color: #9ca3af;
-    cursor: pointer;
-    padding-bottom: 6px;
-    border-bottom: 2px solid transparent;
-    &.on {
-      color: var(--font-color);
-      font-weight: 600;
-      border-bottom-color: var(--theme);
+  .qr-circle {
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f3f5f7;
+    .qr {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+  .privacy {
+    font-size: 14px;
+    margin-top: 16px;
+    color: #333;
+    a {
+      color: var(--theme);
+      text-decoration: none;
+      &:hover {
+        opacity: 0.8;
+      }
     }
   }
 }
-.qr-box {
-  position: relative;
-  width: 280px;
-  height: 280px;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 6px solid #fff;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-  .qr {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-}
-.qr-tip {
-  margin-top: 18px;
+.acct-link {
+  border: none;
+  background: none;
   font-size: 13px;
   color: #9ca3af;
+  cursor: pointer;
+  text-decoration: underline;
+  &:hover {
+    color: var(--theme);
+  }
 }
 .acct-form {
   width: 280px;
@@ -214,10 +243,17 @@ watch(
       cursor: pointer;
     }
   }
+  .agree {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #9ca3af;
+    cursor: pointer;
+  }
   .acct-btns {
     display: flex;
     gap: 10px;
-    margin-top: 6px;
   }
 }
 .mock {
@@ -236,18 +272,6 @@ watch(
     background: transparent;
     color: var(--theme);
     border: 1px solid var(--theme);
-  }
-}
-.agree {
-  margin-top: 20px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: #9ca3af;
-  cursor: pointer;
-  a {
-    color: var(--theme);
   }
 }
 </style>

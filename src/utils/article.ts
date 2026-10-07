@@ -60,12 +60,13 @@ export function logoColor(slug: string): string {
   return LOGO_COLORS[Math.abs(h) % LOGO_COLORS.length]
 }
 
-/** tcb 资源地址 → 本地缓存路径（爬取时已下载到 public/codecv-assets） */
+/** tcb 资源地址 → 本地缓存路径（镜像目录结构到 public/ 同名目录） */
 export function localAsset(url?: string): string {
   if (!url) return ''
-  if (url.includes('tcb.qcloud.la/')) {
-    const name = url.split('?')[0].split('/').pop()
-    if (name) return `/codecv-assets/${name}`
+  const i = url.indexOf('tcb.qcloud.la/')
+  if (i >= 0) {
+    const rel = url.slice(i + 'tcb.qcloud.la/'.length).split('?')[0]
+    if (rel) return `/${rel}`
   }
   return url
 }

@@ -3,7 +3,7 @@ import outNav from '@/common/nav/outNav'
 </script>
 
 <template>
-  <ul class="nav">
+  <ul class="site-nav">
     <li
       v-for="(navItem, idx) in outNav"
       :key="idx"
@@ -28,7 +28,7 @@ import outNav from '@/common/nav/outNav'
 </template>
 
 <style lang="scss" scoped>
-.nav {
+.site-nav {
   display: flex;
   align-items: center;
   list-style: none;

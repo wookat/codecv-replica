@@ -208,7 +208,7 @@ watch(
       <div class="promo-col">
         <router-link to="/jobs" class="promo banner-jobs">
           <img
-            src="/prod-assets/offerstar-recruit.webp"
+            src="/codecv-assets/recruitment.webp"
             alt="简历模板页面校招信息汇总"
             draggable="false"
           />
@@ -219,7 +219,11 @@ watch(
           rel="noopener noreferrer"
           class="promo banner-mj"
         >
-          <img src="/prod-assets/codecv.webp" alt="网申助手广告位" draggable="false" />
+          <img
+            src="/advertise_cover/avatar_1790992869080.webp"
+            alt="AI 网申助手"
+            draggable="false"
+          />
         </a>
       </div>
     </div>

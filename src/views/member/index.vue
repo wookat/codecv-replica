@@ -220,7 +220,15 @@ async function upgrade(t: Tier) {
           </div>
         </div>
         <div class="rights">
-          <div class="rights-title">功能权益</div>
+          <div class="rights-title">
+            功能权益
+            <img
+              src="/static/svg/quanquan-CjIjpzSc.svg"
+              draggable="false"
+              class="quanquan"
+              alt="功能权益装饰图标"
+            />
+          </div>
           <div class="rights-list">
             <div v-for="[k, v] in t.rights" :key="k" class="right-row">
               <div>{{ k }}</div>
@@ -375,13 +383,12 @@ async function upgrade(t: Tier) {
     font-weight: 700;
     font-size: 14px;
     margin-bottom: 24px;
-    &::after {
-      content: '';
+    .quanquan {
       position: absolute;
-      inset: -8px -18px;
-      border: 2.5px solid #f6d24b;
-      border-radius: 50%;
-      transform: rotate(-4deg);
+      top: 66%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0.6;
       pointer-events: none;
     }
   }

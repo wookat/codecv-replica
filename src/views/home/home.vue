@@ -179,7 +179,7 @@ const COMMENTS = [
         简历内容不够丰富不知道如何下手？自己翻译简历觉得很困难？没关系，找 AI 这些都能解决～
       </p>
       <div class="ai-body">
-        <img src="/prod-assets/chat.svg" class="ai-illust" alt="AI小助手" />
+        <img src="/static/svg/chat-Cr3bTpp1.svg" class="ai-illust" alt="AI小助手" />
         <ul class="ai-grid">
           <li v-for="(c, i) in AI_CARDS" :key="c.title" class="ai-card" :class="{ off: i === 1 }">
             <p class="ai-title">
@@ -198,7 +198,7 @@ const COMMENTS = [
         除了 PDF 格式，我们还支持 Markdown、PNG格式的文件导出，基本涵盖大部分的使用场景
       </p>
       <div class="ext-body">
-        <img src="/prod-assets/ext.svg" class="ext-illust" alt="支持多文件导出" />
+        <img src="/static/svg/ext-BRnvL-Al.svg" class="ext-illust" alt="支持多文件导出" />
         <div class="ext-labels">
           <span class="pdf">.PDF</span>
           <span class="md">.MD</span>
