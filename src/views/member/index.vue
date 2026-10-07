@@ -20,8 +20,32 @@ interface Tier {
   rights: [string, string][]
 }
 
-// 生产只有 3 档（年度/季度/月度），无终身卡——逐卡爬取验证
+// 生产 4 档：终身/年度/季度/月度（逐卡实测 x136/432/728/1024）
 const tiers: Tier[] = [
+  {
+    name: '终身会员',
+    price: '99.99',
+    del: '¥188',
+    unit: '权益永久有效',
+    gradient: 'navy-grad',
+    badge: '秋招限时优惠',
+    priceColor: '#FEECCA',
+    btnGradient: 'lifetime-btn',
+    rights: [
+      ['会员有效时长', '终身有效'],
+      ['导入/导出简历', '无限制'],
+      ['导出简历水印', '无水印'],
+      ['可上传证件照/图片大小', '10MB内'],
+      ['支持导出格式', 'PDF/PNG/MD'],
+      ['可拥有简历份数', '不限'],
+      ['AI助手使用次数', '无限制'],
+      ['保存历史记录恢复', '✅'],
+      ['简历分享', '✅'],
+      ['所有模板可用', '✅'],
+      ['后续更新功能', '✅'],
+      ['简历模板定制', '✅']
+    ]
+  },
   {
     name: '年度会员',
     price: '69.99',
@@ -251,6 +275,8 @@ async function upgrade(t: Tier) {
   display: flex;
   flex-direction: column;
   align-items: center;
+  /* 生产父级 justify-center：sr-only h1 静态位置落在容器中轴（y519 实测） */
+  justify-content: center;
 }
 .mb-head {
   display: flex;

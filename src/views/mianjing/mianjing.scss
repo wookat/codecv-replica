@@ -310,6 +310,8 @@
     .pos {
       margin-left: 2px;
       opacity: 0.7;
+      /* 生产岗位标签行高 16 */
+      line-height: 16px;
     }
   }
   .item-sum {
@@ -333,6 +335,8 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
+      /* 生产底行高 16 */
+      line-height: 16px;
       &.grow {
         flex: 1;
       }
@@ -348,8 +352,10 @@
   display: inline-flex;
   align-items: center;
   border-radius: 6px;
-  padding: 2px 8px;
+  /* 生产：!py-0 !px-2 → 高 19 */
+  padding: 0 8px;
   font-size: 12px;
+  line-height: 16px;
   font-weight: 500;
   &--gray {
     background: rgba(30, 41, 59, 0.09);

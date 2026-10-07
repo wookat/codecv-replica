@@ -536,10 +536,13 @@ onMounted(() => {
       font-size: 24px;
       font-weight: 700;
       margin: 0;
+      /* 生产 h1 行高 32 */
+      line-height: 32px;
     }
     p {
       margin-top: 8px;
-      line-height: 1.7;
+      /* 生产描述单行 24 */
+      line-height: 24px;
       /* 生产标题卡高度 112px：描述单行截断 */
       white-space: nowrap;
       overflow: hidden;
