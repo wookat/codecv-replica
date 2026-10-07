@@ -403,12 +403,18 @@ const COMMENTS = [
   height: 100%;
   align-items: center;
   justify-content: center;
+  /* 生产实测：锚点被压成 ~57px 槽位、img 居中溢出、视觉序为 DOM 反序 */
+  flex-direction: row-reverse;
   .fan-a {
-    display: inline-block;
+    display: flex;
+    justify-content: center;
     position: relative;
+    width: 57px;
+    flex: none;
     img {
       width: 250px;
       max-width: none;
+      flex: none;
       box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
       display: block;
       cursor: pointer;
