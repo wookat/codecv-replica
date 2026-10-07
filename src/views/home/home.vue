@@ -402,16 +402,13 @@ const COMMENTS = [
   height: 100%;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  /* 生产该容器被压缩到 ~315px：不设 shrink:0，按 flex 默认收缩 */
   .fan-a {
     display: inline-block;
     position: relative;
-    flex-shrink: 1;
-    min-width: 0;
     img {
       width: 250px;
       max-width: none;
-      border-radius: 8px;
       box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
       display: block;
       cursor: pointer;
