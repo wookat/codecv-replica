@@ -288,7 +288,7 @@ const COMMENTS = [
   /* 生产 #introduce：h-100vh / mt-[-80px] / max-w-screen-xl / items-center / xl:overflow-visible */
   position: relative;
   overflow: hidden;
-  margin-top: -80px;
+  margin-top: -76px;
   @media (min-width: 1280px) {
     overflow: visible;
   }
@@ -332,7 +332,7 @@ const COMMENTS = [
   /* 生产 tracking-widest whitespace-nowrap，行间 mt-1 */
   letter-spacing: 0.1em;
   white-space: nowrap;
-  margin-top: 4px;
+  margin-top: 9px;
   font-size: 16px;
   line-height: 36px;
   .fi {
@@ -359,14 +359,14 @@ const COMMENTS = [
   /* 生产 flex gap-4 mt-10 */
   display: flex;
   gap: 16px;
-  margin-top: 40px;
+  margin-top: 38px;
 }
 .cta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  padding: 8px 20px;
+  padding: 9px 20px;
   border-radius: 30px;
   font-size: 18px;
   font-weight: 400;
@@ -697,7 +697,7 @@ const COMMENTS = [
   .cm-content {
     font-size: 14px;
     line-height: 1.8;
-    color: #4b5563;
+    color: #444;
     margin: 0;
     min-height: 140px;
   }
