@@ -593,6 +593,8 @@ watch(
 .resumes {
   display: grid;
   gap: 0;
+  /* 生产首卡 y614（网格上方间距补足） */
+  margin-top: 5px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   @media (min-width: 768px) {
     grid-template-columns: repeat(3, minmax(0, 1fr));
