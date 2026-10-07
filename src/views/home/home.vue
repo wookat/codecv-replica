@@ -263,6 +263,7 @@ const COMMENTS = [
   gap: 40px;
   max-width: var(--max-width);
   margin: 0 auto;
+  min-height: 824px;
   padding: 90px 20px 70px;
   background: linear-gradient(120deg, var(--background) 55%, rgba(255, 116, 73, 0.07));
 }
@@ -361,7 +362,7 @@ const COMMENTS = [
 .sec {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 60px 20px 30px;
+  padding: 40px 20px 20px;
   text-align: center;
   h2 {
     font-size: 28px;
@@ -399,6 +400,9 @@ const COMMENTS = [
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
     img {
       width: 100%;
+      height: 190px;
+      object-fit: cover;
+      object-position: top;
       display: block;
     }
     .use-badge {
@@ -423,6 +427,9 @@ const COMMENTS = [
   &:hover .tc-name {
     color: var(--theme);
   }
+}
+.sec.ai {
+  padding: 60px 20px;
 }
 .ai-body {
   display: flex;
@@ -480,8 +487,8 @@ const COMMENTS = [
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
-  padding: 20px 0;
+  gap: 12px;
+  padding: 8px 0;
   @media (min-width: 768px) {
     flex-direction: row;
     justify-content: space-around;
@@ -540,15 +547,22 @@ const COMMENTS = [
     grid-template-columns: 1fr;
   }
 }
+.sec.comments {
+  padding-bottom: 60px;
+}
+.cm-grid {
+  gap: 0;
+}
 .cm-card {
   background: var(--background);
-  border-radius: 14px;
+  border-radius: 12px;
   padding: 20px;
+  margin: 8px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 150px;
+  min-height: 220px;
   .cm-content {
     font-size: 13px;
     line-height: 1.8;

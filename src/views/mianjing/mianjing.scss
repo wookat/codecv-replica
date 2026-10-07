@@ -1,8 +1,8 @@
 /* 面经板块公共样式（对齐生产 mj-* 命名） */
 .mj-page {
-  max-width: var(--max-width);
+  max-width: 1216px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 20px 12px;
   font-family: var(--font-noto-sans-sc);
   color: var(--font-color);
 }
@@ -234,7 +234,7 @@
   display: block;
   background: var(--background);
   border-radius: 12px;
-  padding: 16px 20px;
+  padding: 15px 20px;
   text-decoration: none;
   color: inherit;
   transition: box-shadow 0.2s, transform 0.2s;
@@ -355,7 +355,7 @@
 }
 
 .mj-aside {
-  width: 300px;
+  width: 260px;
   flex-shrink: 0;
   position: sticky;
   top: 84px;

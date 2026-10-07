@@ -325,7 +325,7 @@ watch(
 .jl-page {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 16px 12px;
+  padding: 20px 12px 16px;
   color: var(--font-color);
   font-family: var(--font-noto-sans-sc);
 }
@@ -339,10 +339,10 @@ watch(
   min-width: 0;
   background: var(--background);
   border-radius: 8px;
-  padding: 16px;
+  padding: 8px 16px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 0;
 }
 .promo-col {
   display: flex;
@@ -362,6 +362,7 @@ watch(
 .banner-jobs img {
   display: block;
   width: 280px;
+  height: 210px;
   object-fit: cover;
 }
 .banner-mj {
@@ -369,6 +370,7 @@ watch(
   img {
     display: block;
     width: 100%;
+    height: 210px;
     object-fit: cover;
   }
 }
@@ -414,20 +416,18 @@ watch(
 }
 .cat-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 16px;
+  height: 40px;
   border-bottom: 1px solid #f3f4f6;
-  padding-bottom: 12px;
   &:last-child {
     border-bottom: none;
-    padding-bottom: 0;
   }
 }
 .cat-label {
   flex-shrink: 0;
   font-weight: 600;
   font-size: 14px;
-  padding-top: 2px;
 }
 .cat-items {
   flex: 1;
@@ -486,6 +486,8 @@ watch(
   transition: transform 0.4s;
   img {
     width: 100%;
+    height: 122px;
+    object-fit: cover;
     border-radius: 12px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
   }
@@ -586,7 +588,7 @@ watch(
 }
 .resumes {
   display: grid;
-  gap: 8px;
+  gap: 0;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   @media (min-width: 768px) {
     grid-template-columns: repeat(3, minmax(0, 1fr));

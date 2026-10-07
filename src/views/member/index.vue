@@ -374,6 +374,8 @@ async function upgrade(t: Tier) {
 .rights {
   border-radius: 0 0 12px 12px;
   padding: 16px;
+  min-height: 416px;
+  box-sizing: border-box;
   background: var(--background);
   text-align: center;
   .rights-title {
@@ -408,7 +410,7 @@ async function upgrade(t: Tier) {
 .mb-comments {
   width: 100%;
   text-align: center;
-  padding: 60px 0 30px;
+  padding: 32px 0 20px;
   h2 {
     font-size: 28px;
     font-weight: 800;
@@ -423,7 +425,7 @@ async function upgrade(t: Tier) {
 .cm-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
+  gap: 0;
   list-style: none;
   padding: 0;
   margin: 0;
@@ -437,12 +439,13 @@ async function upgrade(t: Tier) {
 }
 .cm-card {
   background: #f3f4f6;
-  border-radius: 14px;
+  border-radius: 12px;
   padding: 20px;
+  margin: 8px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 150px;
+  min-height: 280px;
   .cm-content {
     font-size: 13px;
     line-height: 1.8;

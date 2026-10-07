@@ -21,7 +21,7 @@ const position = ref('')
 const keyword = ref('')
 const sort = ref<'new' | 'hot'>('new')
 const current = ref(1)
-const pageSize = 10 // 生产首屏 10 条（chunk 取证）
+const pageSize = 12 // 生产首屏 12 条（测量 12 卡 × 167px）
 
 const batchOptions = ['秋招', '春招', '暑期实习', '日常实习', '社招']
 
