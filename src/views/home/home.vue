@@ -172,36 +172,39 @@ const COMMENTS = [
       </div>
     </section>
 
-    <!-- 最新模板 -->
+    <!-- 最新模板（生产：标题为灰底卡片 p-10 bg-body-background rounded-xl mb-2） -->
     <section class="sec noto-sans-sc">
-      <h2 data-aos="zoom-in">🤩 最新模板</h2>
-      <p class="sub" data-aos="zoom-in">
-        主打一个实用！如果你有喜欢的模板在这里没有，记得告诉我哦～
-        等你下次再来的时候就能看到了，你永远可以相信作者的速度！
-      </p>
+      <div class="sec-head">
+        <h2 data-aos="zoom-in">🤩 最新模板</h2>
+        <p class="sub" data-aos="zoom-in">
+          主打一个实用！如果你有喜欢的模板在这里没有，记得告诉我哦～
+          等你下次再来的时候就能看到了，你永远可以相信作者的速度！
+        </p>
+      </div>
       <ul class="tpl-grid">
         <li
           v-for="(t, i) in newest"
           :key="t.type"
           :data-aos="['fade-right', 'fade-up', 'fade-up', 'fade-down', 'fade-down', 'fade-left'][i]"
         >
+          <!-- 生产：li.template>a 内 img+绝对定位角标+p（a 为内联元素，无 div 包裹） -->
           <router-link :to="`/jianlimoban/${t.type}`" class="tpl-card">
-            <div class="tc-img">
-              <span class="use-badge">999+ 人使用过</span>
-              <img :src="t.img" :alt="`${t.name}简历模板`" loading="lazy" />
-            </div>
+            <img :src="t.img" :alt="`模板使用人数统计`" loading="lazy" class="tc-img" />
+            <span class="use-badge">999+ 人使用过</span>
             <p class="tc-name">{{ t.name }}简历模板</p>
           </router-link>
         </li>
       </ul>
     </section>
 
-    <!-- AI 辅助写简历 -->
+    <!-- AI 辅助写简历（生产整区为灰底宽条，头部透明） -->
     <section class="sec ai noto-sans-sc">
-      <h2 data-aos="fade-down">👋 AI 辅助写简历</h2>
-      <p class="sub" data-aos="fade-up">
-        简历内容不够丰富不知道如何下手？自己翻译简历觉得很困难？没关系，找 AI 这些都能解决～
-      </p>
+      <div class="sec-head nobg">
+        <h2 data-aos="fade-down">👋 AI 辅助写简历</h2>
+        <p class="sub" data-aos="fade-up">
+          简历内容不够丰富不知道如何下手？自己翻译简历觉得很困难？没关系，找 AI 这些都能解决～
+        </p>
+      </div>
       <div class="ai-body">
         <img
           src="/static/svg/chat-Cr3bTpp1.svg"
@@ -222,10 +225,12 @@ const COMMENTS = [
 
     <!-- 支持多文件导出 -->
     <section class="sec ext noto-sans-sc">
-      <h2 data-aos="zoom-in">✌🏻 支持多文件导出</h2>
-      <p class="sub" data-aos="zoom-in">
-        除了 PDF 格式，我们还支持 Markdown、PNG格式的文件导出，基本涵盖大部分的使用场景
-      </p>
+      <div class="sec-head">
+        <h2 data-aos="zoom-in">✌🏻 支持多文件导出</h2>
+        <p class="sub" data-aos="zoom-in">
+          除了 PDF 格式，我们还支持 Markdown、PNG格式的文件导出，基本涵盖大部分的使用场景
+        </p>
+      </div>
       <div class="ext-body">
         <img
           src="/static/svg/ext-BRnvL-Al.svg"
@@ -246,12 +251,14 @@ const COMMENTS = [
       </div>
     </section>
 
-    <!-- 好评如潮 -->
+    <!-- 好评如潮（生产标题卡额外 mb-20） -->
     <section class="sec comments noto-sans-sc">
-      <h2 data-aos="zoom-in">😍 好评如潮</h2>
-      <p class="sub" data-aos="zoom-in">
-        CodeCV简历上线后得到了许多用户的喜欢，同时也收获了一些用户的反馈，看看他们是怎么说的吧～
-      </p>
+      <div class="sec-head mb20">
+        <h2 data-aos="zoom-in">😍 好评如潮</h2>
+        <p class="sub" data-aos="zoom-in">
+          CodeCV简历上线后得到了许多用户的喜欢，同时也收获了一些用户的反馈，看看他们是怎么说的吧～
+        </p>
+      </div>
       <ul class="cm-grid">
         <li v-for="c in COMMENTS" :key="c.profession" class="cm-card" data-aos="zoom-in">
           <p class="cm-content">{{ c.content }}</p>
@@ -415,21 +422,33 @@ const COMMENTS = [
   }
 }
 .sec {
-  /* 生产区块内容宽 1352（x=44 起），h2 行高 60px */
-  max-width: 1352px;
-  margin: 0 auto;
-  padding: 40px 0 20px;
+  /* 生产区块整宽，内嵌灰底标题卡；内容区另限 1280 居中 */
+  width: 100%;
+  padding: 40px 4px 20px;
   text-align: center;
-  h2 {
-    font-size: 36px;
-    font-weight: 700;
-    line-height: 60px;
-    margin: 0 0 12px;
-  }
-  .sub {
-    color: #999;
-    font-size: 14px;
-    margin: 0 0 34px;
+  .sec-head {
+    padding: 40px;
+    text-align: center;
+    background: var(--body-background);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    &.nobg {
+      background: transparent;
+    }
+    &.mb20 {
+      margin-bottom: 80px;
+    }
+    h2 {
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 60px;
+      margin: 0 0 12px;
+    }
+    .sub {
+      color: #999;
+      font-size: 14px;
+      margin: 0;
+    }
   }
 }
 .tpl-grid {
@@ -447,37 +466,35 @@ const COMMENTS = [
     position: relative;
     text-align: center;
   }
-  @media (max-width: 1024px) {
+  /* 生产断点 grid-cols-2 / md(768):cols-3 / xl(1280):cols-6 */
+  @media (max-width: 1279px) {
     grid-template-columns: repeat(3, 1fr);
   }
-  @media (max-width: 640px) {
+  @media (max-width: 767px) {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 .tpl-card {
-  display: block;
+  /* 生产 a.no-underline：内联元素，内含块级 p → 锚点盒尺寸=文本区 */
   text-decoration: none;
   .tc-img {
-    position: relative;
-    img {
-      width: 100%;
-      border-radius: 6px;
-      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-      display: block;
-    }
-    .use-badge {
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 2;
-      padding: 5px 10px;
-      border-radius: 6px 0 6px 0;
-      background: var(--theme);
-      color: #fff;
-      font-size: 12px;
-      font-weight: 400;
-      line-height: 18px;
-    }
+    width: 100%;
+    border-radius: 6px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    display: block;
+  }
+  .use-badge {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    padding: 5px 10px;
+    border-radius: 6px 0 6px 0;
+    background: var(--theme);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 18px;
   }
   .tc-name {
     margin: 8px 0 0;
@@ -491,7 +508,13 @@ const COMMENTS = [
   }
 }
 .sec.ai {
-  padding: 60px 0;
+  /* 生产 AI 区为整宽灰底条 */
+  background: var(--body-background);
+  padding: 60px 4px;
+  .ai-body {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
 }
 .ai-body {
   display: flex;
@@ -519,29 +542,41 @@ const COMMENTS = [
   gap: 16px;
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 40px 0 0;
   text-align: left;
+  @media (min-width: 768px) {
+    margin: 0 20px 0 0;
+  }
 }
 .ai-card {
+  /* 生产：bg-background rounded-2xl shadow-xl tracking-widest leading-6 p-5 */
   background: var(--background);
-  border-radius: 14px;
+  border-radius: 16px;
   padding: 20px;
   max-width: 300px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  letter-spacing: 0.1em;
+  line-height: 24px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
   &.off {
     @media (min-width: 768px) {
       transform: translateX(-100px);
     }
   }
   .ai-title {
+    /* 生产 strong.text-shine 渐变标题 mb-3 block */
+    display: block;
     font-size: 16px;
     font-weight: 700;
     margin: 0 0 12px;
+    background: linear-gradient(90deg, #ff7d31, #ff1480);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    width: fit-content;
   }
   .ai-desc {
-    font-size: 14px;
-    line-height: 1.6;
-    color: #6b7280;
+    font-size: 16px;
+    color: var(--font-color);
     margin: 0;
   }
 }
@@ -581,7 +616,11 @@ const COMMENTS = [
 .ext-desc {
   max-width: 300px;
   font-size: 16px;
-  line-height: 2.4;
+  /* 生产：leading-10 tracking-widest p-5 ml-5 */
+  line-height: 40px;
+  letter-spacing: 0.1em;
+  padding: 20px;
+  margin-left: 20px;
   color: var(--font-color);
   b {
     font-weight: 700;
@@ -618,29 +657,30 @@ const COMMENTS = [
   gap: 0;
 }
 .cm-card {
-  /* 生产评论卡是灰底无阴影 */
+  /* 生产评论卡灰底：内容区固定 140px + 40px 头像行 → 整卡 228px */
   background: #f3f5f7;
   border-radius: 12px;
   padding: 20px;
   margin: 8px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  min-height: 258px;
+  gap: 8px;
   .cm-content {
     font-size: 14px;
     line-height: 1.8;
     color: #4b5563;
-    margin: 0 0 14px;
+    margin: 0;
+    min-height: 140px;
   }
   .cm-info {
     display: flex;
     align-items: center;
     gap: 8px;
     margin: 0;
+    height: 40px;
     img {
-      width: 30px;
-      height: 30px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
     }
     sub {

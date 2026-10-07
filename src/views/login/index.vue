@@ -159,11 +159,13 @@ watch(
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 16px;
+  /* 生产列距更大：H1 y217/h46，协议 y664 */
+  gap: 24px;
   .title {
     color: #000;
     font-size: 32px;
     font-weight: 700;
+    line-height: 46px;
     margin: 0;
   }
   .sub {

@@ -266,9 +266,10 @@ async function upgrade(t: Tier) {
 
 <style lang="scss">
 .mb-page {
-  max-width: var(--max-width);
+  /* 生产会员页内容宽 1352（x=44 起） */
+  max-width: 1352px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 20px 0;
   color: var(--font-color);
   display: flex;
   flex-direction: column;
@@ -279,7 +280,9 @@ async function upgrade(t: Tier) {
   align-items: center;
   gap: 16px;
   justify-content: center;
-  margin-bottom: 32px;
+  /* 生产：vipIcon y96、卡内 ¥ y288 → 头部下移 16、卡区间隔再 +4 */
+  margin-top: 16px;
+  margin-bottom: 36px;
   .vip {
     height: 80px;
   }
@@ -394,7 +397,7 @@ async function upgrade(t: Tier) {
     margin-bottom: 24px;
     .quanquan {
       position: absolute;
-      top: 66%;
+      top: 82%;
       left: 50%;
       transform: translate(-50%, -50%);
       opacity: 0.6;
@@ -447,29 +450,31 @@ async function upgrade(t: Tier) {
   }
 }
 .cm-card {
+  /* 生产评论卡：内容区 140px + 40px 头像行 → 228px */
   background: #f3f5f7;
   border-radius: 12px;
   padding: 20px;
   margin: 8px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  min-height: 170px;
+  gap: 8px;
   .cm-content {
     font-family: -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
     font-size: 14px;
     line-height: 1.8;
     color: #545a69;
-    margin: 0 0 14px;
+    margin: 0;
+    min-height: 140px;
   }
   .cm-info {
     display: flex;
     align-items: center;
     gap: 8px;
     margin: 0;
+    height: 40px;
     img {
-      width: 30px;
-      height: 30px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
     }
     sub {
