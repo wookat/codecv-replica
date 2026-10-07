@@ -147,14 +147,13 @@ watch(pageNum, p => {
   router.replace({ query: { ...route.query, page: p > 1 ? p : undefined } })
 })
 
-// 生产 NEW 角标 = 最近上架的一批（日期最新的 5 套：2026-09 批次）
-const newTypes = new Set(
-  [...templates.value]
-    .filter(t => t.date)
-    .sort((a, b) => String(b.date).localeCompare(String(a.date)))
-    .slice(0, 5)
-    .map(t => t.type)
-)
+// 生产 NEW 角标 = 实测挂牌的 4 套（逐卡爬取验证，非日期推算）
+const newTypes = new Set([
+  'yinhangguanpeisheng',
+  'duomotaidamoxingsuanfa',
+  'shuziic',
+  'youxikaifagongchengshi'
+])
 const isNew = (t: any) => newTypes.has(t.type)
 
 const tplSlug = (t: any) => t.type
