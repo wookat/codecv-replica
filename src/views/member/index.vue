@@ -420,11 +420,13 @@ async function upgrade(t: Tier) {
 .mb-comments {
   width: 100%;
   text-align: center;
-  padding: 32px 0 20px;
+  /* 生产 h2 y1014：权益区到评论区间距 66px */
+  padding: 98px 0 20px;
   h2 {
     font-family: -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
     font-size: 36px;
     font-weight: 700;
+    line-height: 60px;
     margin: 0 0 12px;
     padding-bottom: 20px;
   }
@@ -436,16 +438,18 @@ async function upgrade(t: Tier) {
 }
 .cm-grid {
   display: grid;
+  /* 生产同首页：ul.grid xl:cols-5 max-w-screen-xl → 卡 240 起 x88 */
   grid-template-columns: repeat(5, 1fr);
-  gap: 0;
+  gap: 20px;
   list-style: none;
   padding: 0;
-  margin: 0;
+  max-width: 1280px;
+  margin: 0 auto;
   text-align: left;
-  @media (max-width: 1024px) {
-    grid-template-columns: repeat(2, 1fr);
+  @media (max-width: 1279px) {
+    grid-template-columns: repeat(3, 1fr);
   }
-  @media (max-width: 640px) {
+  @media (max-width: 767px) {
     grid-template-columns: 1fr;
   }
 }
@@ -454,7 +458,6 @@ async function upgrade(t: Tier) {
   background: #f3f5f7;
   border-radius: 12px;
   padding: 20px;
-  margin: 8px;
   display: flex;
   flex-direction: column;
   gap: 8px;

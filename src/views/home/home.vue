@@ -422,9 +422,9 @@ const COMMENTS = [
   }
 }
 .sec {
-  /* 生产区块整宽，内嵌灰底标题卡；内容区另限 1280 居中 */
+  /* 生产区块自身无垂直间距——全由标题卡 p-10 与 ul mt-4/pb-5 承担 */
   width: 100%;
-  padding: 40px 4px 20px;
+  padding: 0 4px;
   text-align: center;
   .sec-head {
     padding: 40px;
@@ -637,31 +637,29 @@ const COMMENTS = [
 }
 .cm-grid {
   display: grid;
+  /* 生产 ul.grid xl:cols-5 max-w-screen-xl mx-auto：卡 240 起 x88、间距 20 */
   grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
+  gap: 20px;
   list-style: none;
   padding: 0;
-  margin: 0;
+  max-width: 1280px;
+  margin: 0 auto;
   text-align: left;
-  @media (max-width: 1024px) {
-    grid-template-columns: repeat(2, 1fr);
+  @media (max-width: 1279px) {
+    grid-template-columns: repeat(3, 1fr);
   }
-  @media (max-width: 640px) {
+  @media (max-width: 767px) {
     grid-template-columns: 1fr;
   }
 }
 .sec.comments {
   padding-bottom: 60px;
 }
-.cm-grid {
-  gap: 0;
-}
 .cm-card {
   /* 生产评论卡灰底：内容区固定 140px + 40px 头像行 → 整卡 228px */
   background: #f3f5f7;
   border-radius: 12px;
   padding: 20px;
-  margin: 8px;
   display: flex;
   flex-direction: column;
   gap: 8px;
