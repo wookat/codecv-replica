@@ -186,7 +186,6 @@ const COMMENTS = [
           v-for="(t, i) in newest"
           :key="t.type"
           :data-aos="['fade-right', 'fade-up', 'fade-up', 'fade-down', 'fade-down', 'fade-left'][i]"
-          @click="$router.push(`/jianlimoban/${t.type}`)"
         >
           <!-- 生产实测：a.no-underline 包裹 img+span+p 整卡 -->
           <router-link :to="`/jianlimoban/${t.type}`" class="tpl-card">
@@ -500,9 +499,10 @@ const COMMENTS = [
   cursor: pointer;
 }
 .tpl-card {
-  /* 生产 a.no-underline 整卡块级（img+徽标+名字全在内） */
+  /* 生产 a.no-underline 为 inline：img 块级子级把行内盒分裂，
+     锚自身只剩底部文字区（实测 y1305 h80） */
   text-decoration: none;
-  display: block;
+  display: inline;
   .use-badge {
     position: absolute;
     top: 0;
