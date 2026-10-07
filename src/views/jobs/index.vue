@@ -520,7 +520,7 @@ onMounted(() => {
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 0 20px 40px;
-  font-family: var(--font-noto-sans-sc);
+  /* 生产 jobs 内容区不设字体：标题计算值为 UA 默认（探针实测） */
   color: var(--font-color);
   overflow-x: clip;
 }

@@ -22,13 +22,43 @@ const FEATURES = [
   { icon: '🎁', name: '至今已免费导出', strong: '20万+', desc: ' 简历!' }
 ]
 
-// 生产首页右侧扇形简历图（抓取自线上静态资源）
+// 生产首页右侧扇形简历图：5 张 /static/webp 封面 + rotate/z-index 叠扇 + 各自链接模板详情（prod DOM 逆向）
 const FAN = [
-  { src: '/prod-assets/hero-18.webp', rotate: -24, x: -120, y: 24 },
-  { src: '/prod-assets/hero-17.webp', rotate: -12, x: -60, y: 0 },
-  { src: '/prod-assets/hero-16.webp', rotate: 0, x: 0, y: -12 },
-  { src: '/prod-assets/hero-15.webp', rotate: 12, x: 60, y: 0 },
-  { src: '/prod-assets/hero-14.webp', rotate: 24, x: 120, y: 24 }
+  {
+    src: '/static/webp/18-C2ddrgEb.webp',
+    rotate: 40,
+    z: 100,
+    to: '/jianlimoban/18art',
+    alt: 'CodeCV简历 - 简约/产品经理/商务/设计'
+  },
+  {
+    src: '/static/webp/17-hAuO6TPg.webp',
+    rotate: 20,
+    z: 99,
+    to: '/jianlimoban/17business',
+    alt: 'CodeCV简历 - 商务/校招/互联网/设计'
+  },
+  {
+    src: '/static/webp/16-Dfa-By72.webp',
+    rotate: 0,
+    z: 98,
+    to: '/jianlimoban/16prominent_content',
+    alt: 'CodeCV简历 - 设计/简约/通用/突出内容'
+  },
+  {
+    src: '/static/webp/15-DVM_h8fX.webp',
+    rotate: -20,
+    z: 97,
+    to: '/jianlimoban/15simple_versatile',
+    alt: 'CodeCV简历 - 简约/后端/前端/互联网'
+  },
+  {
+    src: '/static/webp/14-DeXkzOFm.webp',
+    rotate: -40,
+    z: 96,
+    to: '/jianlimoban/14heading',
+    alt: 'CodeCV简历 - 简约/设计/商务/运营'
+  }
 ]
 
 const newest = RECENT
@@ -54,30 +84,30 @@ const AI_CARDS = [
 const COMMENTS = [
   {
     content: '使用体验还不错呀，UI 做的也蛮好的，加油！',
-    avatar: '/prod-assets/avatar1.png',
+    avatar: '/static/png/avatar1-155VfYeO.png',
     profession: '阿里巴巴前端'
   },
   {
     content:
       '在nk推荐中看到了这个工具，非常感谢作者大大的开发，虽然我不是前后端开发，但是直观感觉这玩意真好～',
-    avatar: '/prod-assets/avatar2.png',
+    avatar: '/static/png/avatar2-Dk7PWhs9.png',
     profession: '嵌入式开发工程师'
   },
   {
     content: '这个简历工具实在是泰库辣！真的节省了我很多时间，简历模板也很实用，发现了宝藏工具！！',
-    avatar: '/prod-assets/avatar3.png',
+    avatar: '/static/png/avatar3-CKCfc60R.png',
     profession: 'Java开发工程师'
   },
   {
     content:
       '简历写起来真的非常方便，因为我不懂UP说的markdown，所以我使用所见即所得方式编写，感觉就和写word一样简单，墙裂推荐～',
-    avatar: '/prod-assets/avatar4.png',
+    avatar: '/static/png/avatar4-D4xNvzs7.png',
     profession: '用户运营'
   },
   {
     content:
       '周末在家搞网站发现的这个宝藏资源，写简历就跟写笔记一样简单了，所见即所得，以后写简历就在这上面了～',
-    avatar: '/prod-assets/avatar5.png',
+    avatar: '/static/png/avatar5-CkIdX3WU.png',
     profession: '产品经理'
   }
 ]
@@ -110,14 +140,15 @@ const COMMENTS = [
         </div>
       </div>
       <div class="hero-r">
-        <img
+        <router-link
           v-for="(f, i) in FAN"
           :key="i"
-          :src="f.src"
-          :style="{ transform: `translate(${f.x}px, ${f.y}px) rotate(${f.rotate}deg)` }"
-          alt="简历模板"
-          draggable="false"
-        />
+          :to="f.to"
+          class="fan-a"
+          :style="{ transform: `rotate(${f.rotate}deg)`, zIndex: f.z }"
+        >
+          <img :src="f.src" :alt="f.alt" loading="lazy" draggable="false" />
+        </router-link>
       </div>
     </section>
 
@@ -297,12 +328,20 @@ const COMMENTS = [
   display: flex;
   align-items: center;
   justify-content: center;
-  img {
+  .fan-a {
     position: absolute;
-    width: 190px;
-    border-radius: 10px;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
-    transition: transform 0.4s;
+    display: inline-block;
+    img {
+      width: 190px;
+      border-radius: 10px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+      transition: transform 0.4s;
+      display: block;
+      cursor: pointer;
+      &:hover {
+        transform: scale(1.05);
+      }
+    }
   }
 }
 .sec {

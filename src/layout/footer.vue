@@ -38,12 +38,12 @@ const minimal = computed(() => useRoute().path === '/progress')
         <strong class="title">联系方式/小程序</strong>
         <li class="mp-imgs">
           <div class="mp-one">
-            <img src="/prod-assets/wechat.jpg" alt="客服微信" />
-            <span>客服微信</span>
+            <img src="/static/jpg/wechat-BjrEoHaI.jpg" alt="微信客服" />
+            <strong>客服微信</strong>
           </div>
           <router-link to="/progress" class="mp-one">
-            <img src="/prod-assets/miniprogram.webp" alt="投递进度管理" />
-            <span>投递进度管理</span>
+            <img src="/static/webp/miniprogram-Ceuprux3.webp" alt="投递进度管理" />
+            <strong>投递进度管理</strong>
           </router-link>
         </li>
       </ul>
@@ -81,6 +81,7 @@ const minimal = computed(() => useRoute().path === '/progress')
     li {
       letter-spacing: 0.5px;
       font-size: 14px;
+      color: #555;
       a,
       .mp-ref {
         text-decoration: none;
@@ -93,22 +94,27 @@ const minimal = computed(() => useRoute().path === '/progress')
       }
       &.mp-imgs {
         flex-direction: row;
-        gap: 10px;
+        gap: 20px;
+        margin-top: 16px;
         .mp-one {
           display: flex;
           flex-direction: column;
           align-items: center;
+          width: 80px;
+          height: 80px;
+          padding: 2px;
+          background: #fff;
+          border-radius: 6px;
           text-decoration: none;
           img {
-            width: 44px;
-            height: 44px;
-            border-radius: 8px;
+            width: 100%;
+            margin-bottom: 12px;
             display: block;
           }
-          span {
-            margin-top: 4px;
-            font-size: 11px;
-            color: #999;
+          strong {
+            font-size: 12px;
+            color: var(--font-color);
+            font-weight: 400;
             white-space: nowrap;
           }
         }

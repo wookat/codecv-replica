@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getLocalStorage } from '@/common/localstorage'
+
+// 生产 member 页 nav/文本主题为 #555（探针实测），其余页 #1e293b——进出本页时切换全局变量
+onMounted(() => document.body.style.setProperty('--font-color', '#555'))
+onUnmounted(() => document.body.style.setProperty('--font-color', '#1e293b'))
 
 interface Tier {
   name: string
@@ -111,30 +115,30 @@ const tiers: Tier[] = [
 const COMMENTS = [
   {
     content: '使用体验还不错呀，UI 做的也蛮好的，加油！',
-    avatar: '/prod-assets/avatar1.png',
+    avatar: '/static/png/avatar1-155VfYeO.png',
     profession: '阿里巴巴前端'
   },
   {
     content:
       '在nk推荐中看到了这个工具，非常感谢作者大大的开发，虽然我不是前后端开发，但是直观感觉这玩意真好～',
-    avatar: '/prod-assets/avatar2.png',
+    avatar: '/static/png/avatar2-Dk7PWhs9.png',
     profession: '嵌入式开发工程师'
   },
   {
     content: '这个简历工具实在是泰库辣！真的节省了我很多时间，简历模板也很实用，发现了宝藏工具！！',
-    avatar: '/prod-assets/avatar3.png',
+    avatar: '/static/png/avatar3-CKCfc60R.png',
     profession: 'Java开发工程师'
   },
   {
     content:
       '简历写起来真的非常方便，因为我不懂UP说的markdown，所以我使用所见即所得方式编写，感觉就和写word一样简单，墙裂推荐～',
-    avatar: '/prod-assets/avatar4.png',
+    avatar: '/static/png/avatar4-D4xNvzs7.png',
     profession: '用户运营'
   },
   {
     content:
       '周末在家搞网站发现的这个宝藏资源，写简历就跟写笔记一样简单了，所见即所得，以后写简历就在这上面了～',
-    avatar: '/prod-assets/avatar5.png',
+    avatar: '/static/png/avatar5-CkIdX3WU.png',
     profession: '产品经理'
   }
 ]
