@@ -264,35 +264,37 @@ onMounted(() => {
           </div>
         </div>
 
-        <div class="ad-row">
-          <router-link
-            to="/mianjing"
-            target="_blank"
-            class="ad-link"
-            aria-label="进入面经广场，查看面试笔经"
-          >
-            <img
-              src="/ads/mianjing.webp"
-              alt="面经广场：投完递，先看看这家公司的面经——笔试面试真实记录，免费看面经"
-              loading="lazy"
-              draggable="false"
-            />
-          </router-link>
-          <a
-            href="https://assist.codecvcv.com?utm_source=codecv"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="ad-link"
-            aria-label="网申助手——求职网申请表单一键自动填写"
-          >
-            <img
-              src="/ads/assist.webp"
-              alt="网申助手：找个班上，网申不用反复填，一键填写更快投递"
-              loading="lazy"
-              draggable="false"
-            />
-          </a>
-        </div>
+      </section>
+
+      <!-- 生产：广告区是独立 section（grid 两卡），不在筛选 section 内 -->
+      <section class="ad-section" aria-label="广告">
+        <router-link
+          to="/mianjing"
+          target="_blank"
+          class="ad-link"
+          aria-label="进入面经广场，查看面试笔经"
+        >
+          <img
+            src="/ads/mianjing.webp"
+            alt="面经广场：投完递，先看看这家公司的面经——笔试面试真实记录，免费看面经"
+            loading="lazy"
+            draggable="false"
+          />
+        </router-link>
+        <a
+          href="https://assist.codecvcv.com?utm_source=codecv"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="ad-link"
+          aria-label="网申助手——求职网申请表单一键自动填写"
+        >
+          <img
+            src="/ads/assist.webp"
+            alt="网申助手：找个班上，网申不用反复填，一键填写更快投递"
+            loading="lazy"
+            draggable="false"
+          />
+        </a>
       </section>
 
       <section aria-label="校招岗位列表">
@@ -513,7 +515,8 @@ onMounted(() => {
   /* 生产校招页容器 1240px（内容 x=100 起），头部卡 y=116 */
   max-width: 1240px;
   margin: 0 auto;
-  padding: 56px 0 40px;
+  /* 生产内容底距仅 ~4px（FAQ 底 2626→容器底 2630） */
+  padding: 56px 0 4px;
   /* 生产 jobs 内容区不设字体：标题计算值为 UA 默认（探针实测） */
   color: var(--font-color);
   overflow-x: clip;
@@ -589,7 +592,8 @@ onMounted(() => {
   }
 }
 
-.ad-row {
+/* 生产结构：grid gap-3 md:grid-cols-2 md:gap-4 mb-4 独立 section */
+.ad-section {
   display: grid;
   gap: 12px;
   margin-bottom: 16px;

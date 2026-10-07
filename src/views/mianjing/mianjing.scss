@@ -208,7 +208,8 @@
 }
 
 .mj-main {
-  margin-top: 24px;
+  /* 生产列表头 y340（筛选卡底 322 + 间距 18） */
+  margin-top: 18px;
   display: flex;
   gap: 24px;
   align-items: flex-start;
@@ -244,7 +245,7 @@
   display: block;
   background: var(--background);
   border-radius: 12px;
-  padding: 15px 20px;
+  padding: 16px 20px;
   text-decoration: none;
   color: inherit;
   transition: box-shadow 0.2s, transform 0.2s;
@@ -365,7 +366,8 @@
 }
 
 .mj-aside {
-  width: 260px;
+  /* 生产侧栏 300px（列表列宽 908 实测） */
+  width: 300px;
   flex-shrink: 0;
   position: sticky;
   top: 84px;
