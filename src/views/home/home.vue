@@ -438,7 +438,7 @@ const COMMENTS = [
       margin-bottom: 0;
     }
     &.mb20 {
-      margin-bottom: 28px;
+      margin-bottom: 36px;
     }
     h2 {
       font-size: 36px;
@@ -597,7 +597,10 @@ const COMMENTS = [
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  padding: 0;
+  /* 生产 .ext：max-w-screen-xl p-5 space-around → 图 x140 */
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
   @media (min-width: 768px) {
     flex-direction: row;
     justify-content: space-around;
@@ -666,6 +669,10 @@ const COMMENTS = [
 }
 .sec.comments {
   padding-bottom: 60px;
+}
+.sec.ext {
+  /* 生产导出区底到评论头卡间留 ~20px */
+  padding-bottom: 20px;
 }
 .cm-card {
   /* 生产评论卡灰底：内容区固定 140px + 40px 头像行 → 整卡 228px */
