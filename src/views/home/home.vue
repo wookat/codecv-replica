@@ -508,9 +508,9 @@ const COMMENTS = [
   }
 }
 .sec.ai {
-  /* 生产 AI 区为整宽灰底条 */
+  /* 生产 AI 区为整宽灰底条；顶距由透明标题卡 p-10 提供，底部留 60 */
   background: var(--body-background);
-  padding: 60px 4px;
+  padding: 0 4px 60px;
   .ai-body {
     max-width: 1280px;
     margin: 0 auto;
