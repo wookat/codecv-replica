@@ -490,17 +490,15 @@ const COMMENTS = [
   }
 }
 .tc-img {
-  /* li 的 margin:20 已承担卡距，img 铺满内容盒（实测 w173=li 宽） */
+  /* 生产 img 原生 inline（行内元素，无 display:block）：rounded-md w-full shadow-md */
   width: 100%;
   margin: 0;
   border-radius: 6px;
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  display: block;
   cursor: pointer;
 }
 .tpl-card {
-  /* 生产 a.no-underline 为 inline：img 块级子级把行内盒分裂，
-     锚自身只剩底部文字区（实测 y1305 h80） */
+  /* 生产 a.no-underline 原生 inline 锚（整卡含 img+徽标+名字） */
   text-decoration: none;
   display: inline;
   .use-badge {
