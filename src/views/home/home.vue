@@ -437,9 +437,8 @@ const COMMENTS = [
       background: transparent;
       margin-bottom: 0;
     }
-    /* 生产评论区 LI 距卡底 ~48px：卡底 padding40 + ul mt-4 已够，不再叠 mb-20 */
     &.mb20 {
-      margin-bottom: 8px;
+      margin-bottom: 28px;
     }
     h2 {
       font-size: 36px;
@@ -591,7 +590,7 @@ const COMMENTS = [
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  padding: 8px 0;
+  padding: 0;
   @media (min-width: 768px) {
     flex-direction: row;
     justify-content: space-around;
