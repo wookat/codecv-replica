@@ -395,14 +395,14 @@ const COMMENTS = [
   }
 }
 .hero-r {
-  /* 生产 md:flex w-[50%] ml-80 h-full items-center justify-center，五张 250px 图 flex 收缩重叠成扇形 */
+  /* 生产实测容器被压到 x1045 w315：定宽 320 + shrink:0 让左栏拿 640 */
   display: flex;
-  width: 50%;
+  width: 320px;
+  flex-shrink: 0;
   margin-left: 320px;
   height: 100%;
   align-items: center;
   justify-content: center;
-  /* 生产该容器被压缩到 ~315px：不设 shrink:0，按 flex 默认收缩 */
   .fan-a {
     display: inline-block;
     position: relative;
