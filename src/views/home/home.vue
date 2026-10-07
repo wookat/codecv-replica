@@ -188,9 +188,9 @@ const COMMENTS = [
           :data-aos="['fade-right', 'fade-up', 'fade-up', 'fade-down', 'fade-down', 'fade-left'][i]"
           @click="$router.push(`/jianlimoban/${t.type}`)"
         >
-          <!-- 生产实测：a 仅覆盖卡底文字区(y1305 h80)，img 在 a 外为 li 直接子级 -->
-          <img :src="t.img" :alt="`模板使用人数统计`" loading="lazy" class="tc-img" />
+          <!-- 生产实测：a.no-underline 包裹 img+span+p 整卡 -->
           <router-link :to="`/jianlimoban/${t.type}`" class="tpl-card">
+            <img :src="t.img" :alt="`模板使用人数统计`" loading="lazy" class="tc-img" />
             <span class="use-badge">999+ 人使用过</span>
             <p class="tc-name">{{ t.name }}简历模板</p>
           </router-link>
@@ -213,14 +213,13 @@ const COMMENTS = [
           alt="AI小助手"
           data-aos="fade-right"
         />
-        <ul class="ai-grid" data-aos="fade-right">
-          <li v-for="(c, i) in AI_CARDS" :key="c.title" class="ai-card" :class="{ off: i === 1 }">
-            <p class="ai-title">
-              <span>{{ c.icon }}</span> {{ c.title }}
-            </p>
-            <p class="ai-desc">{{ c.desc }}</p>
-          </li>
-        </ul>
+        <!-- 生产：右侧三个聊天气泡 p，strong 渐变标题 block -->
+        <div class="ai-bubbles" data-aos="fade-right">
+          <p v-for="(c, i) in AI_CARDS" :key="c.title" class="ai-bubble" :class="{ off: i === 1 }">
+            <strong class="ai-title">{{ c.icon }} {{ c.title }}</strong
+            >{{ c.desc }}
+          </p>
+        </div>
       </div>
     </section>
 
@@ -332,7 +331,10 @@ const COMMENTS = [
   /* 生产 tracking-widest whitespace-nowrap，行间 mt-1 */
   letter-spacing: 0.1em;
   white-space: nowrap;
-  margin-top: 9px;
+  margin-top: 4px;
+  &:first-of-type {
+    margin-top: 8px;
+  }
   font-size: 16px;
   line-height: 36px;
   .fi {
@@ -359,7 +361,7 @@ const COMMENTS = [
   /* 生产 flex gap-4 mt-10 */
   display: flex;
   gap: 16px;
-  margin-top: 38px;
+  margin-top: 40px;
 }
 .cta {
   display: inline-flex;
@@ -448,13 +450,15 @@ const COMMENTS = [
       margin-bottom: 0;
     }
     &.mb20 {
-      margin-bottom: 36px;
+      /* 生产标题卡 mb-20(80px)，由 ul mt-[-40px] 吃掉一半 */
+      margin-bottom: 80px;
     }
     h2 {
       font-size: 36px;
       font-weight: 700;
       line-height: 60px;
-      margin: 0 0 12px;
+      margin: 0;
+      padding-bottom: 20px;
     }
     .sub {
       color: #999;
@@ -496,11 +500,9 @@ const COMMENTS = [
   cursor: pointer;
 }
 .tpl-card {
-  /* 生产 a.no-underline：内联元素，实测盒 y1305 h80（顶部盖住图底 ~35px） */
+  /* 生产 a.no-underline 整卡块级（img+徽标+名字全在内） */
   text-decoration: none;
-  display: inline-block;
-  margin-top: -35px;
-  padding-top: 35px;
+  display: block;
   .use-badge {
     position: absolute;
     top: 0;
@@ -562,27 +564,28 @@ const COMMENTS = [
     margin-right: 0;
   }
 }
-.ai-grid {
+.ai-bubbles {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  list-style: none;
-  padding: 0;
-  margin: 40px 0 0;
+  margin-top: 40px;
   text-align: left;
   @media (min-width: 768px) {
     margin: 0 20px 0 0;
   }
 }
-.ai-card {
-  /* 生产：bg-background rounded-2xl shadow-xl tracking-widest leading-6 p-5 */
+.ai-bubble {
+  /* 生产：bg-background rounded-2xl shadow-xl tracking-widest leading-6 p-5 max-w-[300px] */
   background: var(--background);
   border-radius: 16px;
   padding: 20px;
   max-width: 300px;
   letter-spacing: 0.1em;
   line-height: 24px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  font-size: 16px;
+  color: var(--font-color);
+  margin: 0;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
   &.off {
     @media (min-width: 768px) {
       transform: translateX(-100px);
@@ -599,11 +602,6 @@ const COMMENTS = [
     background-clip: text;
     color: transparent;
     width: fit-content;
-  }
-  .ai-desc {
-    font-size: 16px;
-    color: var(--font-color);
-    margin: 0;
   }
 }
 .ext-body {
@@ -666,11 +664,12 @@ const COMMENTS = [
   display: grid;
   /* 生产 ul.grid xl:cols-5 max-w-screen-xl mx-auto：卡 240 起 x88、间距 20 */
   grid-template-columns: repeat(5, 1fr);
-  gap: 20px;
+  gap: 0;
   list-style: none;
   padding: 0;
   max-width: 1280px;
-  margin: 0 auto;
+  /* 生产 ul mt-[-40px] 咬住标题卡 80px 底距 */
+  margin: -40px auto 0;
   text-align: left;
   @media (max-width: 1279px) {
     grid-template-columns: repeat(3, 1fr);
@@ -687,30 +686,33 @@ const COMMENTS = [
   padding-bottom: 20px;
 }
 .cm-card {
-  /* 生产评论卡灰底：内容区固定 140px + 40px 头像行 → 整卡 228px */
-  background: #f3f5f7;
+  /* 生产 li.flex flex-col cursor-pointer bg-body p-5 m-2 rounded-xl */
+  background: var(--body-background);
   border-radius: 12px;
   padding: 20px;
+  margin: 8px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  cursor: pointer;
   .cm-content {
+    /* 生产 p.flex-1 text-writable-font-color text-sm leading-7 min-w-[180px] */
+    flex: 1;
+    min-width: 180px;
     font-size: 14px;
-    line-height: 1.8;
+    line-height: 28px;
     color: #444;
     margin: 0;
-    min-height: 140px;
   }
   .cm-info {
+    /* 生产 p.mt-2 flex place-content-between items-center */
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin: 0;
+    justify-content: space-between;
+    margin: 8px 0 0;
     height: 40px;
     img {
       width: 40px;
       height: 40px;
-      border-radius: 50%;
     }
     sub {
       font-size: 12px;
