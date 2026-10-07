@@ -597,9 +597,7 @@ const COMMENTS = [
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  /* 生产 .ext：max-w-screen-xl p-5 space-around → 图 x140 */
-  max-width: 1280px;
-  margin: 0 auto;
+  /* 生产 .ext：整宽 p-5 space-around → 图 x140 / 描述 x1000 */
   padding: 0 20px;
   @media (min-width: 768px) {
     flex-direction: row;
