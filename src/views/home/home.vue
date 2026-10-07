@@ -1,14 +1,14 @@
 <script setup lang="ts">
 // 生产首页「最新模板」为运营精选的 6 套固定卡片（名称与模板库展示名不同）
 const RECENT = [
-  { type: '45', img: '/covers/cv-45.webp', name: '应届后端开发工程师' },
-  { type: '1internet_avatar', img: '/covers/cv-1internet-avatar.webp', name: '大数据开发工程师' },
-  { type: '38', img: '/covers/cv-38.webp', name: '数据运营' },
-  { type: '43', img: '/covers/cv-43.webp', name: '运营通用' },
-  { type: '44', img: '/covers/cv-44.webp', name: '中高级数据运营通用' },
+  { type: '45', img: '/static/webp/45-B6lizpRp.webp', name: '应届后端开发工程师' },
+  { type: '1internet_avatar', img: '/static/webp/1-CJ2PN3sg.webp', name: '大数据开发工程师' },
+  { type: '38', img: '/static/webp/38-XGXgWs1_.webp', name: '数据运营' },
+  { type: '43', img: '/static/webp/43-DGmGKs4S.webp', name: '运营通用' },
+  { type: '44', img: '/static/webp/44-O9bLJnm5.webp', name: '中高级数据运营通用' },
   {
     type: '15simple_versatile',
-    img: '/covers/cv-15simple-versatile.webp',
+    img: '/static/webp/15-DVM_h8fX.webp',
     name: '后端Java开发工程师'
   }
 ]
@@ -154,13 +154,17 @@ const COMMENTS = [
 
     <!-- 最新模板 -->
     <section class="sec noto-sans-sc">
-      <h2>🤩 最新模板</h2>
-      <p class="sub">
+      <h2 data-aos="zoom-in">🤩 最新模板</h2>
+      <p class="sub" data-aos="zoom-in">
         主打一个实用！如果你有喜欢的模板在这里没有，记得告诉我哦～
         等你下次再来的时候就能看到了，你永远可以相信作者的速度！
       </p>
       <ul class="tpl-grid">
-        <li v-for="t in newest" :key="t.type">
+        <li
+          v-for="(t, i) in newest"
+          :key="t.type"
+          :data-aos="['fade-right', 'fade-up', 'fade-up', 'fade-down', 'fade-down', 'fade-left'][i]"
+        >
           <router-link :to="`/jianlimoban/${t.type}`" class="tpl-card">
             <div class="tc-img">
               <span class="use-badge">999+ 人使用过</span>
@@ -174,13 +178,18 @@ const COMMENTS = [
 
     <!-- AI 辅助写简历 -->
     <section class="sec ai noto-sans-sc">
-      <h2>👋 AI 辅助写简历</h2>
-      <p class="sub">
+      <h2 data-aos="fade-down">👋 AI 辅助写简历</h2>
+      <p class="sub" data-aos="fade-up">
         简历内容不够丰富不知道如何下手？自己翻译简历觉得很困难？没关系，找 AI 这些都能解决～
       </p>
       <div class="ai-body">
-        <img src="/static/svg/chat-Cr3bTpp1.svg" class="ai-illust" alt="AI小助手" />
-        <ul class="ai-grid">
+        <img
+          src="/static/svg/chat-Cr3bTpp1.svg"
+          class="ai-illust"
+          alt="AI小助手"
+          data-aos="fade-right"
+        />
+        <ul class="ai-grid" data-aos="fade-right">
           <li v-for="(c, i) in AI_CARDS" :key="c.title" class="ai-card" :class="{ off: i === 1 }">
             <p class="ai-title">
               <span>{{ c.icon }}</span> {{ c.title }}
@@ -193,18 +202,23 @@ const COMMENTS = [
 
     <!-- 支持多文件导出 -->
     <section class="sec ext noto-sans-sc">
-      <h2>✌🏻 支持多文件导出</h2>
-      <p class="sub">
+      <h2 data-aos="zoom-in">✌🏻 支持多文件导出</h2>
+      <p class="sub" data-aos="zoom-in">
         除了 PDF 格式，我们还支持 Markdown、PNG格式的文件导出，基本涵盖大部分的使用场景
       </p>
       <div class="ext-body">
-        <img src="/static/svg/ext-BRnvL-Al.svg" class="ext-illust" alt="支持多文件导出" />
-        <div class="ext-labels">
+        <img
+          src="/static/svg/ext-BRnvL-Al.svg"
+          class="ext-illust"
+          alt="支持多文件导出"
+          data-aos="fade-right"
+        />
+        <div class="ext-labels" data-aos="zoom-in">
           <span class="pdf">.PDF</span>
           <span class="md">.MD</span>
           <span class="png">.PNG</span>
         </div>
-        <p class="ext-desc">
+        <p class="ext-desc" data-aos="fade-up">
           🚀 我们推出了多种导出方式，无论是制作图片还是 <b class="c-pdf">PDF</b> ，您只需编写简单的
           <b class="c-md">MD</b> 文本或者
           <b class="c-word">Word</b> ，其他的我们都助您轻松生成！快来尝试吧！✨
@@ -214,12 +228,12 @@ const COMMENTS = [
 
     <!-- 好评如潮 -->
     <section class="sec comments noto-sans-sc">
-      <h2>😍 好评如潮</h2>
-      <p class="sub">
+      <h2 data-aos="zoom-in">😍 好评如潮</h2>
+      <p class="sub" data-aos="zoom-in">
         CodeCV简历上线后得到了许多用户的喜欢，同时也收获了一些用户的反馈，看看他们是怎么说的吧～
       </p>
       <ul class="cm-grid">
-        <li v-for="c in COMMENTS" :key="c.profession" class="cm-card">
+        <li v-for="c in COMMENTS" :key="c.profession" class="cm-card" data-aos="zoom-in">
           <p class="cm-content">{{ c.content }}</p>
           <p class="cm-info">
             <img :src="c.avatar" alt="头像" /><sub>{{ c.profession }}</sub>

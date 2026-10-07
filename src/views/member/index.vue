@@ -191,7 +191,7 @@ async function upgrade(t: Tier) {
 <template>
   <div class="mb-page">
     <h1 class="sr-only">会员中心_VIP会员特权_简历制作高级功能_专业简历模板下载</h1>
-    <div class="mb-head">
+    <div class="mb-head" data-aos="fade-down">
       <img
         src="/static/png/vipIcon-wax61BPq.png"
         class="vip"
@@ -204,7 +204,7 @@ async function upgrade(t: Tier) {
       </div>
     </div>
 
-    <div class="tiers">
+    <div class="tiers" data-aos="zoom-out">
       <div v-for="t in tiers" :key="t.name" class="tier-wrap">
         <div class="tier" :class="t.gradient">
           <div v-if="t.badge" class="badge">{{ t.badge }}</div>
@@ -241,13 +241,13 @@ async function upgrade(t: Tier) {
 
     <!-- 用户评价（生产同板块） -->
     <div class="mb-comments">
-      <h2>看看用户的真实评价</h2>
-      <p class="sub">
+      <h2 data-aos="zoom-in">看看用户的真实评价</h2>
+      <p class="sub" data-aos="zoom-in">
         看看用户的真实评价，用户说好才是真的好，已经有 5000+ 用户使用CodeCV简历制作简历成功入职拿到
         OFFER!
       </p>
       <ul class="cm-grid">
-        <li v-for="c in COMMENTS" :key="c.profession" class="cm-card">
+        <li v-for="c in COMMENTS" :key="c.profession" class="cm-card" data-aos="zoom-in">
           <p class="cm-content">{{ c.content }}</p>
           <p class="cm-info">
             <img :src="c.avatar" alt="头像" /><sub>{{ c.profession }}</sub>

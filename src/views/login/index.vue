@@ -31,65 +31,64 @@ watch(
 </script>
 
 <template>
-  <div class="login-page">
-    <h1 class="sr-only">用户登录_微信扫码登录_简历制作工具登录_免费注册</h1>
-    <router-link to="/" class="logo">
-      <img src="/static/svg/logo-BFLBP-GO.svg" alt="CodeCV简历Logo" draggable="false" />
-    </router-link>
-    <div class="login-wrap">
-      <div class="illus-col">
-        <img
-          draggable="false"
-          src="/static/svg/login-page-CxicEn1V.svg"
-          class="illus"
-          alt="登录封面"
-        />
+  <h1 class="sr-only">用户登录_微信扫码登录_简历制作工具登录_免费注册</h1>
+  <div class="logo" @click="router.push('/')">
+    <img src="/static/svg/logo-BFLBP-GO.svg" alt="CodeCV简历Logo" draggable="false" />
+  </div>
+  <div class="login-wrap">
+    <div class="illus-col">
+      <img
+        draggable="false"
+        src="/static/svg/login-page-CxicEn1V.svg"
+        class="illus"
+        alt="登录封面"
+      />
+    </div>
+    <div class="vline"></div>
+    <div class="login-col">
+      <h1 class="title">微信扫码登录注册</h1>
+      <p class="sub">登录开启沉浸式简历编写体验</p>
+      <div class="qr-circle">
+        <img src="/prod-assets/miniprogram.webp" alt="微信扫码登录" class="qr" />
       </div>
-      <div class="vline"></div>
-      <div class="login-col">
-        <h1 class="title">微信扫码登录注册</h1>
-        <p class="sub">登录开启沉浸式简历编写体验</p>
-        <div class="qr-circle">
-          <img src="/prod-assets/miniprogram.webp" alt="微信扫码登录" class="qr" />
-        </div>
-        <p class="privacy">
-          扫码登录/注册表示您同意该<a
-            href="https://www.yuque.com/xiongleixin/saqnu1/qkvrw80dm615kai4"
-            rel="noopener noreferrer"
-            target="_blank"
-            >《用户隐私政策与服务协议》</a
-          >
-        </p>
-        <button class="acct-link" type="button" @click="showAcct = !showAcct">
-          账号密码登录/注册
-        </button>
-        <div v-if="showAcct" class="acct-form">
-          <input v-model="form.username" class="acct-input" placeholder="用户名" maxlength="32" />
-          <input
-            v-model="form.password"
-            class="acct-input"
-            type="password"
-            placeholder="密码"
-            maxlength="64"
+      <p class="privacy">
+        扫码登录/注册表示您同意该<a
+          href="https://www.yuque.com/xiongleixin/saqnu1/qkvrw80dm615kai4"
+          rel="noopener noreferrer"
+          target="_blank"
+          >《用户隐私政策与服务协议》</a
+        >
+      </p>
+      <button class="acct-link" type="button" @click="showAcct = !showAcct">
+        账号密码登录/注册
+      </button>
+      <!-- 生产无账号密码入口；保留在 QR 下方作为次级入口 -->
+      <div v-if="showAcct" class="acct-form">
+        <input v-model="form.username" class="acct-input" placeholder="用户名" maxlength="32" />
+        <input
+          v-model="form.password"
+          class="acct-input"
+          type="password"
+          placeholder="密码"
+          maxlength="64"
+        />
+        <div class="acct-verify">
+          <input v-model="form.verify" class="acct-input" placeholder="验证码" maxlength="4" />
+          <img
+            :src="store.loginState.verifyImg"
+            class="vimg"
+            alt="验证码"
+            title="点击换一张"
+            @click="store.genVerify()"
           />
-          <div class="acct-verify">
-            <input v-model="form.verify" class="acct-input" placeholder="验证码" maxlength="4" />
-            <img
-              :src="store.loginState.verifyImg"
-              class="vimg"
-              alt="验证码"
-              title="点击换一张"
-              @click="store.genVerify()"
-            />
-          </div>
-          <label class="agree">
-            <input v-model="agreed" type="checkbox" />
-            <span>我已阅读并同意协议</span>
-          </label>
-          <div class="acct-btns">
-            <button class="mock" @click="submit(true)">登录</button>
-            <button class="mock ghost" @click="submit(false)">注册</button>
-          </div>
+        </div>
+        <label class="agree">
+          <input v-model="agreed" type="checkbox" />
+          <span>我已阅读并同意协议</span>
+        </label>
+        <div class="acct-btns">
+          <button class="mock" @click="submit(true)">登录</button>
+          <button class="mock ghost" @click="submit(false)">注册</button>
         </div>
       </div>
     </div>
@@ -97,27 +96,22 @@ watch(
 </template>
 
 <style lang="scss">
-.login-page {
-  position: relative;
-  min-height: 100vh;
-  background: var(--background);
-  .logo {
-    position: fixed;
-    top: 0;
-    left: 0;
-    padding: 12px 24px;
-    z-index: 5;
-    img {
-      width: 80px;
-      height: 60px;
-      transform: scale(1.5);
-      transform-origin: top left;
-      object-fit: contain;
-      cursor: pointer;
-      transition: transform 0.2s;
-      &:hover {
-        transform: scale(1.25);
-      }
+.logo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 12px 24px;
+  z-index: 5;
+  img {
+    width: 80px;
+    height: 60px;
+    transform: scale(1.5);
+    transform-origin: top left;
+    object-fit: contain;
+    cursor: pointer;
+    transition: transform 0.2s;
+    &:hover {
+      transform: scale(1.25);
     }
   }
 }
@@ -166,7 +160,8 @@ watch(
   gap: 20px;
   .title {
     color: #000;
-    font-size: 24px;
+    font-size: 32px;
+    font-weight: 700;
     margin: 0;
   }
   .sub {

@@ -325,7 +325,7 @@ watch(
 .jl-page {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 16px;
+  padding: 16px 12px;
   color: var(--font-color);
   font-family: var(--font-noto-sans-sc);
 }
@@ -362,7 +362,6 @@ watch(
 .banner-jobs img {
   display: block;
   width: 280px;
-  height: 100%;
   object-fit: cover;
 }
 .banner-mj {
@@ -370,7 +369,6 @@ watch(
   img {
     display: block;
     width: 100%;
-    height: 100%;
     object-fit: cover;
   }
 }
@@ -589,19 +587,20 @@ watch(
 .resumes {
   display: grid;
   gap: 8px;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   @media (min-width: 768px) {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   @media (min-width: 1024px) {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
   @media (min-width: 1280px) {
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
 .resume-card {
   margin: 8px;
+  min-width: 0;
   text-decoration: none;
   color: var(--font-color);
   position: relative;
@@ -655,6 +654,8 @@ watch(
     overflow: hidden;
     img {
       width: 100%;
+      aspect-ratio: 210 / 297;
+      object-fit: cover;
       border-radius: 6px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
       display: block;

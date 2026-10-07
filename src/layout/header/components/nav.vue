@@ -23,7 +23,6 @@ import outNav from '@/common/nav/outNav'
         }}<span v-if="navItem.badge" class="nav-badge">{{ navItem.badge }}</span></router-link
       >
     </li>
-    <li class="sr-only"><router-link to="/shixisheng">专题模板</router-link></li>
   </ul>
 </template>
 

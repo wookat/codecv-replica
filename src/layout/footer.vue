@@ -9,7 +9,7 @@ const minimal = computed(() => useRoute().path === '/progress')
   <div class="footer-wrap">
     <!-- 结构逐类对齐生产：flex-row 四组 + p-10 + justify-between -->
     <div v-if="!minimal" class="footer noto-sans-sc">
-      <ul class="fcol">
+      <ul class="fcol" data-aos="fade-right">
         <strong class="ftitle">友情链接</strong>
         <li>
           <a href="https://markdown.com.cn/basic-syntax" target="_blank" rel="noopener noreferrer"
@@ -20,7 +20,7 @@ const minimal = computed(() => useRoute().path === '/progress')
           <a href="https://hao.logosc.cn" target="_blank" rel="noopener noreferrer">神器集</a>
         </li>
       </ul>
-      <ul class="fcol">
+      <ul class="fcol" data-aos="fade-right">
         <strong class="ftitle">其他产品</strong>
         <li class="mr2">
           <a
@@ -47,7 +47,7 @@ const minimal = computed(() => useRoute().path === '/progress')
           >
         </li>
       </ul>
-      <ul class="fcol">
+      <ul class="fcol" data-aos="fade-left">
         <strong class="ftitle">社交媒体</strong>
         <li>
           <a
@@ -63,7 +63,7 @@ const minimal = computed(() => useRoute().path === '/progress')
           >
         </li>
       </ul>
-      <ul>
+      <ul data-aos="fade-left">
         <strong>联系方式/小程序</strong>
         <ul class="mp-row">
           <li class="mp-card first">
