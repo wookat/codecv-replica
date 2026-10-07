@@ -428,6 +428,8 @@ watch(
   flex-shrink: 0;
   font-weight: 600;
   font-size: 14px;
+  /* 生产标签列到链接列距 72px（实测链接 x156） */
+  margin-right: 12px;
 }
 .cat-items {
   flex: 1;
