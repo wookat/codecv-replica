@@ -456,7 +456,7 @@ const COMMENTS = [
     h2 {
       font-size: 36px;
       font-weight: 700;
-      line-height: 60px;
+      line-height: 40px;
       margin: 0;
       padding-bottom: 20px;
     }
