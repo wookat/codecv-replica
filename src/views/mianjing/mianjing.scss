@@ -74,7 +74,7 @@
   background: var(--theme);
   color: #fff;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   text-decoration: none;
   border: none;
   cursor: pointer;
@@ -106,6 +106,7 @@
 }
 .flabel {
   font-size: 13px;
+  font-weight: 600;
   opacity: 0.55;
   padding-top: 7px;
   flex-shrink: 0;
@@ -119,7 +120,7 @@
 
 .mj-pill {
   border: none;
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(30, 41, 59, 0.06);
   color: var(--font-color);
   border-radius: 999px;
   padding: 7px 14px;

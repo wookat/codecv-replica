@@ -49,7 +49,7 @@ onMounted(async () => {
   <div v-if="ready" class="adm">
     <aside class="adm-side">
       <router-link to="/" class="adm-logo">
-        <img src="/prod-assets/logo.svg" alt="CodeCV" />
+        <img src="/static/svg/logo-BFLBP-GO.svg" alt="CodeCV" />
         <span>CodeCV 后台</span>
       </router-link>
       <nav>

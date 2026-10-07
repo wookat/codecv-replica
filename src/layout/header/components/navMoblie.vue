@@ -13,7 +13,7 @@ function goNav(item: { path: string; external?: boolean }) {
 <template>
   <div class="header-moblie">
     <div class="m-logo" @click="$router.push('/home')">
-      <img src="/prod-assets/logo.svg" alt="CodeCV 简历" draggable="false" />
+      <img src="/static/svg/logo-BFLBP-GO.svg" alt="CodeCV 简历" draggable="false" />
     </div>
     <div class="m-right">
       <el-dropdown trigger="click">

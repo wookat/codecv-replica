@@ -8,7 +8,7 @@ import NavMoblie from './components/navMoblie.vue'
   <div class="header-out noto-sans-sc">
     <div class="header">
       <div class="nav-left" @click="$router.push('/home')">
-        <img src="/prod-assets/logo.svg" alt="CodeCV 简历" draggable="false" />
+        <img src="/static/svg/logo-BFLBP-GO.svg" alt="CodeCV 简历" draggable="false" />
       </div>
       <Nav />
       <User />

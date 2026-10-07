@@ -118,7 +118,7 @@ onMounted(() => {
     .catch(() => undefined)
 })
 
-const shown = computed(() => {
+const filtered = computed(() => {
   let rows = templates.value.filter(t => !hiddenTypes.value.has(t.type))
   const t = tag.value
   if (t && t !== '全部') {
@@ -132,6 +132,19 @@ const shown = computed(() => {
   // 综合排序=生产数组序（index.json 顺序，与线上一致）；最新上架=配置插入序；最多下载=hot 降序
   if (sort.value === '最多下载') sorted.sort((a, b) => +(b.hot || 0) - +(a.hot || 0))
   return sorted
+})
+
+// 生产模板中心分页：每页 25（chunk pageSize 默认 25，?size= 可覆盖）
+const PAGE_SIZE = 25
+const pageNum = ref(Number(route.query.page) || 1)
+const shown = computed(() =>
+  filtered.value.slice((pageNum.value - 1) * PAGE_SIZE, pageNum.value * PAGE_SIZE)
+)
+watch([tag, sort, keyword], () => {
+  pageNum.value = 1
+})
+watch(pageNum, p => {
+  router.replace({ query: { ...route.query, page: p > 1 ? p : undefined } })
 })
 
 // 生产 NEW 角标 = 最近上架的一批（日期最新的 5 套：2026-09 批次）
@@ -290,6 +303,16 @@ watch(
         </router-link>
         <el-empty v-if="!shown.length" description="暂无匹配模板" />
       </div>
+      <el-pagination
+        v-if="filtered.length > PAGE_SIZE"
+        v-model:current-page="pageNum"
+        class="jl-pager"
+        background
+        layout="prev, pager, next"
+        :total="filtered.length"
+        :page-size="PAGE_SIZE"
+        :pager-count="7"
+      />
     </div>
   </div>
 </template>
@@ -555,6 +578,9 @@ watch(
       height: 16px;
     }
   }
+}
+.jl-pager {
+  margin: 16px 0 20px 8px;
 }
 .resumes {
   display: grid;

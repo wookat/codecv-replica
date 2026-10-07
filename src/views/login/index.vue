@@ -33,10 +33,15 @@ watch(
 <template>
   <div class="login-page">
     <router-link to="/" class="logo">
-      <img src="/prod-assets/logo.svg" alt="CodeCV简历" draggable="false" />
+      <img src="/static/svg/logo-BFLBP-GO.svg" alt="CodeCV简历" draggable="false" />
     </router-link>
     <div class="login-wrap">
-      <img src="/prod-assets/login-page.svg" class="illus" alt="登录插画" draggable="false" />
+      <img
+        src="/static/svg/login-page-CxicEn1V.svg"
+        class="illus"
+        alt="登录插画"
+        draggable="false"
+      />
       <div class="vline"></div>
       <div class="login-card">
         <h1>登录 / 注册</h1>

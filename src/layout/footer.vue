@@ -80,10 +80,11 @@ const minimal = computed(() => useRoute().path === '/progress')
     }
     li {
       letter-spacing: 0.5px;
+      font-size: 14px;
       a,
       .mp-ref {
         text-decoration: none;
-        color: #999;
+        color: #6b7280;
         font-size: 14px;
         cursor: pointer;
         &:hover {
