@@ -3,44 +3,43 @@ import outNav from '@/common/nav/outNav'
 </script>
 
 <template>
-  <ul class="site-nav">
-    <li
-      v-for="(navItem, idx) in outNav"
-      :key="idx"
-      :class="{ checked: $route.path.startsWith(navItem.path) }"
-    >
+  <nav class="site-nav">
+    <template v-for="(navItem, idx) in outNav" :key="idx">
       <a
         v-if="navItem.external"
         :href="navItem.path"
         target="_blank"
         rel="noopener noreferrer"
         class="nav-link"
+        :class="{ checked: $route.path.startsWith(navItem.path) }"
         >{{ navItem.name
         }}<span v-if="navItem.badge" class="nav-badge">{{ navItem.badge }}</span></a
       >
-      <router-link v-else :to="navItem.path" class="nav-link"
+      <router-link
+        v-else
+        :to="navItem.path"
+        class="nav-link"
+        :class="{ checked: $route.path.startsWith(navItem.path) }"
         >{{ navItem.name
         }}<span v-if="navItem.badge" class="nav-badge">{{ navItem.badge }}</span></router-link
       >
-    </li>
-  </ul>
+    </template>
+  </nav>
 </template>
 
 <style lang="scss" scoped>
 .site-nav {
   display: flex;
   align-items: center;
-  list-style: none;
   gap: 2px;
   margin: 0;
   padding: 0;
-  li {
-    white-space: nowrap;
-  }
   .nav-link {
     position: relative;
     display: inline-block;
-    padding: 6px 10px;
+    white-space: nowrap;
+    /* 生产链接高 37px（y12） */
+    padding: 8px 10px;
     font-size: 15px;
     font-weight: 500;
     color: var(--font-color);
@@ -57,10 +56,22 @@ import outNav from '@/common/nav/outNav'
       font-weight: 700;
       color: orangered;
     }
-  }
-  .checked .nav-link {
-    color: var(--theme);
-    font-weight: 600;
+    &.checked {
+      color: var(--theme);
+      font-weight: 600;
+      /* 生产当前页导航下短橙色指示条 */
+      &::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        transform: translateX(-50%);
+        width: 60%;
+        height: 2.5px;
+        border-radius: 3px;
+        background: var(--theme);
+      }
+    }
   }
 }
 </style>

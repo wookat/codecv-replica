@@ -192,14 +192,7 @@ onMounted(() => {
 
 <template>
   <div class="jobs-page">
-    <nav aria-label="面包屑" class="crumb">
-      <ol class="flex">
-        <li><router-link to="/">首页</router-link></li>
-        <li class="sep">/</li>
-        <li class="cur">校招信息汇总</li>
-      </ol>
-    </nav>
-
+    <!-- 生产校招页无面包屑 -->
     <header class="jobs-header">
       <div class="intro-card">
         <h1>2027校招信息汇总表-秋招春招岗位大全，每日更新</h1>
@@ -517,39 +510,13 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .jobs-page {
-  max-width: var(--max-width);
+  /* 生产校招页容器 1240px（内容 x=100 起），头部卡 y=116 */
+  max-width: 1240px;
   margin: 0 auto;
-  padding: 0 20px 40px;
+  padding: 56px 0 40px;
   /* 生产 jobs 内容区不设字体：标题计算值为 UA 默认（探针实测） */
   color: var(--font-color);
   overflow-x: clip;
-}
-
-.crumb {
-  padding: 16px 0;
-  ol {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    font-size: 14px;
-    li + li {
-      margin-left: 8px;
-    }
-    a {
-      color: var(--font-color);
-      text-decoration: none;
-      &:hover {
-        color: var(--theme);
-      }
-    }
-    .sep {
-      color: #bbb;
-    }
-    .cur {
-      color: var(--theme);
-      font-weight: 500;
-    }
-  }
 }
 
 .jobs-header {
@@ -571,6 +538,10 @@ onMounted(() => {
     p {
       margin-top: 8px;
       line-height: 1.7;
+      /* 生产标题卡高度 112px：描述单行截断 */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 

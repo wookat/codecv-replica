@@ -127,6 +127,7 @@ function logout() {
 
 <template>
   <div class="nav-right">
+    <!-- 生产未登录态也有：主题切换 + 小程序入口 + 分隔线（探针实测） -->
     <span class="tt-wrap"><theme-toggle /></span>
     <!-- 小程序：hover 出二维码弹层（与线上一致的入口形态） -->
     <el-popover placement="bottom-end" :width="170" trigger="hover">
@@ -246,6 +247,7 @@ function logout() {
   align-items: center;
   gap: 14px;
   flex-shrink: 0;
+  margin-left: auto;
 }
 .mp-entry {
   display: flex;
@@ -407,10 +409,11 @@ function logout() {
   }
 }
 .login-btn {
+  /* 生产：h-9 px-5 rounded-full 胶囊 */
   height: 36px;
   padding: 0 20px;
   border: none;
-  border-radius: 8px;
+  border-radius: 999px;
   background: var(--theme);
   color: #fff;
   font-size: 14px;

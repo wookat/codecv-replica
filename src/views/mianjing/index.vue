@@ -288,6 +288,7 @@ onUnmounted(() => observer?.disconnect())
             <div class="item-top">
               <span
                 class="mj-logo lg"
+                :class="{ 'mj-logo--img': !!companyOf(m)?.logo }"
                 :style="{ '--mj-logo-bg': logoColor(m.companySlug || m.companyName || '') } as any"
               >
                 <img
@@ -301,7 +302,7 @@ onUnmounted(() => observer?.disconnect())
               </span>
               <div class="item-head">
                 <div class="item-title-row">
-                  <h3>{{ m.title }}</h3>
+                  <h3>{{ (m.title || '').replace(/面经$/, '') }}</h3>
                   <span v-if="isHot(m)" class="hot-badge">
                     <svg
                       viewBox="0 0 24 24"
@@ -340,6 +341,22 @@ onUnmounted(() => observer?.disconnect())
                   <circle cx="12" cy="12" r="10" />
                   <path d="M12 6v6h4" /></svg
                 >{{ fmtTime(m.publishTime) }}</span
+              >
+              <span v-if="m.questionCount" class="f-ic"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M13 5h8" />
+                  <path d="M13 12h8" />
+                  <path d="M13 19h8" />
+                  <path d="m3 17 2 2 4-4" />
+                  <path d="m3 7 2 2 4-4" /></svg
+                >{{ m.questionCount }} 题</span
               >
               <span class="f-ic grow"></span>
               <span class="f-ic"

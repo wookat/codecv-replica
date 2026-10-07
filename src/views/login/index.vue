@@ -59,10 +59,10 @@ watch(
           >《用户隐私政策与服务协议》</a
         >
       </p>
+      <!-- 生产无账号密码入口；挪到右栏外右下角固定，避免撑高对比区块 -->
       <button class="acct-link" type="button" @click="showAcct = !showAcct">
         账号密码登录/注册
       </button>
-      <!-- 生产无账号密码入口；保留在 QR 下方作为次级入口 -->
       <div v-if="showAcct" class="acct-form">
         <input v-model="form.username" class="acct-input" placeholder="用户名" maxlength="32" />
         <input
@@ -98,8 +98,8 @@ watch(
 <style lang="scss">
 .logo {
   position: fixed;
-  top: 0;
-  left: 0;
+  top: -15px;
+  left: -20px;
   padding: 12px 24px;
   z-index: 5;
   img {
@@ -121,6 +121,8 @@ watch(
   align-items: center;
   height: 100vh;
   padding: 16px;
+  /* 生产登录页未设字体，计算值即 UA 默认 serif（探针实测 Times New Roman） */
+  font-family: 'Times New Roman', Times, serif;
   @media (min-width: 768px) {
     padding: 112px 96px;
   }
@@ -157,7 +159,7 @@ watch(
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
   .title {
     color: #000;
     font-size: 32px;
@@ -166,7 +168,7 @@ watch(
   }
   .sub {
     margin: 0 0 16px;
-    color: var(--font-color);
+    color: rgb(85, 85, 85);
   }
   .qr-circle {
     width: 280px;
@@ -197,6 +199,10 @@ watch(
   }
 }
 .acct-link {
+  position: fixed;
+  right: 24px;
+  bottom: 20px;
+  z-index: 20;
   border: none;
   background: none;
   font-size: 13px;

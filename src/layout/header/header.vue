@@ -35,11 +35,12 @@ import NavMoblie from './components/navMoblie.vue'
     max-width: var(--max-width);
     height: 60px;
     margin: 0 auto;
-    padding: 0 20px;
+    /* 生产 logo x=100（容器1300居中70 + 左右30px），导航 首页 x=204 */
+    padding: 0 30px;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
-    gap: 12px;
+    gap: 40px;
   }
 
   .nav-left {

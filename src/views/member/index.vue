@@ -311,6 +311,8 @@ async function upgrade(t: Tier) {
   width: 280px;
   position: relative;
   font-family: -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  /* 生产深色区高约 232px */
+  box-sizing: border-box;
   padding: 28px 20px 20px;
   display: flex;
   flex-direction: column;
@@ -318,10 +320,12 @@ async function upgrade(t: Tier) {
   text-align: center;
   border-radius: 12px 12px 0 0;
   &.navy-grad {
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.65), #374151);
+    /* 生产终身卡近黑深蓝灰 */
+    background: linear-gradient(135deg, #161d28, #2b3646);
   }
   &.blue-grad {
-    background: linear-gradient(135deg, #627a92, #4c5f74);
+    /* 生产非终身卡蓝灰 */
+    background: linear-gradient(135deg, #5b6e82, #4a5b6d);
   }
   .badge {
     position: absolute;
@@ -347,7 +351,7 @@ async function upgrade(t: Tier) {
       color: #fff;
     }
     .yuan {
-      font-size: 18px;
+      font-size: 22px;
       color: #fff;
     }
   }
@@ -443,14 +447,14 @@ async function upgrade(t: Tier) {
   }
 }
 .cm-card {
-  background: #f3f4f6;
+  background: #f3f5f7;
   border-radius: 12px;
   padding: 20px;
   margin: 8px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 280px;
+  min-height: 170px;
   .cm-content {
     font-family: -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
     font-size: 14px;

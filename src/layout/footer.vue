@@ -100,7 +100,8 @@ const minimal = computed(() => useRoute().path === '/progress')
   justify-content: space-between;
   max-width: var(--max-width);
   margin: 20px auto 0;
-  padding: 40px;
+  /* 生产页脚内容 x=120 起（容器 1300 + 左右 50px） */
+  padding: 40px 50px;
   overflow: hidden;
   @media (min-width: 768px) {
     flex-direction: row;

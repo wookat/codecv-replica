@@ -13,16 +13,16 @@ const RECENT = [
   }
 ]
 
-const FEATURES = [
+const FEATURES: { icon: string; name: string; pre?: string; strong?: string; desc: string }[] = [
   { icon: '🎈', name: '不设限', desc: '简历模板中一切都是可控的 不被默认简历排版限制～' },
   { icon: '✨', name: '自动排版', desc: '只需关注简历内容本身 分页/排版自动生成～' },
   { icon: '✌🏻', name: '两种编辑模式', desc: '可选择适合自己的编写方式～' },
   { icon: '🔒', name: '隐私安全', desc: '不用担心个人信息泄露～' },
   { icon: '🌴', name: '所见即所得', desc: '简历导出效果与预览效果高度一致～' },
-  { icon: '🎁', name: '至今已免费导出', strong: '20万+', desc: ' 简历!' }
+  { icon: '🎁', name: '', pre: '至今已免费导出', strong: '20万+', desc: ' 简历!' }
 ]
 
-// 生产首页右侧扇形简历图：5 张 /static/webp 封面 + rotate/z-index 叠扇 + 各自链接模板详情（prod DOM 逆向）
+// 生产首页右侧扇形简历图：DOM 顺序 18/17/16/15/14，旋转 40/20/0/-20/-40，z 100→96，img 250px
 const FAN = [
   {
     src: '/static/webp/18-C2ddrgEb.webp',
@@ -115,40 +115,60 @@ const COMMENTS = [
 
 <template>
   <div id="home">
-    <!-- Hero：与线上版一致 -->
+    <!-- Hero：与线上版一致（h-100vh / mt-[-80px] / 左文右扇） -->
     <section class="hero noto-sans-sc">
-      <div class="hero-l">
-        <h1 class="sr-only">
-          免费在线Markdown简历制作工具，专业中英文简历模板免费下载，涵盖前后端、产品、运营等岗位
-        </h1>
-        <p class="hero-title">互联网从业者都在用的专业简历工具</p>
-        <ul class="hero-feats">
-          <li v-for="f in FEATURES" :key="f.name">
+      <div class="introduce">
+        <div class="introduce-l">
+          <h1 class="sr-only">
+            免费在线Markdown简历制作工具，专业中英文简历模板免费下载，涵盖前后端、产品、运营等岗位
+          </h1>
+          <h2 class="hero-title">互联网从业者都在用的专业简历工具</h2>
+          <div v-for="f in FEATURES" :key="f.name" class="feat">
             <span class="fi">{{ f.icon }}</span>
-            <b>{{ f.name }}</b>
-            <span class="fd"
-              ><b v-if="f.strong" class="fstrong">{{ f.strong }}</b
-              >{{ f.desc }}</span
+            <strong v-if="f.name" class="text-shine">{{ f.name }}</strong>
+            {{ f.pre }}
+            <strong v-if="f.strong" class="text-shine big">{{ f.strong }}</strong>
+            {{ f.desc }}
+          </div>
+          <div class="hero-cta">
+            <router-link to="/jianlimoban" class="cta primary">
+              免费生成专业简历
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M9 6l6 6-6 6" />
+              </svg>
+            </router-link>
+            <a href="https://www.offerstar.cn" target="_blank" rel="noopener" class="cta ghost"
+              >Ai笔试面试神器</a
             >
-          </li>
-        </ul>
-        <div class="hero-cta">
-          <router-link to="/jianlimoban" class="cta primary">免费生成专业简历</router-link>
-          <a href="https://www.offerstar.cn" target="_blank" rel="noopener" class="cta ghost"
-            >Ai笔试面试神器</a
-          >
+          </div>
         </div>
-      </div>
-      <div class="hero-r">
-        <router-link
-          v-for="(f, i) in FAN"
-          :key="i"
-          :to="f.to"
-          class="fan-a"
-          :style="{ transform: `rotate(${f.rotate}deg)`, zIndex: f.z }"
-        >
-          <img :src="f.src" :alt="f.alt" loading="lazy" draggable="false" />
-        </router-link>
+        <div class="hero-r">
+          <router-link
+            v-for="(f, i) in FAN"
+            :key="i"
+            :to="f.to"
+            class="fan-a"
+            :style="{ transform: `rotate(${f.rotate}deg)`, zIndex: f.z }"
+          >
+            <img :src="f.src" :alt="f.alt" loading="lazy" draggable="false" />
+          </router-link>
+        </div>
+        <!-- 生产同款模糊椭圆彩色光晕 mask -->
+        <div class="mask">
+          <svg viewBox="0 0 800 450" opacity="0.19" preserveAspectRatio="none">
+            <defs>
+              <filter id="bbblurry" x="-100%" y="-100%" width="400%" height="400%">
+                <feGaussianBlur stdDeviation="50" />
+              </filter>
+            </defs>
+            <g filter="url(#bbblurry)">
+              <ellipse rx="74" ry="79" cx="303" cy="196" fill="hsla(290,87%,47%,1)" />
+              <ellipse rx="74" ry="79" cx="136" cy="235" fill="hsla(272,99%,54%,1)" />
+              <ellipse rx="74" ry="79" cx="373" cy="224" fill="hsla(37,91%,55%,1)" />
+              <ellipse rx="74" ry="79" cx="201" cy="158" fill="hsla(167,72%,60%,1)" />
+            </g>
+          </svg>
+        </div>
       </div>
     </section>
 
@@ -257,102 +277,137 @@ const COMMENTS = [
   clip: rect(0 0 0 0);
 }
 .hero {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 40px;
-  max-width: var(--max-width);
-  margin: 0 auto;
-  min-height: 824px;
-  padding: 90px 20px 70px;
-  background: linear-gradient(120deg, var(--background) 55%, rgba(255, 116, 73, 0.07));
+  /* 生产 #introduce：h-100vh / mt-[-80px] / max-w-screen-xl / items-center / xl:overflow-visible */
+  position: relative;
+  overflow: hidden;
+  margin-top: -80px;
+  @media (min-width: 1280px) {
+    overflow: visible;
+  }
+  .introduce {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 100vh;
+    max-width: 1280px;
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+  .introduce-l {
+    padding: 16px;
+    width: 100%;
+    min-width: 250px;
+    z-index: 10;
+  }
 }
-.hero-l {
-  max-width: 560px;
+.mask {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  pointer-events: none;
+  svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
 }
 .hero-title {
-  font-size: 40px;
-  font-weight: 800;
-  line-height: 1.3;
-  margin: 0 0 30px;
+  /* 生产 text-4xl leading-50px mb-5 */
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 50px;
+  margin: 0 0 20px;
+  white-space: nowrap;
 }
-.hero-feats {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 36px;
-  li {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    font-size: 15px;
-    line-height: 2.1;
-    .fi {
-      width: 24px;
-      flex-shrink: 0;
-    }
-    b {
-      font-weight: 700;
-      flex-shrink: 0;
-      white-space: nowrap;
-    }
-    .fd {
-      color: #6b7280;
-      font-size: 14px;
-    }
-    .fstrong {
-      color: var(--theme);
-      font-size: 18px;
-    }
+.feat {
+  /* 生产 tracking-widest whitespace-nowrap，行间 mt-1 */
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  margin-top: 4px;
+  font-size: 16px;
+  line-height: 36px;
+  .fi {
+    /* 生产 text-3xl emoji */
+    font-size: 30px;
+    line-height: 1;
+    vertical-align: -2px;
+  }
+  .text-shine {
+    /* 生产 text-xl m-3 text-shine（橙色渐变加粗字） */
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 12px;
+    background: linear-gradient(90deg, #ff7d31, #ff1480);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .big {
+    font-size: 24px;
   }
 }
 .hero-cta {
+  /* 生产 flex gap-4 mt-10 */
   display: flex;
   gap: 16px;
+  margin-top: 40px;
 }
 .cta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 46px;
-  padding: 0 30px;
-  border-radius: 999px;
-  font-size: 15px;
-  font-weight: 600;
+  gap: 4px;
+  padding: 8px 20px;
+  border-radius: 30px;
+  font-size: 18px;
+  font-weight: 400;
   text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
   transition: all 0.2s;
+  svg {
+    width: 18px;
+    height: 18px;
+  }
   &.primary {
-    background: linear-gradient(90deg, #ff7449, #ff9a44);
+    /* 生产 from-[#ff7d31] to-[#ff1480] + shadow-xl */
+    background: linear-gradient(90deg, #ff7d31, #ff1480);
     color: #fff;
-    box-shadow: 0 6px 18px rgba(255, 116, 73, 0.35);
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   }
   &.ghost {
-    background: var(--background);
-    color: var(--font-color);
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: #fff;
+    color: #000;
+    border: 1px solid #d1d5db;
   }
   &:hover {
-    transform: translateY(-2px);
-    filter: brightness(1.04);
+    transform: scale(1.05);
+    opacity: 0.9;
   }
 }
 .hero-r {
-  position: relative;
-  flex-shrink: 0;
-  width: 460px;
-  height: 460px;
+  /* 生产 md:flex w-[50%] ml-80 h-full items-center justify-center，五张 250px 图 flex 收缩重叠成扇形 */
   display: flex;
+  width: 50%;
+  margin-left: 320px;
+  height: 100%;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   .fan-a {
-    position: absolute;
     display: inline-block;
+    position: relative;
+    flex-shrink: 1;
+    min-width: 0;
     img {
-      width: 190px;
-      border-radius: 10px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
-      transition: transform 0.4s;
+      width: 250px;
+      max-width: none;
+      border-radius: 8px;
+      box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
       display: block;
       cursor: pointer;
+      transition: transform 0.3s;
       &:hover {
         transform: scale(1.05);
       }
@@ -360,13 +415,15 @@ const COMMENTS = [
   }
 }
 .sec {
-  max-width: var(--max-width);
+  /* 生产区块内容宽 1352（x=44 起），h2 行高 60px */
+  max-width: 1352px;
   margin: 0 auto;
-  padding: 40px 20px 20px;
+  padding: 40px 0 20px;
   text-align: center;
   h2 {
     font-size: 36px;
     font-weight: 700;
+    line-height: 60px;
     margin: 0 0 12px;
   }
   .sub {
@@ -376,12 +433,20 @@ const COMMENTS = [
   }
 }
 .tpl-grid {
+  /* 生产：ul grid-cols-6 max-w-screen-xl(1280) mt-4 mx-auto pb-5，li 外边距 20px 作间距 */
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 18px;
+  gap: 0;
   list-style: none;
-  padding: 0;
-  margin: 0;
+  max-width: 1280px;
+  padding: 0 0 20px;
+  margin: 16px auto 0;
+  overflow: hidden;
+  > li {
+    margin: 20px;
+    position: relative;
+    text-align: center;
+  }
   @media (max-width: 1024px) {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -394,14 +459,10 @@ const COMMENTS = [
   text-decoration: none;
   .tc-img {
     position: relative;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
     img {
       width: 100%;
-      height: 190px;
-      object-fit: cover;
-      object-position: top;
+      border-radius: 6px;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
       display: block;
     }
     .use-badge {
@@ -409,17 +470,19 @@ const COMMENTS = [
       top: 0;
       left: 0;
       z-index: 2;
-      padding: 4px 8px;
-      border-radius: 0 0 8px 0;
+      padding: 5px 10px;
+      border-radius: 6px 0 6px 0;
       background: var(--theme);
       color: #fff;
       font-size: 12px;
       font-weight: 400;
+      line-height: 18px;
     }
   }
   .tc-name {
-    margin: 10px 0 0;
-    font-size: 13px;
+    margin: 8px 0 0;
+    font-size: 16px;
+    color: var(--font-color);
     letter-spacing: 0.05em;
     text-align: center;
   }
@@ -428,7 +491,7 @@ const COMMENTS = [
   }
 }
 .sec.ai {
-  padding: 60px 20px;
+  padding: 60px 0;
 }
 .ai-body {
   display: flex;
@@ -503,6 +566,8 @@ const COMMENTS = [
   gap: 20px;
   font-size: 30px;
   font-weight: 700;
+  /* 生产的格式徽标用 serif（实测 Times New Roman） */
+  font-family: 'Times New Roman', Times, serif;
   .pdf {
     color: #e92423;
   }
@@ -515,7 +580,7 @@ const COMMENTS = [
 }
 .ext-desc {
   max-width: 300px;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 2.4;
   color: var(--font-color);
   b {
@@ -553,17 +618,17 @@ const COMMENTS = [
   gap: 0;
 }
 .cm-card {
-  background: var(--background);
+  /* 生产评论卡是灰底无阴影 */
+  background: #f3f5f7;
   border-radius: 12px;
   padding: 20px;
   margin: 8px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 220px;
+  min-height: 258px;
   .cm-content {
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.8;
     color: #4b5563;
     margin: 0 0 14px;
@@ -586,7 +651,11 @@ const COMMENTS = [
 }
 @media (max-width: 1024px) {
   .hero {
-    padding: 44px 20px 36px;
+    margin-top: 0;
+    .introduce {
+      height: auto;
+      padding: 44px 20px 36px;
+    }
   }
   .hero-r {
     display: none;

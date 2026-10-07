@@ -1,7 +1,7 @@
 :root {
   --theme: #ff7449;
   --bg-theme: #444444;
-  --font-color: #555555;
+  --font-color: rgb(30, 41, 59);
   --background: #ffffff;
   --strong-color: #eb500d;
   --toolbar-bg: #222222;
@@ -14,6 +14,11 @@
   /* 生产 UI 字体栈：系统字体（探针实测 -apple-system），仅简历纸面加载 Web 字体 */
   --font-noto-sans-sc: -apple-system, 'PingFang SC', 'Microsoft YaHei', 'Source Han Sans SC',
     BlinkMacSystemFont, 'Helvetica Neue', 'WenQuanYi Micro Hei', 'Noto Sans CJK SC', sans-serif;
+}
+
+body {
+  /* 生产全局默认字体栈（实测 -apple-system），此前缺省回退成 Times */
+  font-family: var(--font-noto-sans-sc);
 }
 
 .btn {

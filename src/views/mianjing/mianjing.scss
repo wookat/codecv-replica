@@ -1,8 +1,14 @@
 /* 面经板块公共样式（对齐生产 mj-* 命名） */
 .mj-page {
-  max-width: 1216px;
+  /* 生产容器：内容 x=104（1440 下 max-width 1232 居中） */
+  max-width: 1232px;
   margin: 0 auto;
-  padding: 20px 12px;
+  /* 生产 h1 面经大全 y=92（header60 + 32） */
+  padding: 32px 0 20px;
+  @media (max-width: 1240px) {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
   font-family: var(--font-noto-sans-sc);
   color: var(--font-color);
 }
@@ -189,11 +195,15 @@
     border-radius: 12px;
     font-size: 17px;
   }
+  &.mj-logo--img {
+    /* 生产带图 logo 盒为浅灰底，不再用品牌色 */
+    background: #f4f5f7;
+  }
   .mj-logo-img {
-    width: 100%;
-    height: 100%;
+    /* 生产：img 仅 86%×60% 居中，盒子浅灰底 */
+    width: 86%;
+    height: 60%;
     object-fit: contain;
-    background: #fff;
   }
 }
 
@@ -369,6 +379,11 @@
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 16px;
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
 }
 .aside-title {
   display: inline-block;
@@ -388,7 +403,7 @@
     font-weight: 700;
     text-align: center;
     flex-shrink: 0;
-    color: #bbb;
+    color: var(--font-color);
     &.top {
       color: var(--theme);
     }
@@ -684,7 +699,7 @@
     margin-top: 14px;
     text-align: center;
     padding: 12px;
-    border-radius: 999px;
+    border-radius: 10px;
     font-size: 15px;
     font-weight: 600;
   }

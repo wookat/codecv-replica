@@ -228,15 +228,13 @@ watch(
       </div>
     </div>
 
-    <!-- 专区横幅 -->
-    <div class="zone-row">
-      <router-link v-for="z in ZONE_BANNERS" :key="z.slug" :to="`/${z.slug}`" class="zone-card">
-        <img :src="z.img" :alt="z.alt" draggable="false" />
-      </router-link>
-    </div>
-
-    <!-- 模板区 -->
+    <!-- 模板区（生产：专区横幅与标签/排序/网格同一张白卡） -->
     <div class="tpl-card">
+      <div class="zone-row">
+        <router-link v-for="z in ZONE_BANNERS" :key="z.slug" :to="`/${z.slug}`" class="zone-card">
+          <img :src="z.img" :alt="z.alt" draggable="false" />
+        </router-link>
+      </div>
       <div class="tpl-head">
         <ul class="tag-tabs">
           <li v-for="t in TAG_TABS" :key="t">
@@ -325,7 +323,7 @@ watch(
 .jl-page {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 20px 12px 16px;
+  padding: 20px 26px 16px;
   color: var(--font-color);
   font-family: var(--font-noto-sans-sc);
 }
@@ -473,10 +471,10 @@ watch(
   }
 }
 .zone-row {
-  margin-top: 16px;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 12px;
+  margin-bottom: 20px;
   @media (max-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -486,7 +484,7 @@ watch(
   transition: transform 0.4s;
   img {
     width: 100%;
-    height: 122px;
+    height: 118px;
     object-fit: cover;
     border-radius: 12px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
