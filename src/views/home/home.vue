@@ -678,7 +678,7 @@ const COMMENTS = [
   }
 }
 .sec.comments {
-  padding-bottom: 60px;
+  padding-bottom: 46px;
 }
 .sec.ext {
   padding-bottom: 0;
