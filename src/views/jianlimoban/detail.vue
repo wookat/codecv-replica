@@ -663,7 +663,7 @@ export default { name: 'jianlimoban-detail' }
   }
 }
 .cta {
-  margin-top: 16px;
+  margin-top: 6px;
   padding: 56px 24px 53px;
   text-align: center;
   border-radius: 16px;
