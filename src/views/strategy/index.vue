@@ -256,7 +256,7 @@ onMounted(load)
   }
 }
 .pager {
-  margin-top: 20px;
+  margin-top: 13px;
   display: flex;
   justify-content: center;
 }

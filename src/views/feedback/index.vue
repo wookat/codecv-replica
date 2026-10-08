@@ -135,7 +135,7 @@ function submit() {
 .fb-page {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 20px 30px 4px;
+  padding: 40px 30px 4px;
   color: var(--font-color);
 }
 .feedback {
@@ -198,6 +198,7 @@ function submit() {
 }
 
 .edit {
+  padding: 0 20px 8px;
   .ta {
     display: block;
     width: 100%;
@@ -215,7 +216,7 @@ function submit() {
     }
   }
   .fi {
-    margin-top: 14px;
+    margin-top: 20px;
     display: block;
     border: none;
     background: var(--body-background);
@@ -253,7 +254,7 @@ function submit() {
     }
   }
   .submit {
-    margin-top: 12px;
+    margin-top: 17px;
     border: none;
     background: var(--theme);
     color: #fff;
