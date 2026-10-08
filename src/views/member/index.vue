@@ -461,8 +461,8 @@ async function upgrade(t: Tier) {
   .sub {
     color: #999;
     font-size: 14px;
-    /* 生产：副文案底→首卡间距 ~93 */
-    margin: 0 0 93px;
+    /* 生产：副文案底→首卡间距 ~84 */
+    margin: 0 0 84px;
   }
 }
 .cm-grid {
