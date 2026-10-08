@@ -395,13 +395,13 @@ export default { name: 'jianlimoban-detail' }
     }
   }
   .actions {
-    margin-top: 24px;
+    margin-top: 34px;
     display: flex;
     flex-direction: column;
     gap: 10px;
     .primary {
       width: 100%;
-      padding: 12px 0;
+      padding: 14px 0;
       border: none;
       border-radius: 999px;
       color: #fff;
@@ -497,6 +497,7 @@ export default { name: 'jianlimoban-detail' }
     display: flex;
     justify-content: space-between;
     align-items: baseline;
+    padding: 0 14px;
     h2 {
       font-size: 18px;
       font-weight: 700;

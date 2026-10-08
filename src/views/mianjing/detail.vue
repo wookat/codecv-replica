@@ -491,6 +491,19 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
                   <div class="cmt-bar">
                     <span class="cmt-hint">{{ cmtDraft.length }}/500</span>
                     <button class="mj-btn sm" :disabled="cmtPosting" @click="postComment">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="send-ico"
+                        aria-hidden="true"
+                      >
+                        <path d="m22 2-7 20-4-9-9-4Z" />
+                        <path d="M22 2 11 13" />
+                      </svg>
                       {{ cmtPosting ? '发布中…' : '评论' }}
                     </button>
                   </div>
@@ -551,7 +564,22 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
                 <p>专业模板 + AI 润色，拒绝花里胡哨，快速产出一份能过筛的简历</p>
               </div>
               <div class="cta-btns">
-                <router-link to="/edit/new" class="mj-btn">去做简历</router-link>
+                <router-link to="/edit/new" class="mj-btn">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="cta-ico"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 20h9" />
+                    <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                  </svg>
+                  去做简历
+                </router-link>
                 <router-link to="/mianjing/write" class="mj-btn ghost">分享面经</router-link>
               </div>
             </div>
@@ -937,6 +965,14 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
     opacity: 0.45;
     text-align: center;
   }
+}
+.send-ico {
+  width: 14px;
+  height: 14px;
+}
+.cta-ico {
+  width: 16px;
+  height: 16px;
 }
 .cta-card {
   margin-top: 16px;

@@ -189,7 +189,7 @@ function submit() {
   .ta {
     display: block;
     width: 100%;
-    min-height: 108px;
+    min-height: 100px;
     border: none;
     border-radius: 6px;
     background: var(--body-background);
