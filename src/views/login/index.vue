@@ -125,6 +125,7 @@ watch(
   align-items: center;
   height: 100vh;
   padding: 16px;
+  background: #f3f5f7;
   /* 生产登录页未设字体，计算值即 UA 默认 serif（探针实测 Times New Roman） */
   font-family: 'Times New Roman', Times, serif;
   @media (min-width: 768px) {
