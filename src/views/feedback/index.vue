@@ -135,7 +135,7 @@ function submit() {
 .fb-page {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 40px 30px 24px;
+  padding: 40px 30px 44px;
   color: var(--font-color);
 }
 .feedback {
@@ -158,6 +158,9 @@ function submit() {
 }
 .said {
   padding-bottom: 0;
+  h3 {
+    margin: 0;
+  }
   &.mt-10 {
     margin-top: 0;
   }
@@ -276,12 +279,12 @@ function submit() {
   margin-top: 40px;
   h3 {
     font-size: 14px;
-    margin: 0 0 24px 4px;
+    margin: 0 0 0 4px;
     font-weight: 500;
   }
 }
 .fb-pager {
-  padding: 24px 0 40px;
+  padding: 24px 0 16px;
   margin-top: 32px;
 }
 .suggests {
