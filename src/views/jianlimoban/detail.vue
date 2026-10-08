@@ -492,7 +492,7 @@ export default { name: 'jianlimoban-detail' }
   }
 }
 .rel {
-  margin-top: 32px;
+  margin-top: 20px;
   .rel-head {
     display: flex;
     justify-content: space-between;
@@ -500,6 +500,7 @@ export default { name: 'jianlimoban-detail' }
     h2 {
       font-size: 18px;
       font-weight: 700;
+      line-height: 28px;
       margin: 0 0 12px;
     }
     .more {
@@ -514,9 +515,14 @@ export default { name: 'jianlimoban-detail' }
   .rel-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
+    gap: 12px;
+    max-width: 828px;
     @media (min-width: 768px) {
       grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    @media (min-width: 1024px) {
+      gap: 20px;
     }
     @media (max-width: 640px) {
       grid-template-columns: 1fr;

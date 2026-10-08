@@ -146,7 +146,7 @@ const catName = (s: string) => TEMPLATE_CATEGORIES.find(c => c.slug === s)?.name
 
 // 生产默认全部展开，超过阈值给「收起 / 展开全部」按钮
 const expanded = ref<Record<string, boolean>>({})
-const CAP = 12
+const CAP = 16
 const shownSlugs = (g: (typeof GROUPS)[number]) =>
   expanded.value[g.label] === false ? g.slugs.slice(0, CAP) : g.slugs
 const toggleGroup = (label: string) => {

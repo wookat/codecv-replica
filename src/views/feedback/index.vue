@@ -162,7 +162,7 @@ function submit() {
 .qr-card {
   background: var(--background);
   border-radius: 12px;
-  padding: 16px;
+  padding: 16px 16px 22px;
   .qr-title {
     font-size: 16px;
     line-height: 24px;

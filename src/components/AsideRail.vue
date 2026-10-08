@@ -92,7 +92,7 @@ const hotRank = [
     }
     img {
       width: 100%;
-      height: 146px;
+      height: 141px;
       object-fit: cover;
       display: block;
       border-radius: 12px;
