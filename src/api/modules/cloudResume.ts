@@ -27,6 +27,28 @@ export async function cloudList(): Promise<CloudResume[]> {
   }
 }
 
+// 立即保存并返回服务端结果（手动保存/分享前置需可见错误，不能走静默去抖）
+export async function cloudSaveNow(
+  type: string,
+  content: string
+): Promise<{ code: number; msg?: string }> {
+  const h = headers()
+  if (!h) return { code: -1, msg: '未登录' }
+  try {
+    const res = await fetch('/api/resume/save', {
+      method: 'POST',
+      headers: h,
+      body: JSON.stringify({ type, content })
+    })
+    const data = await res.json().catch(() => ({ code: res.status }))
+    if (data.code === undefined) data.code = res.status
+    if (!res.ok && !data.msg) data.msg = `保存失败(${res.status})`
+    return data
+  } catch {
+    return { code: -1, msg: '网络异常，保存失败' }
+  }
+}
+
 // 按 type 去抖上传（编辑器每次击键都会触发 setMDContent）
 const pending = new Map<string, ReturnType<typeof setTimeout>>()
 export function cloudPush(type: string, content: string) {

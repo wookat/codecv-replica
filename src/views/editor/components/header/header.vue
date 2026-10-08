@@ -6,8 +6,13 @@ import Contact from '@/components/contact.vue'
 import ExportTotal from '@/components/exportTotal.vue'
 import useEditorStore from '@/store/modules/editor'
 import { useResumeType } from '../../hook'
-import { cloudPush, cloudSaveName, cloudIncExport, cloudListMeta } from '@/api/modules/cloudResume'
-import { successMessage } from '@/common/message'
+import {
+  cloudSaveName,
+  cloudIncExport,
+  cloudListMeta,
+  cloudSaveNow
+} from '@/api/modules/cloudResume'
+import { successMessage, errorMessage } from '@/common/message'
 import ProofreadDrawer from '../proofread/proofread.vue'
 import HistoryDrawer from './historyDrawer.vue'
 import ShareDialog from './shareDialog.vue'
@@ -46,10 +51,14 @@ const lastSaved = ref(editorStore.MDContent)
 onMounted(() => setTimeout(() => (lastSaved.value = editorStore.MDContent), 0))
 const dirty = computed(() => editorStore.MDContent !== lastSaved.value)
 
-function save() {
-  cloudPush(resumeType.value, editorStore.MDContent)
-  lastSaved.value = editorStore.MDContent
-  successMessage('已保存')
+async function save() {
+  const res = await cloudSaveNow(resumeType.value, editorStore.MDContent)
+  if (res?.code === 200) {
+    lastSaved.value = editorStore.MDContent
+    successMessage('已保存')
+  } else {
+    errorMessage(res?.msg || '保存失败')
+  }
 }
 // 生产口径：标题输入框显示该简历的名称（云端 name），未命名回落到站点默认名
 onMounted(async () => {
@@ -303,6 +312,16 @@ function openImport() {
   @media (max-width: 1023.9px) {
     .more-menu-wrap {
       display: inline-flex;
+      // 右侧操作区整体超出视口时保证触发器仍可达（prod 同款固定在右缘）
+      position: fixed;
+      right: 10px;
+      top: 10px;
+      z-index: 3000;
+      .share-dots {
+        background: var(--background);
+        border-radius: 50%;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+      }
     }
   }
 }

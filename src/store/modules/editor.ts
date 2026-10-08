@@ -32,8 +32,9 @@ const useEditorStore = defineStore('editorStore', {
     })(),
     // 预览模式：隐藏左侧编辑器 只看纸面（对齐线上版三模式切换）
     previewMode: false,
-    // 编辑历史栈 用于顶栏撤销按钮
-    history: [] as string[]
+    // 编辑历史栈 用于顶栏撤销按钮；future = 重做栈
+    history: [] as string[],
+    future: [] as string[]
   }),
   actions: {
     // 初始化编辑器内容（默认为Markdown模式）
@@ -43,10 +44,11 @@ const useEditorStore = defineStore('editorStore', {
         ? (getLocalStorage(cacheKey) as string)
         : getCurrentTypeContent(resumeType)
     },
-    setMDContent(nv: string, resumeType: string) {
-      if (nv !== this.MDContent) {
+    setMDContent(nv: string, resumeType: string, fromHistory = false) {
+      if (nv !== this.MDContent && !fromHistory) {
         this.history.push(this.MDContent)
         if (this.history.length > 30) this.history.shift()
+        this.future.length = 0 // 新编辑使重做栈失效
       }
       this.MDContent = nv
       // 处理之后的操作
@@ -57,7 +59,16 @@ const useEditorStore = defineStore('editorStore', {
     // 撤销到上一个内容快照
     undo() {
       const prev = this.history.pop()
-      return prev === undefined ? null : prev
+      if (prev === undefined) return null
+      this.future.push(this.MDContent)
+      return prev
+    },
+    // 重做到撤销前的内容快照
+    redo() {
+      const next = this.future.pop()
+      if (next === undefined) return null
+      this.history.push(this.MDContent)
+      return next
     },
     setPreviewMode(v: boolean) {
       this.previewMode = v

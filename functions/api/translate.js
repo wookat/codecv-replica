@@ -33,7 +33,7 @@ async function llmTranslate(env, content, target) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.GP_LLM_API_KEY}` },
     body: JSON.stringify({
-      model: env.AI_MODEL || 'hf-deepseek-v3',
+      model: env.AI_MODEL || 'swe-2-medium',
       max_tokens: 8192,
       temperature: 0.3,
       messages: [

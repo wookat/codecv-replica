@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useToggleEditorMode } from './hook'
 import { checkMouseSelect, selectIcon } from '../toolbar/hook'
 import { useResumeType } from '../../../hook'
@@ -16,7 +16,13 @@ import './writable.scss'
 defineProps<{ left: number }>()
 
 const { resumeType } = useResumeType()
-const { DOMTree, ObserverContent, editorStore, undo } = useToggleEditorMode(resumeType.value)
+const {
+  DOMTree,
+  ObserverContent,
+  editorStore,
+  undo,
+  redo: storeRedo
+} = useToggleEditorMode(resumeType.value)
 
 // 生产左栏同款：指南图标打开外部语雀排版指南；末位为日/夜间主题切换（html.dark）
 const GUIDE_DOC = 'https://www.yuque.com/xiongleixin/saqnu1/rxhlykmem82qbb8m'
@@ -32,22 +38,20 @@ if (localStorage.getItem('editor-theme') === 'dark') {
   isDark.value = true
 }
 
-// 撤销/重做可用态（生产同款禁用半透明）
+// 撤销/重做可用态（生产同款禁用半透明）——跟 md 快照栈联动，execCommand 不可用
 const canUndo = ref(false)
 const canRedo = ref(false)
 const refreshUndo = () => {
-  try {
-    canUndo.value = document.queryCommandEnabled('undo')
-    canRedo.value = document.queryCommandEnabled('redo')
-  } catch {
-    /* jsdom/不支持的浏览器 */
-  }
+  canUndo.value = editorStore.history.length > 0
+  canRedo.value = editorStore.future.length > 0
 }
 const redo = () => {
-  document.execCommand('redo')
+  storeRedo()
   refreshUndo()
-  ObserverContent()
 }
+onMounted(refreshUndo)
+const undoTimer = setInterval(refreshUndo, 800)
+onBeforeUnmount(() => clearInterval(undoTimer))
 </script>
 
 <template>

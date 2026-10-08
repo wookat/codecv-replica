@@ -18,8 +18,11 @@ export function useSubmit(emits: any) {
     if (form.value.verify.trim().toLowerCase() != verifyCode.toLowerCase()) {
       return errorMessage('验证码不正确，请重新尝试！')
     }
-    const { userInfo } = useUserStore(),
-      username = userInfo.username
+    const store = useUserStore()
+    if (!(await store.ensureHydrated())) {
+      return errorMessage('登录态失效，请重新登录')
+    }
+    const username = store.userInfo.username
     const { code, msg } = (await pwdUpdate({
       username,
       nPassword: form.value.nPassword,

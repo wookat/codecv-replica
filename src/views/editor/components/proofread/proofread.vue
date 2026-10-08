@@ -25,6 +25,7 @@ const issues = ref<ProofreadIssue[]>([])
 const hiddenCount = ref(0)
 const tier = ref<'vip' | 'free'>('vip')
 const status = ref<'idle' | 'checking' | 'done'>('idle')
+const scanFailed = ref('')
 const ignored = ref<string[]>([])
 const ignoreOpen = ref(false)
 const showIgnored = ref(false)
@@ -419,6 +420,7 @@ function upgrade() {
 /* ---------- 扫描 ---------- */
 async function rescan() {
   status.value = 'checking'
+  scanFailed.value = ''
   proofreadState.value = { status: 'checking', found: 0 }
   issues.value = []
   hiddenCount.value = 0
@@ -464,6 +466,9 @@ async function rescan() {
           all = all.slice(0, 2)
         }
         issues.value = all
+      } else if (res?.code !== 200) {
+        // 登录态远端失败必须显式报失败——本地词典静默回落会造成「✓未发现」假阴性
+        scanFailed.value = res?.message || res?.msg || '错别字检查服务暂不可用'
       } else {
         issues.value = localScan(md)
       }
@@ -471,7 +476,7 @@ async function rescan() {
       issues.value = localScan(md)
     }
   } catch {
-    issues.value = localScan(md)
+    scanFailed.value = '错别字检查服务暂不可用'
   }
   for (const i of issues.value) i.module = moduleOf(i)
   status.value = 'done'
@@ -589,8 +594,14 @@ onBeforeUnmount(() => {
         </div>
         <div v-else class="proofread-drawer__empty">
           <div class="proofread-drawer__empty-badge">✓</div>
-          <h4 class="proofread-drawer__empty-title">未发现错别字</h4>
-          <p class="proofread-drawer__empty-sub">简历文字很干净，放心投递</p>
+          <template v-if="scanFailed">
+            <h4 class="proofread-drawer__empty-title">检查失败</h4>
+            <p class="proofread-drawer__empty-sub">{{ scanFailed }}，请稍后重试</p>
+          </template>
+          <template v-else>
+            <h4 class="proofread-drawer__empty-title">未发现错别字</h4>
+            <p class="proofread-drawer__empty-sub">简历文字很干净，放心投递</p>
+          </template>
           <button class="proofread-drawer__empty-recheck" @click="rescan">重新检查</button>
           <button
             v-if="ignored.length"

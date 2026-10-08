@@ -89,6 +89,22 @@ const useUserStore = defineStore('userStore', {
         }
       })
     },
+    // 会话恢复场景：userInfo 可能还没被 verifyLoginState 水合（uid=0）——
+    // 提交资料/改密前必须先 hydrate，否则后端按 uid=0 查不到用户
+    async ensureHydrated() {
+      if (this.userInfo.uid) return true
+      const token = getLocalStorage(TOKEN) as string,
+        username = getLocalStorage(USERNAME) as string
+      if (!token || !username) return false
+      const res: any = await verify({ token, username })
+      if (res?.code === 200) {
+        this.loginState.logined = true
+        this.setUserInfo(this.userInfo, res.data)
+        this.setUserInfo(userForm, res.data)
+        return true
+      }
+      return false
+    },
     loginModelToggle() {
       this.loginState.loginModel = !this.loginState.loginModel
       this.genVerify()

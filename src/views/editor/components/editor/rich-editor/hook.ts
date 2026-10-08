@@ -399,11 +399,17 @@ export function useToggleEditorMode(resumeType: string) {
     }
   }
 
-  // 撤销：恢复上一个 md 快照并从预览 DOM 回填
+  // 撤销/重做：恢复 md 快照并从预览 DOM 回填（fromHistory 旁路不再入栈）
   const undo = () => {
     const prev = editorStore.undo()
     if (prev == null) return
-    editorStore.setMDContent(prev, resumeType)
+    editorStore.setMDContent(prev, resumeType, true)
+    nextTick(fillContent)
+  }
+  const redo = () => {
+    const next = editorStore.redo()
+    if (next == null) return
+    editorStore.setMDContent(next, resumeType, true)
     nextTick(fillContent)
   }
 
@@ -413,6 +419,7 @@ export function useToggleEditorMode(resumeType: string) {
     editorStore,
     DOMTree,
     ObserverContent,
-    undo
+    undo,
+    redo
   }
 }

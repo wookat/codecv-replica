@@ -4,6 +4,8 @@ import { ref, watch, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { shareState, shareToggle } from '@/api/modules/share'
 import { currentUser } from '@/utils/auth'
+import { cloudSaveNow } from '@/api/modules/cloudResume'
+import { getLocalStorage } from '@/common/localstorage'
 
 const props = defineProps<{ modelValue: boolean; resumeType: string; resumeName: string }>()
 const emit = defineEmits(['update:modelValue'])
@@ -32,6 +34,16 @@ watch(visible, v => emit('update:modelValue', v))
 
 async function toggle(v: boolean) {
   loading.value = true
+  // 开启分享前先把当前内容写云端——未保存过云端的简历开分享会得到死链
+  if (v) {
+    const content = getLocalStorage(`markdown-content-${props.resumeType}`) as string
+    const saved = await cloudSaveNow(props.resumeType, content || '')
+    if (saved?.code !== 200) {
+      loading.value = false
+      isPublic.value = false
+      return ElMessage.error(saved?.msg || '请先保存简历再分享')
+    }
+  }
   const res = await shareToggle(props.resumeType, v)
   loading.value = false
   if (res?.code !== 200) {

@@ -3,7 +3,7 @@
 import { currentUserRow } from '../../_auth.js'
 
 const RELAY = 'https://api.aicdks.com/v1/chat/completions'
-const MODEL = 'hf-deepseek-v3'
+const MODEL = 'swe-2-medium'
 
 const json = (d, s = 200) =>
   new Response(JSON.stringify(d), { status: s, headers: { 'Content-Type': 'application/json' } })

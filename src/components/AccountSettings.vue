@@ -27,6 +27,10 @@ fetch('/api/schools', {
 async function saveProfile() {
   saving.value = true
   try {
+    if (!(await store.ensureHydrated())) {
+      ElMessage.error('登录态失效，请重新登录')
+      return
+    }
     const res: any = await updateUserInfo(store.userInfo)
     if (res?.code === 200) {
       ElMessage.success('资料已更新')
