@@ -284,8 +284,8 @@ function submit() {
   }
 }
 .fb-pager {
-  padding: 24px 0 16px;
-  margin-top: 32px;
+  padding: 8px 0 0;
+  margin-top: 0;
 }
 .suggests {
   display: grid;
