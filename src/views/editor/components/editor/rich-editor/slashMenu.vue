@@ -12,9 +12,18 @@ interface Item {
   zh: string
   en: string
   icon: string
-  act: () => void | Promise<void>
+  act: (...args: number[]) => void | Promise<void>
+  sub?: 'table' // prod 同款：表格布局带子菜单网格选择
 }
-const state = reactive({ visible: false, top: 0, left: 0, items: [] as Item[], index: 0 })
+const state = reactive({
+  visible: false,
+  top: 0,
+  left: 0,
+  items: [] as Item[],
+  index: 0,
+  subOpen: false,
+  grid: null as { row: number; col: number } | null
+})
 let anchorNode: Node | null = null // 命中的文本节点
 let matchStart = 0 // `/` 在文本中的下标
 
@@ -170,6 +179,38 @@ const ITEMS: Item[] = [
     icon: 'image',
     act: () => uploadImage('image')
   },
+  { zh: '一级标题', en: 'yijibiaoti/heading', icon: 'head', act: setHeading(1) },
+  { zh: '二级标题', en: 'erjibiaoti/heading', icon: 'head', act: setHeading(2) },
+  { zh: '三级标题', en: 'sanjibiaoti/heading', icon: 'head', act: setHeading(3) },
+  { zh: '四级标题', en: 'sijibiaoti/heading', icon: 'head', act: setHeading(4) },
+  { zh: '五级标题', en: 'wujibiaoti/heading', icon: 'head', act: setHeading(5) },
+  { zh: '六级标题', en: 'liujibiaoti/heading', icon: 'head', act: setHeading(6) },
+  {
+    zh: '表格布局',
+    en: 'biaogebuju/table',
+    icon: 'table',
+    sub: 'table',
+    act: (rows = 3, cols = 3) => {
+      // prod: insertTable({rows,cols,withHeaderRow:true})
+      const table = document.createElement('table')
+      table.style.width = '100%'
+      const tbody = document.createElement('tbody')
+      for (let r = 0; r < rows; r++) {
+        const tr = document.createElement('tr')
+        for (let c = 0; c < cols; c++) {
+          const cell = document.createElement(r === 0 ? 'th' : 'td')
+          cell.innerHTML = '<br>'
+          tr.appendChild(cell)
+        }
+        tbody.appendChild(tr)
+      }
+      table.appendChild(tbody)
+      insertNode(table, false)
+      const p = document.createElement('p')
+      p.innerHTML = '<br>'
+      insertNode(p)
+    }
+  },
   {
     zh: '插入空白符',
     en: 'kongbaifu/space',
@@ -297,9 +338,29 @@ function onKey(ev: KeyboardEvent) {
   }
   listRef.value?.querySelector('.slash-item.active')?.scrollIntoView({ block: 'nearest' })
 }
-function run(it: Item) {
+function run(it: Item, ...args: number[]) {
+  if (it.sub) {
+    // prod：表格布局点击不执行，只展开网格子菜单
+    state.subOpen = true
+    return
+  }
   close()
-  void it.act()
+  void it.act(...args)
+}
+// prod TableGridSelector：hover 项若是表格布局 → 右侧弹 10×10 网格
+function onItemEnter(i: number) {
+  state.index = i
+  state.subOpen = !!state.items[i]?.sub
+  if (!state.subOpen) state.grid = null
+}
+function pickCell(row: number, col: number) {
+  const it = state.items[state.index]
+  close()
+  void it?.act(row + 1, col + 1)
+}
+const GRID_SIZE = 10
+function cellHit(r: number, c: number) {
+  return state.grid ? r <= state.grid.row && c <= state.grid.col : false
 }
 function onDocDown(ev: MouseEvent) {
   if (!state.visible) return
@@ -332,13 +393,33 @@ onBeforeUnmount(() => {
           :key="it.zh"
           class="slash-item"
           :class="{ active: i === state.index }"
-          @mouseenter="state.index = i"
+          @mouseenter="onItemEnter(i)"
           @click="run(it)"
         >
           <i class="iconfont item-icon" :class="'icon-' + it.icon"></i>
           <p>{{ it.zh }}</p>
           <sub>{{ it.en }}</sub>
         </button>
+        <div v-if="state.subOpen" class="table-grid-selector" @mouseenter="state.subOpen = true">
+          <div class="table-grid-selector__label" :class="{ 'is-active': state.grid }">
+            {{ state.grid ? `${state.grid.row + 1} x ${state.grid.col + 1}` : '表格' }}
+          </div>
+          <div class="table-grid-selector__grid" @mouseleave="state.grid = null">
+            <button
+              v-for="i in GRID_SIZE * GRID_SIZE"
+              :key="i"
+              type="button"
+              class="table-grid-selector__cell"
+              :class="{
+                'is-highlighted': cellHit(Math.floor((i - 1) / GRID_SIZE), (i - 1) % GRID_SIZE)
+              }"
+              @mouseenter="
+                state.grid = { row: Math.floor((i - 1) / GRID_SIZE), col: (i - 1) % GRID_SIZE }
+              "
+              @click="pickCell(Math.floor((i - 1) / GRID_SIZE), (i - 1) % GRID_SIZE)"
+            ></button>
+          </div>
+        </div>
       </div>
     </Transition>
   </Teleport>
@@ -400,5 +481,46 @@ onBeforeUnmount(() => {
 .slash-pop-leave-to {
   opacity: 0;
   transform: translateY(-4px);
+}
+</style>
+
+<style lang="scss" scoped>
+.table-grid-selector {
+  position: absolute;
+  left: calc(100% + 6px);
+  top: 0;
+  background: var(--background);
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.14);
+  .table-grid-selector__label {
+    font-size: 12px;
+    color: var(--font-color);
+    text-align: center;
+    padding: 4px 0 8px;
+    &.is-active {
+      color: var(--theme);
+      font-weight: 600;
+    }
+  }
+  .table-grid-selector__grid {
+    display: grid;
+    grid-template-columns: repeat(10, 20px);
+    gap: 2px;
+  }
+  .table-grid-selector__cell {
+    width: 20px;
+    height: 20px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.02);
+    padding: 0;
+    cursor: pointer;
+    &.is-highlighted {
+      background: var(--theme);
+      border-color: var(--theme);
+      opacity: 0.85;
+    }
+  }
 }
 </style>
