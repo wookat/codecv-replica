@@ -63,8 +63,8 @@ function submit() {
 <template>
   <div class="fb-page">
     <h1 class="sr-only">用户反馈_使用体验_产品建议_简历制作工具评价_用户评价</h1>
-    <div class="feedback">
-      <div class="feedback-main">
+    <main class="feedback">
+      <article class="feedback-main">
         <section class="edit">
           <textarea
             v-model="content"
@@ -119,7 +119,7 @@ function submit() {
             />
           </div>
         </section>
-      </div>
+      </article>
       <AsideRail>
         <div class="qr-card">
           <p class="qr-title">问题反馈微信群</p>
@@ -127,7 +127,7 @@ function submit() {
           <p class="qr-cap">有遇到问题可以加群反馈，客服24h在线</p>
         </div>
       </AsideRail>
-    </div>
+    </main>
   </div>
 </template>
 
