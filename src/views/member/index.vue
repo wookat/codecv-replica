@@ -194,52 +194,52 @@ async function upgrade(t: Tier) {
     <div class="mb-hero">
       <h1 class="sr-only">会员中心_VIP会员特权_简历制作高级功能_专业简历模板下载</h1>
       <div class="mb-head" data-aos="fade-down">
-      <img
-        src="/static/png/vipIcon-wax61BPq.png"
-        class="vip"
-        draggable="false"
-        alt="CodeCV简历VIP会员图标"
-      />
-      <div>
-        <div class="t">CodeCV 简历会员</div>
-        <sub class="s">尊享 6 大特权，一份好简历祝您斩获理想 OFFER！</sub>
-      </div>
-    </div>
-
-    <div class="tiers" data-aos="zoom-out">
-      <div v-for="t in tiers" :key="t.name" class="tier-wrap">
-        <div class="tier" :class="t.gradient">
-          <div v-if="t.badge" class="badge">{{ t.badge }}</div>
-          <div class="tname">{{ t.name }}</div>
-          <div class="tprice" :style="{ color: t.priceColor || '#fff' }">
-            <span class="sym">¥</span> {{ t.price }} <span class="yuan">元</span>
-          </div>
-          <del v-if="t.del" class="tdel">{{ t.del }}</del>
-          <del v-else class="tdel op0">0</del>
-          <div class="tunit">{{ t.unit }}</div>
-          <div class="tbtn" :class="t.btnGradient || ''" @click="!paying && upgrade(t)">
-            升级会员
-          </div>
+        <img
+          src="/static/png/vipIcon-wax61BPq.png"
+          class="vip"
+          draggable="false"
+          alt="CodeCV简历VIP会员图标"
+        />
+        <div>
+          <div class="t">CodeCV 简历会员</div>
+          <sub class="s">尊享 6 大特权，一份好简历祝您斩获理想 OFFER！</sub>
         </div>
-        <div class="rights">
-          <div class="rights-title">
-            功能权益
-            <img
-              src="/static/svg/quanquan-CjIjpzSc.svg"
-              draggable="false"
-              class="quanquan"
-              alt="功能权益装饰图标"
-            />
+      </div>
+
+      <div class="tiers" data-aos="zoom-out">
+        <div v-for="t in tiers" :key="t.name" class="tier-wrap">
+          <div class="tier" :class="t.gradient">
+            <div v-if="t.badge" class="badge">{{ t.badge }}</div>
+            <div class="tname">{{ t.name }}</div>
+            <div class="tprice" :style="{ color: t.priceColor || '#fff' }">
+              <span class="sym">¥</span> {{ t.price }} <span class="yuan">元</span>
+            </div>
+            <del v-if="t.del" class="tdel">{{ t.del }}</del>
+            <del v-else class="tdel op0">0</del>
+            <div class="tunit">{{ t.unit }}</div>
+            <div class="tbtn" :class="t.btnGradient || ''" @click="!paying && upgrade(t)">
+              升级会员
+            </div>
           </div>
-          <div class="rights-list">
-            <div v-for="[k, v] in t.rights" :key="k" class="right-row">
-              <div>{{ k }}</div>
-              <div>{{ v }}</div>
+          <div class="rights">
+            <div class="rights-title">
+              功能权益
+              <img
+                src="/static/svg/quanquan-CjIjpzSc.svg"
+                draggable="false"
+                class="quanquan"
+                alt="功能权益装饰图标"
+              />
+            </div>
+            <div class="rights-list">
+              <div v-for="[k, v] in t.rights" :key="k" class="right-row">
+                <div>{{ k }}</div>
+                <div>{{ v }}</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
     </div>
 
     <!-- 用户评价（生产同板块） -->
