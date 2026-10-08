@@ -272,7 +272,8 @@ async function upgrade(t: Tier) {
   /* 生产会员页内容宽 1352（x=44 起） */
   max-width: 1352px;
   margin: 0 auto;
-  padding: 20px 0;
+  /* 生产横幅底→页脚间距 ~24 */
+  padding: 20px 0 6px;
   color: var(--font-color);
   display: flex;
   flex-direction: column;
@@ -357,24 +358,32 @@ async function upgrade(t: Tier) {
     color: #fff;
     font-weight: 700;
     font-size: 20px;
+    /* 生产档位名行高 28 */
+    line-height: 28px;
   }
   .tprice {
     color: #fff;
     font-weight: 700;
     font-size: 30px;
+    line-height: 36px;
     .sym {
       font-size: 16px;
       color: #fff;
+      /* 生产 ¥ 行高 24 */
+      line-height: 24px;
     }
     .yuan {
       font-size: 22px;
       color: #fff;
+      line-height: 30px;
     }
   }
   .tdel {
     color: #d1d5db;
     font-size: 14px;
-    margin-top: -10px;
+    /* 生产划线价行高 20 */
+    line-height: 20px;
+    margin-top: -8px;
     &.op0 {
       opacity: 0;
     }
@@ -382,10 +391,13 @@ async function upgrade(t: Tier) {
   .tunit {
     color: #d1d5db;
     font-size: 14px;
+    line-height: 20px;
   }
   .tbtn {
     background: #fff;
+    /* 生产按钮高 40 */
     padding: 8px 0;
+    line-height: 24px;
     color: #000;
     font-weight: 700;
     border-radius: 999px;
