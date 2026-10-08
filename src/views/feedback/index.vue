@@ -17,7 +17,7 @@ const field = ref('')
 const avatar = ref('/static/png/avatar1-155VfYeO.png')
 const list = ref<FeedbackItem[]>([])
 const current = ref(1)
-const PAGE_SIZE = 9
+const PAGE_SIZE = 6
 const shown = computed(() =>
   list.value.slice((current.value - 1) * PAGE_SIZE, current.value * PAGE_SIZE)
 )
@@ -142,6 +142,7 @@ function submit() {
   display: flex;
   gap: 20px;
   align-items: flex-start;
+  min-height: 1147px;
 }
 .feedback-main {
   flex: 1;
