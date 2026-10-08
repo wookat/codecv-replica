@@ -501,7 +501,7 @@ export default { name: 'jianlimoban-detail' }
       font-size: 18px;
       font-weight: 700;
       line-height: 28px;
-      margin: 0 0 12px;
+      margin: 0 0 20px;
     }
     .more {
       font-size: 14px;
@@ -726,7 +726,7 @@ export default { name: 'jianlimoban-detail' }
   }
 }
 .faq {
-  margin-top: 50px;
+  margin-top: 66px;
   display: flex;
   flex-direction: column;
   gap: 10px;

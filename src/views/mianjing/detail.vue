@@ -734,7 +734,7 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
   }
 }
 .cmt-card {
-  margin-top: 48px;
+  margin-top: 56px;
   .cmt-head {
     display: flex;
     align-items: center;
