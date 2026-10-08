@@ -128,6 +128,21 @@ export function useToggleEditorMode(resumeType: string) {
   function onModLeave() {
     clearModOps()
   }
+  // tiptap 会把非文档化的 DOM 交换归一化回滚——与生产效果一致的做法：直接按 `##` 模块边界操作 md
+  function mdChunks() {
+    const md = editorStore.MDContent || ''
+    const lines = md.split('\n')
+    const heads: number[] = []
+    lines.forEach((l, i) => {
+      if (/^##\s/.test(l)) heads.push(i)
+    })
+    const pre = lines.slice(0, heads[0] ?? lines.length).join('\n')
+    const chunks = heads.map((h, i) => lines.slice(h, heads[i + 1]).join('\n'))
+    return { pre, chunks }
+  }
+  function writeChunks(pre: string, chunks: string[]) {
+    editorStore.setMDContent([pre, ...chunks].filter(Boolean).join('\n'), resumeType)
+  }
   function moveModule(mod: HTMLElement, dir: -1 | 1) {
     const mods = modulesOf()
     const i = mods.indexOf(mod)
@@ -135,14 +150,15 @@ export function useToggleEditorMode(resumeType: string) {
     if (dir < 0 && i === 0) return warningMessage('已经是第一位了')
     if (dir > 0 && i === mods.length - 1) return warningMessage('已经到最后了')
     clearModOps()
-    const parent = mod.parentElement
-    if (!parent) return
-    if (dir < 0) parent.insertBefore(mod, mod.previousElementSibling as Node | null)
-    else parent.insertBefore(mod, mod.nextElementSibling as Node | null)
-    ObserverContent()
+    const { pre, chunks } = mdChunks()
+    if (chunks.length !== mods.length) return
+    ;[chunks[i + dir], chunks[i]] = [chunks[i], chunks[i + dir]]
+    writeChunks(pre, chunks)
   }
   async function removeModule(mod: HTMLElement) {
     clearModOps()
+    const mods = modulesOf()
+    const i = mods.indexOf(mod)
     const title = mod.querySelector('h2')?.textContent?.trim()
     try {
       await ElMessageBox.confirm(
@@ -154,6 +170,14 @@ export function useToggleEditorMode(resumeType: string) {
           type: 'warning'
         }
       )
+      if (i >= 0) {
+        const { pre, chunks } = mdChunks()
+        if (chunks.length === mods.length) {
+          chunks.splice(i, 1)
+          writeChunks(pre, chunks)
+          return
+        }
+      }
       mod.remove()
       ObserverContent()
     } catch {
