@@ -198,7 +198,7 @@ function submit() {
 }
 
 .edit {
-  padding: 0 20px 8px;
+  padding: 0 20px 3px;
   .ta {
     display: block;
     width: 100%;
@@ -254,7 +254,7 @@ function submit() {
     }
   }
   .submit {
-    margin-top: 17px;
+    margin-top: 11px;
     border: none;
     background: var(--theme);
     color: #fff;

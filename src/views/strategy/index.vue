@@ -101,7 +101,7 @@ onMounted(load)
 .st-page {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 20px 20px 8px;
   color: var(--font-color);
   font-family: var(--font-noto-sans-sc);
 }
@@ -168,7 +168,7 @@ onMounted(load)
 .items {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 18px;
   min-height: 200px;
 }
 .post-card {
@@ -256,7 +256,7 @@ onMounted(load)
   }
 }
 .pager {
-  margin-top: 13px;
+  margin-top: 20px;
   display: flex;
   justify-content: center;
 }
