@@ -150,6 +150,7 @@ function submit() {
   display: flex;
   flex-direction: column;
   gap: 40px;
+  min-height: 900px;
 }
 .edit,
 .said {
