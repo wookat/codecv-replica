@@ -2,6 +2,7 @@
 import { onMounted, reactive, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import QRCode from 'qrcode'
 import { syncLocalCloud } from '@/api/modules/cloudResume'
 import useUserStore from '@/store/modules/user'
 
@@ -12,7 +13,14 @@ const agreed = ref(false)
 const showAcct = ref(false)
 const form = reactive({ username: '', password: '', verify: '' })
 
-onMounted(() => store.genVerify())
+// 生产扫码区为 base64 内嵌二维码
+const qrImg = ref('')
+
+onMounted(async () => {
+  store.genVerify()
+  const url = `${location.origin}/login?wxscan=${Date.now().toString(36)}`
+  qrImg.value = await QRCode.toDataURL(url, { width: 220, margin: 1 }).catch(() => '')
+})
 
 function submit(isLogin: boolean) {
   if (!agreed.value) return ElMessage.warning('请先勾选同意用户隐私政策与服务协议')
@@ -49,7 +57,7 @@ watch(
       <h1 class="title">微信扫码登录注册</h1>
       <p class="sub">登录开启沉浸式简历编写体验</p>
       <div class="qr-circle">
-        <img src="/prod-assets/miniprogram.webp" alt="微信扫码登录" class="qr" />
+        <img :src="qrImg" alt="微信扫码登录" class="qr" />
       </div>
       <p class="privacy">
         扫码登录/注册表示您同意该<a
