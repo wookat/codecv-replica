@@ -328,9 +328,9 @@ async function upgrade(t: Tier) {
   width: 280px;
   position: relative;
   font-family: -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  /* 生产深色区高约 232px */
+  /* 生产深色区高 234：上 24 下 26 */
   box-sizing: border-box;
-  padding: 28px 20px 20px;
+  padding: 24px 20px 26px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -383,7 +383,7 @@ async function upgrade(t: Tier) {
     font-size: 14px;
     /* 生产划线价行高 20 */
     line-height: 20px;
-    margin-top: -8px;
+    margin-top: -4px;
     &.op0 {
       opacity: 0;
     }
@@ -409,7 +409,8 @@ async function upgrade(t: Tier) {
 .rights {
   border-radius: 0 0 12px 12px;
   padding: 16px;
-  min-height: 416px;
+  /* 生产权益区高 500（wrap734-tier234） */
+  min-height: 421px;
   box-sizing: border-box;
   background: var(--background);
   text-align: center;
@@ -419,7 +420,8 @@ async function upgrade(t: Tier) {
     text-align: center;
     font-weight: 700;
     font-size: 14px;
-    margin-bottom: 24px;
+    /* 生产：标题→首行权益间距 52（rt458→rr510） */
+    margin-bottom: 27px;
     .quanquan {
       position: absolute;
       top: 82%;
@@ -445,8 +447,8 @@ async function upgrade(t: Tier) {
 .mb-comments {
   width: 100%;
   text-align: center;
-  /* 生产 h2 y1014：权益区到评论区间距 66px */
-  padding: 98px 0 20px;
+  /* 生产：wrap底942 → h2顶1014 间距 72 */
+  padding: 72px 0 20px;
   h2 {
     font-family: -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
     font-size: 36px;
