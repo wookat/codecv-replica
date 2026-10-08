@@ -3,6 +3,8 @@ import { TOKEN } from '@/store/modules/user'
 import { getLocalStorage } from '@/common/localstorage'
 import { queryDOM } from '@/utils'
 import { resumeDOMStruct2Markdown } from '@/utils/dom2md'
+import { warningMessage } from '@/common/message'
+import { ElMessageBox } from 'element-plus'
 import { nextTick, onActivated, onBeforeUnmount, onMounted, ref } from 'vue'
 // 使用编辑模式
 export function useToggleEditorMode(resumeType: string) {
@@ -12,7 +14,7 @@ export function useToggleEditorMode(resumeType: string) {
   function ObserverContent() {
     // 克隆序列化：drag-handle 等编辑态辅助元素不进 md
     const clone = DOMTree.value?.cloneNode(true) as HTMLElement
-    clone?.querySelectorAll('.' + HANDLE).forEach(e => e.remove())
+    clone?.querySelectorAll('.' + HANDLE + ',.mod-op').forEach(e => e.remove())
     const content = resumeDOMStruct2Markdown({
       node: clone as Node,
       latest: true,
@@ -92,6 +94,110 @@ export function useToggleEditorMode(resumeType: string) {
         ObserverContent()
       })
       el.appendChild(h)
+    }
+  }
+
+  // ===== 生产同款模块操作：hover .resume-module 出内联 img 钮（上移/下移/删除该模块） =====
+  let modOpEls: HTMLElement[] = []
+  const modulesOf = () =>
+    Array.from(DOMTree.value?.querySelectorAll('.resume-module') || []) as HTMLElement[]
+
+  function mkModBtn(cls: string, title: string, arrow: string) {
+    const b = document.createElement('span')
+    b.className = `mod-op ${cls}`
+    b.title = title
+    b.contentEditable = 'false'
+    b.innerHTML = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">${arrow}</svg>`
+    return b
+  }
+  function clearModOps() {
+    modOpEls.forEach(e => e.parentElement?.removeChild(e))
+    modOpEls = []
+  }
+  function onModEnter(ev: Event) {
+    const mod = ev.currentTarget as HTMLElement
+    clearModOps()
+    const up = mkModBtn('mod-up', '上移', '<path d="M6 15l6-6 6 6"/>')
+    const down = mkModBtn('mod-down', '下移', '<path d="M6 9l6 6 6-6"/>')
+    const del = mkModBtn('remove-module', '删除该模块', '<path d="M6 6l12 12M18 6L6 18"/>')
+    mod.appendChild(down)
+    mod.appendChild(up)
+    mod.appendChild(del)
+    modOpEls = [down, up, del]
+  }
+  function onModLeave() {
+    clearModOps()
+  }
+  function moveModule(mod: HTMLElement, dir: -1 | 1) {
+    const mods = modulesOf()
+    const i = mods.indexOf(mod)
+    if (i < 0) return
+    if (dir < 0 && i === 0) return warningMessage('已经是第一位了')
+    if (dir > 0 && i === mods.length - 1) return warningMessage('已经到最后了')
+    clearModOps()
+    const parent = mod.parentElement
+    if (!parent) return
+    if (dir < 0) parent.insertBefore(mod, mod.previousElementSibling as Node | null)
+    else parent.insertBefore(mod, mod.nextElementSibling as Node | null)
+    ObserverContent()
+  }
+  async function removeModule(mod: HTMLElement) {
+    clearModOps()
+    const title = mod.querySelector('h2')?.textContent?.trim()
+    try {
+      await ElMessageBox.confirm(
+        `您确定要删除${title ? `【${title}】` : '此'}模块吗？`,
+        '删除模块提示',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+      )
+      mod.remove()
+      ObserverContent()
+    } catch {
+      /* 取消 */
+    }
+  }
+  function onModClick(ev: Event) {
+    const t = ev.target as HTMLElement
+    const mod = ev.currentTarget as HTMLElement
+    if (t.closest('.mod-up')) {
+      ev.stopPropagation()
+      moveModule(mod, -1)
+    } else if (t.closest('.mod-down')) {
+      ev.stopPropagation()
+      moveModule(mod, 1)
+    } else if (t.closest('.remove-module')) {
+      ev.stopPropagation()
+      void removeModule(mod)
+    }
+  }
+  function bindModuleOps() {
+    modulesOf().forEach(mod => {
+      if (mod.dataset.modopsBound) return
+      mod.dataset.modopsBound = '1'
+      mod.addEventListener('mouseenter', onModEnter)
+      mod.addEventListener('mouseleave', onModLeave)
+      mod.addEventListener('click', onModClick)
+    })
+  }
+
+  // ===== 生产同款滚动联动：预览点击模块 → BroadcastChannel 广播 index/line =====
+  let modChannel: BroadcastChannel | null = null
+  function onChannelMsg(ev: MessageEvent) {
+    const data = ev.data as { index?: number }
+    if (typeof data?.index !== 'number') return
+    const mod = modulesOf()[data.index]
+    if (!mod) return
+    const scroller =
+      (DOMTree.value?.closest('[style*="overflow"]') as HTMLElement | null) ||
+      (DOMTree.value?.parentElement as HTMLElement | null)
+    if (scroller && scroller.scrollHeight > scroller.clientHeight) {
+      scroller.scrollTo({ top: Math.max(0, mod.offsetTop - 56), behavior: 'smooth' })
+    } else {
+      mod.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
   }
 
@@ -209,18 +315,28 @@ export function useToggleEditorMode(resumeType: string) {
       root.addEventListener('dragover', onDragOver)
       root.addEventListener('paste', onPaste)
       document.addEventListener('selectionchange', onSelectionChange)
-      // 新建节点（回车拆段等）出现时补挂手柄
+      modChannel = new BroadcastChannel('resume-module-scroll')
+      modChannel.addEventListener('message', onChannelMsg)
+      // 新建节点（回车拆段等）出现时补挂手柄 + 模块钮
       new MutationObserver(muts => {
         const need = muts.some(
           m =>
             m.addedNodes.length &&
             !Array.from(m.addedNodes).every(n => (n as HTMLElement).classList?.contains(HANDLE))
         )
-        if (need) injectHandles()
+        if (need) {
+          injectHandles()
+          bindModuleOps()
+        }
       }).observe(root, { childList: true, subtree: true })
     }
   })
-  onBeforeUnmount(() => document.removeEventListener('selectionchange', onSelectionChange))
+  onBeforeUnmount(() => {
+    document.removeEventListener('selectionchange', onSelectionChange)
+    modChannel?.removeEventListener('message', onChannelMsg)
+    modChannel?.close()
+    clearModOps()
+  })
 
   const fillContent = () => {
     if (editorStore.writable) {
@@ -229,6 +345,7 @@ export function useToggleEditorMode(resumeType: string) {
           queryDOM('.reference-dom')
         )).innerHTML
         injectHandles()
+        bindModuleOps()
       })
     }
   }

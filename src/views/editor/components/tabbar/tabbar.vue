@@ -77,13 +77,17 @@ watch(proofreadBus, () => (proofreadVisible.value = true))
       <el-tooltip content="调整简历中内容边距/字号" effect="light">
         <i class="iconfont icon-adjust operator-item" @click="adjustMargin"></i>
       </el-tooltip>
-      <div class="operator-item font-color-picker">
-        <el-color-picker @change="setColor" size="small" v-model="color" />
-      </div>
-      <div class="operator-item main-color-picker">
-        <el-color-picker @change="setPrimaryColor" size="small" v-model="primaryColor" />
-      </div>
-      <el-tooltip content="证件照（支持形状裁剪/拖拽/缩放）" effect="light">
+      <el-tooltip content="修改简历字体颜色" effect="light">
+        <div class="operator-item font-color-picker">
+          <el-color-picker @change="setColor" size="small" v-model="color" />
+        </div>
+      </el-tooltip>
+      <el-tooltip content="修改简历主题颜色" effect="light">
+        <div class="operator-item main-color-picker">
+          <el-color-picker @change="setPrimaryColor" size="small" v-model="primaryColor" />
+        </div>
+      </el-tooltip>
+      <el-tooltip content="上传/更换可拖拽的证件照" effect="light">
         <button
           class="operator-item text-btn lx-avatar-tool"
           @click=";(photoKind = 'avatar'), (photoVisible = true)"
@@ -91,7 +95,7 @@ watch(proofreadBus, () => (proofreadVisible.value = true))
           证件照
         </button>
       </el-tooltip>
-      <el-tooltip content="校徽（拖拽图中校徽可调整位置，右下角可缩放）" effect="light">
+      <el-tooltip content="上传/更换可拖拽的学校徽标" effect="light">
         <button
           class="operator-item text-btn"
           @click=";(photoKind = 'badge'), (photoVisible = true)"
@@ -99,28 +103,25 @@ watch(proofreadBus, () => (proofreadVisible.value = true))
           校徽
         </button>
       </el-tooltip>
-      <el-tooltip
-        :content="onePageApplied ? '恢复多页排版' : '智能压缩边距装进一页'"
-        effect="light"
-      >
+      <el-tooltip :content="onePageApplied ? '取消智能一页' : '开启智能一页'" effect="light">
         <button
-          class="operator-item text-btn"
-          :class="{ 'onepage-active': onePageApplied }"
+          class="operator-item text-btn lx-menu-btn"
+          :class="{ 'lx-menu-active': onePageApplied }"
           @click="toggleOnePage"
         >
           {{ onePageApplied ? '取消一页' : '智能一页' }}
         </button>
       </el-tooltip>
-      <el-tooltip content="段落两端对齐" effect="light">
+      <el-tooltip :content="justified ? '取消正文两端对齐' : '开启正文两端对齐'" effect="light">
         <button
-          class="operator-item text-btn"
-          :class="{ active: justified }"
+          class="operator-item text-btn lx-menu-btn"
+          :class="{ 'lx-menu-active': justified }"
           @click="toggleJustify"
         >
-          两端对齐
+          {{ justified ? '取消对齐' : '两端对齐' }}
         </button>
       </el-tooltip>
-      <el-tooltip content="错别字检查" effect="light">
+      <el-tooltip content="检查简历中的错别字与标点问题" effect="light">
         <button
           class="operator-item text-btn proofread-btn proofread-tool-btn"
           :class="{
@@ -132,8 +133,14 @@ watch(proofreadBus, () => (proofreadVisible.value = true))
           @click="proofreadVisible = true"
         >
           <span v-if="proofreadState.status === 'checking'" class="proofread-btn-spinner"></span>
-          错别字检查
-          <span class="proofread-new-dot" title="新功能"></span>
+          <span v-if="proofreadState.status === 'checking'" class="proofread-btn-pop">
+            {{ proofreadState.found > 0 ? `已发现 ${proofreadState.found} 处…` : '检查中…' }}
+          </span>
+          <span v-else-if="proofreadState.status === 'done' && proofreadState.found > 0"
+            >发现 {{ proofreadState.found }} 处问题</span
+          >
+          <span v-else-if="proofreadState.status === 'done'">✔ 未发现问题</span>
+          <span v-else>错别字检查</span>
         </button>
       </el-tooltip>
 
@@ -312,15 +319,17 @@ watch(proofreadBus, () => (proofreadVisible.value = true))
     }
     .proofread-btn {
       position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
-    .proofread-new-dot {
-      position: absolute;
-      top: -4px;
-      right: -6px;
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #f56c6c;
+    .lx-menu-active {
+      color: var(--theme) !important;
+      border: 1px solid var(--theme);
+      border-radius: 6px;
+    }
+    .proofread-btn-pop {
+      white-space: nowrap;
     }
 
     i.iconfont {

@@ -2,7 +2,7 @@
 import nav from '@/common/nav/nav'
 import useEditorStore from '@/store/modules/editor'
 
-defineEmits(['import-md', 'ai-helper'])
+defineEmits(['import-md'])
 
 const editorStore = useEditorStore()
 // 生产使用教程链接随编辑模式切换：所见即所得→rich 指南，markdown→md 指南
@@ -15,7 +15,7 @@ function tutorHref() {
 
 <template>
   <ul class="nav">
-    <li v-for="(navItem, idx) in nav" :key="idx">
+    <li v-for="(navItem, idx) in nav" :key="idx" :class="{ 'xl-only': navItem.xlOnly }">
       <!-- 导入简历：生产同款直接唤起文件选择，tooltip「导入上次编写的MD」 -->
       <template v-if="navItem.file">
         <el-tooltip content="导入上次编写的MD">
@@ -29,9 +29,6 @@ function tutorHref() {
       <a v-else-if="navItem.tutor" :href="tutorHref()" target="_blank" rel="noopener noreferrer">
         {{ navItem.name }}
       </a>
-      <span v-else-if="navItem.act === 'ai'" class="ai-link" @click="$emit('ai-helper')">
-        {{ navItem.name }}<i class="hot-tag">🔥</i>
-      </span>
       <a v-else-if="navItem.external" :href="navItem.path" target="_blank" rel="noopener noreferrer"
         >{{ navItem.name }}<i v-if="navItem.hot" class="hot-tag">🔥</i></a
       >
@@ -67,8 +64,10 @@ function tutorHref() {
   margin-left: 1px;
   vertical-align: super;
 }
-.ai-link {
-  cursor: pointer;
-  color: var(--theme);
+/* 生产同款：证件照制作/面经 仅 ≥1280px 显示 */
+@media (max-width: 1279.9px) {
+  .xl-only {
+    display: none;
+  }
 }
 </style>

@@ -16,11 +16,13 @@ const nav = [
   {
     name: '证件照制作',
     path: 'https://www.quzuotu.com/idphoto/guide',
-    external: true
+    external: true,
+    xlOnly: true
   },
   {
     name: '面经',
-    path: '/mianjing'
+    path: '/mianjing',
+    xlOnly: true
   },
   {
     name: '网申助手',
@@ -31,11 +33,6 @@ const nav = [
   {
     name: '秋招岗位汇总',
     path: '/jobs',
-    hot: true
-  },
-  {
-    name: 'AI助手',
-    act: 'ai',
     hot: true
   }
 ]

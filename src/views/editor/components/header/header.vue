@@ -59,6 +59,15 @@ function saveName() {
   if (!name) return
   cloudSaveName(resumeType.value, name)
 }
+// 移动端 ⋮ 菜单与桌面 nav 共用「使用教程」双链接逻辑
+function tutorHref() {
+  return editorStore.writable
+    ? 'https://www.yuque.com/xiongleixin/saqnu1/rxhlykmem82qbb8m'
+    : 'https://www.yuque.com/xiongleixin/saqnu1/sl2ai75t6xgbhg86'
+}
+function openImport() {
+  ;(document.getElementById('import_md') as HTMLInputElement | null)?.click()
+}
 </script>
 
 <template>
@@ -81,7 +90,6 @@ function saveName() {
       @import-md="importFile"
       @export-picture="exportFile('picture')"
       @print-page="emit('print-page')"
-      @ai-helper="aiVisible = true"
     />
     <div class="right">
       <span class="watermark-pill" @click="$router.push('/member')">移除水印</span>
@@ -115,6 +123,44 @@ function saveName() {
       <el-tooltip content="简历分享" effect="light">
         <div class="share-dots lx-cp" @click="shareVisible = true"><i></i><i></i><i></i></div>
       </el-tooltip>
+      <!-- 生产同款移动端 ⋮ 更多菜单（lg:hidden，<1024px 才显示） -->
+      <el-dropdown class="more-menu-wrap" trigger="click" placement="bottom-end">
+        <div class="share-dots lx-cp"><i></i><i></i><i></i></div>
+        <template #dropdown>
+          <ul class="more-menu">
+            <li @click="openImport">导入简历</li>
+            <li>
+              <a href="/jianlimoban" target="_blank" rel="noopener noreferrer">简历模板</a>
+            </li>
+            <li @click="historyVisible = true">历史记录</li>
+            <li class="mm-md" @click="proofreadVisible = true">
+              错别字检查<span class="proofread-new-dot"></span>
+            </li>
+            <li class="mm-md" @click="$router.push('/member')">移除水印</li>
+            <li>
+              <a
+                href="https://www.quzuotu.com/idphoto/guide"
+                target="_blank"
+                rel="noopener noreferrer"
+                >证件照制作</a
+              >
+            </li>
+            <li><a href="/mianjing" target="_blank" rel="noopener noreferrer">面经</a></li>
+            <li>
+              <a
+                href="https://assist.codecvcv.com?utm_source=codecv_nav"
+                target="_blank"
+                rel="noopener noreferrer"
+                >网申助手</a
+              >
+            </li>
+            <li><a href="/jobs" target="_blank" rel="noopener noreferrer">秋招岗位汇总</a></li>
+            <li>
+              <a :href="tutorHref()" target="_blank" rel="noopener noreferrer">使用教程</a>
+            </li>
+          </ul>
+        </template>
+      </el-dropdown>
     </div>
   </div>
   <Contact :open="open" @toggle="toggle" />
@@ -240,6 +286,58 @@ function saveName() {
   .icon-back {
     cursor: pointer;
     font-weight: normal;
+  }
+  /* 生产同款：⋮ 更多菜单仅 <1024px 显示 */
+  .more-menu-wrap {
+    display: none;
+  }
+  @media (max-width: 1023.9px) {
+    .more-menu-wrap {
+      display: inline-flex;
+    }
+  }
+}
+.more-menu {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  width: 132px;
+  li {
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    margin: 0 8px;
+    padding: 8px;
+    border-radius: 6px;
+    color: var(--font-color);
+    position: relative;
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+    &:hover {
+      color: var(--theme);
+      background: var(--body-background);
+    }
+    /* 生产同款：错别字检查/移除水印 仅 <768px 显示 */
+    &.mm-md {
+      display: none;
+    }
+    .proofread-new-dot {
+      position: absolute;
+      right: 6px;
+      top: 6px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--theme, #ff7449);
+    }
+  }
+}
+@media (max-width: 767.9px) {
+  .more-menu li.mm-md {
+    display: block;
   }
 }
 #import_md {
