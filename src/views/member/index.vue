@@ -460,6 +460,8 @@ async function upgrade(t: Tier) {
   max-width: 1280px;
   margin: 0 auto;
   text-align: left;
+  /* 生产网格底部比单卡高度多 8px */
+  padding-bottom: 8px;
   @media (max-width: 1279px) {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -505,9 +507,9 @@ async function upgrade(t: Tier) {
   margin-left: calc(50% - 50vw);
   background: #0d0d0d;
   text-align: center;
-  /* 生产：bg-[#111] py-8 整体高 152、与评论区网格间隔 48 */
+  /* 生产：bg-[#111] py-8 整体高 152、与评论区网格间隔 48（含评论容器 pb20） */
   padding: 32px 20px;
-  margin-top: 56px;
+  margin-top: 28px;
   p {
     color: #fff;
     font-size: 16px;
