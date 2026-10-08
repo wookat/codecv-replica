@@ -328,9 +328,9 @@ async function upgrade(t: Tier) {
   width: 280px;
   position: relative;
   font-family: -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  /* 生产深色区高 234：上 24 下 26 */
+  /* 生产深色区高 ~225：权益标题 rt 对齐 */
   box-sizing: border-box;
-  padding: 24px 20px 26px;
+  padding: 21px 20px 18px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -460,8 +460,8 @@ async function upgrade(t: Tier) {
   .sub {
     color: #999;
     font-size: 14px;
-    /* 生产：副文案底(1094)→首卡(1182) 间距 88 */
-    margin: 0 0 88px;
+    /* 生产：副文案底→首卡间距 ~82 */
+    margin: 0 0 82px;
   }
 }
 .cm-grid {
