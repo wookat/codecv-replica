@@ -328,9 +328,9 @@ async function upgrade(t: Tier) {
   width: 280px;
   position: relative;
   font-family: -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  /* 生产深色区高 ~225：权益标题 rt 对齐 */
+  /* 生产深色区高 234 */
   box-sizing: border-box;
-  padding: 21px 20px 18px;
+  padding: 24px 20px 22px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -408,7 +408,8 @@ async function upgrade(t: Tier) {
 }
 .rights {
   border-radius: 0 0 12px 12px;
-  padding: 16px;
+  /* 生产权益标题距卡边 ~9px 内距，底部补至 wrap=734 */
+  padding: 9px 16px 25px;
   /* 生产权益区高 500（wrap734-tier234） */
   min-height: 421px;
   box-sizing: border-box;
@@ -460,8 +461,8 @@ async function upgrade(t: Tier) {
   .sub {
     color: #999;
     font-size: 14px;
-    /* 生产：副文案底→首卡间距 ~82 */
-    margin: 0 0 82px;
+    /* 生产：副文案底→首卡间距 ~93 */
+    margin: 0 0 93px;
   }
 }
 .cm-grid {
