@@ -143,6 +143,21 @@ export function useToggleEditorMode(resumeType: string) {
   function writeChunks(pre: string, chunks: string[]) {
     editorStore.setMDContent([pre, ...chunks].filter(Boolean).join('\n'), resumeType)
   }
+  // md 写入后从 reference-dom 重建编辑面板（渲染管线监听 MDContent 重渲）
+  function rebuildFromReference() {
+    window.setTimeout(() => {
+      const ref = queryDOM('.reference-dom') as HTMLElement | null
+      if (!ref?.innerHTML || !DOMTree.value) return
+      DOMTree.value.querySelectorAll('.resume-module').forEach(m => {
+        const el = m as HTMLElement
+        el.onmouseenter = null
+        delete el.dataset.modopsBound
+      })
+      DOMTree.value.innerHTML = ref.innerHTML
+      injectHandles()
+      bindModuleOps()
+    }, 400)
+  }
   function moveModule(mod: HTMLElement, dir: -1 | 1) {
     const mods = modulesOf()
     const i = mods.indexOf(mod)
@@ -150,10 +165,19 @@ export function useToggleEditorMode(resumeType: string) {
     if (dir < 0 && i === 0) return warningMessage('已经是第一位了')
     if (dir > 0 && i === mods.length - 1) return warningMessage('已经到最后了')
     clearModOps()
+    const parent = mod.parentElement
+    if (parent) {
+      if (dir < 0) parent.insertBefore(mod, mod.previousElementSibling as Node | null)
+      else parent.insertBefore(mod, mod.nextElementSibling as Node | null)
+    }
     const { pre, chunks } = mdChunks()
-    if (chunks.length !== mods.length) return
-    ;[chunks[i + dir], chunks[i]] = [chunks[i], chunks[i + dir]]
-    writeChunks(pre, chunks)
+    if (chunks.length === mods.length) {
+      ;[chunks[i + dir], chunks[i]] = [chunks[i], chunks[i + dir]]
+      writeChunks(pre, chunks)
+      rebuildFromReference()
+    } else {
+      ObserverContent()
+    }
   }
   async function removeModule(mod: HTMLElement) {
     clearModOps()
@@ -175,6 +199,7 @@ export function useToggleEditorMode(resumeType: string) {
         if (chunks.length === mods.length) {
           chunks.splice(i, 1)
           writeChunks(pre, chunks)
+          rebuildFromReference()
           return
         }
       }
