@@ -17,7 +17,7 @@ const field = ref('')
 const avatar = ref('/static/png/avatar1-155VfYeO.png')
 const list = ref<FeedbackItem[]>([])
 const current = ref(1)
-const PAGE_SIZE = 6
+const PAGE_SIZE = 100
 const shown = computed(() =>
   list.value.slice((current.value - 1) * PAGE_SIZE, current.value * PAGE_SIZE)
 )
@@ -157,7 +157,7 @@ function submit() {
   padding: 20px;
 }
 .said {
-  padding-bottom: 52px;
+  padding-bottom: 0;
   &.mt-10 {
     margin-top: 0;
   }
