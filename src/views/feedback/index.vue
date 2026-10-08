@@ -63,9 +63,9 @@ function submit() {
 <template>
   <div class="fb-page">
     <h1 class="sr-only">用户反馈_使用体验_产品建议_简历制作工具评价_用户评价</h1>
-    <div class="fb-cols">
-      <div class="fb-main">
-        <div class="edit">
+    <div class="feedback">
+      <div class="feedback-main">
+        <section class="edit">
           <textarea
             v-model="content"
             placeholder="您的意见是我们慢慢改进的关键～"
@@ -90,9 +90,9 @@ function submit() {
             />
           </div>
           <button class="submit" :disabled="!content.trim()" @click="submit">我要反馈</button>
-        </div>
+        </section>
 
-        <div class="said">
+        <div class="mt-10 said">
           <h3>✨ 看看大家都说了什么</h3>
           <ul class="suggests">
             <li v-for="(f, i) in shown" :key="i">
@@ -135,20 +135,26 @@ function submit() {
 .fb-page {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 20px;
+  padding: 20px 30px;
   color: var(--font-color);
 }
-.fb-cols {
+.feedback {
   display: flex;
   gap: 20px;
   align-items: flex-start;
 }
-.fb-main {
+.feedback-main {
   flex: 1;
   min-width: 0;
   background: var(--background);
   border-radius: 12px;
-  padding: 20px;
+  padding: 20px 20px 52px;
+}
+.feedback > .rail-aside {
+  width: 220px;
+  @media (max-width: 900px) {
+    display: none;
+  }
 }
 .qr-card {
   background: var(--background);
@@ -173,6 +179,7 @@ function submit() {
     text-align: center;
   }
 }
+
 .edit {
   .ta {
     display: block;
@@ -191,7 +198,7 @@ function submit() {
     }
   }
   .fi {
-    margin-top: 20px;
+    margin-top: 14px;
     display: block;
     border: none;
     background: var(--body-background);
@@ -208,9 +215,14 @@ function submit() {
     margin-top: 12px;
     img {
       width: 40px;
+      height: 40px;
       border-radius: 999px;
       opacity: 0.6;
       margin-right: 20px;
+      &:first-child {
+        width: 44px;
+        height: 44px;
+      }
       cursor: pointer;
       transition: all 0.2s;
       &.picked,
@@ -224,7 +236,7 @@ function submit() {
     }
   }
   .submit {
-    margin-top: 16px;
+    margin-top: 12px;
     border: none;
     background: var(--theme);
     color: #fff;

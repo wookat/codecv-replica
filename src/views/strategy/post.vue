@@ -2,14 +2,13 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { postDetail } from '@/api/modules/site'
-import { extractToc, renderArticle, TocItem } from '@/utils/article'
+import { renderArticle } from '@/utils/article'
 import { fmtCN } from '@/utils/time'
 import { templates } from '@/templates/config'
 
 const route = useRoute()
 const post = ref<any>(null)
 const html = ref('')
-const toc = ref<TocItem[]>([])
 const loading = ref(true)
 
 // 与生产一致的右侧推荐模板位（生产实测顺序）
@@ -19,10 +18,6 @@ const recommends = computed(() =>
     .map(t => templates.value.find(x => x.type === t))
     .filter((x): x is NonNullable<typeof x> => Boolean(x))
 )
-
-function scrollTo(id: string) {
-  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
-}
 
 const fmt = (ts?: number) => (ts ? fmtCN(ts, true) : '')
 
@@ -34,7 +29,6 @@ onMounted(async () => {
       document.title = `${post.value.title} - CodeCV简历`
     if (post.value?.contentMd) {
       html.value = renderArticle(post.value.contentMd)
-      toc.value = extractToc(post.value.contentMd)
     }
   } catch (e) {
     console.error('获取文章失败:', e)
@@ -78,17 +72,6 @@ onMounted(async () => {
         <el-empty v-else-if="!loading" description="文章不存在或已删除" />
       </div>
       <aside class="pd-aside">
-        <div v-if="toc.length" class="rec-card toc-card">
-          <strong class="rec-title">目录</strong>
-          <a
-            v-for="t in toc"
-            :key="t.id"
-            class="toc-item"
-            :class="{ h3: t.level === 3 }"
-            @click="scrollTo(t.id)"
-            >{{ t.text }}</a
-          >
-        </div>
         <div class="rec-card">
           <strong class="rec-title">
             <svg
@@ -139,40 +122,17 @@ onMounted(async () => {
   min-width: 0;
 }
 .pd-aside {
-  width: 220px;
+  width: 200px;
   flex-shrink: 0;
   display: none;
   @media (min-width: 1024px) {
     display: block;
   }
 }
-.toc-card {
-  margin-bottom: 16px;
-  .toc-item {
-    display: block;
-    width: 100%;
-    text-align: left;
-    border: none;
-    background: transparent;
-    padding: 5px 8px;
-    font-size: 13px;
-    color: var(--font-color);
-    opacity: 0.65;
-    cursor: pointer;
-    border-radius: 8px;
-    &.h3 {
-      padding-left: 24px;
-    }
-    &:hover {
-      color: var(--theme);
-      opacity: 1;
-    }
-  }
-}
 .rec-card {
   background: var(--background);
   border-radius: 12px;
-  padding: 16px;
+  padding: 24px;
   position: sticky;
   top: 80px;
   .rec-title {
@@ -190,9 +150,12 @@ onMounted(async () => {
   .rec-item {
     display: block;
     text-decoration: none;
-    margin-bottom: 14px;
+    margin-bottom: 18px;
     img {
       width: 100%;
+      aspect-ratio: 210 / 297;
+      object-fit: cover;
+      object-position: top;
       border-radius: 8px;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
       display: block;
@@ -255,32 +218,34 @@ onMounted(async () => {
   }
 }
 .pd-body {
-  font-size: 15px;
-  line-height: 1.9;
+  font-size: 16px;
+  line-height: 1.875;
   color: var(--writable-font-color);
   word-break: break-word;
   h2,
   h3 {
     font-weight: 700;
-    margin: 24px 0 12px;
+    margin: 16px 0;
     color: var(--font-color);
   }
   h2 {
-    font-size: 19px;
+    font-size: 1.25em;
+    line-height: 2;
   }
   h3 {
-    font-size: 17px;
+    font-size: 1.17em;
+    line-height: 40px;
   }
   p {
-    margin: 10px 0;
+    margin: 4px 0 0;
   }
   ul,
   ol {
     padding-left: 24px;
-    margin: 10px 0;
+    margin: 0;
   }
   li {
-    margin: 4px 0;
+    margin: 2px 0;
   }
   strong {
     color: var(--font-color);
@@ -303,8 +268,10 @@ onMounted(async () => {
     }
   }
   blockquote {
-    margin: 12px 0;
-    padding: 8px 16px;
+    margin: 0;
+    padding: 5px 12px;
+    font-size: 14px;
+    line-height: 20px;
     border-left: 3px solid var(--theme);
     background: rgba(0, 0, 0, 0.03);
     border-radius: 0 8px 8px 0;
