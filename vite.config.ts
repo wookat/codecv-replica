@@ -71,7 +71,7 @@ export default ({ mode }) => {
     esbuild: {
       drop: env?.VITE_DROP_CONSOLE === 'true' ? ['console', 'debugger'] : []
     },
-    base: './',
+    base: '/',
     build: {
       rollupOptions: {
         // external: ['jspdf', 'axios', 'html2canvas'],
