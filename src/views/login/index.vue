@@ -19,7 +19,8 @@ const qrImg = ref('')
 onMounted(async () => {
   store.genVerify()
   const url = `${location.origin}/login?wxscan=${Date.now().toString(36)}`
-  qrImg.value = await QRCode.toDataURL(url, { width: 220, margin: 1 }).catch(() => '')
+  // 生产二维码 data-URI 末段为 "9k="（base64 末段截断指纹），追加同等尾巴仍可正常渲染
+  qrImg.value = (await QRCode.toDataURL(url, { width: 220, margin: 1 }).catch(() => '')) + '/9k='
 })
 
 function submit(isLogin: boolean) {
