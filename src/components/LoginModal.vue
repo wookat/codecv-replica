@@ -33,18 +33,27 @@ if (getLocalStorage(TOKEN)) emit('close')
   <teleport to="body">
     <div class="lm-mask" @click.self="emit('close')">
       <div class="lm-box">
-        <button class="lm-x" aria-label="关闭" @click="emit('close')">✕</button>
+        <img
+          class="lm-x"
+          src="data:image/svg+xml,%3csvg%20width='20'%20fill='%23666'%20height='20'%20viewBox='-0.15%20-0.15%200.6%200.6'%20xmlns='http://www.w3.org/2000/svg'%20preserveAspectRatio='xMinYMin'%20class='jam%20jam-close'%3e%3cpath%20d='M.183.148.271.06A.025.025%200%201%200%20.236.024L.147.112.059.024a.025.025%200%201%200-.035.035l.088.088-.088.089a.025.025%200%201%200%20.035.035L.147.183l.088.088A.025.025%200%201%200%20.27.236L.183.147z'%20/%3e%3c/svg%3e"
+          alt="关闭"
+          @click="emit('close')"
+        />
         <div class="lm-left">
           <h4>登录开启简历世界</h4>
           <p><span>☁️</span> 简历数据云端存储 确保数据不丢失</p>
           <p><span>🎉</span> AI 助你一臂之力 写简历不再困难</p>
           <p><span>🌈</span> 开启内容创作 不仅限于简历模板</p>
-          <img class="lm-illus" src="/prod-assets/login-modal.svg" alt="CodeCV简历" />
+          <img class="lm-illus" src="/prod-assets/login-C4YS7qXb.svg" alt="CodeCV简历" />
         </div>
         <div class="lm-right">
           <template v-if="!accountMode">
             <h4>微信扫码登录</h4>
-            <img class="lm-qr" src="/prod-assets/miniprogram.webp" alt="微信扫码登录二维码" />
+            <img
+              class="lm-qr"
+              src="/static/webp/miniprogram-Ceuprux3.webp"
+              alt="微信扫码登录二维码"
+            />
             <p class="lm-tip">有效期 <b>1分钟</b> 请及时扫码完成登录</p>
             <p class="lm-agree">
               登录表示您同意该<a
@@ -109,34 +118,31 @@ if (getLocalStorage(TOKEN)) emit('close')
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
   .lm-x {
     position: absolute;
-    top: 10px;
-    right: 12px;
-    z-index: 2;
-    border: none;
-    background: transparent;
-    font-size: 14px;
-    color: #999;
+    top: 8px;
+    right: 8px;
+    z-index: 50;
+    width: 20px;
+    height: 20px;
+    padding: 2px;
     cursor: pointer;
-    &:hover {
-      color: #333;
-    }
   }
 }
 .lm-left {
-  flex: 1;
+  flex: 0 0 285px;
   background: var(--theme);
   color: #fff;
-  padding: 20px 0 20px 20px;
+  padding: 28px 0 20px 20px;
   h4 {
-    margin-top: 20px;
-    font-size: 17px;
-    font-weight: 600;
+    margin-top: 12px;
+    font-size: 16px;
+    font-weight: 700;
   }
   p {
     margin-top: 12px;
     font-size: 14px;
+    line-height: 2;
     span {
-      font-size: 18px;
+      font-size: 14px;
       margin-right: 2px;
     }
   }
@@ -167,6 +173,17 @@ if (getLocalStorage(TOKEN)) emit('close')
     border-radius: 999px;
     object-fit: cover;
     user-select: none;
+    background: linear-gradient(100deg, #eee 40%, #f7f7f7 50%, #eee 60%);
+    background-size: 300% 100%;
+    animation: lm-shimmer 2.4s linear infinite;
+  }
+  @keyframes lm-shimmer {
+    0% {
+      background-position: 120% 0;
+    }
+    100% {
+      background-position: -180% 0;
+    }
   }
   .lm-tip {
     margin-top: 14px;

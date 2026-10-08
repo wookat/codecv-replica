@@ -190,23 +190,12 @@ async function submit() {
         </svg>
       </button>
       <div class="mw-top-right">
+        <button class="mw-user" @click="user ? router.push('/profile') : router.push('/login')">
+          {{ user?.name || '未登录' }}
+        </button>
         <button class="mw-pub" :disabled="submitting" @click="openPublish">
           {{ submitting ? '发布中…' : '发布' }}
         </button>
-        <router-link class="mw-bell" to="/notify" title="通知">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-          </svg>
-        </router-link>
-        <router-link class="mw-avatar" to="/profile">{{ (user?.name || '游')[0] }}</router-link>
       </div>
     </header>
 
@@ -218,7 +207,10 @@ async function submit() {
         placeholder="给这篇面经起个标题"
         @input="autoSave"
       />
-      <p class="mw-sub">选填 · 不填将按公司 / 届别 / 批次 / 岗位 / 轮次自动生成</p>
+      <p class="mw-sub">
+        <span>选填 · 不填将按公司 / 届别 / 批次 / 岗位 / 轮次自动生成</span>
+        <span class="mw-title-count">{{ form.title.length }}/60</span>
+      </p>
 
       <textarea
         v-model="form.contentMd"
@@ -227,62 +219,66 @@ async function submit() {
         @input="onBodyInput"
       ></textarea>
 
-      <p class="mw-tpl-tip">从模板开始 选一个结构快速上手，也可以直接在上方自由书写</p>
-      <div class="mw-tpls">
-        <button
-          v-for="t in TPLS"
-          :key="t.key"
-          class="mw-tpl-card"
-          type="button"
-          @click="applyTpl(t)"
-        >
-          <span class="mw-tpl-icon" :class="t.icon">
-            <svg
-              v-if="t.icon === 'cap'"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="m22 9-10-4L2 9l10 4 10-4Z" />
-              <path d="M6 11.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5" />
-              <path d="M22 9v5" />
-            </svg>
-            <svg
-              v-else-if="t.icon === 'building'"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <rect x="4" y="3" width="16" height="18" rx="1" />
-              <path d="M9 21v-4h6v4" />
-              <path d="M8 7h2M14 7h2M8 11h2M14 11h2" />
-            </svg>
-            <svg
-              v-else
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M3 3v18h18" />
-              <path d="m7 14 4-4 4 3 5-6" />
-            </svg>
-          </span>
-          <span class="mw-tpl-title">{{ t.title }}</span>
-          <span class="mw-tpl-desc">{{ t.desc }}</span>
-          <span class="mw-tpl-secs">
-            <i v-for="s in t.secs" :key="s">{{ s }}</i>
-          </span>
-        </button>
-      </div>
+      <section class="mw-tplsec">
+        <p class="mw-tpl-tip">从模板开始 选一个结构快速上手，也可以直接在上方自由书写</p>
+        <div class="mw-tpls">
+          <button
+            v-for="t in TPLS"
+            :key="t.key"
+            class="mw-tpl-card"
+            type="button"
+            @click="applyTpl(t)"
+          >
+            <span class="mw-tpl-head">
+              <span class="mw-tpl-icon" :class="t.icon">
+                <svg
+                  v-if="t.icon === 'cap'"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="m22 9-10-4L2 9l10 4 10-4Z" />
+                  <path d="M6 11.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5" />
+                  <path d="M22 9v5" />
+                </svg>
+                <svg
+                  v-else-if="t.icon === 'building'"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="4" y="3" width="16" height="18" rx="1" />
+                  <path d="M9 21v-4h6v4" />
+                  <path d="M8 7h2M14 7h2M8 11h2M14 11h2" />
+                </svg>
+                <svg
+                  v-else
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M3 3v18h18" />
+                  <path d="m7 14 4-4 4 3 5-6" />
+                </svg>
+              </span>
+              <span class="mw-tpl-title">{{ t.title }}</span>
+            </span>
+            <span class="mw-tpl-desc">{{ t.desc }}</span>
+            <span class="mw-tpl-secs">
+              <i v-for="s in t.secs" :key="s">{{ s }}</i>
+            </span>
+          </button>
+        </div>
+      </section>
     </main>
 
     <p class="mw-count">
@@ -372,13 +368,16 @@ async function submit() {
   color: var(--font-color);
 }
 .mw-top {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
+  height: 72px;
   z-index: 10;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 22px;
+  padding: 0 16px;
   background: var(--background);
   .mw-back {
     width: 40px;
@@ -417,53 +416,49 @@ async function submit() {
       cursor: default;
     }
   }
-  .mw-bell {
+  .mw-user {
+    border: none;
+    background: transparent;
     color: var(--font-color);
-    display: inline-flex;
-    svg {
-      width: 20px;
-      height: 20px;
-    }
-  }
-  .mw-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 999px;
-    background: var(--theme);
-    color: #fff;
-    font-size: 14px;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 0;
   }
 }
 .mw-main {
-  max-width: 720px;
+  max-width: 760px;
   margin: 0 auto;
-  padding: 8vh 24px 120px;
+  padding: 96px 16px 120px;
 }
 .mw-title {
   width: 100%;
+  height: 40px;
   border: none;
   outline: none;
   background: transparent;
-  font-size: 28px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 600;
   color: var(--font-color);
   &::placeholder {
     color: rgba(0, 0, 0, 0.25);
   }
 }
 .mw-sub {
-  margin: 6px 0 26px;
-  font-size: 12.5px;
+  display: flex;
+  align-items: center;
+  height: 16px;
+  margin: 4px 0 0;
+  font-size: 12px;
   color: rgba(0, 0, 0, 0.4);
+  .mw-title-count {
+    margin-left: auto;
+    font-variant-numeric: tabular-nums;
+  }
 }
 .mw-body {
   width: 100%;
-  min-height: 60px;
+  min-height: 120px;
+  margin-top: 4px;
   border: none;
   outline: none;
   resize: none;
@@ -476,12 +471,18 @@ async function submit() {
     color: rgba(0, 0, 0, 0.25);
   }
 }
+.mw-tplsec {
+  margin-top: 0;
+}
 .mw-tpl-tip {
-  margin: 34px 0 14px;
+  margin: 0;
+  height: 19px;
+  line-height: 19px;
   font-size: 13px;
   color: rgba(0, 0, 0, 0.4);
 }
 .mw-tpls {
+  margin-top: 12px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 14px;
@@ -492,15 +493,21 @@ async function submit() {
 .mw-tpl-card {
   text-align: left;
   padding: 16px;
+  height: 159px;
   border-radius: 16px;
   border: 1px solid rgba(0, 0, 0, 0.07);
   background: var(--background);
   cursor: pointer;
-  display: grid;
-  grid-template-columns: 36px 1fr;
-  column-gap: 12px;
+  display: flex;
+  flex-direction: column;
   transition: box-shadow 0.15s ease, border-color 0.15s ease;
   font-family: inherit;
+  .mw-tpl-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 36px;
+  }
   &:hover {
     border-color: rgba(255, 87, 34, 0.45);
     box-shadow: 0 6px 20px rgba(255, 87, 34, 0.08);
@@ -514,27 +521,28 @@ async function submit() {
     justify-content: center;
     background: rgba(255, 87, 34, 0.1);
     color: var(--theme);
-    grid-row: 1;
+    flex-shrink: 0;
     svg {
       width: 20px;
       height: 20px;
     }
   }
   .mw-tpl-title {
-    grid-row: 1;
-    align-self: center;
     font-size: 15px;
     font-weight: 600;
   }
   .mw-tpl-desc {
-    grid-column: 1 / -1;
+    display: block;
     margin-top: 10px;
+    height: 20px;
     font-size: 12.5px;
     color: rgba(0, 0, 0, 0.45);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .mw-tpl-secs {
-    grid-column: 1 / -1;
-    margin-top: 14px;
+    margin-top: auto;
     display: flex;
     flex-wrap: wrap;
     gap: 6px;

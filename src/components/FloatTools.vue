@@ -52,7 +52,7 @@ const tools = [
 </script>
 
 <template>
-  <div class="ft-bar">
+  <nav class="ft-bar">
     <div v-if="showTop" class="ft-btn" title="回到顶部" @click="toTop">
       <svg
         viewBox="0 0 24 24"
@@ -97,7 +97,7 @@ const tools = [
         </div>
       </div>
     </Teleport>
-  </div>
+  </nav>
 </template>
 
 <style lang="scss" scoped>

@@ -15,7 +15,7 @@ const router = useRouter()
 
 <style lang="scss" scoped>
 .nf-page {
-  min-height: calc(100vh - 60px);
+  min-height: calc(100vh + 28px);
   background: var(--body-background);
   display: flex;
   flex-direction: column;

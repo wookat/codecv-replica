@@ -63,7 +63,12 @@ const myUid = ref(0)
 const loginModal = ref(false)
 const docId = computed(() => String(route.params.docId))
 
-const QUICK = ['感谢分享，收藏了！', '干货满满', '蹲一个后续', '祝大家 offer 多多']
+const QUICK = [
+  '感谢分享，收藏了！',
+  '同批投递，沾沾好运',
+  '题目很全，马住慢慢看',
+  '求后续结果，蹲一个'
+]
 const quick = (t: string) => (cmtDraft.value = t)
 
 const cmtFmt = (ts: number) => fmtCN(ts, true)
@@ -122,9 +127,14 @@ const batchLabel = computed(() => {
 
 const readMins = computed(() => Math.max(1, Math.round((doc.value?.contentMd?.length ?? 0) / 500)))
 
+const AV_FILE: Record<number, string> = {
+  1: 'avatar1-155VfYeO.png',
+  6: 'avatar6-CPIstjYR.png'
+}
 const authorAvatar = computed(() => {
   const av = doc.value?.author?.av
-  return av ? `/prod-assets/avatar${av}.png` : '/prod-assets/avatar1.png'
+  const f = (av && AV_FILE[av]) || (av ? `avatar${av}.png` : 'avatar1-155VfYeO.png')
+  return `/prod-assets/${f}`
 })
 
 const publishLabel = computed(() => (doc.value?.publishTime ? fmtCN(doc.value.publishTime) : ''))
@@ -381,9 +391,16 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
             </div>
 
             <!-- 评论区 -->
-            <div id="mj-comments" class="d-card cmt-card">
-              <h3 class="cmt-title">全部评论（{{ comments.length }}）</h3>
+            <section id="mj-comments" class="d-card cmt-card">
+              <div class="cmt-head">
+                <h2 class="cmt-title">全部评论</h2>
+                <div class="cmt-tabs">
+                  <button class="on">推荐</button>
+                  <button>最新</button>
+                </div>
+              </div>
               <div class="cmt-quick">
+                <span class="q-label">快捷回复</span>
                 <button v-for="q in QUICK" :key="q" class="q-chip" @click="quick(q)">
                   {{ q }}
                 </button>
@@ -393,22 +410,32 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
                 <span class="cancel" @click="replyTo = null">取消回复</span>
               </div>
               <div class="cmt-input">
-                <textarea
-                  v-model="cmtDraft"
-                  rows="3"
-                  maxlength="500"
-                  :placeholder="replyTo ? `回复 ${replyTo.nickname}…` : '写下你的看法、补充或提问…'"
-                ></textarea>
-                <div class="cmt-bar">
-                  <span class="cmt-hint">{{ cmtDraft.length }}/500</span>
-                  <button class="mj-btn sm" :disabled="cmtPosting" @click="postComment">
-                    {{ cmtPosting ? '发布中…' : '发表评论' }}
-                  </button>
+                <img class="cmt-av" src="/prod-assets/avatar1-155VfYeO.png" alt="" />
+                <div class="cmt-main">
+                  <textarea
+                    v-model="cmtDraft"
+                    maxlength="500"
+                    :placeholder="
+                      replyTo ? `回复 ${replyTo.nickname}…` : '写下你的看法、补充或提问…'
+                    "
+                  ></textarea>
+                  <div class="cmt-bar">
+                    <span class="cmt-hint">{{ cmtDraft.length }}/500</span>
+                    <button class="mj-btn sm" :disabled="cmtPosting" @click="postComment">
+                      {{ cmtPosting ? '发布中…' : '发表评论' }}
+                    </button>
+                  </div>
                 </div>
               </div>
               <ul v-if="comments.length" class="cmt-list">
                 <li v-for="c in comments" :key="c.id">
-                  <span class="c-av">{{ (c.nickname || '匿')[0] }}</span>
+                  <img
+                    :src="`/prod-assets/${
+                      AV_FILE[((c.id ?? 0) % 6) + 1] ?? 'avatar' + (((c.id ?? 0) % 6) + 1) + '.png'
+                    }`"
+                    class="c-av-img"
+                    alt=""
+                  />
                   <div class="c-body">
                     <p class="c-meta">
                       <b>{{ c.nickname || '匿名用户' }}</b>
@@ -426,6 +453,18 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
                 </li>
               </ul>
               <p v-else class="cmt-empty">还没有评论，来抢沙发～</p>
+            </section>
+
+            <!-- 底部CTA（生产同款） -->
+            <div class="d-card cta-card">
+              <div class="cta-text">
+                <h3>面试稳了，简历也得过硬</h3>
+                <p>专业模板 + AI 润色，拒绝花里胡哨，快速产出一份能过筛的简历</p>
+              </div>
+              <div class="cta-btns">
+                <router-link to="/edit/new" class="mj-btn">去做简历</router-link>
+                <router-link to="/mianjing/write" class="mj-btn ghost">分享面经</router-link>
+              </div>
             </div>
           </article>
 
@@ -608,12 +647,66 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 .cmt-card {
   margin-top: 16px;
   padding: 20px 24px;
+  .cmt-head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .cmt-tabs {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    border-radius: 999px;
+    padding: 4px;
+    background: rgba(0, 0, 0, 0.05);
+    button {
+      border: none;
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--font-color);
+      opacity: 0.6;
+      background: transparent;
+      cursor: pointer;
+      &:hover {
+        opacity: 1;
+      }
+      &.on {
+        background: var(--background);
+        color: var(--theme);
+        opacity: 1;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      }
+    }
+  }
   .cmt-title {
-    margin: 0 0 16px;
-    font-size: 16px;
+    margin: 0;
+    font-size: 18px;
     font-weight: 700;
   }
+  .cmt-input {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-top: 28px;
+    .cmt-av {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      flex-shrink: 0;
+      object-fit: cover;
+    }
+    .cmt-main {
+      flex: 1;
+      min-width: 0;
+    }
+  }
   .cmt-input textarea {
+    height: 84px;
     width: 100%;
     padding: 12px 14px;
     border-radius: 10px;
@@ -653,6 +746,12 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
       padding: 12px 0;
       border-top: 1px solid rgba(0, 0, 0, 0.06);
     }
+    .c-av-img {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      flex-shrink: 0;
+    }
     .c-av {
       width: 32px;
       height: 32px;
@@ -684,6 +783,36 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
       word-break: break-word;
     }
   }
+  .cta-card {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    text-align: left;
+    .cta-text {
+      flex: 1;
+      min-width: 0;
+    }
+    h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+    p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: #6b7280;
+    }
+    .cta-btns {
+      display: flex;
+      gap: 10px;
+      flex-shrink: 0;
+      .mj-btn.ghost {
+        background: transparent;
+        color: var(--theme);
+        border: 1px solid var(--theme);
+      }
+    }
+  }
   .cmt-empty {
     margin-top: 18px;
     font-size: 13px;
@@ -711,8 +840,14 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 .cmt-quick {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
   margin-bottom: 10px;
+  .q-label {
+    font-size: 13px;
+    color: #9ca3af;
+    margin-right: 4px;
+  }
   .q-chip {
     border: 1px solid #e2e4e9;
     background: rgba(0, 0, 0, 0.02);

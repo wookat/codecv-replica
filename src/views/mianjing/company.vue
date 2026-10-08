@@ -10,6 +10,7 @@ const slug = computed(() => (route.params.slug ?? route.params.companySlug) as s
 const combo = computed(() => route.params.combo as string | undefined)
 
 const company = ref<MianjingCompany | null>(null)
+const others = ref<(MianjingCompany & { count: number })[]>([])
 const list = ref<MianjingItem[]>([])
 const all = ref<MianjingItem[]>([])
 const loading = ref(false)
@@ -113,8 +114,18 @@ watch([company, all], () => {
 onMounted(async () => {
   load()
   try {
-    const cs = await mianjingMeta('companies')
-    company.value = (cs?.data ?? []).find((c: MianjingCompany) => c.slug === slug.value) ?? null
+    const [cs, items] = await Promise.all([
+      mianjingMeta('companies'),
+      mianjingList({ current: 1, pageSize: 500 })
+    ])
+    const csList: MianjingCompany[] = cs?.data ?? []
+    company.value = csList.find((c: MianjingCompany) => c.slug === slug.value) ?? null
+    const counts = new Map<string, number>()
+    for (const m of items?.data ?? [])
+      counts.set(m.companySlug ?? '', (counts.get(m.companySlug ?? '') ?? 0) + 1)
+    others.value = csList
+      .filter(c => c.slug !== slug.value && (counts.get(c.slug) ?? 0) > 0)
+      .map(c => ({ ...c, count: counts.get(c.slug) ?? 0 }))
   } catch {
     /* ignore */
   }
@@ -367,6 +378,30 @@ onMounted(async () => {
         </div>
       </aside>
     </div>
+    <section v-if="others.length" class="other-comps">
+      <h2>其他公司面经</h2>
+      <div class="oc-list">
+        <router-link
+          v-for="c in others"
+          :key="c.slug"
+          :to="`/mianjing/c/${c.slug}`"
+          class="oc-pill"
+        >
+          <span class="mj-logo" :style="{ '--mj-logo-bg': logoColor(c.slug) } as any">
+            <img
+              v-if="c.logo"
+              :src="localAsset(c.logo)"
+              :alt="c.name"
+              class="mj-logo-img"
+              draggable="false"
+            />
+            <template v-else>{{ c.name?.[0] }}</template>
+          </span>
+          <span class="oc-name">{{ c.name }}</span>
+          <span class="oc-count">{{ c.count }}</span>
+        </router-link>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -380,7 +415,7 @@ onMounted(async () => {
     gap: 4px;
     font-size: 13px;
     opacity: 0.55;
-    margin-bottom: 12px;
+    margin-bottom: 0;
     a {
       color: var(--font-color);
       text-decoration: none;
@@ -391,6 +426,44 @@ onMounted(async () => {
     .sep {
       width: 14px;
       height: 14px;
+    }
+  }
+  .other-comps {
+    margin-top: 36px;
+    h2 {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0 0 12px;
+    }
+    .oc-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .oc-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px 6px 6px;
+      border-radius: 999px;
+      background: var(--background);
+      color: var(--font-color);
+      text-decoration: none;
+      font-size: 13px;
+      transition: all 0.2s;
+      &:hover {
+        color: var(--theme);
+      }
+      .mj-logo {
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        overflow: hidden;
+      }
+      .oc-count {
+        color: var(--theme);
+        font-weight: 600;
+      }
     }
   }
   .hero {
@@ -426,6 +499,10 @@ onMounted(async () => {
     width: 100%;
     @media (min-width: 640px) {
       width: auto;
+      margin-left: auto;
+      .mj-search {
+        width: 250px;
+      }
     }
     .mj-btn.sm {
       padding: 10px 16px;
@@ -445,7 +522,7 @@ onMounted(async () => {
   }
   .mj-cols {
     display: flex;
-    gap: 20px;
+    gap: 24px;
     align-items: flex-start;
     .mj-list {
       flex: 1;
@@ -453,7 +530,7 @@ onMounted(async () => {
     }
   }
   .mj-rail {
-    width: 260px;
+    width: 300px;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;

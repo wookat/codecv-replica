@@ -147,7 +147,7 @@ function logout() {
         </span>
       </template>
       <div class="mp-qr">
-        <img src="/prod-assets/miniprogram.webp" alt="CodeCV 小程序" />
+        <img src="/static/webp/miniprogram-Ceuprux3.webp" alt="CodeCV 小程序" />
         <span>扫码体验小程序，随时导出</span>
       </div>
     </el-popover>

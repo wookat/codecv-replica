@@ -168,9 +168,40 @@ watchEffect(() => {
   document.title = `${short}简历模板_${short}个人简历免费下载 - CodeCV简历`
 })
 
-const hotRank = computed(() =>
-  [...templates.value].sort((a, b) => +(b.hot || 0) - +(a.hot || 0)).slice(0, 15)
-)
+// 生产实测静态榜单（与 AsideRail 同源）
+const RANK15 = [
+  {
+    href: '/jianlimoban/45',
+    text: '产品/运营/数分/算法/前端/校招/社招/实习/上海交通大学/后端',
+    hot: 55799
+  },
+  { href: '/jianlimoban/1internet_avatar', text: '互联网/校招/社招/可拖拽证件照', hot: 23460 },
+  { href: '/jianlimoban/43', text: '研发/工程师/校招/社招/互联网/通用/华东师范大学', hot: 23085 },
+  { href: '/jianlimoban/48', text: 'Java/前端/Go/校招/社招/左对齐/通用', hot: 22869 },
+  {
+    href: '/jianlimoban/61',
+    text: 'AI开发/AI应用/程序员/Agent开发/RAG应用开发/AI大模型应用/暑期实习/软件工程/Ai',
+    hot: 20679
+  },
+  { href: '/jianlimoban/38', text: '运营/互联网/校招/社招/简洁', hot: 15339 },
+  { href: '/jianlimoban/44', text: '运营/研发/校招/社招/互联网/通用/实习/应届生', hot: 15236 },
+  {
+    href: '/jianlimoban/55',
+    text: '后端/Java/Go/微服务/分布式/高并发/校招/社招/计算机科学与技术',
+    hot: 13517
+  },
+  { href: '/jianlimoban/27', text: '校招/社招/电气/极简', hot: 10014 },
+  {
+    href: '/jianlimoban/15simple_versatile',
+    text: '简约/后端/前端/互联网/Java/实习/通用/证件照',
+    hot: 10011
+  },
+  { href: '/jianlimoban/35', text: '测试/互联网/校招/社招', hot: 7970 },
+  { href: '/jianlimoban/41', text: '运营/设计/研发/校招/渐变配色/新媒体/自媒体', hot: 7954 },
+  { href: '/jianlimoban/33', text: '事业单位/通用/简约/校招', hot: 7213 },
+  { href: '/jianlimoban/34', text: '研发/前端/后端/测试/通用/校招/互联网/社招', hot: 7048 },
+  { href: '/jianlimoban/39', text: '运营/互联网/校招/一页', hot: 7026 }
+]
 
 const shown = computed(() => {
   if (!cat.value) return []
@@ -186,35 +217,37 @@ const shown = computed(() => {
 
 <template>
   <div class="cat-page">
-    <el-breadcrumb separator="/" class="crumb">
-      <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item :to="{ path: '/jianlimoban' }">简历模板中心</el-breadcrumb-item>
-      <el-breadcrumb-item>{{ cat?.name ?? slug }}</el-breadcrumb-item>
-    </el-breadcrumb>
+    <div class="crumb-wrap">
+      <el-breadcrumb separator="/" class="crumb">
+        <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/jianlimoban' }">简历模板中心</el-breadcrumb-item>
+        <el-breadcrumb-item>{{ cat?.name ?? slug }}</el-breadcrumb-item>
+      </el-breadcrumb>
+    </div>
 
-    <div class="cat-cols">
-      <section class="main-card">
-        <form class="search-form" @submit.prevent>
-          <svg class="s-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
-          <input
-            v-model="keyword"
-            type="text"
-            placeholder="通过关键词搜索相关简历模板"
-            aria-label="搜索简历模板"
+    <section class="search-card">
+      <form class="search-form" @submit.prevent>
+        <svg class="s-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
           />
-          <button type="submit" class="go">搜索</button>
-        </form>
+        </svg>
+        <input
+          v-model="keyword"
+          type="text"
+          placeholder="通过关键词搜索相关简历模板"
+          aria-label="搜索简历模板"
+        />
+        <button type="submit" class="go">搜索</button>
+      </form>
 
-        <div v-for="g in GROUPS" :key="g.label" class="tag-row">
-          <span class="tag-label"
-            ><span aria-hidden="true">{{ g.icon }}</span> {{ g.label }}</span
-          >
+      <div v-for="g in GROUPS" :key="g.label" class="tag-row">
+        <span class="tag-label"
+          ><span aria-hidden="true">{{ g.icon }}</span> {{ g.label }}</span
+        >
+        <div class="tag-wrap">
           <div class="tag-flow">
             <router-link
               v-for="s in shownSlugs(g)"
@@ -226,7 +259,7 @@ const shown = computed(() => {
             >
             <button
               v-if="g.slugs.length > CAP"
-              class="tag-pill more"
+              class="tag-more"
               type="button"
               @click="toggleGroup(g.label)"
             >
@@ -234,11 +267,15 @@ const shown = computed(() => {
             </button>
           </div>
         </div>
+      </div>
+    </section>
 
-        <h1 class="sum-title">
-          {{ sumTitle }}<span class="sum-count">共 {{ shown.length }} 个模板</span>
-        </h1>
-
+    <div class="cat-cols">
+      <section class="main-card">
+        <div class="sum-row">
+          <h1 class="sum-title">{{ sumTitle }}</h1>
+          <span class="sum-count">共 {{ shown.length }} 个模板</span>
+        </div>
         <div class="resumes">
           <router-link
             v-for="t in shown"
@@ -247,6 +284,14 @@ const shown = computed(() => {
             class="resume-card"
           >
             <div class="rc-img">
+              <img
+                :src="t.img"
+                :alt="`${t.name}简历模板`"
+                width="500"
+                height="707"
+                loading="lazy"
+                decoding="async"
+              />
               <span v-if="(t.hot ?? 0) >= 1000" class="hot-badge">
                 <svg viewBox="0 0 1024 1024" fill="currentColor" aria-hidden="true">
                   <path
@@ -255,28 +300,28 @@ const shown = computed(() => {
                 </svg>
                 热门
               </span>
-              <div class="mask"><span class="use-btn">使用模板</span></div>
-              <img :src="t.img" :alt="`${t.name}简历模板`" loading="lazy" />
             </div>
-            <h3 class="rc-name">{{ t.name }}简历模板</h3>
-            <p v-if="t.description" class="rc-desc">{{ t.description }}</p>
-            <div v-if="(t.tags ?? []).length" class="rc-tags">
-              <span v-for="x in (t.tags ?? []).slice(0, 4)" :key="x">{{ x }}</span>
-            </div>
-            <div class="rc-meta">
-              <span class="rc-users">
-                <svg viewBox="0 0 1024 1024" fill="currentColor" aria-hidden="true">
-                  <path
-                    d="M519.8 574.1c115.7 0 209.5-97.3 209.5-217.3S635.4 139.6 519.8 139.6 310.3 236.9 310.3 356.8s93.8 217.3 209.5 217.3z"
-                  />
-                  <path
-                    d="M519.8 170.7c96.1 0 174.3 81.4 174.3 181.4s-78.2 181.4-174.3 181.4-174.4-81.4-174.4-181.4 78.3-181.4 174.4-181.4z"
-                    fill="#f8d02d"
-                  />
-                </svg>
-                {{ t.hot ?? 0 }}人使用
-              </span>
-              <span v-if="t.date" class="rc-date">{{ t.date }}</span>
+            <div class="rc-info">
+              <h3 class="rc-name">{{ t.name }}简历模板</h3>
+              <p class="rc-desc">{{ t.description }}</p>
+              <div class="rc-tags">
+                <span v-for="x in (t.tags ?? []).slice(0, 4)" :key="x">{{ x }}</span>
+              </div>
+              <div class="rc-meta">
+                <span class="rc-users">
+                  <svg viewBox="0 0 1024 1024" fill="currentColor" aria-hidden="true">
+                    <path
+                      d="M519.8 574.1c115.7 0 209.5-97.3 209.5-217.3S635.4 139.6 519.8 139.6 310.3 236.9 310.3 356.8s93.8 217.3 209.5 217.3z"
+                    />
+                    <path
+                      d="M519.8 170.7c96.1 0 174.3 81.4 174.3 181.4s-78.2 181.4-174.3 181.4-174.4-81.4-174.4-181.4 78.3-181.4 174.4-181.4z"
+                      fill="#f8d02d"
+                    />
+                  </svg>
+                  {{ t.hot ?? 0 }}人使用
+                </span>
+                <span v-if="t.date" class="rc-date">{{ t.date }}</span>
+              </div>
             </div>
           </router-link>
           <el-empty
@@ -287,18 +332,19 @@ const shown = computed(() => {
       </section>
       <aside class="cat-aside">
         <router-link to="/jobs" class="aside-jobs">
-          <img src="/prod-assets/offerstar-recruit.webp" alt="2027校招信息汇总" />
+          <div class="aj-title">2027校招信息汇总</div>
+          <img src="/codecv-assets/recruitment.webp" alt="2027校招信息汇总" loading="lazy" />
           <p class="aj-cap">打破信息差，早就是机会 🎈</p>
         </router-link>
         <div class="aside-rank">
           <p class="ar-title">简历模板热度排行榜</p>
           <ol class="ar-list">
-            <li v-for="(t, i) in hotRank" :key="t.type">
-              <router-link :to="`/jianlimoban/${t.type}`">
-                <span class="rk" :class="{ top: i < 3 }">{{ i + 1 }}</span>
-                <span class="rt">{{ (t.tags ?? []).slice(0, 6).join('/') || t.name }}</span>
-                <span class="rh">🔥{{ t.hot }}</span>
+            <li v-for="(t, i) in RANK15" :key="t.href">
+              <router-link :to="t.href" class="rank-a text-ellipsis">
+                <span class="rk" :class="{ top: i < 3 }">{{ i + 1 }}</span
+                >{{ t.text }}
               </router-link>
+              <sub class="rh"><i class="iconfont icon-hot"></i> {{ t.hot }}</sub>
             </li>
           </ol>
         </div>
@@ -309,30 +355,37 @@ const shown = computed(() => {
 
 <style lang="scss">
 .cat-page {
-  max-width: var(--max-width);
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 12px 16px;
+  padding: 4px;
   color: var(--font-color);
+  @media (min-width: 768px) {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
 }
-.cat-cols {
-  display: flex;
-  gap: 20px;
-  align-items: flex-start;
+.crumb-wrap {
+  padding: 12px 0;
+  font-family: 'Times New Roman', serif;
+  font-size: 14px;
+  @media (min-width: 768px) {
+    padding: 16px 0;
+  }
 }
-.main-card {
-  flex: 1;
-  min-width: 0;
-  margin-top: 12px;
+.search-card {
   border-radius: 16px;
   background: var(--background);
-  padding: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  padding: 16px;
+  @media (min-width: 768px) {
+    padding: 20px;
+  }
 }
 .search-form {
   display: flex;
   align-items: center;
   height: 44px;
-  margin-bottom: 20px;
+  margin: 0 0 20px;
   padding-left: 16px;
   padding-right: 4px;
   border-radius: 999px;
@@ -392,15 +445,17 @@ const shown = computed(() => {
   margin-top: 4px;
   padding: 4px 10px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
   color: var(--theme);
   background: color-mix(in srgb, var(--theme) 10%, transparent);
 }
-.tag-flow {
+.tag-wrap {
   flex: 1;
   min-width: 0;
+}
+.tag-flow {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -408,12 +463,13 @@ const shown = computed(() => {
 .tag-pill {
   padding: 6px 12px;
   border-radius: 999px;
-  font-size: 13px;
-  color: var(--font-color);
+  font-size: 14px;
+  line-height: 20px;
+  color: rgb(30, 41, 59);
   text-decoration: none;
   background: rgba(0, 0, 0, 0.04);
   white-space: nowrap;
-  transition: all 0.2s;
+  transition: color 0.2s;
   &:hover {
     color: var(--theme);
   }
@@ -423,57 +479,108 @@ const shown = computed(() => {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
   }
 }
-.resumes {
-  margin-top: 20px;
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(2, 1fr);
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  @media (min-width: 1024px) {
-    grid-template-columns: repeat(4, 1fr);
-  }
-  @media (min-width: 1280px) {
-    grid-template-columns: repeat(5, 1fr);
+.tag-more {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 12px;
+  color: #9ca3af;
+  padding: 6px 0;
+  &:hover {
+    color: var(--theme);
   }
 }
-.sum-title {
-  margin: 22px 0 4px;
-  font-size: 18px;
-  font-weight: 700;
+.cat-cols {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+  align-items: flex-start;
+  @media (min-width: 768px) {
+    flex-direction: row;
+  }
+}
+.main-card {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  border-radius: 16px;
+  background: var(--background);
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  @media (min-width: 768px) {
+    padding: 20px;
+  }
+}
+.sum-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  .sum-count {
-    font-size: 12px;
-    font-weight: 400;
-    color: var(--theme);
-    background: color-mix(in srgb, var(--theme) 10%, transparent);
-    border-radius: 999px;
-    padding: 4px 12px;
-    white-space: nowrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.sum-title {
+  margin: 0;
+  padding-bottom: 4px;
+  font-size: 16px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  @media (min-width: 768px) {
+    font-size: 20px;
   }
 }
-.tag-pill.more {
-  border: none;
-  cursor: pointer;
+.sum-count {
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 400;
   color: var(--theme);
-  background: color-mix(in srgb, var(--theme) 8%, transparent);
+  background: color-mix(in srgb, var(--theme) 10%, transparent);
+  border-radius: 999px;
+  padding: 4px 12px;
+  white-space: nowrap;
+}
+.resumes {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, 1fr);
+  transition: opacity 0.2s;
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  @media (min-width: 1280px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 .resume-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
   text-decoration: none;
   color: var(--font-color);
+  cursor: pointer;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--background);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s, box-shadow 0.3s;
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  }
   .rc-img {
     position: relative;
-    border-radius: 6px;
+    aspect-ratio: 210 / 297;
     overflow: hidden;
+    background: var(--body-background);
     .hot-badge {
       position: absolute;
       top: 8px;
       left: 8px;
       z-index: 2;
-      display: inline-flex;
+      display: flex;
       align-items: center;
       gap: 2px;
       background: linear-gradient(90deg, #ff7449, #ff9a44);
@@ -481,89 +588,88 @@ const shown = computed(() => {
       font-size: 12px;
       padding: 2px 8px 2px 6px;
       border-radius: 999px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
       svg {
-        width: 14px;
-        height: 14px;
+        width: 12px;
+        height: 12px;
       }
     }
     img {
       width: 100%;
-      border-radius: 6px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+      height: 100%;
+      object-fit: cover;
+      object-position: top;
       display: block;
+      transition: transform 0.3s;
     }
-    .mask {
-      position: absolute;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.35);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transition: opacity 0.25s;
-    }
-    .use-btn {
-      border: none;
-      background: linear-gradient(90deg, #ff7449, #ff9a44);
-      color: #fff;
-      font-size: 14px;
-      border-radius: 999px;
-      padding: 8px 16px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      cursor: pointer;
-    }
-    &:hover .mask {
-      opacity: 1;
+  }
+  &:hover .rc-img img {
+    transform: scale(1.03);
+  }
+  .rc-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    padding: 10px;
+    @media (min-width: 768px) {
+      padding: 12px;
     }
   }
   .rc-name {
-    display: block;
-    margin: 8px 0 0;
+    margin: 0;
     font-size: 14px;
     font-weight: 600;
     line-height: 20px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    @media (min-width: 768px) {
+      font-size: 15px;
+    }
   }
   .rc-desc {
-    margin: 4px 0 0;
+    display: none;
+    margin: 0;
     font-size: 12px;
     line-height: 20px;
     color: #6b7280;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    @media (min-width: 768px) {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
   }
   .rc-tags {
-    display: flex;
+    display: none;
     flex-wrap: wrap;
     gap: 4px;
-    margin-top: 6px;
-    max-height: 20px;
     overflow: hidden;
+    max-height: 20px;
+    @media (min-width: 768px) {
+      display: flex;
+    }
     span {
       font-size: 12px;
       line-height: 20px;
       color: #6b7280;
       background: rgba(0, 0, 0, 0.04);
       border-radius: 4px;
-      padding: 0 4px;
+      padding: 0 6px;
       white-space: nowrap;
     }
   }
   .rc-meta {
+    margin-top: auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    margin-top: 8px;
     font-size: 12px;
     color: #9ca3af;
     .rc-users {
-      display: inline-flex;
+      display: flex;
       align-items: center;
       gap: 4px;
       white-space: nowrap;
@@ -583,76 +689,90 @@ const shown = computed(() => {
 .cat-aside {
   width: 260px;
   flex-shrink: 0;
-  margin-top: 12px;
-  display: flex;
+  display: none;
   flex-direction: column;
-  gap: 14px;
-  @media (max-width: 900px) {
-    display: none;
+  gap: 16px;
+  position: sticky;
+  top: 80px;
+  @media (min-width: 768px) {
+    display: flex;
   }
   .aside-jobs {
     border-radius: 12px;
     overflow: hidden;
     display: block;
     background: var(--background);
+    padding: 16px;
+    text-decoration: none;
+    .aj-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--theme);
+      margin-bottom: 8px;
+    }
     img {
       width: 100%;
       display: block;
+      border-radius: 12px;
     }
     .aj-cap {
-      margin: 0;
-      padding: 10px;
-      font-size: 12px;
-      color: #6b7280;
-      text-align: center;
+      margin: 8px 0 0;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--font-color);
     }
   }
   .aside-rank {
     background: var(--background);
     border-radius: 12px;
-    padding: 14px;
+    padding: 20px;
     .ar-title {
       font-size: 14px;
       font-weight: 700;
       color: var(--theme);
-      margin: 0 0 10px;
+      margin: 0 0 8px;
+      display: inline-block;
     }
     .ar-list {
       list-style: none;
       padding: 0;
       margin: 0;
-      li a {
+      li {
         display: flex;
         align-items: center;
-        gap: 8px;
-        padding: 5px 0;
-        font-size: 12px;
+        justify-content: space-between;
+        cursor: pointer;
+        &:hover {
+          opacity: 0.7;
+        }
+      }
+      .rank-a {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 14px;
+        line-height: 32px;
         color: var(--font-color);
         text-decoration: none;
         .rk {
-          width: 16px;
-          flex-shrink: 0;
-          font-weight: 700;
-          color: #9ca3af;
+          margin-right: 12px;
+          color: var(--font-color);
           &.top {
-            color: var(--theme);
+            color: #ff4500;
+            font-weight: 700;
           }
         }
-        .rt {
-          flex: 1;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          color: #6b7280;
-        }
-        .rh {
-          flex-shrink: 0;
-          color: #9ca3af;
-          font-size: 11px;
-        }
-        &:hover .rt {
-          color: var(--theme);
-        }
+      }
+      .rh {
+        flex-shrink: 0;
+        color: #ff4500;
+        font-weight: 700;
+        font-size: 14px;
+        margin-bottom: 8px;
+        text-align: right;
+        white-space: nowrap;
       }
     }
   }

@@ -114,7 +114,7 @@ onMounted(async () => {
       <aside class="pf-aside">
         <h4>🎉 使用小程序管理投递进度</h4>
         <div class="qr-wrap">
-          <img src="/prod-assets/miniprogram.webp" alt="小程序投递进度管理" />
+          <img src="/static/webp/miniprogram-Ceuprux3.webp" alt="小程序投递进度管理" />
         </div>
         <ul>
           <li>1. ✨ 无需制作烦琐的Excel表格</li>

@@ -37,46 +37,86 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="markdown-transform-html jufe"></div>
+  <div v-if="!noType" class="markdown-transform-html jufe"></div>
   <div v-if="noType" class="dl-hint">
-    <h2>备用导出通道</h2>
-    <p>此页面由编辑器的「备用导出」自动打开并完成打印/另存 PDF，直接访问没有可导出的内容。</p>
-    <router-link to="/jianlimoban" class="dl-btn">去模板中心挑一份简历</router-link>
+    <h1>啊哦～发生了一点错误，请稍后再试</h1>
+    <p class="err-code">
+      <span>错误码：500</span>
+      <span class="err-detail">[nuxt] instance unavailable</span>
+    </p>
+    <p class="err-tip">如频繁出现此问题，请通过右下角联系我们，感谢您的配合！</p>
+    <div class="err-btns">
+      <button class="b-outline" @click="router.back()">返回上一页</button>
+      <button class="b-solid" @click="router.push('/home')">返回首页</button>
+      <button class="b-outline" @click="router.go(0)">重试</button>
+      <button class="b-outline" @click="noType = false">忽略并继续</button>
+    </div>
   </div>
   <LoginModal v-if="showLogin" @close="onLoginClose" />
 </template>
 
 <style lang="scss" scoped>
 .dl-hint {
-  position: fixed;
-  inset: 0;
+  position: relative;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
   background: var(--body-background);
-  color: var(--font-color);
+  color: rgb(85, 85, 85);
   text-align: center;
   padding: 24px;
-  h2 {
-    margin: 0;
-    font-size: 20px;
+  h1 {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 16px;
+    line-height: 32px;
   }
-  p {
-    font-size: 14px;
-    opacity: 0.6;
-    max-width: 420px;
-    line-height: 1.8;
+  .err-code {
+    color: rgb(75, 85, 99);
+    font-size: 16px;
+    margin: 0 0 16px;
+    .err-detail {
+      display: block;
+      margin-top: 8px;
+    }
   }
-  .dl-btn {
-    margin-top: 8px;
-    background: var(--theme);
-    color: #fff;
-    border-radius: 999px;
-    padding: 9px 24px;
-    font-size: 14px;
-    text-decoration: none;
+  .err-tip {
+    line-height: 40px;
+    font-size: 16px;
+    margin: 0 0 24px;
+  }
+  .err-btns {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    button {
+      padding: 8px 16px;
+      font-size: 13.333px;
+      cursor: pointer;
+      background: none;
+    }
+    .b-outline {
+      border: 1px solid var(--theme);
+      color: var(--theme);
+      border-radius: 4px;
+      &:hover {
+        background: var(--theme);
+        color: #fff;
+      }
+    }
+    .b-solid {
+      border: none;
+      border-radius: 6px;
+      background: var(--theme);
+      color: #fff;
+      &:hover {
+        opacity: 0.9;
+      }
+    }
   }
 }
 .jufe {

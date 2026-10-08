@@ -1,6 +1,6 @@
 <template>
   <div class="nf-page">
-    <div class="nf-code">404</div>
+    <p class="nf-code">404</p>
     <p class="nf-msg">哎呀！您访问了一个不存在的页面</p>
     <router-link to="/home" class="nf-btn">回到首页</router-link>
   </div>
@@ -8,27 +8,36 @@
 
 <style lang="scss" scoped>
 .nf-page {
-  text-align: center;
-  padding: 80px 20px 120px;
+  min-height: calc(100vh + 8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 .nf-code {
-  font-size: 110px;
-  font-weight: 800;
-  color: #e4e7ed;
-  letter-spacing: 8px;
-  line-height: 1.2;
+  font-size: 50px;
+  color: var(--theme);
+  text-align: center;
+  margin: 0;
 }
 .nf-msg {
-  font-size: 15px;
-  color: #909399;
-  margin: 18px 0 34px;
+  font-size: 24px;
+  line-height: 32px;
+  color: rgb(68, 68, 68);
+  margin: 20px 0 0;
 }
 .nf-btn {
   display: inline-block;
   background: var(--theme);
   color: #fff;
-  border-radius: 8px;
-  padding: 10px 38px;
-  font-size: 14px;
+  border-radius: 4px;
+  padding: 12px 16px;
+  font-size: 13.333px;
+  margin-top: 20px;
+  transition: transform 0.2s;
+  text-decoration: none;
+  &:hover {
+    transform: scale(1.05);
+  }
 }
 </style>

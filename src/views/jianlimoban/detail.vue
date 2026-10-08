@@ -98,173 +98,171 @@ function useTemplate() {
         <el-breadcrumb-item>{{ tpl.name }}简历模板</el-breadcrumb-item>
       </el-breadcrumb>
 
-      <div class="jld-cols">
-        <div class="jld-main">
-          <section class="hero">
-            <div class="preview" @click="zoom = true">
-              <div class="pv-box">
-                <img :src="tpl.img" :alt="`${tpl.name}简历模板预览`" draggable="false" />
-                <div class="pv-tip"><span>点击查看大图</span></div>
-              </div>
+      <div class="jld-main">
+        <section class="hero">
+          <div class="preview" @click="zoom = true">
+            <div class="pv-box">
+              <img :src="tpl.img" :alt="`${tpl.name}简历模板预览`" draggable="false" />
+              <div class="pv-tip"><span>点击查看大图</span></div>
             </div>
+          </div>
 
-            <div class="panel">
-              <h1>{{ tpl.name }}简历模板</h1>
-              <p class="desc">{{ tpl.description }}</p>
-              <p class="meta">
-                <b>{{ tpl.hot ?? 0 }}+</b> 人使用过 <i>·</i> PDF / PNG 导出 <i>·</i> 免费在线编辑
-              </p>
-              <div class="actions">
-                <button class="primary" @click="useTemplate"><span>点击使用该模板</span></button>
-                <router-link to="/jianlimoban" class="ghost">换一个模板</router-link>
-              </div>
-              <div class="fit">
-                <p class="fit-label">适用方向</p>
-                <div class="fit-tags">
-                  <router-link
-                    v-for="t in tpl.tags ?? []"
-                    :key="t"
-                    :to="{ path: '/jianlimoban', query: { tags: t } }"
-                    class="fit-tag"
-                    >{{ t }}</router-link
-                  >
-                </div>
-              </div>
-              <div class="params">
-                <p class="fit-label">模板参数</p>
-                <ul>
-                  <li>
-                    <span>字体</span><b>{{ tpl.font || '默认字体' }}</b>
-                  </li>
-                  <li>
-                    <span>行距</span><b>{{ tpl.lineHeight || 25 }}px</b>
-                  </li>
-                  <li>
-                    <span>主色调</span>
-                    <b
-                      ><i class="sw" :style="{ background: tpl.primaryBackground }"></i
-                      >{{ tpl.primaryBackground }}</b
-                    >
-                  </li>
-                  <li>
-                    <span>字体颜色</span>
-                    <b
-                      ><i class="sw" :style="{ background: tpl.primaryColor }"></i
-                      >{{ tpl.primaryColor }}</b
-                    >
-                  </li>
-                </ul>
+          <div class="panel">
+            <h1>{{ tpl.name }}简历模板</h1>
+            <p class="desc">{{ tpl.description }}</p>
+            <p class="meta">
+              <b>{{ tpl.hot ?? 0 }}+</b> 人使用过 <i>·</i> PDF / PNG 导出 <i>·</i> 免费在线编辑
+            </p>
+            <div class="actions">
+              <button class="primary" @click="useTemplate"><span>点击使用该模板</span></button>
+              <router-link to="/jianlimoban" class="ghost">换一个模板</router-link>
+            </div>
+            <div class="fit">
+              <p class="fit-label">适用方向</p>
+              <div class="fit-tags">
+                <router-link
+                  v-for="t in tpl.tags ?? []"
+                  :key="t"
+                  :to="{ path: '/jianlimoban', query: { tags: t } }"
+                  class="fit-tag"
+                  >{{ t }}</router-link
+                >
               </div>
             </div>
-          </section>
-          <div class="jld-row">
-            <div class="jld-left">
-              <div v-if="related.length" class="rel">
-                <div class="rel-head">
-                  <h2>相关简历模板推荐</h2>
-                  <router-link to="/jianlimoban" class="more">更多模板 →</router-link>
-                </div>
-                <div class="rel-grid">
-                  <router-link
-                    v-for="t in related"
-                    :key="t.type"
-                    :to="`/jianlimoban/${t.type}`"
-                    class="resume-card"
+            <div class="params">
+              <p class="fit-label">模板参数</p>
+              <ul>
+                <li>
+                  <span>字体</span><b>{{ tpl.font || '默认字体' }}</b>
+                </li>
+                <li>
+                  <span>行距</span><b>{{ tpl.lineHeight || 25 }}px</b>
+                </li>
+                <li>
+                  <span>主色调</span>
+                  <b
+                    ><i class="sw" :style="{ background: tpl.primaryBackground }"></i
+                    >{{ tpl.primaryBackground }}</b
                   >
-                    <div class="rc-img">
-                      <img
-                        :src="t.img"
-                        :alt="`${t.name}简历模板`"
-                        width="500"
-                        height="707"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                      <span v-if="(t.hot ?? 0) >= 1000" class="hot-badge">
+                </li>
+                <li>
+                  <span>字体颜色</span>
+                  <b
+                    ><i class="sw" :style="{ background: tpl.primaryColor }"></i
+                    >{{ tpl.primaryColor }}</b
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <div class="jld-row">
+          <div class="jld-left">
+            <div v-if="related.length" class="rel">
+              <div class="rel-head">
+                <h2>相关简历模板推荐</h2>
+                <router-link to="/jianlimoban" class="more">更多模板 →</router-link>
+              </div>
+              <div class="rel-grid">
+                <router-link
+                  v-for="t in related"
+                  :key="t.type"
+                  :to="`/jianlimoban/${t.type}`"
+                  class="resume-card"
+                >
+                  <div class="rc-img">
+                    <img
+                      :src="t.img"
+                      :alt="`${t.name}简历模板`"
+                      width="500"
+                      height="707"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <span v-if="(t.hot ?? 0) >= 1000" class="hot-badge">
+                      <svg viewBox="0 0 1024 1024" fill="currentColor" aria-hidden="true">
+                        <path
+                          d="M326.3 981.3C261.2 850.5 295.5 775.3 346.9 706.6c54.8-78.5 68.5-153.7 68.5-153.7s44.5 52.4 27.4 137.4c75.4-81.8 89.1-212.6 78.8-261.7 171.3 114.5 246.7 366.3 147.4 549.5 527.7-287.8 130.2-716.2 61.7-762 24 49 27.4 130.8-20.6 170C631.3 98.3 436 42.7 436 42.7c24 147.2-82.2 307.4-185 428.4-3.4-58.9-6.8-98.1-41.1-157-6.8 108-92.5 193-116.5 300.9-30.8 147.2 24 251.8 232.9 366.3z"
+                        />
+                      </svg>
+                      热门
+                    </span>
+                  </div>
+                  <div class="rc-info">
+                    <h3 class="rc-name">{{ t.name }}简历模板</h3>
+                    <p class="rc-desc">{{ t.description }}</p>
+                    <div class="rc-tags">
+                      <span v-for="x in (t.tags ?? []).slice(0, 4)" :key="x">{{ x }}</span>
+                    </div>
+                    <div class="rc-meta">
+                      <span class="rc-users">
                         <svg viewBox="0 0 1024 1024" fill="currentColor" aria-hidden="true">
                           <path
-                            d="M326.3 981.3C261.2 850.5 295.5 775.3 346.9 706.6c54.8-78.5 68.5-153.7 68.5-153.7s44.5 52.4 27.4 137.4c75.4-81.8 89.1-212.6 78.8-261.7 171.3 114.5 246.7 366.3 147.4 549.5 527.7-287.8 130.2-716.2 61.7-762 24 49 27.4 130.8-20.6 170C631.3 98.3 436 42.7 436 42.7c24 147.2-82.2 307.4-185 428.4-3.4-58.9-6.8-98.1-41.1-157-6.8 108-92.5 193-116.5 300.9-30.8 147.2 24 251.8 232.9 366.3z"
+                            d="M519.8 574.1c115.7 0 209.5-97.3 209.5-217.3S635.4 139.6 519.8 139.6 310.3 236.9 310.3 356.8s93.8 217.3 209.5 217.3z"
+                          />
+                          <path
+                            d="M519.8 170.7c96.1 0 174.3 81.4 174.3 181.4s-78.2 181.4-174.3 181.4-174.4-81.4-174.4-181.4 78.3-181.4 174.4-181.4z"
+                            fill="#f8d02d"
                           />
                         </svg>
-                        热门
+                        {{ t.hot ?? 0 }}人使用
                       </span>
+                      <span class="rc-date">{{
+                        RELATED_DATE[String(t.type)] || t.level || '通用'
+                      }}</span>
                     </div>
-                    <div class="rc-info">
-                      <h3 class="rc-name">{{ t.name }}简历模板</h3>
-                      <p class="rc-desc">{{ t.description }}</p>
-                      <div class="rc-tags">
-                        <span v-for="x in (t.tags ?? []).slice(0, 4)" :key="x">{{ x }}</span>
-                      </div>
-                      <div class="rc-meta">
-                        <span class="rc-users">
-                          <svg viewBox="0 0 1024 1024" fill="currentColor" aria-hidden="true">
-                            <path
-                              d="M519.8 574.1c115.7 0 209.5-97.3 209.5-217.3S635.4 139.6 519.8 139.6 310.3 236.9 310.3 356.8s93.8 217.3 209.5 217.3z"
-                            />
-                            <path
-                              d="M519.8 170.7c96.1 0 174.3 81.4 174.3 181.4s-78.2 181.4-174.3 181.4-174.4-81.4-174.4-181.4 78.3-181.4 174.4-181.4z"
-                              fill="#f8d02d"
-                            />
-                          </svg>
-                          {{ t.hot ?? 0 }}人使用
-                        </span>
-                        <span class="rc-date">{{
-                          RELATED_DATE[String(t.type)] || t.level || '通用'
-                        }}</span>
-                      </div>
-                    </div>
-                  </router-link>
-                </div>
+                  </div>
+                </router-link>
               </div>
+            </div>
 
-              <div class="faq">
-                <div class="sec-head">
-                  <i></i>
-                  <h2>常见问题</h2>
-                </div>
-                <details v-for="f in faqs" :key="f.q" class="faq-item">
-                  <summary>
-                    {{ f.q }}
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </summary>
-                  <p class="fa">{{ f.a }}</p>
-                </details>
+            <div class="faq">
+              <div class="sec-head">
+                <i></i>
+                <h2>常见问题</h2>
               </div>
+              <details v-for="f in faqs" :key="f.q" class="faq-item">
+                <summary>
+                  {{ f.q }}
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </summary>
+                <p class="fa">{{ f.a }}</p>
+              </details>
             </div>
-            <aside class="jld-aside">
-              <article class="promo-card">
-                <p class="promo-title">2027校招信息汇总</p>
-                <img src="/prod-assets/recruitment.webp" alt="2027校招信息汇总" loading="lazy" />
-                <p class="promo-desc">打破信息差，早就是机会 🎈</p>
-              </article>
-              <div class="rank-card">
-                <strong>简历模板热度排行榜</strong>
-                <ul>
-                  <li v-for="(t, i) in hotRank" :key="t.type">
-                    <router-link :to="`/jianlimoban/${t.type}`"
-                      ><span class="rk" :class="{ top: i < 3 }">{{ i + 1 }}</span
-                      >{{ (t.tags ?? []).join('/') }}</router-link
-                    >
-                    <sub> {{ t.hot ?? 0 }}</sub>
-                  </li>
-                </ul>
-              </div>
-            </aside>
           </div>
-          <div class="cta-wrap">
-            <div class="cta">
-              <h2>立即使用「{{ tpl.name }}」简历模板</h2>
-              <p class="cta-sub">在线编辑、自动排版，5 分钟制作一份专业简历</p>
-              <button class="primary" @click="useTemplate"><span>使用该模板</span></button>
+          <aside class="jld-aside">
+            <article class="promo-card">
+              <p class="promo-title">2027校招信息汇总</p>
+              <img src="/prod-assets/recruitment.webp" alt="2027校招信息汇总" loading="lazy" />
+              <p class="promo-desc">打破信息差，早就是机会 🎈</p>
+            </article>
+            <div class="rank-card">
+              <strong>简历模板热度排行榜</strong>
+              <ul>
+                <li v-for="(t, i) in hotRank" :key="t.type">
+                  <router-link :to="`/jianlimoban/${t.type}`"
+                    ><span class="rk" :class="{ top: i < 3 }">{{ i + 1 }}</span
+                    >{{ (t.tags ?? []).join('/') }}</router-link
+                  >
+                  <sub> {{ t.hot ?? 0 }}</sub>
+                </li>
+              </ul>
             </div>
-            <nav class="cta-links">
-              <router-link to="/jianlimoban">查看其他简历模板</router-link>
-              <router-link to="/feedback">反馈问题</router-link>
-              <a href="#faq">常见问题</a>
-            </nav>
+          </aside>
+        </div>
+        <div class="cta-wrap">
+          <div class="cta">
+            <h2>立即使用「{{ tpl.name }}」简历模板</h2>
+            <p class="cta-sub">在线编辑、自动排版，5 分钟制作一份专业简历</p>
+            <button class="primary" @click="useTemplate"><span>使用该模板</span></button>
           </div>
+          <nav class="cta-links">
+            <router-link to="/jianlimoban">查看其他简历模板</router-link>
+            <router-link to="/feedback">反馈问题</router-link>
+            <a href="#faq">常见问题</a>
+          </nav>
         </div>
       </div>
     </template>

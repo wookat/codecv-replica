@@ -92,7 +92,7 @@ function submit() {
           <button class="submit" :disabled="!content.trim()" @click="submit">我要反馈</button>
         </section>
 
-        <div class="mt-10 said">
+        <section class="mt-10 said">
           <h3>✨ 看看大家都说了什么</h3>
           <ul class="suggests">
             <li v-for="(f, i) in shown" :key="i">
@@ -118,7 +118,7 @@ function submit() {
               layout="prev, pager, next"
             />
           </div>
-        </div>
+        </section>
       </div>
       <AsideRail>
         <div class="qr-card">
@@ -184,7 +184,7 @@ function submit() {
   .ta {
     display: block;
     width: 100%;
-    min-height: 100px;
+    min-height: 108px;
     border: none;
     border-radius: 6px;
     background: var(--body-background);
@@ -258,12 +258,12 @@ function submit() {
   margin-top: 40px;
   h3 {
     font-size: 14px;
-    margin: 0 0 20px 4px;
+    margin: 0 0 24px 4px;
     font-weight: 500;
   }
 }
 .fb-pager {
-  margin-top: 20px;
+  margin-top: 32px;
 }
 .suggests {
   display: grid;

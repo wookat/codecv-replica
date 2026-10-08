@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { postPage, PostItem } from '@/api/modules/site'
 import { localAsset } from '@/utils/article'
 import AsideRail from '@/components/AsideRail.vue'
+import { formatTimefromNow } from '@/utils/date'
 
 const list = ref<PostItem[]>([])
 const total = ref(0)
@@ -19,15 +20,7 @@ const shown = computed(() => {
   )
 })
 
-const rel = (ts?: number) => {
-  if (!ts) return ''
-  const d = Date.now() - ts
-  const day = 86400000
-  if (d < day) return '今天'
-  if (d < 30 * day) return `${Math.floor(d / day)} 天前`
-  if (d < 365 * day) return `${Math.floor(d / (30 * day))} 个月前`
-  return `${Math.floor(d / (365 * day))} 年前`
-}
+const rel = (ts?: number) => (ts ? formatTimefromNow(ts) : '')
 
 async function load() {
   loading.value = true
@@ -57,29 +50,31 @@ onMounted(load)
           </div>
           <div v-loading="loading" class="items">
             <router-link v-for="p in shown" :key="p._id" :to="`/post/${p._id}`" class="post-card">
-              <img
-                :src="localAsset(p.cover)"
-                :alt="`${p.title} - 文章封面图`"
-                class="cover"
-                loading="lazy"
-              />
-              <div class="pc-body">
-                <h3>{{ p.title }}</h3>
-                <p class="desc">{{ p.description }}</p>
-                <div class="pc-foot">
-                  <div class="tags">
-                    <span v-for="t in (p.tags ?? []).slice(0, 3)" :key="t" class="tag">{{
-                      t
-                    }}</span>
+              <div class="pc-row">
+                <img
+                  :src="localAsset(p.cover)"
+                  :alt="`${p.title} - 文章封面图`"
+                  class="cover"
+                  loading="lazy"
+                />
+                <div class="pc-body">
+                  <h3>{{ p.title }}</h3>
+                  <p class="desc">{{ p.description }}</p>
+                  <div class="pc-foot">
+                    <div class="tags">
+                      <span v-for="t in (p.tags ?? []).slice(0, 3)" :key="t" class="tag">{{
+                        t
+                      }}</span>
+                    </div>
+                    <span class="meta">{{ p.viewNum }} 浏览</span>
+                    <span class="meta tm">{{ rel(p.create_time) }}</span>
                   </div>
-                  <span class="meta">{{ p.viewNum }} 浏览</span>
-                  <span class="meta tm">{{ rel(p.create_time) }}</span>
                 </div>
               </div>
             </router-link>
             <el-empty v-if="!loading && !shown.length" description="暂无文章" />
           </div>
-          <div v-if="total > pageSize" class="pager">
+          <div class="pager">
             <el-pagination
               v-model:current-page="current"
               :page-size="pageSize"
@@ -94,7 +89,7 @@ onMounted(load)
       <AsideRail :jobs-first="false">
         <div class="mp-card">
           <p class="mp-title">小程序功能上新</p>
-          <img src="/prod-assets/miniprogram-feature.webp" alt="小程序功能上新" />
+          <img src="/static/webp/wxmp-CPjs_7at.webp" alt="CodeCV简历小程序" />
           <p class="mp-cap">🌟 小程序也能导出简历啦！</p>
         </div>
       </AsideRail>
@@ -173,20 +168,24 @@ onMounted(load)
 .items {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 21px;
   min-height: 200px;
 }
 .post-card {
-  display: flex;
-  gap: 16px;
+  display: block;
+  padding-bottom: 16px;
   text-decoration: none;
   color: var(--font-color);
   &:hover {
     opacity: 0.8;
   }
+  .pc-row {
+    display: flex;
+    gap: 16px;
+  }
   .cover {
     width: 160px;
-    height: 100px;
+    height: 106px;
     object-fit: cover;
     border-radius: 8px;
     flex-shrink: 0;
@@ -204,8 +203,9 @@ onMounted(load)
   }
   h3 {
     margin: 0;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 500;
+    line-height: 24px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -216,12 +216,12 @@ onMounted(load)
   .desc {
     flex: 1;
     font-size: 13px;
-    color: #999;
+    color: rgba(156, 163, 175, 0.8);
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    line-height: 1.6;
+    line-height: 24px;
     margin: 0;
   }
   .pc-foot {
@@ -236,10 +236,14 @@ onMounted(load)
       gap: 6px;
       flex-wrap: wrap;
       .tag {
+        display: inline-flex;
+        align-items: center;
+        height: 22px;
+        padding: 0 8px;
         background: #fef0f0;
         color: #f56c6c;
+        border: 1px solid #fde2e2;
         border-radius: 4px;
-        padding: 1px 8px;
         font-size: 12px;
       }
     }
