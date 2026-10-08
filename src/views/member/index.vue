@@ -505,8 +505,9 @@ async function upgrade(t: Tier) {
   margin-left: calc(50% - 50vw);
   background: #0d0d0d;
   text-align: center;
-  padding: 42px 20px;
-  margin-top: 40px;
+  /* 生产：bg-[#111] py-8 整体高 152、与评论区网格间隔 48 */
+  padding: 32px 20px;
+  margin-top: 56px;
   p {
     color: #fff;
     font-size: 16px;
