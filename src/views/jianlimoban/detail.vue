@@ -681,7 +681,7 @@ export default { name: 'jianlimoban-detail' }
     margin: 0 0 28px;
   }
   .primary {
-    padding: 12px 34px;
+    padding: 14px 34px;
     border: none;
     border-radius: 999px;
     color: #fff;

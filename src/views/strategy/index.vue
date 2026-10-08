@@ -145,7 +145,7 @@ onMounted(load)
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 13px;
   h2 {
     font-size: 18px;
     font-weight: 600;
@@ -168,7 +168,7 @@ onMounted(load)
 .items {
   display: flex;
   flex-direction: column;
-  gap: 21px;
+  gap: 15px;
   min-height: 200px;
 }
 .post-card {
