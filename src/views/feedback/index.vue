@@ -135,7 +135,7 @@ function submit() {
 .fb-page {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 40px 30px 4px;
+  padding: 40px 30px 24px;
   color: var(--font-color);
 }
 .feedback {
