@@ -398,32 +398,34 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
                     <button>最新</button>
                   </div>
                 </div>
-                <div class="cmt-quick">
-                  <span class="q-label">快捷回复</span>
-                  <button v-for="q in QUICK" :key="q" class="q-chip" @click="quick(q)">
-                    {{ q }}
-                  </button>
-                </div>
-                <div v-if="replyTo" class="cmt-replying">
-                  回复 {{ replyTo.nickname }}：{{ replyTo.content.slice(0, 30) }}
-                  <span class="cancel" @click="replyTo = null">取消回复</span>
-                </div>
                 <div class="cmt-input">
-                  <img class="cmt-av" src="/prod-assets/avatar1-155VfYeO.png" alt="" />
-                  <div class="cmt-main">
-                    <textarea
-                      v-model="cmtDraft"
-                      maxlength="500"
-                      :placeholder="
-                        replyTo ? `回复 ${replyTo.nickname}…` : '写下你的看法、补充或提问…'
-                      "
-                    ></textarea>
-                    <div class="cmt-bar">
-                      <span class="cmt-hint">{{ cmtDraft.length }}/500</span>
-                      <button class="mj-btn sm" :disabled="cmtPosting" @click="postComment">
-                        {{ cmtPosting ? '发布中…' : '评论' }}
-                      </button>
+                  <div class="cmt-quick">
+                    <span class="q-label">快捷回复</span>
+                    <button v-for="q in QUICK" :key="q" class="q-chip" @click="quick(q)">
+                      {{ q }}
+                    </button>
+                  </div>
+                  <div v-if="replyTo" class="cmt-replying">
+                    回复 {{ replyTo.nickname }}：{{ replyTo.content.slice(0, 30) }}
+                    <span class="cancel" @click="replyTo = null">取消回复</span>
+                  </div>
+                  <div class="cmt-edit">
+                    <img class="cmt-av" src="/prod-assets/avatar1-155VfYeO.png" alt="" />
+                    <div class="cmt-main">
+                      <textarea
+                        v-model="cmtDraft"
+                        maxlength="500"
+                        :placeholder="
+                          replyTo ? `回复 ${replyTo.nickname}…` : '写下你的看法、补充或提问…'
+                        "
+                      ></textarea>
                     </div>
+                  </div>
+                  <div class="cmt-bar">
+                    <span class="cmt-hint">{{ cmtDraft.length }}/500</span>
+                    <button class="mj-btn sm" :disabled="cmtPosting" @click="postComment">
+                      {{ cmtPosting ? '发布中…' : '评论' }}
+                    </button>
                   </div>
                 </div>
                 <ul v-if="comments.length" class="cmt-list">
@@ -709,10 +711,16 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
     font-weight: 700;
   }
   .cmt-input {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    margin-top: 12px;
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 16px;
+    background: var(--body-background);
+    .cmt-edit {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin-top: 12px;
+    }
     .cmt-av {
       width: 36px;
       height: 36px;
@@ -723,6 +731,9 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
     .cmt-main {
       flex: 1;
       min-width: 0;
+    }
+    .cmt-quick {
+      margin-top: 0;
     }
   }
   .cmt-input textarea {
@@ -805,11 +816,12 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
     }
   }
   .cta-card {
-    margin-top: 16px;
+    margin-top: 40px;
     display: flex;
     align-items: center;
     gap: 16px;
     text-align: left;
+    box-sizing: border-box;
     height: 81px;
     padding: 0 20px;
     .cta-text {
@@ -839,7 +851,7 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
     }
   }
   .cmt-empty-box {
-    margin-top: 48px;
+    margin-top: 28px;
     height: 149px;
     display: flex;
     flex-direction: column;

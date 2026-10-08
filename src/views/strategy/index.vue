@@ -99,7 +99,7 @@ onMounted(load)
 
 <style lang="scss">
 .st-page {
-  max-width: var(--max-width);
+  max-width: 1280px;
   margin: 0 auto;
   padding: 20px;
   color: var(--font-color);
@@ -122,7 +122,7 @@ onMounted(load)
 .mp-card {
   background: var(--background);
   border-radius: 12px;
-  padding: 14px;
+  padding: 16px 16px 26px;
   .mp-title {
     font-size: 14px;
     font-weight: 700;
@@ -133,10 +133,10 @@ onMounted(load)
     width: 100%;
     display: block;
     border-radius: 8px;
-    margin-top: 8px;
+    margin-top: 16px;
   }
   .mp-cap {
-    margin: 8px 0 0;
+    margin: 12px 0 0;
     font-size: 12px;
     color: var(--font-color);
   }

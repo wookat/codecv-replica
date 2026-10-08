@@ -105,7 +105,7 @@ const hotRank = [
   .aside-rank {
     background: var(--background);
     border-radius: 12px;
-    padding: 14px;
+    padding: 20px;
     .ar-title {
       font-size: 14px;
       font-weight: 700;

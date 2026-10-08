@@ -153,7 +153,7 @@ function submit() {
 .feedback > .rail-aside {
   width: 220px;
   .aside-rank {
-    padding-bottom: 66px;
+    padding-bottom: 54px;
   }
   @media (max-width: 900px) {
     display: none;

@@ -215,6 +215,28 @@ async function submit() {
       </div>
 
       <div class="mw-body">
+        <div class="mw-ed-tools" aria-hidden="true">
+          <span class="mw-ed-drag"
+            ><svg viewBox="0 0 24 24" fill="currentColor">
+              <circle cx="9" cy="6" r="1.6" />
+              <circle cx="15" cy="6" r="1.6" />
+              <circle cx="9" cy="12" r="1.6" />
+              <circle cx="15" cy="12" r="1.6" />
+              <circle cx="9" cy="18" r="1.6" />
+              <circle cx="15" cy="18" r="1.6" /></svg
+          ></span>
+          <span class="mw-ed-add"
+            ><svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <path d="M12 5v14M5 12h14" /></svg
+          ></span>
+        </div>
+        <img class="mw-pm-sep" alt="" aria-hidden="true" />
         <textarea
           v-model="form.contentMd"
           class="mw-body-ta"
@@ -466,15 +488,47 @@ async function submit() {
   }
 }
 .mw-body {
+  position: relative;
   max-width: 760px;
   margin: 0 auto;
   padding: 0 28px;
-  min-height: 120px;
+  min-height: 115px;
+}
+.mw-ed-tools {
+  position: absolute;
+  left: 4px;
+  top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(0, 0, 0, 0.3);
+  .mw-ed-drag,
+  .mw-ed-add {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+  }
+  .mw-ed-drag svg {
+    width: 16px;
+    height: 16px;
+  }
+  .mw-ed-add svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+.mw-pm-sep {
+  display: block;
+  width: 0;
+  height: 0;
 }
 .mw-body-ta {
   width: 100%;
   height: 100%;
-  min-height: 120px;
+  min-height: 115px;
   border: none;
   outline: none;
   resize: none;
@@ -543,13 +597,14 @@ async function submit() {
     color: var(--theme);
     flex-shrink: 0;
     svg {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
     }
   }
   .mw-tpl-title {
     font-size: 14px;
     font-weight: 600;
+    line-height: 20px;
     color: #1e293b;
   }
   .mw-tpl-desc {
@@ -563,14 +618,15 @@ async function submit() {
     text-overflow: ellipsis;
   }
   .mw-tpl-secs {
-    margin-top: auto;
+    margin-top: 22px;
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
     i {
       font-style: normal;
       font-size: 11px;
-      padding: 2px 8px;
+      line-height: 16px;
+      padding: 3px 8px;
       border-radius: 6px;
       background: rgba(30, 41, 59, 0.06);
       color: #1e293b;
