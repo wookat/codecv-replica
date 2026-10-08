@@ -169,7 +169,10 @@ function submit() {
 .feedback > .rail-aside {
   width: 220px;
   .aside-rank {
-    padding-bottom: 30px;
+    display: none;
+  }
+  .aside-jobs {
+    height: 213px;
   }
   @media (max-width: 900px) {
     display: none;
