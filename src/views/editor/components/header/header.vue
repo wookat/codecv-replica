@@ -12,7 +12,7 @@ import ProofreadDrawer from '../proofread/proofread.vue'
 import HistoryDrawer from './historyDrawer.vue'
 import ShareDialog from './shareDialog.vue'
 import AiHelper from './aiHelper.vue'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 
 const emit = defineEmits([
   'download-dynamic',
@@ -28,6 +28,15 @@ const { open, toggle } = useSwitch()
 const editorStore = useEditorStore()
 const { resumeType } = useResumeType()
 const proofreadVisible = ref(false)
+// 生产同款「新功能」红点：点开错别字抽屉一次后消失
+const PROOFREAD_DOT_KEY = 'proofread-new-dot-seen'
+const newDotSeen = ref(!!localStorage.getItem(PROOFREAD_DOT_KEY))
+watch(proofreadVisible, v => {
+  if (v) {
+    localStorage.setItem(PROOFREAD_DOT_KEY, '1')
+    newDotSeen.value = true
+  }
+})
 const historyVisible = ref(false)
 const shareVisible = ref(false)
 const aiVisible = ref(false)
@@ -134,7 +143,7 @@ function openImport() {
             </li>
             <li @click="historyVisible = true">历史记录</li>
             <li class="mm-md" @click="proofreadVisible = true">
-              错别字检查<span class="proofread-new-dot"></span>
+              错别字检查<span v-if="!newDotSeen" class="proofread-new-dot"></span>
             </li>
             <li class="mm-md" @click="$router.push('/member')">移除水印</li>
             <li>

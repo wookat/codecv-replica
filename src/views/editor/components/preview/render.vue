@@ -68,6 +68,48 @@ function closeCtx() {
 }
 onMounted(() => document.addEventListener('click', closeCtx))
 onUnmounted(() => document.removeEventListener('click', closeCtx))
+
+// 生产同款：dblclick 叠层图开证照弹层；聚焦图按 Delete/Backspace 删除
+let focusedImg: HTMLElement | null = null
+function imgKind(el: HTMLElement | null): 'avatar' | 'badge' | null {
+  if (!el) return null
+  return el.classList.contains('cv-badge-overlay') ? 'badge' : 'avatar'
+}
+function onImgDown(e: MouseEvent) {
+  const img = (e.target as HTMLElement).closest?.(
+    '.cv-avatar-overlay,.cv-badge-overlay'
+  ) as HTMLElement | null
+  focusedImg = img
+}
+function onImgDbl(e: MouseEvent) {
+  const img = (e.target as HTMLElement).closest?.(
+    '.cv-avatar-overlay,.cv-badge-overlay'
+  ) as HTMLElement | null
+  const kind = imgKind(img)
+  if (!kind) return
+  e.preventDefault()
+  window.dispatchEvent(new CustomEvent('open-photo-dialog', { detail: kind }))
+}
+function delFocused() {
+  const kind = imgKind(focusedImg)
+  if (!kind) return
+  removeLocalStorage(
+    kind === 'badge' ? `badge_config-${resumeType.value}` : `avatar-cfg-${resumeType.value}`
+  )
+  focusedImg = null
+  refreshOverlays(resumeType.value)
+  successMessage('已删除')
+}
+function onKeydown(e: KeyboardEvent) {
+  if (e.key !== 'Delete' && e.key !== 'Backspace') return
+  if (!focusedImg) return
+  const t = e.target as HTMLElement
+  if (t.closest('input,textarea,[contenteditable="true"],[contenteditable=""]')) return
+  e.preventDefault()
+  delFocused()
+}
+onMounted(() => document.addEventListener('keydown', onKeydown))
+onUnmounted(() => document.removeEventListener('keydown', onKeydown))
 const ctxKey = () =>
   ctxMenu.value.kind === 'badge'
     ? `badge_config-${resumeType.value}`
@@ -165,6 +207,8 @@ async function ctxAction(act: 'replace' | 'reset-position' | 'reset-size' | 'del
       }"
       @click="onPreviewClick"
       @contextmenu="onContextMenu"
+      @mousedown="onImgDown"
+      @dblclick="onImgDbl"
     ></div>
     <Teleport to="body">
       <div

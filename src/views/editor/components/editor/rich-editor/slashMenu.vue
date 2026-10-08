@@ -5,7 +5,7 @@ import { successMessage, errorMessage } from '@/common/message'
 import { getLocalStorage } from '@/common/localstorage'
 import { TOKEN } from '@/store/modules/user'
 import { getPickerFile } from '@/utils/uploader'
-import { selectIcon, linkFlag, tableFlag } from '../toolbar/hook'
+import { selectIcon, linkFlag } from '../toolbar/hook'
 import { reset } from '../toolbar/components/linkInput/hook'
 
 interface Item {
@@ -169,21 +169,6 @@ const ITEMS: Item[] = [
     en: 'tupian/image',
     icon: 'image',
     act: () => uploadImage('image')
-  },
-  { zh: '一级标题', en: 'yijibiaoti/heading', icon: 'head', act: setHeading(1) },
-  { zh: '二级标题', en: 'erjibiaoti/heading', icon: 'head', act: setHeading(2) },
-  { zh: '三级标题', en: 'sanjibiaoti/heading', icon: 'head', act: setHeading(3) },
-  { zh: '四级标题', en: 'sijibiaoti/heading', icon: 'head', act: setHeading(4) },
-  { zh: '五级标题', en: 'wujibiaoti/heading', icon: 'head', act: setHeading(5) },
-  { zh: '六级标题', en: 'liujibiaoti/heading', icon: 'head', act: setHeading(6) },
-  {
-    zh: '表格布局',
-    en: 'biaogebuju/table',
-    icon: 'table',
-    act: () => {
-      removeQuery()
-      tableFlag.value = true
-    }
   },
   {
     zh: '插入空白符',

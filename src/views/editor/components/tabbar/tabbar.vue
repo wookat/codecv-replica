@@ -26,7 +26,7 @@ import ProofreadDrawer from '../proofread/proofread.vue'
 import TranslateDialog from './translateDialog.vue'
 import PhotoDialog from './photoDialog.vue'
 import { proofreadBus, proofreadState } from '../proofread/proofread'
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 
 const emits = defineEmits(['upload-avatar', 'html-convert'])
 
@@ -50,6 +50,13 @@ const proofreadVisible = ref(false)
 const translateVisible = ref(false)
 const photoVisible = ref(false)
 const photoKind = ref<'avatar' | 'badge'>('avatar')
+// 预览图 dblclick/右键事件 → 打开证照弹层（生产同款入口）
+function onOpenPhoto(e: Event) {
+  photoKind.value = (e as CustomEvent).detail === 'badge' ? 'badge' : 'avatar'
+  photoVisible.value = true
+}
+onMounted(() => window.addEventListener('open-photo-dialog', onOpenPhoto))
+onBeforeUnmount(() => window.removeEventListener('open-photo-dialog', onOpenPhoto))
 watch(proofreadBus, () => (proofreadVisible.value = true))
 </script>
 
