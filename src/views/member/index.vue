@@ -207,7 +207,7 @@ async function upgrade(t: Tier) {
       </div>
 
       <div class="tiers" data-aos="zoom-out">
-        <div v-for="t in tiers" :key="t.name" class="tier-wrap">
+        <div v-for="t in [...tiers].reverse()" :key="t.name" class="tier-wrap">
           <div class="tier" :class="t.gradient">
             <div v-if="t.badge" class="badge">{{ t.badge }}</div>
             <div class="tname">{{ t.name }}</div>
@@ -311,6 +311,8 @@ async function upgrade(t: Tier) {
   gap: 16px;
   flex-wrap: wrap;
   justify-content: center;
+  /* 生产：DOM 序为 月度→终身，row-reverse 反排后视觉仍是 终身→月度 */
+  flex-direction: row-reverse;
 }
 .tier-wrap {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);

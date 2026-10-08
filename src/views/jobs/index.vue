@@ -639,6 +639,8 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
+  /* 生产广告区底→列表标题间隔比原实现多 5px */
+  margin-top: 5px;
 }
 .progress-link {
   display: flex;
@@ -763,13 +765,15 @@ onMounted(() => {
 }
 
 .pager {
-  margin-top: 16px;
+  /* 生产：表底→分页器间隔 ~22px */
+  margin-top: 22px;
   display: flex;
   justify-content: center;
 }
 
 .faq {
-  margin-top: 32px;
+  /* 生产：分页底 2373 → h2 顶 2405，间隔 32；上方累计差 ~5px 此处补回 */
+  margin-top: 37px;
   .faq-card {
     margin-top: 16px;
     background: var(--background);
@@ -813,7 +817,8 @@ onMounted(() => {
       }
     }
     .faq-a {
-      padding: 0 20px 14px;
+      /* 生产答案块高 37（pb-3.5 ≈ 14 内边距但行高更小） */
+      padding: 0 20px 12px;
       font-size: 14px;
       line-height: 1.8;
       color: var(--writable-font-color);
