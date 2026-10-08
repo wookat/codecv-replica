@@ -369,7 +369,8 @@ async function upgrade(t: Tier) {
     .sym {
       font-size: 16px;
       color: #fff;
-      /* 生产 ¥ 行高 24 */
+      /* 生产 ¥ 行高 24（inline-block 才吃行高） */
+      display: inline-block;
       line-height: 24px;
     }
     .yuan {
@@ -422,7 +423,7 @@ async function upgrade(t: Tier) {
     font-weight: 700;
     font-size: 14px;
     /* 生产：标题→首行权益间距 52（rt458→rr510） */
-    margin-bottom: 27px;
+    margin-bottom: 32px;
     .quanquan {
       position: absolute;
       top: 82%;
