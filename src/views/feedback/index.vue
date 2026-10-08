@@ -153,7 +153,7 @@ function submit() {
 .feedback > .rail-aside {
   width: 220px;
   .aside-rank {
-    padding-bottom: 54px;
+    padding-bottom: 22px;
   }
   @media (max-width: 900px) {
     display: none;
@@ -162,9 +162,10 @@ function submit() {
 .qr-card {
   background: var(--background);
   border-radius: 12px;
-  padding: 14px;
+  padding: 16px;
   .qr-title {
-    font-size: 14px;
+    font-size: 16px;
+    line-height: 24px;
     font-weight: 700;
     color: var(--theme);
     margin: 0;
@@ -173,12 +174,13 @@ function submit() {
     width: 100%;
     display: block;
     border-radius: 8px;
-    margin-top: 8px;
+    margin-top: 12px;
   }
   .qr-cap {
     margin: 8px 0 0;
-    font-size: 12px;
-    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--font-color);
     text-align: center;
   }
 }

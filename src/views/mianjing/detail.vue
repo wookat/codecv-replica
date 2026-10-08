@@ -145,6 +145,9 @@ function onScroll() {
   progress.value = h > 0 ? Math.min(1, el.scrollTop / h) : 0
 }
 
+function toComments() {
+  document.getElementById('mj-comments')?.scrollIntoView({ behavior: 'smooth' })
+}
 function scrollTo(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
 }
@@ -388,6 +391,70 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
               </details>
 
               <div class="mj-article" v-html="html"></div>
+
+              <!-- 互动条（生产同款：文章末 有用/收藏/评论/分享 + 浏览数） -->
+              <div class="mj-react-bar">
+                <button class="mj-react" :class="{ on: liked }" @click="toggleReact('like')">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3z"
+                    />
+                    <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
+                  </svg>
+                  有用<template v-if="likeCount"> {{ likeCount }}</template>
+                </button>
+                <button class="mj-react" :class="{ on: fav }" @click="toggleReact('fav')">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                  </svg>
+                  收藏
+                </button>
+                <button class="mj-react" @click="toComments">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                    />
+                  </svg>
+                  评论
+                </button>
+                <button class="mj-react" @click="copyLink">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                    <path d="m16 6-4-4-4 4" />
+                    <path d="M12 2v13" />
+                  </svg>
+                  分享
+                </button>
+                <span class="mj-views">{{ doc?.viewCount ?? 0 }} 次浏览</span>
+              </div>
 
               <!-- 评论区（生产：评论在文章卡内、透明容器） -->
               <section id="mj-comments" class="cmt-card">
@@ -710,6 +777,41 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
     font-size: 18px;
     font-weight: 700;
   }
+  .mj-react-bar {
+    margin-top: 36px;
+    display: flex;
+    align-items: center;
+    height: 36px;
+    .mj-react {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 36px;
+      padding: 0 12px;
+      border: none;
+      border-radius: 999px;
+      background: transparent;
+      font-size: 14px;
+      color: var(--font-color);
+      cursor: pointer;
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+      &:hover {
+        color: var(--theme);
+        background: rgba(255, 107, 53, 0.08);
+      }
+      &.on {
+        color: var(--theme);
+      }
+    }
+    .mj-views {
+      margin-left: auto;
+      font-size: 12px;
+      opacity: 0.5;
+    }
+  }
   .cmt-input {
     margin-top: 20px;
     padding: 20px;
@@ -815,41 +917,6 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
       word-break: break-word;
     }
   }
-  .cta-card {
-    margin-top: 40px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    text-align: left;
-    box-sizing: border-box;
-    height: 81px;
-    padding: 0 20px;
-    .cta-text {
-      flex: 1;
-      min-width: 0;
-    }
-    h3 {
-      margin: 0;
-      font-size: 15px;
-      line-height: 21px;
-    }
-    p {
-      margin: 4px 0 0;
-      font-size: 12px;
-      line-height: 16px;
-      color: #6b7280;
-    }
-    .cta-btns {
-      display: flex;
-      gap: 10px;
-      flex-shrink: 0;
-      .mj-btn.ghost {
-        background: transparent;
-        color: var(--theme);
-        border: 1px solid var(--theme);
-      }
-    }
-  }
   .cmt-empty-box {
     margin-top: 28px;
     height: 149px;
@@ -869,6 +936,41 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
     font-size: 13px;
     opacity: 0.45;
     text-align: center;
+  }
+}
+.cta-card {
+  margin-top: 40px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-align: left;
+  box-sizing: border-box;
+  height: 81px;
+  padding: 0 20px;
+  .cta-text {
+    flex: 1;
+    min-width: 0;
+  }
+  h3 {
+    margin: 0;
+    font-size: 15px;
+    line-height: 21px;
+  }
+  p {
+    margin: 4px 0 0;
+    font-size: 12px;
+    line-height: 16px;
+    color: #6b7280;
+  }
+  .cta-btns {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+    .mj-btn.ghost {
+      background: transparent;
+      color: var(--theme);
+      border: 1px solid var(--theme);
+    }
   }
 }
 .dock-btn {

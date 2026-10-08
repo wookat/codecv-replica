@@ -91,7 +91,7 @@ const minimal = computed(() => useRoute().path === '/progress')
 
 <style lang="scss" scoped>
 .footer-wrap {
-  background: var(--background);
+  background: var(--body-background);
   color: var(--font-color);
 }
 .footer {

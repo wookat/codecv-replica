@@ -257,21 +257,23 @@ const shown = computed(() => {
               :class="{ active: slug === s }"
               >{{ catName(s) }}</router-link
             >
-            <button
-              v-if="g.slugs.length > CAP && expanded[g.label] !== false"
-              class="tag-pill"
-              type="button"
-              @click="toggleGroup(g.label)"
-            >
-              展开全部 {{ g.slugs.length }} 个
-            </button>
-            <button
-              v-if="g.slugs.length > CAP"
-              class="tag-more"
-              type="button"
-              @click="toggleGroup(g.label)"
-            >
-              {{ expanded[g.label] === false ? `展开全部 ${g.slugs.length} 个` : '收起' }}
+          </div>
+          <div v-if="g.slugs.length > CAP" class="tag-expand-row">
+            <button class="tag-expand" type="button" @click="toggleGroup(g.label)">
+              <span>{{
+                expanded[g.label] === false ? `展开全部 ${g.slugs.length} 个` : '收起'
+              }}</span>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                :class="{ up: expanded[g.label] !== false }"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
             </button>
           </div>
         </div>
@@ -487,13 +489,30 @@ const shown = computed(() => {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
   }
 }
-.tag-more {
+.tag-expand-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+}
+.tag-expand {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 16px;
   border: none;
   background: none;
   cursor: pointer;
   font-size: 12px;
   color: #9ca3af;
-  padding: 6px 0;
+  padding: 0;
+  svg {
+    width: 12px;
+    height: 12px;
+    transition: transform 0.2s ease;
+    &.up {
+      transform: rotate(180deg);
+    }
+  }
   &:hover {
     color: var(--theme);
   }
