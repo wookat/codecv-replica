@@ -17,7 +17,7 @@ const field = ref('')
 const avatar = ref('/static/png/avatar1-155VfYeO.png')
 const list = ref<FeedbackItem[]>([])
 const current = ref(1)
-const PAGE_SIZE = 14
+const PAGE_SIZE = 9
 const shown = computed(() =>
   list.value.slice((current.value - 1) * PAGE_SIZE, current.value * PAGE_SIZE)
 )
@@ -281,6 +281,7 @@ function submit() {
   }
 }
 .fb-pager {
+  padding: 24px 0 40px;
   margin-top: 32px;
 }
 .suggests {
