@@ -142,7 +142,7 @@ function submit() {
   display: flex;
   gap: 20px;
   align-items: flex-start;
-  min-height: 1103px;
+  min-height: 1083px;
 }
 .feedback-main {
   flex: 1;
