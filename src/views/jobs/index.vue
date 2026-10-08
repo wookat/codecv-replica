@@ -569,6 +569,8 @@ onMounted(() => {
     .stat-num {
       font-size: 30px;
       font-weight: 700;
+      /* 生产 stat-num 行高 36（卡高 112） */
+      line-height: 36px;
       &.blue {
         color: #3b82f6;
       }

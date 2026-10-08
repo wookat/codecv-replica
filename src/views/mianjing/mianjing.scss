@@ -352,10 +352,10 @@
   display: inline-flex;
   align-items: center;
   border-radius: 6px;
-  /* 生产：!py-0 !px-2 → 高 19 */
+  /* 生产：!py-0 !px-2 → 实测行高/高 19.2 */
   padding: 0 8px;
   font-size: 12px;
-  line-height: 16px;
+  line-height: 19.2px;
   font-weight: 500;
   &--gray {
     background: rgba(30, 41, 59, 0.09);

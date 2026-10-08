@@ -191,8 +191,9 @@ async function upgrade(t: Tier) {
 
 <template>
   <div class="mb-page">
-    <h1 class="sr-only">会员中心_VIP会员特权_简历制作高级功能_专业简历模板下载</h1>
-    <div class="mb-head" data-aos="fade-down">
+    <div class="mb-hero">
+      <h1 class="sr-only">会员中心_VIP会员特权_简历制作高级功能_专业简历模板下载</h1>
+      <div class="mb-head" data-aos="fade-down">
       <img
         src="/static/png/vipIcon-wax61BPq.png"
         class="vip"
@@ -239,6 +240,7 @@ async function upgrade(t: Tier) {
         </div>
       </div>
     </div>
+    </div>
 
     <!-- 用户评价（生产同板块） -->
     <div class="mb-comments">
@@ -275,8 +277,14 @@ async function upgrade(t: Tier) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* 生产父级 justify-center：sr-only h1 静态位置落在容器中轴（y519 实测） */
+}
+/* 生产：h1 所在父级仅包 head+tiers（h~878）且 justify-center → sr-only h1 静态位置落在其中轴（y519 实测） */
+.mb-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
+  position: relative;
 }
 .mb-head {
   display: flex;
