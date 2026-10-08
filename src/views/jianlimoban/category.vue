@@ -258,6 +258,14 @@ const shown = computed(() => {
               >{{ catName(s) }}</router-link
             >
             <button
+              v-if="g.slugs.length > CAP && expanded[g.label] !== false"
+              class="tag-pill"
+              type="button"
+              @click="toggleGroup(g.label)"
+            >
+              展开全部 {{ g.slugs.length }} 个
+            </button>
+            <button
               v-if="g.slugs.length > CAP"
               class="tag-more"
               type="button"
@@ -443,7 +451,7 @@ const shown = computed(() => {
   gap: 4px;
   flex-shrink: 0;
   margin-top: 4px;
-  padding: 4px 10px;
+  padding: 4px 12px;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
@@ -634,12 +642,6 @@ const shown = computed(() => {
     font-size: 12px;
     line-height: 20px;
     color: #6b7280;
-    @media (min-width: 768px) {
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
   }
   .rc-tags {
     display: none;

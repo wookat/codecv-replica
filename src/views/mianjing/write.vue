@@ -73,7 +73,7 @@ function applyTpl(t: (typeof TPLS)[number]) {
   form.value.contentMd = t.body
   autoSave()
   nextTick(() => {
-    const ta = document.querySelector<HTMLTextAreaElement>('.mw-body')
+    const ta = document.querySelector<HTMLTextAreaElement>('.mw-body-ta')
     if (ta) {
       ta.style.height = 'auto'
       ta.style.height = `${ta.scrollHeight}px`
@@ -175,7 +175,7 @@ async function submit() {
 <template>
   <div class="mw-page">
     <!-- 生产同款极简顶栏：返回圆钮 + 发布/通知/头像 -->
-    <header class="mw-top">
+    <div class="mw-top">
       <button class="mw-back" title="返回" @click="router.back()">
         <svg
           viewBox="0 0 24 24"
@@ -197,27 +197,31 @@ async function submit() {
           {{ submitting ? '发布中…' : '发布' }}
         </button>
       </div>
-    </header>
+    </div>
 
     <main class="mw-main">
-      <input
-        v-model="form.title"
-        class="mw-title"
-        type="text"
-        placeholder="给这篇面经起个标题"
-        @input="autoSave"
-      />
-      <p class="mw-sub">
-        <span>选填 · 不填将按公司 / 届别 / 批次 / 岗位 / 轮次自动生成</span>
-        <span class="mw-title-count">{{ form.title.length }}/60</span>
-      </p>
+      <div class="mw-head">
+        <input
+          v-model="form.title"
+          class="mw-title"
+          type="text"
+          placeholder="给这篇面经起个标题"
+          @input="autoSave"
+        />
+        <p class="mw-sub">
+          <span>选填 · 不填将按公司 / 届别 / 批次 / 岗位 / 轮次自动生成</span>
+          <span class="mw-title-count">{{ form.title.length }}/60</span>
+        </p>
+      </div>
 
-      <textarea
-        v-model="form.contentMd"
-        class="mw-body"
-        placeholder="输入 / 唤起块菜单开始书写，或从下方选择模板…"
-        @input="onBodyInput"
-      ></textarea>
+      <div class="mw-body">
+        <textarea
+          v-model="form.contentMd"
+          class="mw-body-ta"
+          placeholder="输入 / 唤起块菜单开始书写，或从下方选择模板…"
+          @input="onBodyInput"
+        ></textarea>
+      </div>
 
       <section class="mw-tplsec">
         <p class="mw-tpl-tip">从模板开始 选一个结构快速上手，也可以直接在上方自由书写</p>
@@ -408,7 +412,8 @@ async function submit() {
     background: var(--theme);
     color: #fff;
     font-size: 14px;
-    padding: 8px 20px;
+    height: 36px;
+    padding: 0 20px;
     border-radius: 999px;
     cursor: pointer;
     &:disabled {
@@ -421,14 +426,18 @@ async function submit() {
     background: transparent;
     color: var(--font-color);
     font-size: 12px;
+    opacity: 0.6;
     cursor: pointer;
     padding: 0;
   }
 }
 .mw-main {
+  padding: 0 0 120px;
+}
+.mw-head {
   max-width: 760px;
   margin: 0 auto;
-  padding: 96px 16px 120px;
+  padding: 96px 28px 4px;
 }
 .mw-title {
   width: 100%;
@@ -436,7 +445,7 @@ async function submit() {
   border: none;
   outline: none;
   background: transparent;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
   color: var(--font-color);
   &::placeholder {
@@ -448,17 +457,24 @@ async function submit() {
   align-items: center;
   height: 16px;
   margin: 4px 0 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 12px;
-  color: rgba(0, 0, 0, 0.4);
+  color: #1e293b;
   .mw-title-count {
     margin-left: auto;
     font-variant-numeric: tabular-nums;
   }
 }
 .mw-body {
-  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 28px;
   min-height: 120px;
-  margin-top: 4px;
+}
+.mw-body-ta {
+  width: 100%;
+  height: 100%;
+  min-height: 120px;
   border: none;
   outline: none;
   resize: none;
@@ -472,20 +488,23 @@ async function submit() {
   }
 }
 .mw-tplsec {
-  margin-top: 0;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 28px 80px;
 }
 .mw-tpl-tip {
   margin: 0;
   height: 19px;
   line-height: 19px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 13px;
-  color: rgba(0, 0, 0, 0.4);
+  color: #1e293b;
 }
 .mw-tpls {
   margin-top: 12px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
+  gap: 12px;
   @media (max-width: 720px) {
     grid-template-columns: 1fr;
   }
@@ -501,7 +520,8 @@ async function submit() {
   display: flex;
   flex-direction: column;
   transition: box-shadow 0.15s ease, border-color 0.15s ease;
-  font-family: inherit;
+  font-family: Arial, sans-serif;
+  animation: mw-card-in 0.4s ease both;
   .mw-tpl-head {
     display: flex;
     align-items: center;
@@ -528,15 +548,16 @@ async function submit() {
     }
   }
   .mw-tpl-title {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
+    color: #1e293b;
   }
   .mw-tpl-desc {
     display: block;
     margin-top: 10px;
     height: 20px;
-    font-size: 12.5px;
-    color: rgba(0, 0, 0, 0.45);
+    font-size: 12px;
+    color: #1e293b;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -548,12 +569,22 @@ async function submit() {
     gap: 6px;
     i {
       font-style: normal;
-      font-size: 11.5px;
+      font-size: 11px;
       padding: 2px 8px;
       border-radius: 6px;
-      background: rgba(0, 0, 0, 0.05);
-      color: rgba(0, 0, 0, 0.55);
+      background: rgba(30, 41, 59, 0.06);
+      color: #1e293b;
     }
+  }
+}
+@keyframes mw-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 .mw-count {

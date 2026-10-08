@@ -11,7 +11,16 @@ const zoom = ref(false)
 const type = computed(() => resolveTemplateType(route.params.type as string))
 const tpl = computed<any>(() => templates.value.find(t => t.type === type.value))
 // 生产固定推荐序（/jianlimoban/45 实测：46,18art,1internet_avatar,43,48,61,38,44）
-const RELATED_ORDER = ['46', '18art', '1internet_avatar', '43', '48', '61', '38', '44']
+const RELATED_ORDER = [
+  '15simple_versatile',
+  '16prominent_content',
+  '31',
+  '32',
+  '33',
+  '4internet',
+  '49',
+  '52'
+]
 const RELATED_DATE: Record<string, string> = {
   '46': '2025-03-22',
   '18art': '2024-03-18',
@@ -281,6 +290,7 @@ export default { name: 'jianlimoban-detail' }
   max-width: 1128px;
   margin: 16px auto;
   padding: 0 0 24px;
+  font-family: 'Times New Roman', Times, serif;
   color: var(--font-color);
   display: flex;
   flex-direction: column;
@@ -490,10 +500,10 @@ export default { name: 'jianlimoban-detail' }
     h2 {
       font-size: 18px;
       font-weight: 700;
-      margin: 8px 0 12px;
+      margin: 0 0 12px;
     }
     .more {
-      font-size: 13px;
+      font-size: 14px;
       color: #9ca3af;
       text-decoration: none;
       &:hover {
@@ -646,7 +656,7 @@ export default { name: 'jianlimoban-detail' }
   }
 }
 .cta {
-  margin-top: 40px;
+  margin-top: 16px;
   padding: 56px 24px 64px;
   text-align: center;
   border-radius: 16px;
@@ -682,7 +692,7 @@ export default { name: 'jianlimoban-detail' }
   justify-content: center;
   gap: 20px;
   a {
-    font-size: 13px;
+    font-size: 12px;
     color: #9ca3af;
     &:hover {
       color: var(--theme);

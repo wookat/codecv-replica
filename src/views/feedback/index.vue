@@ -135,7 +135,7 @@ function submit() {
 .fb-page {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 20px 30px;
+  padding: 20px 30px 4px;
   color: var(--font-color);
 }
 .feedback {
@@ -152,6 +152,9 @@ function submit() {
 }
 .feedback > .rail-aside {
   width: 220px;
+  .aside-rank {
+    padding-bottom: 66px;
+  }
   @media (max-width: 900px) {
     display: none;
   }

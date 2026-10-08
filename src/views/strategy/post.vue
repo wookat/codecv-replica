@@ -245,7 +245,7 @@ onMounted(async () => {
     margin: 0;
   }
   li {
-    margin: 2px 0;
+    margin: 0;
   }
   strong {
     color: var(--font-color);

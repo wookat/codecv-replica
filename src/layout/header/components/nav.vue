@@ -58,7 +58,6 @@ import outNav from '@/common/nav/outNav'
       color: orangered;
     }
     &.checked {
-      color: var(--theme);
       font-weight: 600;
       /* 生产当前页导航下短橙色指示条 */
       &::after {

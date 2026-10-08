@@ -388,72 +388,92 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
               </details>
 
               <div class="mj-article" v-html="html"></div>
-            </div>
 
-            <!-- 评论区 -->
-            <section id="mj-comments" class="d-card cmt-card">
-              <div class="cmt-head">
-                <h2 class="cmt-title">全部评论</h2>
-                <div class="cmt-tabs">
-                  <button class="on">推荐</button>
-                  <button>最新</button>
-                </div>
-              </div>
-              <div class="cmt-quick">
-                <span class="q-label">快捷回复</span>
-                <button v-for="q in QUICK" :key="q" class="q-chip" @click="quick(q)">
-                  {{ q }}
-                </button>
-              </div>
-              <div v-if="replyTo" class="cmt-replying">
-                回复 {{ replyTo.nickname }}：{{ replyTo.content.slice(0, 30) }}
-                <span class="cancel" @click="replyTo = null">取消回复</span>
-              </div>
-              <div class="cmt-input">
-                <img class="cmt-av" src="/prod-assets/avatar1-155VfYeO.png" alt="" />
-                <div class="cmt-main">
-                  <textarea
-                    v-model="cmtDraft"
-                    maxlength="500"
-                    :placeholder="
-                      replyTo ? `回复 ${replyTo.nickname}…` : '写下你的看法、补充或提问…'
-                    "
-                  ></textarea>
-                  <div class="cmt-bar">
-                    <span class="cmt-hint">{{ cmtDraft.length }}/500</span>
-                    <button class="mj-btn sm" :disabled="cmtPosting" @click="postComment">
-                      {{ cmtPosting ? '发布中…' : '发表评论' }}
-                    </button>
+              <!-- 评论区（生产：评论在文章卡内、透明容器） -->
+              <section id="mj-comments" class="cmt-card">
+                <div class="cmt-head">
+                  <h2 class="cmt-title">全部评论</h2>
+                  <div class="cmt-tabs">
+                    <button class="on">推荐</button>
+                    <button>最新</button>
                   </div>
                 </div>
-              </div>
-              <ul v-if="comments.length" class="cmt-list">
-                <li v-for="c in comments" :key="c.id">
-                  <img
-                    :src="`/prod-assets/${
-                      AV_FILE[((c.id ?? 0) % 6) + 1] ?? 'avatar' + (((c.id ?? 0) % 6) + 1) + '.png'
-                    }`"
-                    class="c-av-img"
-                    alt=""
-                  />
-                  <div class="c-body">
-                    <p class="c-meta">
-                      <b>{{ c.nickname || '匿名用户' }}</b>
-                      <time>{{ cmtFmt(c.created_at) }}</time>
-                      <button class="c-op" @click="replyTo = c">回复</button>
-                      <button v-if="c.user_id === myUid" class="c-op danger" @click="delComment(c)">
-                        删除
+                <div class="cmt-quick">
+                  <span class="q-label">快捷回复</span>
+                  <button v-for="q in QUICK" :key="q" class="q-chip" @click="quick(q)">
+                    {{ q }}
+                  </button>
+                </div>
+                <div v-if="replyTo" class="cmt-replying">
+                  回复 {{ replyTo.nickname }}：{{ replyTo.content.slice(0, 30) }}
+                  <span class="cancel" @click="replyTo = null">取消回复</span>
+                </div>
+                <div class="cmt-input">
+                  <img class="cmt-av" src="/prod-assets/avatar1-155VfYeO.png" alt="" />
+                  <div class="cmt-main">
+                    <textarea
+                      v-model="cmtDraft"
+                      maxlength="500"
+                      :placeholder="
+                        replyTo ? `回复 ${replyTo.nickname}…` : '写下你的看法、补充或提问…'
+                      "
+                    ></textarea>
+                    <div class="cmt-bar">
+                      <span class="cmt-hint">{{ cmtDraft.length }}/500</span>
+                      <button class="mj-btn sm" :disabled="cmtPosting" @click="postComment">
+                        {{ cmtPosting ? '发布中…' : '评论' }}
                       </button>
-                    </p>
-                    <p v-if="c.parent_id" class="c-quote">
-                      回复 {{ c.parent_nickname }}：{{ (c.parent_content || '').slice(0, 50) }}
-                    </p>
-                    <p class="c-text">{{ c.content }}</p>
+                    </div>
                   </div>
-                </li>
-              </ul>
-              <p v-else class="cmt-empty">还没有评论，来抢沙发～</p>
-            </section>
+                </div>
+                <ul v-if="comments.length" class="cmt-list">
+                  <li v-for="c in comments" :key="c.id">
+                    <img
+                      :src="`/prod-assets/${
+                        AV_FILE[((c.id ?? 0) % 6) + 1] ??
+                        'avatar' + (((c.id ?? 0) % 6) + 1) + '.png'
+                      }`"
+                      class="c-av-img"
+                      alt=""
+                    />
+                    <div class="c-body">
+                      <p class="c-meta">
+                        <b>{{ c.nickname || '匿名用户' }}</b>
+                        <time>{{ cmtFmt(c.created_at) }}</time>
+                        <button class="c-op" @click="replyTo = c">回复</button>
+                        <button
+                          v-if="c.user_id === myUid"
+                          class="c-op danger"
+                          @click="delComment(c)"
+                        >
+                          删除
+                        </button>
+                      </p>
+                      <p v-if="c.parent_id" class="c-quote">
+                        回复 {{ c.parent_nickname }}：{{ (c.parent_content || '').slice(0, 50) }}
+                      </p>
+                      <p class="c-text">{{ c.content }}</p>
+                    </div>
+                  </li>
+                </ul>
+                <div v-else class="cmt-empty-box">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                    />
+                  </svg>
+                  <p class="cmt-empty">还没有评论，来抢沙发～</p>
+                </div>
+              </section>
+            </div>
 
             <!-- 底部CTA（生产同款） -->
             <div class="d-card cta-card">
@@ -645,14 +665,14 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
   }
 }
 .cmt-card {
-  margin-top: 16px;
-  padding: 20px 24px;
+  margin-top: 48px;
   .cmt-head {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: 12px;
-    margin-bottom: 20px;
+    height: 32px;
+    margin: 0;
   }
   .cmt-tabs {
     margin-left: auto;
@@ -692,7 +712,7 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
     display: flex;
     gap: 10px;
     align-items: flex-start;
-    margin-top: 28px;
+    margin-top: 12px;
     .cmt-av {
       width: 36px;
       height: 36px;
@@ -723,7 +743,8 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
     }
   }
   .cmt-bar {
-    margin-top: 10px;
+    margin-top: 6px;
+    height: 32px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -789,17 +810,21 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
     align-items: center;
     gap: 16px;
     text-align: left;
+    height: 81px;
+    padding: 0 20px;
     .cta-text {
       flex: 1;
       min-width: 0;
     }
     h3 {
       margin: 0;
-      font-size: 16px;
+      font-size: 15px;
+      line-height: 21px;
     }
     p {
       margin: 4px 0 0;
-      font-size: 13px;
+      font-size: 12px;
+      line-height: 16px;
       color: #6b7280;
     }
     .cta-btns {
@@ -813,8 +838,22 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
       }
     }
   }
+  .cmt-empty-box {
+    margin-top: 48px;
+    height: 149px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    svg {
+      width: 40px;
+      height: 40px;
+      color: #c0c4cc;
+    }
+  }
   .cmt-empty {
-    margin-top: 18px;
+    margin: 0;
     font-size: 13px;
     opacity: 0.45;
     text-align: center;
@@ -842,17 +881,19 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  margin-bottom: 10px;
+  margin-top: 40px;
+  height: 25px;
   .q-label {
     font-size: 13px;
-    color: #9ca3af;
+    color: #1e293b;
     margin-right: 4px;
   }
   .q-chip {
     border: 1px solid #e2e4e9;
-    background: rgba(0, 0, 0, 0.02);
+    background: #fff;
     border-radius: 999px;
-    padding: 4px 14px;
+    padding: 0 14px;
+    height: 25px;
     font-size: 12px;
     cursor: pointer;
     color: var(--font-color);
