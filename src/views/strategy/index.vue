@@ -185,7 +185,7 @@ onMounted(load)
   }
   .cover {
     width: 160px;
-    height: 106px;
+    height: auto;
     object-fit: cover;
     border-radius: 8px;
     flex-shrink: 0;

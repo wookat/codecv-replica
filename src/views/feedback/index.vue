@@ -146,9 +146,21 @@ function submit() {
 .feedback-main {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+.edit,
+.said {
   background: var(--background);
   border-radius: 12px;
-  padding: 20px 20px 52px;
+  padding: 20px;
+}
+.said {
+  padding-bottom: 52px;
+  &.mt-10 {
+    margin-top: 0;
+  }
 }
 .feedback > .rail-aside {
   width: 220px;
