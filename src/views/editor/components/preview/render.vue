@@ -36,13 +36,11 @@ function onPreviewClick(e: MouseEvent) {
     d = d.parentElement
   if (!d || !d.classList.contains('resume-module')) return
   const all = Array.from(root.querySelectorAll('.resume-module'))
-  const t =
-    root.querySelector('.markdown-transform-html')?.querySelectorAll('.resume-module').length || 1
-  const line = Number((d as HTMLElement).dataset.mdLine)
-  scrollChannel.postMessage({
-    index: all.indexOf(d as Element) % t,
-    line: Number.isFinite(line) ? line : null
-  })
+  // 生产同款取模：分页克隆会重复模块，用 reference-dom（整档）模块数归一
+  const t = document.querySelectorAll('.reference-dom .resume-module').length || 1
+  // md 端定位：携模块 h2 文本，接收方找 `## …标题` 行
+  const title = (d as HTMLElement).querySelector('h2')?.textContent?.trim() || null
+  scrollChannel.postMessage({ index: all.indexOf(d as Element) % t, title })
 }
 
 // ===== 生产同款：预览图片右键菜单（更换/重置位置/重置尺寸/删除/取消） =====

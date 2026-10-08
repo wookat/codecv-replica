@@ -20,11 +20,22 @@ const editorStore = useEditorStore()
 const cm = ref<{ view?: EditorView } | null>(null)
 let ch: BroadcastChannel | null = null
 function onMsg(ev: MessageEvent) {
-  const data = ev.data as { line?: number | null }
+  const data = ev.data as { line?: number | null; title?: string | null }
   const view = cm.value?.view
-  if (!view || typeof data?.line !== 'number' || !data.line) return
+  if (!view) return
   try {
-    const line = Math.min(data.line, view.state.doc.lines)
+    let lineNo = typeof data?.line === 'number' ? data.line : 0
+    if (!lineNo && data?.title) {
+      for (let i = 1; i <= view.state.doc.lines; i++) {
+        const text = view.state.doc.line(i).text
+        if (/^##\s/.test(text) && text.includes(data.title)) {
+          lineNo = i
+          break
+        }
+      }
+    }
+    if (!lineNo) return
+    const line = Math.min(lineNo, view.state.doc.lines)
     const pos = view.state.doc.line(Math.max(1, line)).from
     view.dispatch({
       effects: EditorView.scrollIntoView(pos, { y: 'start', yMargin: 24 })
