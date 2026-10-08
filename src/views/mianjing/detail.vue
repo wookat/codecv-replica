@@ -996,6 +996,7 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
   align-items: center;
   gap: 8px;
   margin-top: 40px;
+  margin-left: -8px;
   height: 25px;
   .q-label {
     font-size: 13px;
@@ -1006,7 +1007,7 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
     border: 1px solid #e2e4e9;
     background: #fff;
     border-radius: 999px;
-    padding: 0 14px;
+    padding: 0 9px;
     height: 25px;
     font-size: 12px;
     cursor: pointer;

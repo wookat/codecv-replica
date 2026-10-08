@@ -492,7 +492,7 @@ export default { name: 'jianlimoban-detail' }
   }
 }
 .rel {
-  margin-top: 20px;
+  margin-top: 4px;
   .rel-head {
     display: flex;
     justify-content: space-between;
@@ -663,7 +663,7 @@ export default { name: 'jianlimoban-detail' }
 }
 .cta {
   margin-top: 16px;
-  padding: 56px 24px 90px;
+  padding: 56px 24px 53px;
   text-align: center;
   border-radius: 16px;
   background: linear-gradient(180deg, #fff4ec, #ffece1);
@@ -726,7 +726,7 @@ export default { name: 'jianlimoban-detail' }
   }
 }
 .faq {
-  margin-top: 32px;
+  margin-top: 50px;
   display: flex;
   flex-direction: column;
   gap: 10px;
