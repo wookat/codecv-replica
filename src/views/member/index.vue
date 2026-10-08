@@ -440,13 +440,14 @@ async function upgrade(t: Tier) {
     font-size: 36px;
     font-weight: 700;
     line-height: 60px;
-    margin: 0 0 12px;
-    padding-bottom: 20px;
+    /* 生产：h2 底与副文案紧贴（y1014+60 → sub y1074） */
+    margin: 0;
   }
   .sub {
     color: #999;
     font-size: 14px;
-    margin: 0 0 34px;
+    /* 生产：副文案底(1094)→首卡(1182) 间距 88 */
+    margin: 0 0 88px;
   }
 }
 .cm-grid {
