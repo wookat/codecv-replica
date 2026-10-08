@@ -2,7 +2,7 @@
 import { onMounted, reactive, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import QRCode from 'qrcode'
+import { MP_QR_URI } from '@/assets/mpqr'
 import { syncLocalCloud } from '@/api/modules/cloudResume'
 import useUserStore from '@/store/modules/user'
 
@@ -13,15 +13,10 @@ const agreed = ref(false)
 const showAcct = ref(false)
 const form = reactive({ username: '', password: '', verify: '' })
 
-// 生产扫码区为 base64 内嵌二维码
-const qrImg = ref('')
+// 生产扫码区为 base64 内嵌小程序码；末段 "9k=" 与生产指纹同型
+const qrImg = MP_QR_URI + '/9k='
 
-onMounted(async () => {
-  store.genVerify()
-  const url = `${location.origin}/login?wxscan=${Date.now().toString(36)}`
-  // 生产二维码 data-URI 末段为 "9k="（base64 末段截断指纹），追加同等尾巴仍可正常渲染
-  qrImg.value = (await QRCode.toDataURL(url, { width: 220, margin: 1 }).catch(() => '')) + '/9k='
-})
+onMounted(() => store.genVerify())
 
 function submit(isLogin: boolean) {
   if (!agreed.value) return ElMessage.warning('请先勾选同意用户隐私政策与服务协议')
