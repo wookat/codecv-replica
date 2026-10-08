@@ -939,7 +939,7 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
   }
 }
 .cta-card {
-  margin-top: 40px;
+  margin-top: 16px;
   display: flex;
   align-items: center;
   gap: 16px;

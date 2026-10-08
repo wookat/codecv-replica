@@ -663,17 +663,19 @@ export default { name: 'jianlimoban-detail' }
 }
 .cta {
   margin-top: 16px;
-  padding: 56px 24px 64px;
+  padding: 56px 24px 90px;
   text-align: center;
   border-radius: 16px;
   background: linear-gradient(180deg, #fff4ec, #ffece1);
   h2 {
     font-size: 20px;
     font-weight: 700;
+    line-height: 28px;
     margin: 0 0 10px;
   }
   .cta-sub {
     font-size: 14px;
+    line-height: 20px;
     color: #6b7280;
     margin: 0 0 28px;
   }
@@ -693,7 +695,7 @@ export default { name: 'jianlimoban-detail' }
   }
 }
 .cta-links {
-  margin-top: 28px;
+  margin-top: 48px;
   display: flex;
   justify-content: center;
   gap: 20px;
@@ -719,6 +721,7 @@ export default { name: 'jianlimoban-detail' }
   h2 {
     font-size: 18px;
     font-weight: 700;
+    line-height: 28px;
     margin: 0;
   }
 }
@@ -741,7 +744,7 @@ export default { name: 'jianlimoban-detail' }
       gap: 12px;
       cursor: pointer;
       list-style: none;
-      padding: 14px 0;
+      padding: 16px 0;
       font-size: 14px;
       color: var(--font-color);
       &:hover {

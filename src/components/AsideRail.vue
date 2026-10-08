@@ -82,7 +82,7 @@ const hotRank = [
     overflow: hidden;
     display: block;
     background: var(--background);
-    padding: 16px;
+    padding: 16px 16px 24px;
     text-decoration: none;
     .aj-title {
       font-size: 16px;
@@ -96,9 +96,10 @@ const hotRank = [
       object-fit: cover;
       display: block;
       border-radius: 12px;
+      margin-bottom: 5px;
     }
     .aj-cap {
-      margin: 8px 0 0;
+      margin: 4px 0 0;
       font-size: 14px;
       line-height: 1.6;
       color: var(--font-color);
