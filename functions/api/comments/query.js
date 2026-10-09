@@ -22,7 +22,9 @@ export async function onRequest(context) {
         t: r.created_at
       }))
     }
-  } catch { /* 降级种子数据 */ }
+  } catch {
+    /* 降级种子数据 */
+  }
   const items = [...real, ...all]
     .sort((a, b) => (b.t || 0) - (a.t || 0))
     .slice((pageNum - 1) * pageSize, pageNum * pageSize)

@@ -142,9 +142,8 @@ async function submit() {
       </article>
       <AsideRail>
         <div class="qr-card">
-          <p class="qr-title">问题反馈微信群</p>
-          <img src="/prod-assets/feedback-qr.png" alt="问题反馈微信群" />
-          <p class="qr-cap">有遇到问题可以加群反馈，客服24h在线</p>
+          <p class="qr-title">在线反馈</p>
+          <p class="qr-cap">登录后在左侧提交你的建议或问题，我们会认真阅读并及时改进</p>
         </div>
       </AsideRail>
     </main>
