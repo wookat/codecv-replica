@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { favoriteList, favoriteToggle } from '@/api/modules/favorite'
+import { currentUser } from '@/utils/auth'
+import { ElMessage } from 'element-plus'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { templates } from '@/templates/config'
@@ -107,6 +110,28 @@ const tplTags = (t: any): string[] => (Array.isArray(t.tags) ? t.tags : [])
 const sort = ref<'综合排序' | '最新上传' | '最多下载'>('综合排序')
 const SORTS = ['综合排序', '最新上传', '最多下载'] as const
 
+// 模板收藏：登录走云端，未登录本机保存
+const favTypes = ref<Set<string>>(new Set())
+const onlyFav = ref(false)
+onMounted(async () => {
+  const r = await favoriteList()
+  favTypes.value = new Set(r.types)
+})
+async function toggleFav(t: { type: string }) {
+  const r = await favoriteToggle(t.type)
+  const s = new Set(favTypes.value)
+  if (r.favorited) s.add(t.type)
+  else s.delete(t.type)
+  favTypes.value = s
+  ElMessage.success(
+    r.favorited ? (r.cloud ? '已收藏' : '已收藏（登录后可云端同步）') : '已取消收藏'
+  )
+}
+function toggleOnlyFav() {
+  if (!currentUser()) ElMessage.info('未登录收藏保存在本机，登录后可云端同步')
+  onlyFav.value = !onlyFav.value
+}
+
 // 后台下架的模板（admin/template/delete 生效后前台隐藏）
 const hiddenTypes = ref<Set<string>>(new Set())
 onMounted(() => {
@@ -128,6 +153,7 @@ const filtered = computed(() => {
   }
   const kw = keyword.value.trim()
   if (kw) rows = rows.filter(r => r.name.includes(kw) || tplTags(r).some(x => x.includes(kw)))
+  if (onlyFav.value) rows = rows.filter(r => favTypes.value.has(r.type))
   const sorted = [...rows]
   // 综合排序=生产数组序（index.json 顺序，与线上一致）；最新上架=配置插入序；最多下载=hot 降序
   if (sort.value === '最多下载') sorted.sort((a, b) => +(b.hot || 0) - +(a.hot || 0))
@@ -254,6 +280,9 @@ watch(
             @click="sort = s"
             >{{ s }}</span
           >
+          <span class="sort-tab fav-only" :class="{ checked: onlyFav }" @click="toggleOnlyFav"
+            >★ 收藏（{{ favTypes.size }}）</span
+          >
         </div>
         <div class="jl-search">
           <input v-model="keyword" type="text" placeholder="根据关键词搜索简历模板" />
@@ -277,6 +306,14 @@ watch(
           class="resume-card"
         >
           <div class="rc-top">
+            <button
+              class="fav-star"
+              :class="{ on: favTypes.has(t.type) }"
+              :title="favTypes.has(t.type) ? '取消收藏' : '收藏模板'"
+              @click.prevent.stop="toggleFav(t)"
+            >
+              {{ favTypes.has(t.type) ? '★' : '☆' }}
+            </button>
             <p class="use">{{ t.hot ?? 0 }}人使用过</p>
             <span v-if="(t.hot ?? 0) >= 1000" class="hot-badge">
               <svg viewBox="0 0 1024 1024" fill="currentColor">
@@ -332,6 +369,20 @@ watch(
   display: flex;
   gap: 16px;
   align-items: stretch;
+}
+.fav-star {
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  color: #ccc;
+  cursor: pointer;
+  padding: 0;
+  &.on {
+    color: #f5a623;
+  }
+}
+.fav-only.checked {
+  color: #f5a623;
 }
 .cat-card {
   flex: 1;
