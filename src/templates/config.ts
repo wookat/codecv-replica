@@ -64,7 +64,8 @@ export function resolveTemplateType(param: string): string {
       t.slug === `cv-${param}` ||
       t.type === param.replace(/-/g, '_')
   )
-  return hit?.type ?? param
+  // 未命中回落首个模板——非法 type 不能击穿后续皮肤/内容加载（此前会抛动态导入错误致整页空白）
+  return hit?.type ?? TYPE_ORDER[0] ?? templates.value[0]?.type ?? param
 }
 
 export type AvatarConfig = {
