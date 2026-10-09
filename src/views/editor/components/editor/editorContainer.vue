@@ -24,8 +24,8 @@ const editorStore = useEditorStore()
 // 生产版双模式：编辑(所见即所得) / MD —— 右栏即常显预览，无独立预览丸
 const mode = computed(() => (writable.value ? 'edit' : 'md'))
 function setMode(m: 'edit' | 'md') {
-  if (m === 'edit' && !writable.value) editorStore.setWritableMode(document.body)
-  if (m === 'md' && writable.value) editorStore.setWritableMode(document.body)
+  if (m === 'edit' && !writable.value) editorStore.setWritableMode()
+  if (m === 'md' && writable.value) editorStore.setWritableMode()
 }
 </script>
 

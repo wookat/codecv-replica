@@ -1,12 +1,10 @@
 import { defineStore } from 'pinia'
-import { nextTick } from 'vue'
 
 import pinia from '@/store'
 import { getLocalStorage, setLocalStorage } from '@/common/localstorage'
 import { showMessageVN } from '@/common/message'
 import { templates } from '@/templates/config'
 import { cloudPush } from '@/api/modules/cloudResume'
-import { ensureEmptyPreWhiteSpace } from '@/views/editor/components/tabbar/hook'
 
 const MARKDOWN_CONTENT = 'markdown-content'
 const WRITABLE = 'writable'
@@ -73,20 +71,11 @@ const useEditorStore = defineStore('editorStore', {
     setPreviewMode(v: boolean) {
       this.previewMode = v
     },
-    // 切换编辑模式
-    setWritableMode(originHTML: HTMLElement) {
+    // 切换编辑模式（PM 引擎由 fillContent 按 md 重灌，无需再注入 HTML）
+    setWritableMode() {
       this.writable = !this.writable
       setLocalStorage(WRITABLE, this.writable)
       showMessageVN('您已切换至', this.writable ? '内容模式' : 'Markdown模式')
-      if (this.writable) {
-        nextTick(() => {
-          originHTML = originHTML || (document.querySelector('.reference-dom') as HTMLElement)
-          originHTML = <HTMLElement>originHTML.cloneNode(true)
-          const DOMTree = document.querySelector('.writable-edit-mode') as HTMLElement
-          ensureEmptyPreWhiteSpace(originHTML)
-          DOMTree && (DOMTree.innerHTML = originHTML.innerHTML)
-        })
-      }
     },
     setNativeContent(content: string) {
       this.nativeContent = content
