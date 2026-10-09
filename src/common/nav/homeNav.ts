@@ -30,7 +30,7 @@ const homeNav: NavItem[] = [
   },
   {
     name: '网申助手',
-    path: 'https://assist.codecvcv.com?utm_source=codecv_nav',
+    path: 'https://apply.zalize.com?utm_source=codecv_nav',
     badge: 'NEW',
     external: true,
     tooltip: false
@@ -42,7 +42,7 @@ const homeNav: NavItem[] = [
   },
   {
     name: 'AI笔试面试',
-    path: 'https://www.offerstar.cn',
+    path: 'https://test.zalize.com',
     external: true,
     tooltip: false
   },

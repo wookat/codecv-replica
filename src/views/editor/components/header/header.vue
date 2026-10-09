@@ -166,7 +166,7 @@ function openImport() {
             <li><a href="/mianjing" target="_blank" rel="noopener noreferrer">面经</a></li>
             <li>
               <a
-                href="https://assist.codecvcv.com?utm_source=codecv_nav"
+                href="https://apply.zalize.com?utm_source=codecv_nav"
                 target="_blank"
                 rel="noopener noreferrer"
                 >网申助手</a

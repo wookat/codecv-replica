@@ -26,7 +26,7 @@ const nav = [
   },
   {
     name: '网申助手',
-    path: 'https://assist.codecvcv.com?utm_source=codecv_nav',
+    path: 'https://apply.zalize.com?utm_source=codecv_nav',
     external: true,
     hot: true
   },

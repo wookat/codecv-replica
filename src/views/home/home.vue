@@ -137,7 +137,7 @@ const COMMENTS = [
                 <path d="M9 6l6 6-6 6" />
               </svg>
             </router-link>
-            <a href="https://www.offerstar.cn" target="_blank" rel="noopener" class="cta ghost"
+            <a href="https://test.zalize.com" target="_blank" rel="noopener" class="cta ghost"
               >Ai笔试面试神器</a
             >
           </div>

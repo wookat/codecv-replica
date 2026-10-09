@@ -281,7 +281,7 @@ onMounted(() => {
           />
         </router-link>
         <a
-          href="https://assist.codecvcv.com?utm_source=codecv"
+          href="https://apply.zalize.com?utm_source=codecv"
           target="_blank"
           rel="noopener noreferrer"
           class="ad-link"

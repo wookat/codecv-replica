@@ -24,7 +24,7 @@ const minimal = computed(() => useRoute().path === '/progress')
         <strong class="ftitle">其他产品</strong>
         <li class="mr2">
           <a
-            href="https://www.offerstar.cn?utm_source=codecv"
+            href="https://test.zalize.com?utm_source=codecv"
             target="_blank"
             rel="noopener noreferrer"
             >OfferStar - Ai笔试面试辅助工具</a
