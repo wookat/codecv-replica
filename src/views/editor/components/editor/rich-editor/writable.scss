@@ -5,6 +5,11 @@
   position: relative;
   min-width: 480px;
 
+  /* EditorContent 渲染的无类名中间层，需继承高度 .tiptap 的 100% 才解析 */
+  > div {
+    height: 100%;
+  }
+
   * {
     line-height: 30px;
   }
