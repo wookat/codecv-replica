@@ -36,6 +36,8 @@ let dragSession: null | {
   dragging: boolean
   dropMark: HTMLElement | null
   anchorRect: DOMRect
+  lastY: number
+  raf: number
 } = null
 
 function clearDropMark() {
@@ -83,7 +85,11 @@ function installDragWindowListeners() {
       const el = topBlockRects(s.view).find(b => b.pos === s.srcPos)?.el
       el?.classList.add('is-dragging')
     }
-    if (s.dragging) markDropTarget(ev.clientY)
+    s.lastY = ev.clientY
+    if (s.dragging) {
+      markDropTarget(ev.clientY)
+      if (!s.raf) s.raf = requestAnimationFrame(dragScrollTick)
+    }
   })
   window.addEventListener('pointerup', ev => {
     const s = dragSession
@@ -125,9 +131,37 @@ function installDragWindowListeners() {
 }
 
 function cleanupDrag(view: EditorView) {
+  const s = dragSession
+  if (s?.raf) cancelAnimationFrame(s.raf)
   clearDropMark()
   view.dom.querySelectorAll('.is-dragging').forEach(x => x.classList.remove('is-dragging'))
   dragSession = null
+}
+
+// 按住不动也持续滚动：raf tick 里读 lastY 判边缘
+function dragScrollTick() {
+  const s = dragSession
+  if (!s || !s.dragging) return
+  s.raf = 0
+  const scroller = nearestScroller(s.view.dom)
+  if (scroller) {
+    const r = scroller.getBoundingClientRect()
+    const edge = 64
+    const dy = s.lastY < r.top + edge ? -14 : s.lastY > r.bottom - edge ? 14 : 0
+    if (dy) {
+      scroller.scrollTop += dy
+      markDropTarget(s.lastY)
+    }
+  }
+  s.raf = requestAnimationFrame(dragScrollTick)
+}
+
+function nearestScroller(el: HTMLElement): HTMLElement | null {
+  for (let p = el.parentElement; p; p = p.parentElement) {
+    const oy = getComputedStyle(p).overflowY
+    if ((oy === 'auto' || oy === 'scroll') && p.scrollHeight > p.clientHeight) return p
+  }
+  return null
 }
 
 function blockEl(view: EditorView, pos: number, fallback: HTMLElement) {
@@ -165,7 +199,9 @@ function handleDOM(pos: number, node: PMNode, view: EditorView) {
       pressY: ev.clientY,
       dragging: false,
       dropMark: null,
-      anchorRect: h.getBoundingClientRect()
+      anchorRect: h.getBoundingClientRect(),
+      lastY: ev.clientY,
+      raf: 0
     }
     installDragWindowListeners()
   })
