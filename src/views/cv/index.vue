@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import { allOverlaysHTML, convertDOM } from '@/utils/moduleCombine'
 import { loadTemplateContent, resolveTemplateType, templates } from '@/templates/config'
 import { applyTemplateTheme, importCSS } from '@/utils'
+import { getShare, shareView } from '@/api/modules/share'
 
 const route = useRoute()
 const html = ref('')
@@ -16,13 +17,35 @@ onMounted(async () => {
   const t = templates.value.find(x => x.type === type)
   importCSS(type)
   applyTemplateTheme(type)
-  // 公开简历页：优先取本地已存内容，否则展示模板原文
+  // 公开简历页：/cv/<type>/<id> 先按 id 解析实例内容（分享快照/云端简历/实例键），
+  // 再回落本地已存，最后回落模板原文
+  const id = route.params.id as string
   let md = ''
   try {
-    const raw = localStorage.getItem(`markdown-content-${type}`)
-    md = raw ? JSON.parse(raw).value ?? '' : ''
+    const res = await getShare(id)
+    if (res?.code === 200 && res.data?.content) md = res.data.content
   } catch {
     /* ignore */
+  }
+  if (!md && id) {
+    try {
+      const res = await shareView(id)
+      if (res?.code === 200 && res.data?.content) md = res.data.content
+    } catch {
+      /* ignore */
+    }
+  }
+  if (!md) {
+    try {
+      for (const key of [id ? `markdown-content-${id}` : '', `markdown-content-${type}`]) {
+        if (!key) continue
+        const raw = localStorage.getItem(key)
+        md = raw ? JSON.parse(raw).value ?? '' : ''
+        if (md) break
+      }
+    } catch {
+      /* ignore */
+    }
   }
   if (!md) md = await loadTemplateContent(type)
   if (md) html.value = convertDOM(md).innerHTML + allOverlaysHTML(type)

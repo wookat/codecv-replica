@@ -253,7 +253,7 @@ export async function onRequest(context) {
     const list = (Array.isArray(idx) ? idx : Object.values(idx)).map(t => ({
       type: t.name ?? t.type,
       name: t.title ?? t.name,
-      category: t.category ?? '',
+      category: Array.isArray(t.tags) && t.tags.length ? t.tags[0] : t.category ?? '',
       hidden: hset.has(t.name ?? t.type)
     }))
     return json(request, paged(list, { cur, size }))

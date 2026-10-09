@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import dayjs from 'dayjs'
 import { jobPage, jobToday, JobItem } from '@/api/modules/site'
+import { currentUser } from '@/utils/auth'
 import {
   channelStyle,
   locationStyle,
@@ -92,7 +93,11 @@ function toggleStar(job: JobItem) {
   const rec = progress.value[id]
   if (!rec) {
     upsertProgress(id, '待投递', snapshotOf(job))
-    ElMessage.success('已收藏，可在「我的进度」中统一管理')
+    ElMessage.success(
+      currentUser()
+        ? '已收藏，可在「我的进度」中统一管理'
+        : '已收藏，可在「我的进度」中统一管理（登录后可云端同步）'
+    )
   } else if (rec.status === '待投递') {
     removeProgress(id)
     ElMessage.success('已取消收藏')

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import ThemeToggle from '@/components/themeToggle.vue'
 import AccountSettings from '@/components/AccountSettings.vue'
 import useUserStore from '@/store/modules/user'
@@ -9,6 +9,7 @@ import { getLocalStorage } from '@/common/localstorage'
 import { notifyList, notifyRead, notifyUnreadCount, type Notice } from '@/api/modules/notification'
 
 const router = useRouter()
+const route = useRoute()
 const store = useUserStore()
 const user = ref<LocalUser | null>(null)
 const settings = ref(false)
@@ -16,6 +17,13 @@ const redeemOpen = ref(false)
 const redeemCode = ref('')
 const redeemMsg = ref('')
 const unread = ref(0)
+const bellVisible = ref(false)
+watch(
+  () => route.fullPath,
+  () => {
+    bellVisible.value = false
+  }
+)
 
 async function refreshUnread() {
   unread.value = user.value ? await notifyUnreadCount() : 0
@@ -160,6 +168,7 @@ function logout() {
       :width="340"
       trigger="click"
       popper-class="bell-panel"
+      v-model:visible="bellVisible"
       @show="loadNotices"
     >
       <template #reference>

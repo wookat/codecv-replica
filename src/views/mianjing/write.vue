@@ -12,6 +12,40 @@ const router = useRouter()
 const companies = ref<MianjingCompany[]>([])
 const positions = ref<MianjingPosition[]>([])
 
+const bodyTa = ref<HTMLTextAreaElement>()
+const blockItems = [
+  { label: '模块标题', before: '\n\n## ', after: '\n' },
+  { label: '小标题', before: '\n\n### ', after: '\n' },
+  { label: '加粗', before: '**', after: '**' },
+  { label: '斜体', before: '*', after: '*' },
+  { label: '引用', before: '\n\n> ', after: '\n' },
+  { label: '无序列表', before: '\n\n- ', after: '\n' },
+  { label: '有序列表', before: '\n\n1. ', after: '\n' },
+  { label: '分割线', before: '\n\n---\n\n', after: '' },
+  { label: '链接', before: '[文字](', after: ')' },
+  { label: '空白符', before: '\\u00a0', after: '' }
+]
+function insertBlock(b: { before: string; after: string }) {
+  const ta = bodyTa.value
+  if (!ta) {
+    form.value.contentMd += b.before + b.after
+    return
+  }
+  const start = ta.selectionStart ?? form.value.contentMd.length
+  const end = ta.selectionEnd ?? start
+  const sel = form.value.contentMd.slice(start, end)
+  form.value.contentMd =
+    form.value.contentMd.slice(0, start) +
+    b.before +
+    sel +
+    b.after +
+    form.value.contentMd.slice(end)
+  nextTick(() => {
+    const pos = start + b.before.length + sel.length
+    ta.focus()
+    ta.setSelectionRange(pos, pos)
+  })
+}
 const form = ref({
   companySlug: '',
   positionSlug: '',
@@ -237,7 +271,19 @@ async function submit() {
           ></span>
         </div>
         <img class="mw-pm-sep" alt="" aria-hidden="true" />
+        <div class="mw-blockbar">
+          <button
+            v-for="b in blockItems"
+            :key="b.label"
+            type="button"
+            class="mw-block-btn"
+            :title="b.label"
+            @click="insertBlock(b)"
+            v-text="b.label"
+          ></button>
+        </div>
         <textarea
+          ref="bodyTa"
           v-model="form.contentMd"
           class="mw-body-ta"
           placeholder="输入 / 唤起块菜单开始书写，或从下方选择模板…"
@@ -470,6 +516,25 @@ async function submit() {
   font-size: 24px;
   font-weight: 600;
   color: var(--font-color);
+  &.mw-blockbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 4px 0 8px;
+    .mw-block-btn {
+      padding: 2px 10px;
+      border: 1px solid var(--border-color, #e5e5e5);
+      border-radius: 4px;
+      background: var(--background);
+      color: var(--font-color);
+      font-size: 12px;
+      cursor: pointer;
+      &:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+      }
+    }
+  }
   &::placeholder {
     color: rgba(0, 0, 0, 0.25);
   }
@@ -537,6 +602,25 @@ async function submit() {
   line-height: 1.9;
   color: var(--font-color);
   font-family: inherit;
+  &.mw-blockbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 4px 0 8px;
+    .mw-block-btn {
+      padding: 2px 10px;
+      border: 1px solid var(--border-color, #e5e5e5);
+      border-radius: 4px;
+      background: var(--background);
+      color: var(--font-color);
+      font-size: 12px;
+      cursor: pointer;
+      &:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+      }
+    }
+  }
   &::placeholder {
     color: rgba(0, 0, 0, 0.25);
   }

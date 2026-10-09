@@ -61,6 +61,29 @@ theme="dark"
 class="tb-pre"
 ><div style="width:2.5em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div class="tb-code-line">&lt;<span class="tb-hl-tag">div&nbsp;</span><span class="tb-hl-attr-name">class</span>="<span class="tb-hl-attr-value">flex-layout</span>"&gt;</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&lt;<span class="tb-hl-tag">div&nbsp;</span><span class="tb-hl-attr-name">class</span>="<span class="tb-hl-attr-value">flex-layout-item</span>"&gt;content...&lt;/<span class="tb-hl-tag">div</span>&gt;</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&lt;<span class="tb-hl-tag">div&nbsp;</span><span class="tb-hl-attr-name">class</span>="<span class="tb-hl-attr-value">flex-layout-item</span>"&gt;content...&lt;/<span class="tb-hl-tag">div</span>&gt;</div><div class="tb-code-line">&nbsp;&nbsp;&nbsp;&nbsp;&lt;<span class="tb-hl-tag">div&nbsp;</span><span class="tb-hl-attr-name">class</span>="<span class="tb-hl-attr-value">flex-layout-item</span>"&gt;content...&lt;/<span class="tb-hl-tag">div</span>&gt;</div><div class="tb-code-line">&lt;<span class="tb-hl-tag">div</span>&gt;</div></div><span class="tb-pre-lang">HTML</span></pre>
 <h2 style="background:var(--background); color: var(--font-color); margin: 20px 0 10px 0;">
+<span style="color: var(--font-color); background:(--background)">列宽布局</span>
+</h2>
+<p style="background:var(--background); color: var(--font-color)">
+<span style="line-height: 28px"
+  ><span style="color: var(--font-color); background:(--background)"
+    >在弹性布局内，用&nbsp;</span
+  ><code
+    style="color: var(--font-color); background:(--background)">::: 数字</code
+  ><span style="color: var(--font-color); background:(--background)"
+    >&nbsp;可以指定每列的宽度百分比；可选&nbsp;</span
+  ><code style="color: var(--font-color); background:(--background)">left</code
+  ><span style="color: var(--font-color); background:(--background)">/&nbsp;</span
+  ><code style="color: var(--font-color); background:(--background)">right</code
+  ><span style="color: var(--font-color); background:(--background)"
+    >&nbsp;对齐参数控制该列内容水平对齐。</span
+  ></span
+>
+</p>
+<pre
+theme="dark"
+class="tb-pre"
+><div style="width:2.5em" class="tb-code-line-number-bg"></div><div class="tb-code-content"><div class="tb-code-line">::: start</div><div class="tb-code-line">::: 70</div><div class="tb-code-line">左侧主内容...</div><div class="tb-code-line">:::</div><div class="tb-code-line">::: 30 right</div><div class="tb-code-line">右侧 30% 宽并右对齐...</div><div class="tb-code-line">:::</div><div class="tb-code-line">::: end</div></div><span class="tb-pre-lang"></span></pre>
+<h2 style="background:var(--background); color: var(--font-color); margin: 20px 0 10px 0;">
 <span style="color: var(--font-color); background:(--background)">个人信息布局</span>
 </h2>
 <p style="background:var(--background); color: var(--font-color)">
