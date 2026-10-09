@@ -26,26 +26,41 @@ onMounted(async () => {
   if (p?.code === 200) proofreadDays.value = p.data.days
 })
 
-const lineOption = (days: { day: string; n: number }[], name: string) => ({
-  tooltip: { trigger: 'axis' as const },
-  grid: { left: 40, right: 16, top: 20, bottom: 28 },
-  xAxis: {
-    type: 'category' as const,
-    data: days.map(d => d.day.slice(5)),
-    axisLabel: { fontSize: 10 }
-  },
-  yAxis: { type: 'value' as const, minInterval: 1 },
-  series: [
-    {
-      name,
-      type: 'line' as const,
-      smooth: true,
-      showSymbol: false,
-      areaStyle: { opacity: 0.12 },
-      data: days.map(d => d.n)
-    }
-  ]
-})
+// 接口只回有数据的日期；统计口径是「近30天」，缺的日期补 0 让趋势轴连续
+const last30 = (() => {
+  const days: string[] = []
+  const now = new Date()
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(now.getTime() - i * 86400000)
+    days.push(d.toISOString().slice(0, 10))
+  }
+  return days
+})()
+
+const lineOption = (days: { day: string; n: number }[], name: string) => {
+  const byDay = new Map(days.map(d => [d.day, d.n]))
+  const axis = last30
+  return {
+    tooltip: { trigger: 'axis' as const },
+    grid: { left: 40, right: 16, top: 20, bottom: 28 },
+    xAxis: {
+      type: 'category' as const,
+      data: axis.map(d => d.slice(5)),
+      axisLabel: { fontSize: 10 }
+    },
+    yAxis: { type: 'value' as const, minInterval: 1 },
+    series: [
+      {
+        name,
+        type: 'line' as const,
+        smooth: true,
+        showSymbol: false,
+        areaStyle: { opacity: 0.12 },
+        data: axis.map(d => byDay.get(d) ?? 0)
+      }
+    ]
+  }
+}
 
 const exportOption = computed(() => lineOption(exportDays.value, '导出次数'))
 const proofreadOption = computed(() => lineOption(proofreadDays.value, '校对次数'))

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // 后台外壳：左侧菜单 + 内容区。守卫：未登录/非管理员回 /profile（与 prod chunk-admin 同语义）
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { admin } from '@/api/modules/admin'
 import { currentUser } from '@/utils/auth'
@@ -43,6 +43,19 @@ onMounted(async () => {
   }
   ready.value = true
 })
+
+// 取「最长前缀匹配」的菜单项：/admin/mianjing/comments 命中面经评论而非面经审核
+const activeMenu = computed(() => {
+  let best: (typeof MENUS)[number] | undefined
+  for (const m of MENUS) {
+    if (
+      (route.path === m.path || route.path.startsWith(m.path + '/')) &&
+      (best?.path.length ?? -1) < m.path.length
+    )
+      best = m
+  }
+  return best
+})
 </script>
 
 <template>
@@ -58,7 +71,7 @@ onMounted(async () => {
           :key="m.path"
           :to="m.path"
           class="adm-link"
-          :class="{ on: route.path === m.path || route.path.startsWith(m.path + '/') }"
+          :class="{ on: activeMenu?.path === m.path }"
         >
           <i>{{ m.icon }}</i
           >{{ m.name }}
@@ -67,7 +80,7 @@ onMounted(async () => {
     </aside>
     <main class="adm-main">
       <header class="adm-top">
-        <h2>{{ MENUS.find(m => route.path.startsWith(m.path))?.name || '后台' }}</h2>
+        <h2>{{ activeMenu?.name || '后台' }}</h2>
         <router-link to="/" class="adm-back">返回站点 →</router-link>
       </header>
       <router-view />
