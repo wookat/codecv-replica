@@ -71,7 +71,9 @@ function wrapperNode(name: string, cls: string, content: string) {
 }
 
 const ResumeModule = wrapperNode('resumeModule', 'resume-module', 'block+')
-const HeadLayout = wrapperNode('headLayout', 'head-layout', 'block+')
+// headStart..headEnd 内允许 flexLayout（头像|个人信息双栏行），否则 PM 会把
+// flex-layout 提升为同级节点、head-layout 变空壳 → 序列化 md 里头部内容错位/乱码
+const HeadLayout = wrapperNode('headLayout', 'head-layout', '(flexLayout|block)+')
 const FlexLayout = wrapperNode('flexLayout', 'flex-layout', 'flexItem+')
 
 const MainLayout = Node.create({
