@@ -25,8 +25,110 @@ const HANDLE_TOP_TYPES = new Set([
 ])
 
 // ---------- drag-handle widget ----------
-let dragSrcPos = -1
-let dragSrcSize = 0
+// 拖动会话放模块级：widget 会在拖动中被 PM 重建，绑在 grip 上的 pointer capture 会静默丢失
+let dragSession: null | {
+  view: EditorView
+  srcPos: number
+  srcSize: number
+  node: PMNode
+  pressX: number
+  pressY: number
+  dragging: boolean
+  dropMark: HTMLElement | null
+  anchorRect: DOMRect
+} = null
+
+function clearDropMark() {
+  dragSession?.dropMark?.classList.remove('drop-above', 'drop-below')
+  if (dragSession) dragSession.dropMark = null
+}
+
+function markDropTarget(clientY: number) {
+  const s = dragSession
+  if (!s) return
+  let bestEl = null as HTMLElement | null
+  let bestDist = Infinity
+  let above = true
+  for (const b of topBlockRects(s.view)) {
+    const r = b.el.getBoundingClientRect()
+    if (!r.height) continue
+    const mid = r.top + r.height / 2
+    const dist = Math.abs(clientY - mid)
+    if (dist < bestDist) {
+      bestDist = dist
+      bestEl = b.el
+      above = clientY < mid
+    }
+  }
+  if (bestEl !== s.dropMark) {
+    clearDropMark()
+    s.dropMark = bestEl
+  }
+  if (s.dropMark) {
+    s.dropMark.classList.toggle('drop-above', above)
+    s.dropMark.classList.toggle('drop-below', !above)
+  }
+}
+
+let dragListenersInstalled = false
+function installDragWindowListeners() {
+  if (dragListenersInstalled) return
+  dragListenersInstalled = true
+  window.addEventListener('pointermove', ev => {
+    const s = dragSession
+    if (!s) return
+    if (!s.dragging && Math.hypot(ev.clientX - s.pressX, ev.clientY - s.pressY) > 4) {
+      s.dragging = true
+      window.dispatchEvent(new CustomEvent('side-tool-menu-close'))
+      const el = topBlockRects(s.view).find(b => b.pos === s.srcPos)?.el
+      el?.classList.add('is-dragging')
+    }
+    if (s.dragging) markDropTarget(ev.clientY)
+  })
+  window.addEventListener('pointerup', ev => {
+    const s = dragSession
+    if (!s) return
+    if (s.dragging) {
+      const dst = dropTargetPos(s.view, ev.clientY)
+      if (dst >= 0) {
+        const cur = s.view.state.doc.nodeAt(s.srcPos)
+        if (cur && cur.nodeSize === s.srcSize) {
+          const adjDst = dst > s.srcPos ? dst - s.srcSize : dst
+          if (adjDst !== s.srcPos) {
+            const tr = s.view.state.tr
+            tr.delete(s.srcPos, s.srcPos + s.srcSize)
+            const ins = Math.min(Math.max(adjDst, 0), tr.doc.content.size)
+            tr.insert(ins, cur)
+            s.view.dispatch(tr.scrollIntoView())
+          }
+        }
+      }
+      cleanupDrag(s.view)
+    } else {
+      window.dispatchEvent(
+        new CustomEvent('side-tool-menu-trigger', {
+          detail: {
+            mode: 'row-actions',
+            pos: s.srcPos,
+            node: s.node,
+            anchorRect: s.anchorRect,
+            el: topBlockRects(s.view).find(b => b.pos === s.srcPos)?.el
+          }
+        })
+      )
+      dragSession = null
+    }
+  })
+  window.addEventListener('pointercancel', () => {
+    if (dragSession) cleanupDrag(dragSession.view)
+  })
+}
+
+function cleanupDrag(view: EditorView) {
+  clearDropMark()
+  view.dom.querySelectorAll('.is-dragging').forEach(x => x.classList.remove('is-dragging'))
+  dragSession = null
+}
 
 function blockEl(view: EditorView, pos: number, fallback: HTMLElement) {
   try {
@@ -47,39 +149,6 @@ function handleDOM(pos: number, node: PMNode, view: EditorView) {
   const grip = document.createElement('div')
   grip.className = 'drag-btn'
   grip.title = '拖动调整顺序'
-  // 指针事件拖拽（PM 吞 widget 区 HTML5 DnD 事件，pointer 流必生效）
-  let pressX = 0
-  let pressY = 0
-  let dragging = false
-  let dropMark = null as HTMLElement | null
-  const clearDropMark = () => {
-    dropMark?.classList.remove('drop-above', 'drop-below')
-    dropMark = null as HTMLElement | null
-  }
-  const markTarget = (clientY: number) => {
-    let bestEl = null as HTMLElement | null
-    let bestDist = Infinity
-    let above = true
-    for (const b of topBlockRects(view)) {
-      const r = b.el.getBoundingClientRect()
-      if (!r.height) continue
-      const mid = r.top + r.height / 2
-      const dist = Math.abs(clientY - mid)
-      if (dist < bestDist) {
-        bestDist = dist
-        bestEl = b.el
-        above = clientY < mid
-      }
-    }
-    if (bestEl !== dropMark) {
-      clearDropMark()
-      dropMark = bestEl
-    }
-    if (dropMark) {
-      dropMark.classList.toggle('drop-above', above)
-      dropMark.classList.toggle('drop-below', !above)
-    }
-  }
   grip.addEventListener('mousedown', ev => {
     ev.stopPropagation()
     ev.preventDefault()
@@ -87,63 +156,18 @@ function handleDOM(pos: number, node: PMNode, view: EditorView) {
   grip.addEventListener('pointerdown', ev => {
     ev.stopPropagation()
     ev.preventDefault()
-    pressX = ev.clientX
-    pressY = ev.clientY
-    dragging = false
-    grip.setPointerCapture(ev.pointerId)
-  })
-  grip.addEventListener('pointermove', ev => {
-    if (!grip.hasPointerCapture(ev.pointerId)) return
-    if (!dragging && Math.hypot(ev.clientX - pressX, ev.clientY - pressY) > 4) {
-      dragging = true
-      window.dispatchEvent(new CustomEvent('side-tool-menu-close'))
-      dragSrcPos = pos
-      dragSrcSize = node.nodeSize
-      blockEl(view, pos, h).classList.add('is-dragging')
+    dragSession = {
+      view,
+      srcPos: pos,
+      srcSize: node.nodeSize,
+      node,
+      pressX: ev.clientX,
+      pressY: ev.clientY,
+      dragging: false,
+      dropMark: null,
+      anchorRect: h.getBoundingClientRect()
     }
-    if (dragging) markTarget(ev.clientY)
-  })
-  grip.addEventListener('pointerup', ev => {
-    if (!grip.hasPointerCapture(ev.pointerId)) return
-    grip.releasePointerCapture(ev.pointerId)
-    if (dragging) {
-      clearDropMark()
-      view.dom.querySelectorAll('.is-dragging').forEach(x => x.classList.remove('is-dragging'))
-      const dst = dropTargetPos(view, ev.clientY)
-      if (dst >= 0 && dragSrcPos >= 0) {
-        const cur = view.state.doc.nodeAt(dragSrcPos)
-        if (cur && cur.nodeSize === dragSrcSize) {
-          const adjDst = dst > dragSrcPos ? dst - dragSrcSize : dst
-          if (adjDst !== dragSrcPos) {
-            const tr = view.state.tr
-            tr.delete(dragSrcPos, dragSrcPos + dragSrcSize)
-            const ins = Math.min(Math.max(adjDst, 0), tr.doc.content.size)
-            tr.insert(ins, cur)
-            view.dispatch(tr.scrollIntoView())
-          }
-        }
-      }
-      dragSrcPos = -1
-      dragging = false
-    } else {
-      window.dispatchEvent(
-        new CustomEvent('side-tool-menu-trigger', {
-          detail: {
-            mode: 'row-actions',
-            pos,
-            node,
-            anchorRect: h.getBoundingClientRect(),
-            el: blockEl(view, pos, h)
-          }
-        })
-      )
-    }
-  })
-  grip.addEventListener('pointercancel', () => {
-    dragging = false
-    dragSrcPos = -1
-    clearDropMark()
-    view.dom.querySelectorAll('.is-dragging').forEach(x => x.classList.remove('is-dragging'))
+    installDragWindowListeners()
   })
 
   const add = document.createElement('div')
