@@ -1,10 +1,12 @@
 <script setup lang="ts">
-// 生产同款选中文本浮动菜单：标题级别 / AI润色 / B I U S / 链接 / 列表 / 引用 / 清除格式；图片点选走图片模式
+// 生产同款选中文本浮动菜单（ProseMirror 引擎版）：
+// 标题级别 / AI润色 / B I U S / 链接 / 列表 / 引用 / 清除格式；图片点选走图片模式
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { successMessage, errorMessage } from '@/common/message'
 import { getLocalStorage } from '@/common/localstorage'
 import useUserStore, { TOKEN } from '@/store/modules/user'
 import { getPickerFile } from '@/utils/uploader'
+import { getPMEditor } from './pm/useEditor'
 
 type Mode = 'tools' | 'ai' | 'link' | 'image'
 const state = ref({ visible: false, top: 0, left: 0 })
@@ -13,8 +15,10 @@ const curLevel = ref<number>(0)
 const linkUrl = ref('')
 const posInput = ref('')
 const streaming = ref(false)
-const savedRange = ref<Range | null>(null)
-const imgEl = ref<HTMLImageElement | null>(null)
+// 保存的 PM 选区（弹层交互时 DOM 选区会丢）
+const savedSel = ref<{ from: number; to: number } | null>(null)
+const imgPos = ref(-1)
+const imgSrc = ref('')
 
 const userStore = useUserStore()
 const POSITION_KEY = 'cv-ai-target-position'
@@ -38,104 +42,65 @@ const LEVELS = [
   { level: 6, tip: 'H6' }
 ]
 
+const ed = () => getPMEditor()
 const editorRoot = () => document.querySelector('.writable-edit-mode') as HTMLElement | null
-function sync() {
-  editorRoot()?.dispatchEvent(new Event('input', { bubbles: true }))
-}
-function sel(): Selection | null {
-  const s = window.getSelection()
-  return s && s.rangeCount ? s : null
-}
-function insideEditor(n: Node | null) {
-  return !!n && !!editorRoot()?.contains(n)
-}
-function exec(cmd: string, arg?: string) {
-  document.execCommand(cmd, false, arg)
-  sync()
-}
-function restoreSelection() {
-  const r = savedRange.value
-  const s = window.getSelection()
-  if (r && s) {
-    s.removeAllRanges()
-    s.addRange(r)
-  }
-}
+const chain = () => ed()!.chain().focus()
+
 function saveSel() {
-  const s = sel()
-  if (s && !s.isCollapsed && insideEditor(s.anchorNode))
-    savedRange.value = s.getRangeAt(0).cloneRange()
+  const e = ed()
+  if (!e) return
+  const { from, to, empty } = e.state.selection
+  if (!empty) savedSel.value = { from, to }
 }
-function blockOf(): HTMLElement | null {
-  const s = sel()
-  let el = (
-    s?.anchorNode?.nodeType === 1 ? s.anchorNode : s?.anchorNode?.parentElement
-  ) as HTMLElement | null
-  const root = editorRoot()
-  while (el && el !== root && !/^(H[1-6]|P|BLOCKQUOTE|PRE|LI|TD|TH|DIV)$/.test(el.tagName))
-    el = el.parentElement
-  return el && el !== root ? el : null
-}
-function currentLevel(): number {
-  const b = blockOf()
-  return b && /^H[1-6]$/.test(b.tagName) ? Number(b.tagName[1]) : 0
+function restoreSel() {
+  const e = ed()
+  const s = savedSel.value
+  if (e && s) e.chain().focus().setTextSelection({ from: s.from, to: s.to }).run()
 }
 function setLevel(level: number) {
-  restoreSelection()
-  const block = blockOf()
-  if (!block) return
-  const tag = level === 0 ? 'p' : `h${level}`
-  if (block.tagName.toLowerCase() === tag) return
-  const el = document.createElement(tag)
-  for (const c of Array.from(block.childNodes)) el.appendChild(c)
-  block.replaceWith(el)
-  const r = document.createRange()
-  r.selectNodeContents(el)
-  r.collapse(false)
-  const s = window.getSelection()
-  s?.removeAllRanges()
-  s?.addRange(r)
-  sync()
+  restoreSel()
+  if (level === 0) chain().setNode('paragraph').run()
+  else
+    chain()
+      .setNode('heading', { level: level as 1 | 2 | 3 | 4 | 5 | 6 })
+      .run()
   curLevel.value = level
+}
+function currentLevel(): number {
+  const e = ed()
+  const p = e?.state.selection.$from.parent
+  if (p?.type.name === 'heading') return p.attrs.level as number
+  return 0
 }
 
 /* ---------- 链接 ---------- */
-function linkAnchor(): HTMLAnchorElement | null {
-  const s = sel()
-  let el = (
-    s?.anchorNode?.nodeType === 1 ? s.anchorNode : s?.anchorNode?.parentElement
-  ) as HTMLElement | null
-  while (el && el !== editorRoot()) {
-    if (el.tagName === 'A') return el as HTMLAnchorElement
-    el = el.parentElement
-  }
-  return null
-}
+const linkActive = () => !!ed()?.isActive('link')
+const linkHref = () => (ed()?.getAttributes('link').href as string) || ''
 function openLinkMode() {
   saveSel()
-  linkUrl.value = linkAnchor()?.href || ''
+  linkUrl.value = linkActive() ? linkHref() : ''
   mode.value = 'link'
 }
 function confirmLink() {
   if (!linkUrl.value.trim()) return
-  restoreSelection()
-  exec('createLink', linkUrl.value.trim())
+  restoreSel()
+  chain().setLink({ href: linkUrl.value.trim() }).run()
   mode.value = 'tools'
 }
 function openHref() {
-  const a = linkAnchor()
-  if (a) window.open(a.href, '_blank', 'noopener')
+  const h = linkHref()
+  if (h) window.open(h, '_blank', 'noopener')
 }
 function copyHref() {
-  const a = linkAnchor()
-  if (a) {
-    navigator.clipboard.writeText(a.href).catch(() => undefined)
+  const h = linkHref()
+  if (h) {
+    navigator.clipboard.writeText(h).catch(() => undefined)
     successMessage('链接已复制')
   }
 }
 function removeHref() {
-  restoreSelection()
-  exec('unlink')
+  restoreSel()
+  chain().unsetLink().run()
   mode.value = 'tools'
 }
 
@@ -163,9 +128,10 @@ function skipPos() {
   void perf(undefined)
 }
 async function perf(targetPosition?: string) {
-  const range = savedRange.value
-  if (!range || streaming.value) return
-  const text = range.toString()
+  const e = ed()
+  const s = savedSel.value
+  if (!e || !s || streaming.value) return
+  const text = e.state.doc.textBetween(s.from, s.to, ' ')
   if (!text.trim()) return
   streaming.value = true
   try {
@@ -204,26 +170,19 @@ async function perf(targetPosition?: string) {
           const d = JSON.parse(t.slice(5).trim())
           if (d.text) acc += d.text
           if (d.error) throw new Error(d.error)
-        } catch (e) {
-          if (e instanceof SyntaxError) continue
-          throw e
+        } catch (err) {
+          if (err instanceof SyntaxError) continue
+          throw err
         }
       }
     }
     if (acc.trim()) {
-      restoreSelection()
-      const s = sel()
-      if (s && s.rangeCount) {
-        const r = s.getRangeAt(0)
-        r.deleteContents()
-        r.insertNode(document.createTextNode(acc.trim()))
-        sync()
-        successMessage('已润色')
-      }
+      e.chain().focus().deleteRange({ from: s.from, to: s.to }).insertContent(acc.trim()).run()
+      successMessage('已润色')
     }
     mode.value = 'tools'
-  } catch (e) {
-    errorMessage(e instanceof Error ? e.message : '润色失败')
+  } catch (err) {
+    errorMessage(err instanceof Error ? err.message : '润色失败')
   } finally {
     streaming.value = false
   }
@@ -231,26 +190,31 @@ async function perf(targetPosition?: string) {
 
 /* ---------- 图片模式 ---------- */
 function viewImg() {
-  const src = imgEl.value?.src
-  if (src) window.open(src, '_blank', 'noopener')
+  if (imgSrc.value) window.open(imgSrc.value, '_blank', 'noopener')
 }
 function copyImg() {
-  const src = imgEl.value?.src
-  if (src) {
-    navigator.clipboard.writeText(src).catch(() => undefined)
+  if (imgSrc.value) {
+    navigator.clipboard.writeText(imgSrc.value).catch(() => undefined)
     successMessage('图片链接已复制')
   }
 }
 function delImg() {
-  imgEl.value?.remove()
-  imgEl.value = null
+  const e = ed()
+  if (e && imgPos.value >= 0) {
+    const n = e.state.doc.nodeAt(imgPos.value)
+    if (n)
+      e.chain()
+        .deleteRange({ from: imgPos.value, to: imgPos.value + n.nodeSize })
+        .run()
+  }
+  imgPos.value = -1
   hide()
-  sync()
 }
 async function replaceImg() {
+  const e = ed()
   try {
     const file = await getPickerFile({ multiple: false, accept: '.png,.jpg,.jpeg,.webp' })
-    if (!file || !imgEl.value) return
+    if (!file || !e || imgPos.value < 0) return
     const token = (getLocalStorage(TOKEN) as string) || ''
     const fd = new FormData()
     fd.append('file', file)
@@ -272,8 +236,12 @@ async function replaceImg() {
         fr.readAsDataURL(file)
       })
     }
-    imgEl.value.src = url
-    sync()
+    const tr = e.state.tr.setNodeMarkup(imgPos.value, undefined, {
+      ...e.state.doc.nodeAt(imgPos.value)?.attrs,
+      src: url
+    })
+    e.view.dispatch(tr)
+    imgSrc.value = url
     successMessage('图片已替换')
   } catch {
     errorMessage('上传失败')
@@ -281,7 +249,7 @@ async function replaceImg() {
 }
 
 /* ---------- 显示/定位 ---------- */
-function show(rect: DOMRect) {
+function show(rect: { top: number; left: number; width: number }) {
   state.value = {
     visible: true,
     top: Math.max(8, rect.top - 46),
@@ -293,28 +261,61 @@ function hide() {
   mode.value = 'tools'
 }
 function onSelChange() {
-  const s = sel()
-  if (!s || s.isCollapsed || !insideEditor(s.anchorNode)) {
+  const e = ed()
+  if (!e) return
+  const { from, to, empty } = e.state.selection
+  const sel = window.getSelection()
+  if (empty || !sel?.anchorNode || !editorRoot()?.contains(sel.anchorNode)) {
     if (!streaming.value && mode.value !== 'ai' && mode.value !== 'link') hide()
     return
   }
-  if (String(s).trim()) {
+  if (to > from && e.state.doc.textBetween(from, to, ' ').trim()) {
     saveSel()
     curLevel.value = currentLevel()
     if (mode.value === 'image') mode.value = 'tools'
-    const r = s.getRangeAt(0).getBoundingClientRect()
-    if (r.width) show(r)
+    const start = e.view.coordsAtPos(from)
+    const end = e.view.coordsAtPos(to)
+    const r = {
+      top: Math.min(start.top, end.top),
+      left: start.left,
+      width: Math.abs(end.left - start.left) || 1
+    }
+    show(r)
   }
 }
 function onClick(e: MouseEvent) {
   const t = e.target as HTMLElement
-  if (t.tagName === 'IMG' && insideEditor(t)) {
-    imgEl.value = t as HTMLImageElement
-    mode.value = 'image'
-    show(t.getBoundingClientRect())
-    return
+  const ed2 = ed()
+  if (t.tagName === 'IMG' && editorRoot()?.contains(t) && ed2) {
+    // 图片 → 图片模式；定位其 PM pos
+    let p = -1
+    try {
+      p = ed2.view.posAtDOM(t, 0, -1)
+    } catch {
+      /* fallback scan */
+    }
+    if (p < 0) {
+      ed2.state.doc.descendants((node, pos) => {
+        if (p >= 0) return false
+        if (node.type.name === 'image') {
+          try {
+            if (ed2.view.domAtPos(pos).node === t) p = pos
+          } catch {
+            /* skip */
+          }
+        }
+        return true
+      })
+    }
+    if (p >= 0) {
+      imgPos.value = p
+      imgSrc.value = (t as HTMLImageElement).src
+      mode.value = 'image'
+      show(t.getBoundingClientRect())
+      return
+    }
   }
-  imgEl.value = null
+  imgPos.value = -1
 }
 function onDocDown(e: MouseEvent) {
   const t = e.target as HTMLElement
@@ -378,7 +379,7 @@ onBeforeUnmount(() => {
           @keyup.enter="confirmLink"
         />
         <button class="link-confirm" @click="confirmLink">确认</button>
-        <template v-if="linkAnchor()">
+        <template v-if="linkActive()">
           <button class="bubble-menu-item link-action" title="打开链接" @click="openHref">
             <i class="iconfont icon-open" />
           </button>
@@ -433,22 +434,22 @@ onBeforeUnmount(() => {
         </el-tooltip>
         <div class="bm-divider" />
         <el-tooltip content="加粗" placement="top">
-          <button class="bubble-menu-item" @click="exec('bold')">
+          <button class="bubble-menu-item" @click="chain().toggleBold().run()">
             <i class="iconfont icon-bold" />
           </button>
         </el-tooltip>
         <el-tooltip content="斜体" placement="top">
-          <button class="bubble-menu-item" @click="exec('italic')">
+          <button class="bubble-menu-item" @click="chain().toggleItalic().run()">
             <i class="iconfont icon-italic" />
           </button>
         </el-tooltip>
         <el-tooltip content="下划线" placement="top">
-          <button class="bubble-menu-item" @click="exec('underline')">
+          <button class="bubble-menu-item" @click="chain().toggleUnderline().run()">
             <i class="iconfont icon-underline" />
           </button>
         </el-tooltip>
         <el-tooltip content="删除线" placement="top">
-          <button class="bubble-menu-item" @click="exec('strikeThrough')">
+          <button class="bubble-menu-item" @click="chain().toggleStrike().run()">
             <i class="iconfont icon-strike" />
           </button>
         </el-tooltip>
@@ -460,23 +461,23 @@ onBeforeUnmount(() => {
         </el-tooltip>
         <div class="bm-divider" />
         <el-tooltip content="有序列表" placement="top">
-          <button class="bubble-menu-item" @click="exec('insertOrderedList')">
+          <button class="bubble-menu-item" @click="chain().toggleOrderedList().run()">
             <i class="iconfont icon-orderedlist" />
           </button>
         </el-tooltip>
         <el-tooltip content="无序列表" placement="top">
-          <button class="bubble-menu-item" @click="exec('insertUnorderedList')">
+          <button class="bubble-menu-item" @click="chain().toggleBulletList().run()">
             <i class="iconfont icon-unorderedlist" />
           </button>
         </el-tooltip>
         <el-tooltip content="引用" placement="top">
-          <button class="bubble-menu-item" @click="exec('formatBlock', 'blockquote')">
+          <button class="bubble-menu-item" @click="chain().toggleBlockquote().run()">
             <i class="iconfont icon-quote" />
           </button>
         </el-tooltip>
         <div class="bm-divider" />
         <el-tooltip content="清除格式" placement="top">
-          <button class="bubble-menu-item" @click="exec('removeFormat')">
+          <button class="bubble-menu-item" @click="chain().unsetAllMarks().clearNodes().run()">
             <i class="iconfont icon-eraser" />
           </button>
         </el-tooltip>

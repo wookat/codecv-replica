@@ -6,315 +6,149 @@ import { resumeDOMStruct2Markdown } from '@/utils/dom2md'
 import { warningMessage } from '@/common/message'
 import { ElMessageBox } from 'element-plus'
 import { nextTick, onActivated, onBeforeUnmount, onMounted, ref } from 'vue'
-// 使用编辑模式
+import { Editor } from '@tiptap/core'
+import { Node as PMNode } from '@tiptap/pm/model'
+import { resumeExtensions } from './pm/schema'
+import { DragHandle, ModuleOps, TrailingNode } from './pm/plugins'
+import { setPMEditor } from './pm/useEditor'
+
+// 使用编辑模式 —— tiptap/ProseMirror 引擎（生产同款 .tiptap.ProseMirror 文档模型）
 export function useToggleEditorMode(resumeType: string) {
   const editorStore = useEditorStore(),
     DOMTree = ref<HTMLElement>()
+  let editor: Editor | null = null
 
+  // ===== 序列化回 md：克隆 PM DOM，剥离编辑态辅助元素后走既有 DOM→md 方言 ==========
   function ObserverContent() {
-    // 克隆序列化：drag-handle 等编辑态辅助元素不进 md
-    const clone = DOMTree.value?.cloneNode(true) as HTMLElement
-    clone?.querySelectorAll('.' + HANDLE + ',.mod-op').forEach(e => e.remove())
+    if (!editor) return
+    const clone = editor.view.dom.cloneNode(true) as HTMLElement
+    clone
+      .querySelectorAll(
+        '.drag-handle,.mod-op,.ProseMirror-widget,.ProseMirror-separator,.ProseMirror-trailingBreak,.column-resize-handle,.table-col-grip,.table-row-grip'
+      )
+      .forEach(e => e.remove())
+    // PM 表格外层 .tableWrapper 不属于简历结构——解包保留 table
+    clone.querySelectorAll('.tableWrapper').forEach(w => {
+      const t = w.querySelector('table')
+      if (t) w.replaceWith(t)
+      else w.remove()
+    })
     const content = resumeDOMStruct2Markdown({
-      node: clone as Node,
+      node: clone,
       latest: true,
       uid: 0,
       whiteSpace: 0,
-      parent: <Node>DOMTree.value?.parentElement
+      parent: <Node>clone.parentElement
     })
     editorStore.setMDContent(content, resumeType)
   }
 
-  // ===== 拖拽移动/节点操作（对齐生产：块级节点 hover 出 ⋮⋮ 手柄，拖动重排） =====
-  let dragEl: HTMLElement | null = null
-  const HANDLE = 'drag-handle'
-
-  function isBlock(el: Element) {
-    return (
-      el.nodeType === 1 && !el.classList.contains(HANDLE) && !['IMG', 'BR'].includes(el.tagName)
-    )
-  }
-
-  function injectHandles() {
-    const root = DOMTree.value
-    if (!root) return
-    root.querySelectorAll('.' + HANDLE).forEach(e => e.remove())
-    // 生产同款：所有块级节点（模块/行/卡片内标题段落列表等）都挂 ⋮⋮ 手柄
-    const targets = Array.from(
-      root.querySelectorAll(
-        'h1,h2,h3,h4,h5,h6,p,ul,ol,blockquote,pre,table,.resume-module,.head-layout,.main-layout,.flex-layout,.flex-layout-item'
-      )
-    ).filter(el => isBlock(el) && !el.closest('td,th') && !el.closest('.' + HANDLE))
-    for (const el of targets) {
-      if (el.querySelector(':scope > .' + HANDLE)) continue
-      el.classList.add('draggable-block')
-      const h = document.createElement('div')
-      h.className = HANDLE
-      h.contentEditable = 'false'
-      // 生产版手柄 = ⋮⋮ 拖拽钮（点击开 row-actions 菜单）+ ＋ 添加内容钮（点击开 insert 菜单）
-      const grip = document.createElement('div')
-      grip.className = 'drag-btn'
-      grip.draggable = true
-      grip.addEventListener('click', ev => {
-        ev.stopPropagation()
-        window.dispatchEvent(
-          new CustomEvent('side-tool-menu-trigger', {
-            detail: { mode: 'row-actions', block: el, anchorRect: h.getBoundingClientRect() }
-          })
-        )
-      })
-      const add = document.createElement('div')
-      add.className = 'add-btn'
-      add.title = '添加内容'
-      add.addEventListener('click', ev => {
-        ev.stopPropagation()
-        window.dispatchEvent(
-          new CustomEvent('side-tool-menu-trigger', {
-            detail: { mode: 'insert', block: el, anchorRect: h.getBoundingClientRect() }
-          })
-        )
-      })
-      h.appendChild(grip)
-      h.appendChild(add)
-      grip.addEventListener('dragstart', ev => {
-        dragEl = el as HTMLElement
-        ev.dataTransfer?.setData('text/plain', '')
-        ev.dataTransfer?.setDragImage(el as HTMLElement, 0, 0)
-        el.classList.add('is-dragging')
-        ev.stopPropagation()
-      })
-      h.addEventListener('dragend', () => {
-        el.classList.remove('is-dragging')
-        root
-          .querySelectorAll('.is-draggable-hover')
-          .forEach(x => x.classList.remove('is-draggable-hover'))
-        // 生产同款落点闪烁反馈
-        el.classList.add('is-dropped-flash')
-        window.setTimeout(() => el.classList.remove('is-dropped-flash'), 1300)
-        ObserverContent()
-      })
-      el.appendChild(h)
-    }
-  }
-
-  // ===== 生产同款模块操作：hover .resume-module 出内联 img 钮（上移/下移/删除该模块） =====
-  let modOpEls: HTMLElement[] = []
-  const modulesOf = () =>
-    Array.from(DOMTree.value?.querySelectorAll('.resume-module') || []) as HTMLElement[]
-
-  function mkModBtn(cls: string, title: string, arrow: string) {
-    const b = document.createElement('span')
-    b.className = `mod-op ${cls}`
-    b.title = title
-    b.contentEditable = 'false'
-    b.innerHTML = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">${arrow}</svg>`
-    return b
-  }
-  function clearModOps() {
-    modOpEls.forEach(e => e.parentElement?.removeChild(e))
-    modOpEls = []
-  }
-  function onModEnter(ev: Event) {
-    const mod = ev.currentTarget as HTMLElement
-    clearModOps()
-    const up = mkModBtn('mod-up', '上移', '<path d="M6 15l6-6 6 6"/>')
-    const down = mkModBtn('mod-down', '下移', '<path d="M6 9l6 6 6-6"/>')
-    const del = mkModBtn('remove-module', '删除该模块', '<path d="M6 6l12 12M18 6L6 18"/>')
-    mod.appendChild(down)
-    mod.appendChild(up)
-    mod.appendChild(del)
-    modOpEls = [down, up, del]
-  }
-  function onModLeave() {
-    clearModOps()
-  }
-  // tiptap 会把非文档化的 DOM 交换归一化回滚——与生产效果一致的做法：直接按 `##` 模块边界操作 md
-  function mdChunks() {
-    const md = editorStore.MDContent || ''
-    const lines = md.split('\n')
-    const heads: number[] = []
-    lines.forEach((l, i) => {
-      if (/^##\s/.test(l)) heads.push(i)
+  // ===== 模块操作（生产同款 hover 内联 上移/下移/删除该模块） =====
+  // 实现为 widget decoration：resumeModule 节点尾部挂 .mod-op 按钮，CSS hover 显隐
+  function moduleNodes() {
+    const list: { pos: number; node: PMNode }[] = []
+    editor?.state.doc.descendants((node, pos) => {
+      if (node.type.name === 'resumeModule') list.push({ pos, node })
+      return true
     })
-    const pre = lines.slice(0, heads[0] ?? lines.length).join('\n')
-    const chunks = heads.map((h, i) => lines.slice(h, heads[i + 1]).join('\n'))
-    return { pre, chunks }
+    return list
   }
-  function writeChunks(pre: string, chunks: string[]) {
-    editorStore.setMDContent([pre, ...chunks].filter(Boolean).join('\n'), resumeType)
-  }
-  // md 写入后从 reference-dom 重建编辑面板（渲染管线监听 MDContent 重渲）
-  function rebuildFromReference() {
-    window.setTimeout(() => {
-      const ref = queryDOM('.reference-dom') as HTMLElement | null
-      if (!ref?.innerHTML || !DOMTree.value) return
-      DOMTree.value.querySelectorAll('.resume-module').forEach(m => {
-        const el = m as HTMLElement
-        el.onmouseenter = null
-        delete el.dataset.modopsBound
-      })
-      DOMTree.value.innerHTML = ref.innerHTML
-      injectHandles()
-      bindModuleOps()
-    }, 400)
-  }
-  function moveModule(mod: HTMLElement, dir: -1 | 1) {
-    const mods = modulesOf()
-    const i = mods.indexOf(mod)
+  function moveModulePos(pos: number, dir: -1 | 1) {
+    if (!editor) return
+    const mods = moduleNodes()
+    const i = mods.findIndex(m => m.pos === pos)
     if (i < 0) return
     if (dir < 0 && i === 0) return warningMessage('已经是第一位了')
     if (dir > 0 && i === mods.length - 1) return warningMessage('已经到最后了')
-    clearModOps()
-    const parent = mod.parentElement
-    if (parent) {
-      if (dir < 0) parent.insertBefore(mod, mod.previousElementSibling as Node | null)
-      else parent.insertBefore(mod, mod.nextElementSibling as Node | null)
-    }
-    const { pre, chunks } = mdChunks()
-    if (chunks.length === mods.length) {
-      ;[chunks[i + dir], chunks[i]] = [chunks[i], chunks[i + dir]]
-      writeChunks(pre, chunks)
-      rebuildFromReference()
-    } else {
-      ObserverContent()
-    }
+    const node = mods[i].node
+    const target = mods[i + dir]
+    const tr = editor.state.tr
+    tr.delete(pos, pos + node.nodeSize)
+    const ins = dir < 0 ? target.pos : target.pos - node.nodeSize + target.node.nodeSize
+    tr.insert(ins, node)
+    editor.view.dispatch(tr.scrollIntoView())
   }
-  async function removeModule(mod: HTMLElement) {
-    clearModOps()
-    const mods = modulesOf()
-    const i = mods.indexOf(mod)
-    const title = mod.querySelector('h2')?.textContent?.trim()
+  async function removeModulePos(pos: number) {
+    if (!editor) return
+    const node = editor.state.doc.nodeAt(pos)
+    if (!node) return
+    const title = node.firstChild?.textContent?.trim()
     try {
       await ElMessageBox.confirm(
         `您确定要删除${title ? `【${title}】` : '此'}模块吗？`,
         '删除模块提示',
-        {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }
+        { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
       )
-      if (i >= 0) {
-        const { pre, chunks } = mdChunks()
-        if (chunks.length === mods.length) {
-          chunks.splice(i, 1)
-          writeChunks(pre, chunks)
-          rebuildFromReference()
-          return
-        }
-      }
-      mod.remove()
-      ObserverContent()
+      editor.view.dispatch(editor.state.tr.delete(pos, pos + node.nodeSize))
     } catch {
       /* 取消 */
     }
   }
-  function onModClick(ev: Event) {
-    const t = ev.target as HTMLElement
-    const mod = ev.currentTarget as HTMLElement
-    if (t.closest('.mod-up')) {
-      ev.stopPropagation()
-      moveModule(mod, -1)
-    } else if (t.closest('.mod-down')) {
-      ev.stopPropagation()
-      moveModule(mod, 1)
-    } else if (t.closest('.remove-module')) {
-      ev.stopPropagation()
-      void removeModule(mod)
-    }
-  }
-  function bindModuleOps() {
-    modulesOf().forEach(mod => {
-      if (mod.dataset.modopsBound) return
-      mod.dataset.modopsBound = '1'
-      mod.addEventListener('mouseenter', onModEnter)
-      mod.addEventListener('mouseleave', onModLeave)
-      mod.addEventListener('click', onModClick)
-    })
+
+  // 模块操作按钮事件（widget 里的 上移/下移/删除）
+  function onModuleOp(ev: Event) {
+    const d = (ev as CustomEvent).detail as { op: string; pos: number }
+    if (d?.pos == null) return
+    if (d.op === 'del') void removeModulePos(d.pos)
+    else moveModulePos(d.pos, d.op === 'up' ? -1 : 1)
   }
 
-  // ===== 生产同款滚动联动：预览点击模块 → BroadcastChannel 广播 index/line =====
+  // ===== 预览→编辑滚动联动：BroadcastChannel 广播 index → 滚到第 N 个 resume-module =====
   let modChannel: BroadcastChannel | null = null
   function onChannelMsg(ev: MessageEvent) {
     const data = ev.data as { index?: number }
-    if (typeof data?.index !== 'number') return
-    const mod = modulesOf()[data.index]
-    if (!mod) return
-    const scroller =
-      (DOMTree.value?.closest('[style*="overflow"]') as HTMLElement | null) ||
-      (DOMTree.value?.parentElement as HTMLElement | null)
-    if (scroller && scroller.scrollHeight > scroller.clientHeight) {
-      scroller.scrollTo({ top: Math.max(0, mod.offsetTop - 56), behavior: 'smooth' })
-    } else {
-      mod.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
-  }
-
-  function siblingsOf(el: HTMLElement): HTMLElement[] {
-    const p = el.parentElement
-    return p ? (Array.from(p.children).filter(c => isBlock(c)) as HTMLElement[]) : []
-  }
-
-  function onDragOver(ev: DragEvent) {
-    if (!dragEl) return
-    ev.preventDefault()
-    const sibs = siblingsOf(dragEl)
-    const y = ev.clientY
-    // 找当前命中的兄弟节点（除拖拽体本身）
-    let target: HTMLElement | null = null
-    for (const s of sibs) {
-      if (s === dragEl) continue
-      const r = s.getBoundingClientRect()
-      if (y >= r.top && y <= r.bottom) {
-        target = s
-        break
+    if (typeof data?.index !== 'number' || !editor) return
+    const mods = moduleNodes()
+    const m = mods[data.index]
+    if (!m) return
+    try {
+      const el = editor.view.domAtPos(m.pos).node as HTMLElement
+      const scroller = DOMTree.value
+      if (scroller && scroller.scrollHeight > scroller.clientHeight) {
+        scroller.scrollTo({ top: Math.max(0, el.offsetTop - 56), behavior: 'smooth' })
+      } else {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }
+    } catch {
+      /* node may not be mounted yet */
     }
-    if (!target) return
-    const r = target.getBoundingClientRect()
-    const before = y < r.top + r.height / 2
-    sibs.forEach(s => s.classList.remove('is-draggable-hover'))
-    if (before && target.previousElementSibling === dragEl) return
-    if (!before && target.nextElementSibling === dragEl) return
-    target.parentElement?.insertBefore(dragEl, before ? target : target.nextSibling)
-    target.classList.add('is-draggable-hover')
   }
 
-  // 生产同款空段落浮层：光标停在顶层空块时弹出 block-menu（正文/模块标题/小标题/左右布局/空白符）
+  // ===== 空段落 block-menu：光标停在顶层空块 → 弹 insert 菜单（生产同款） =====
   let blockMenuTimer = 0
   function onSelectionChange() {
-    const root = DOMTree.value
-    if (!root) return
+    if (!editor) return
     window.clearTimeout(blockMenuTimer)
     blockMenuTimer = window.setTimeout(() => {
-      const sel = window.getSelection()
-      if (!sel || !sel.isCollapsed || !sel.rangeCount) return
-      const node = sel.anchorNode
-      const el = (node?.nodeType === 1 ? node : node?.parentElement) as HTMLElement | null
-      if (!el || !root.contains(el)) return
-      // 找到直属 root 的块级祖先
-      let block = el
-      while (block.parentElement && block.parentElement !== root) {
-        block = block.parentElement
+      const { $from, empty } = editor!.state.selection
+      if (!empty) return
+      // 只认顶层或包装节点内的空段落（H/P 级块）
+      const node = $from.parent
+      if (node.textContent.trim() || !['paragraph', 'heading'].includes(node.type.name)) return
+      // 排除表格/列表内部的段落
+      for (let d = $from.depth; d > 0; d--) {
+        const n = $from.node(d)
+        if (['tableCell', 'tableHeader', 'listItem'].includes(n.type.name)) return
       }
-      if (block.parentElement !== root) return
-      const isText =
-        !block.textContent?.trim() &&
-        ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(block.tagName)
-      if (!isText) return
-      const r = block.getBoundingClientRect()
+      const el = editor!.view.domAtPos($from.before()).node as HTMLElement
       window.dispatchEvent(
         new CustomEvent('side-tool-menu-trigger', {
-          detail: { mode: 'block', block, anchorRect: r }
+          detail: {
+            mode: 'block',
+            pos: $from.before(),
+            node,
+            anchorRect: el.getBoundingClientRect(),
+            el
+          }
         })
       )
     }, 120)
   }
 
-  // 生产同款粘贴图片：剪贴板含图片文件 → 上传(KV图床，未登录dataURL兜底) → 插入
+  // ===== 粘贴图片（生产同款）：上传 KV 图床，未登录 dataURL 兜底 → 插入 image 节点 =====
   async function onPaste(ev: ClipboardEvent) {
     const file = Array.from(ev.clipboardData?.files || []).find(f => f.type.startsWith('image/'))
-    if (!file) return
+    if (!file || !editor) return
     ev.preventDefault()
     let url = ''
     try {
@@ -339,87 +173,74 @@ export function useToggleEditorMode(resumeType: string) {
         fr.readAsDataURL(file)
       })
     }
-    const img = document.createElement('img')
-    img.src = url
-    img.alt = file.name || 'image'
-    img.style.maxWidth = '100%'
-    const sel = getSelection()
-    const r = sel?.rangeCount ? sel.getRangeAt(0) : null
-    if (r && DOMTree.value?.contains(r.commonAncestorContainer)) {
-      r.deleteContents()
-      r.insertNode(img)
-      r.setStartAfter(img)
-      r.collapse(true)
-      sel?.removeAllRanges()
-      sel?.addRange(r)
-    } else {
-      DOMTree.value?.appendChild(img)
-    }
-    ObserverContent()
+    editor
+      .chain()
+      .focus()
+      .setImage({ src: url, alt: file.name || 'image' })
+      .run()
+  }
+
+  // ===== 编辑器挂载 =====
+  const fillContent = () => {
+    if (!editorStore.writable || !editor) return
+    nextTick(() => {
+      const ref = queryDOM('.reference-dom') as HTMLElement | null
+      if (!ref) return
+      editor!.commands.setContent(ref.innerHTML)
+    })
   }
 
   onMounted(() => {
-    const root = DOMTree.value
-    if (root) {
-      root.addEventListener('dragover', onDragOver)
-      root.addEventListener('paste', onPaste)
-      document.addEventListener('selectionchange', onSelectionChange)
-      modChannel = new BroadcastChannel('resume-module-scroll')
-      modChannel.addEventListener('message', onChannelMsg)
-      // 新建节点（回车拆段等）出现时补挂手柄 + 模块钮
-      new MutationObserver(muts => {
-        const need = muts.some(
-          m =>
-            m.addedNodes.length &&
-            !Array.from(m.addedNodes).every(n => (n as HTMLElement).classList?.contains(HANDLE))
-        )
-        if (need) {
-          injectHandles()
-          bindModuleOps()
-        }
-      }).observe(root, { childList: true, subtree: true })
-    }
+    const host = DOMTree.value
+    if (!host) return
+    const mount = document.createElement('div')
+    host.appendChild(mount)
+    editor = new Editor({
+      element: mount,
+      extensions: [...resumeExtensions, DragHandle, TrailingNode, ModuleOps],
+      content: '',
+      editorProps: {
+        attributes: { class: 'tiptap', spellcheck: 'false' }
+      },
+      onUpdate: () => ObserverContent(),
+      onCreate: () => fillContent()
+    })
+    setPMEditor(editor)
+    host.addEventListener('paste', onPaste)
+    document.addEventListener('selectionchange', onSelectionChange)
+    window.addEventListener('module-op', onModuleOp)
+    modChannel = new BroadcastChannel('resume-module-scroll')
+    modChannel.addEventListener('message', onChannelMsg)
   })
+
   onBeforeUnmount(() => {
     document.removeEventListener('selectionchange', onSelectionChange)
     modChannel?.removeEventListener('message', onChannelMsg)
     modChannel?.close()
-    clearModOps()
+    DOMTree.value?.removeEventListener('paste', onPaste)
+    window.removeEventListener('module-op', onModuleOp)
+    editor?.destroy()
+    editor = null
+    setPMEditor(null)
   })
 
-  const fillContent = () => {
-    if (editorStore.writable) {
-      nextTick(() => {
-        ;(DOMTree.value as HTMLElement).innerHTML = (<HTMLElement>(
-          queryDOM('.reference-dom')
-        )).innerHTML
-        injectHandles()
-        bindModuleOps()
-      })
-    }
-  }
+  onActivated(fillContent)
 
-  // 撤销/重做：恢复 md 快照并从预览 DOM 回填（fromHistory 旁路不再入栈）
+  // 撤销/重做：PM history 原生（生产同款）
   const undo = () => {
-    const prev = editorStore.undo()
-    if (prev == null) return
-    editorStore.setMDContent(prev, resumeType, true)
-    nextTick(fillContent)
+    editor?.commands.undo()
   }
   const redo = () => {
-    const next = editorStore.redo()
-    if (next == null) return
-    editorStore.setMDContent(next, resumeType, true)
-    nextTick(fillContent)
+    editor?.commands.redo()
   }
 
-  onMounted(fillContent)
-  onActivated(fillContent)
   return {
     editorStore,
     DOMTree,
     ObserverContent,
     undo,
-    redo
+    redo,
+    moveModulePos,
+    removeModulePos
   }
 }

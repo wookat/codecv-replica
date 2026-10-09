@@ -1,20 +1,32 @@
 <script setup lang="ts">
-// 生产同款 side-tool-floating-menu：
+// 生产同款 side-tool-floating-menu（ProseMirror 引擎版）：
 //  - row-actions 模式（点 ⋮⋮ 手柄）: 创建副本/复制为Markdown/复制纯文本 | 上移/下移 | 列块操作 | 删除
 //  - insert 模式（点 + 钮）: 正文/模块标题/小标题 + 插入左右布局 + 插入空白符
 //  - block 模式（光标停在空段落）: 正文/模块标题/小标题 + 插入左右布局 + 插入空白符
-import { nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { resumeDOMStruct2Markdown } from '@/utils/dom2md'
 import { successMessage } from '@/common/message'
+import { getPMEditor } from './pm/useEditor'
+import type { Node as PMNode } from '@tiptap/pm/model'
 
 interface MenuState {
   visible: boolean
   mode: 'row-actions' | 'insert' | 'block'
   top: number
   left: number
-  block: HTMLElement | null
+  pos: number
+  node: PMNode | null
+  el: HTMLElement | null
 }
-const state = reactive<MenuState>({ visible: false, mode: 'insert', top: 0, left: 0, block: null })
+const state = reactive<MenuState>({
+  visible: false,
+  mode: 'insert',
+  top: 0,
+  left: 0,
+  pos: -1,
+  node: null,
+  el: null
+})
 const menuRef = ref<HTMLElement>()
 
 const INSERT_ITEMS = [
@@ -25,8 +37,16 @@ const INSERT_ITEMS = [
   { key: 'nbsp', label: '插入空白符，保留空行', en: 'insert nbsp', icon: true }
 ]
 
-function open(detail: { mode: MenuState['mode']; block: HTMLElement; anchorRect: DOMRect }) {
-  state.block = detail.block
+function open(detail: {
+  mode: MenuState['mode']
+  pos: number
+  node: PMNode
+  anchorRect: DOMRect
+  el: HTMLElement
+}) {
+  state.pos = detail.pos
+  state.node = detail.node
+  state.el = detail.el
   state.mode = detail.mode
   const r = detail.anchorRect
   state.top = Math.min(window.innerHeight - 320, r.bottom + 8)
@@ -35,11 +55,11 @@ function open(detail: { mode: MenuState['mode']; block: HTMLElement; anchorRect:
 }
 function onTrigger(ev: Event) {
   const d = (ev as CustomEvent).detail
-  if (d?.block) open(d)
+  if (d?.node && d.pos != null) open(d)
 }
 function close() {
   state.visible = false
-  state.block = null
+  state.node = null
 }
 function onDocDown(ev: MouseEvent) {
   const t = ev.target as HTMLElement
@@ -63,43 +83,68 @@ onBeforeUnmount(() => {
   document.removeEventListener('scroll', close, true)
 })
 
-function siblings(): HTMLElement[] {
-  const b = state.block
-  if (!b?.parentElement) return []
-  return Array.from(b.parentElement.children).filter(
-    c => !c.classList.contains('drag-handle')
-  ) as HTMLElement[]
+// ---------- PM 节点工具 ----------
+const ed = () => getPMEditor()
+function $pos() {
+  const e = ed()
+  if (!e || state.pos < 0) return null
+  return e.state.doc.resolve(Math.min(state.pos, e.state.doc.content.size))
 }
-const isFirst = () => siblings()[0] === state.block
-const isLast = () => siblings()[siblings().length - 1] === state.block
-const inFlex = () => !!state.block?.parentElement?.classList.contains('flex-layout')
+const isFirst = () => !$pos()?.nodeBefore
+const isLast = () => !$pos()?.nodeAfter
+const flexLayoutPosOf = () => {
+  // 当前块本身是 flexLayout，或在 flexItem 里（其父是 flexLayout）
+  const e = ed()
+  const $p = $pos()
+  if (!e || !$p) return -1
+  const n = state.node
+  if (n?.type.name === 'flexLayout') return state.pos
+  for (let d = $p.depth; d >= 0; d--) {
+    if ($p.node(d).type.name === 'flexLayout') return $p.before(d)
+  }
+  return -1
+}
+const inFlex = () => flexLayoutPosOf() >= 0
 
-function sync() {
-  // 变更落回 md：交给编辑器 input 监听（writable 模式 input 冒泡已接 ObserverContent）
-  const b = state.block
-  if (!b) return
-  const root = b.closest('.writable-edit-mode')
-  nextTick(() => root?.dispatchEvent(new Event('input', { bubbles: true })))
+// 与邻近节点交换（上移/下移）
+function swap(dir: -1 | 1) {
+  const e = ed()
+  const $p = $pos()
+  const n = state.node
+  if (!e || !$p || !n) return
+  const sib = dir < 0 ? $p.nodeBefore : $p.nodeAfter
+  if (!sib) return
+  const tr = e.state.tr
+  if (dir < 0) {
+    tr.delete(state.pos, state.pos + n.nodeSize)
+    tr.insert(state.pos - sib.nodeSize, n)
+  } else {
+    tr.delete(state.pos, state.pos + n.nodeSize)
+    tr.insert(state.pos + sib.nodeSize, n)
+  }
+  e.view.dispatch(tr.scrollIntoView())
 }
 
 function act(key: string) {
-  const b = state.block
-  if (!b) return close()
+  const e = ed()
+  const n = state.node
+  if (!e || !n || state.pos < 0) return close()
+  const doc = e.state.doc
   switch (key) {
     case 'copy': {
-      const c = b.cloneNode(true) as HTMLElement
-      c.querySelectorAll('.drag-handle').forEach(e => e.remove())
-      b.parentElement?.insertBefore(c, b.nextSibling)
+      // 创建副本：紧邻原节点后插入同内容节点
+      const ins = Math.min(state.pos + n.nodeSize, doc.content.size)
+      e.chain().focus().insertContentAt(ins, n.toJSON()).run()
       break
     }
     case 'copyMd': {
-      const c = b.cloneNode(true) as HTMLElement
-      c.querySelectorAll('.drag-handle').forEach(e => e.remove())
+      const el = state.el?.cloneNode(true) as HTMLElement
+      el?.querySelectorAll('.drag-handle,.mod-op,.ProseMirror-widget').forEach(x => x.remove())
       navigator.clipboard
         .writeText(
           resumeDOMStruct2Markdown({
-            parent: (b.parentElement as HTMLElement) || c,
-            node: c,
+            parent: (state.el?.parentElement as HTMLElement) || el,
+            node: el,
             latest: true,
             uid: 0,
             whiteSpace: 0
@@ -111,124 +156,120 @@ function act(key: string) {
     }
     case 'copyText': {
       navigator.clipboard
-        .writeText(b.innerText)
+        .writeText(n.textContent)
         .then(() => successMessage('已复制纯文本'))
         .catch(() => undefined)
       break
     }
     case 'moveUp':
-      b.previousElementSibling?.before(b)
+      swap(-1)
       break
     case 'moveDown':
-      b.nextElementSibling?.after(b)
+      swap(1)
       break
     case 'addCol': {
-      const fl = b.classList.contains('flex-layout') ? b : b.closest('.flex-layout')
+      const flPos = flexLayoutPosOf()
+      const fl = flPos >= 0 ? doc.nodeAt(flPos) : null
       if (fl) {
-        const item = document.createElement('div')
-        item.className = 'flex-layout-item'
-        item.innerHTML = '<p><br></p>'
-        fl.appendChild(item)
+        e.chain()
+          .insertContentAt(flPos + fl.nodeSize - 1, {
+            type: 'flexItem',
+            content: [{ type: 'paragraph' }]
+          })
+          .run()
       }
       break
     }
     case 'deleteLastCol': {
-      const fl = b.classList.contains('flex-layout') ? b : b.closest('.flex-layout')
-      const items = fl?.querySelectorAll(':scope > .flex-layout-item')
-      if (items && items.length > 1) items[items.length - 1].remove()
+      const flPos = flexLayoutPosOf()
+      const fl = flPos >= 0 ? doc.nodeAt(flPos) : null
+      if (fl && fl.childCount > 1) {
+        const last = fl.lastChild!
+        const lastPos = flPos + fl.nodeSize - 1 - last.nodeSize
+        e.chain()
+          .deleteRange({ from: lastPos, to: lastPos + last.nodeSize })
+          .run()
+      }
       break
     }
     case 'resetLayout': {
-      const fl = b.classList.contains('flex-layout') ? b : b.closest('.flex-layout')
-      fl?.querySelectorAll(':scope > .flex-layout-item').forEach(i => {
-        ;(i as HTMLElement).style.flex = ''
-      })
+      const flPos = flexLayoutPosOf()
+      const fl = flPos >= 0 ? doc.nodeAt(flPos) : null
+      if (fl) {
+        const tr = e.state.tr
+        fl.forEach((child, offset) => {
+          tr.setNodeMarkup(flPos + 1 + offset, undefined, { ...child.attrs, style: null })
+        })
+        e.view.dispatch(tr)
+      }
       break
     }
     case 'delete':
-      b.remove()
+      e.chain()
+        .deleteRange({ from: state.pos, to: state.pos + n.nodeSize })
+        .run()
       break
   }
   close()
-  sync()
 }
 
 function insert(key: string) {
-  const b = state.block
-  if (!b) return close()
-  if (state.mode === 'block' && b.tagName === 'P' && !b.textContent?.trim()) {
-    // 空块转换类型
-    if (key === 'p') {
-      close()
-      return
-    }
+  const e = ed()
+  const n = state.node
+  if (!e || !n || state.pos < 0) return close()
+  const doc = e.state.doc
+
+  // block 模式：空段落 → 转换/替换
+  if (state.mode === 'block' && n.type.name === 'paragraph' && !n.textContent.trim()) {
+    if (key === 'p') return close()
     if (key === 'h2' || key === 'h3') {
-      const h = document.createElement(key)
-      h.innerHTML = '<br>'
-      b.replaceWith(h)
-      placeCaret(h)
-      close()
-      sync()
-      return
+      e.chain()
+        .focus()
+        .setNode('heading', { level: +key[1] as 2 | 3 })
+        .run()
+    } else if (key === 'nbsp') {
+      e.chain()
+        .insertContentAt(state.pos + 1, '\u00a0')
+        .run()
+    } else if (key === 'cols') {
+      e.chain()
+        .insertContentAt(state.pos, {
+          type: 'flexLayout',
+          content: [
+            { type: 'flexItem', content: [{ type: 'paragraph' }] },
+            { type: 'flexItem', content: [{ type: 'paragraph' }] }
+          ]
+        })
+        .run()
     }
-    if (key === 'nbsp') {
-      b.innerHTML = '&nbsp;'
-      close()
-      sync()
-      return
-    }
-    if (key === 'cols') {
-      const fl = document.createElement('div')
-      fl.className = 'flex-layout'
-      fl.innerHTML =
-        '<div class="flex-layout-item"><p><br></p></div><div class="flex-layout-item"><p><br></p></div>'
-      b.replaceWith(fl)
-      const p = fl.querySelector('p')
-      if (p) placeCaret(p)
-      close()
-      sync()
-      return
-    }
-    close()
-    return
+    return close()
   }
-  // insert 模式：在该块之后插入
-  const mk = (el: HTMLElement) => {
-    b.parentElement?.insertBefore(el, b.nextSibling)
-    return el
-  }
+
+  // insert 模式：该块之后插入
+  const ins = Math.min(state.pos + n.nodeSize, doc.content.size)
   if (key === 'p' || key === 'h2' || key === 'h3') {
-    const el = document.createElement(key === 'p' ? 'p' : key)
-    el.innerHTML = '<br>'
-    mk(el)
-    placeCaret(el)
+    const content =
+      key === 'p' ? { type: 'paragraph' } : { type: 'heading', attrs: { level: +key[1] } }
+    e.chain().focus().insertContentAt(ins, content).run()
   } else if (key === 'cols') {
-    const fl = document.createElement('div')
-    fl.className = 'flex-layout'
-    fl.innerHTML =
-      '<div class="flex-layout-item"><p><br></p></div><div class="flex-layout-item"><p><br></p></div>'
-    mk(fl)
-    const p = fl.querySelector('p')
-    if (p) placeCaret(p)
+    e.chain()
+      .focus()
+      .insertContentAt(ins, {
+        type: 'flexLayout',
+        content: [
+          { type: 'flexItem', content: [{ type: 'paragraph' }] },
+          { type: 'flexItem', content: [{ type: 'paragraph' }] }
+        ]
+      })
+      .run()
   } else if (key === 'nbsp') {
-    const el = document.createElement('p')
-    el.innerHTML = '&nbsp;'
-    mk(el)
-    placeCaret(el)
+    e.chain().focus().insertContentAt(ins, { type: 'paragraph', content: [] }).run()
+    // 在段首填 &nbsp;
+    e.chain()
+      .insertContentAt(ins + 1, '\u00a0')
+      .run()
   }
   close()
-  sync()
-}
-
-function placeCaret(el: HTMLElement) {
-  nextTick(() => {
-    const range = document.createRange()
-    range.selectNodeContents(el)
-    range.collapse(false)
-    const sel = window.getSelection()
-    sel?.removeAllRanges()
-    sel?.addRange(range)
-  })
 }
 </script>
 
@@ -282,7 +323,7 @@ function placeCaret(el: HTMLElement) {
               <path d="M12 5v14m-7-7l7 7 7-7" /></svg
             ><span>下移</span>
           </button>
-          <template v-if="inFlex() || state.block?.classList.contains('flex-layout')">
+          <template v-if="inFlex() || state.node?.type.name === 'flexLayout'">
             <div class="divider"></div>
             <button class="item" @click="act('addCol')">
               <i class="iconfont icon-add item-icon"></i><span>右侧加一列</span>

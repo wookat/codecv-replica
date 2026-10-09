@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // 生产同款 resizable-image：点击编辑器内图片 → 框选 + 右下角拖拽手柄缩放（宽度百分比）
 import { onBeforeUnmount, onMounted, reactive } from 'vue'
+import { getPMEditor } from './pm/useEditor'
 
 const state = reactive({ visible: false, top: 0, left: 0, width: 0, height: 0 })
 let target: HTMLImageElement | null = null
@@ -62,6 +63,26 @@ function endDrag() {
   drag = null
   document.removeEventListener('mousemove', onMove, true)
   document.removeEventListener('mouseup', endDrag, true)
+  // PM：style 落进 image 节点 attrs，防止下次渲染回滚
+  const e = getPMEditor()
+  if (e && target) {
+    try {
+      const pos = e.view.posAtDOM(target, -1)
+      const node = pos >= 0 ? e.state.doc.nodeAt(pos) : null
+      if (node?.type.name === 'image') {
+        e.view.dispatch(
+          e.state.tr.setNodeMarkup(pos, undefined, {
+            ...node.attrs,
+            style: target.getAttribute('style') || null
+          })
+        )
+        frame()
+        return
+      }
+    } catch {
+      /* fallback */
+    }
+  }
   target?.closest('.writable-edit-mode')?.dispatchEvent(new Event('input', { bubbles: true }))
 }
 onMounted(() => {

@@ -4,6 +4,7 @@ import useEditorStore from '@/store/modules/editor'
 import { clickedTarget, ensureResetClickedTarget } from '../../../hook'
 import { reset } from './components/linkInput/hook'
 import { createText, queryDOM } from '@/utils'
+import { getPMEditor } from '../rich-editor/pm/useEditor'
 
 // 标题级别控制
 export const level = ref('普通文本')
@@ -33,11 +34,34 @@ export function useHeading(emit: any) {
 export const selectIcon = ref(false)
 export function insertIcon(iconName: string, emit: any) {
   selectIcon.value = !selectIcon.value
-  // 内容模式：直接点击Icon进行替换的情况
+  const pm = getPMEditor()
+  // 内容模式：直接点击Icon进行替换的情况 → 更新 icon 节点 attrs
   if (clickedTarget.value) {
-    clickedTarget.value.className = `iconfont icon-${iconName}`
+    if (pm) {
+      try {
+        const pos = pm.view.posAtDOM(clickedTarget.value as HTMLElement, -1)
+        const node = pos >= 0 ? pm.state.doc.nodeAt(pos) : null
+        if (node?.type.name === 'icon') {
+          pm.view.dispatch(
+            pm.state.tr.setNodeMarkup(pos, undefined, { ...node.attrs, name: iconName })
+          )
+        }
+      } catch {
+        /* fallback */
+      }
+    } else {
+      clickedTarget.value.className = `iconfont icon-${iconName}`
+    }
     emit('content-change')
     clickedTarget.value = null
+    return
+  }
+  if (pm) {
+    pm.chain()
+      .focus()
+      .insertContent({ type: 'icon', attrs: { name: iconName } })
+      .run()
+    emit('content-change')
     return
   }
   const icon = document.createElement('span')
@@ -49,12 +73,23 @@ export function insertIcon(iconName: string, emit: any) {
 export const linkFlag = ref(false)
 export function insertLink(url: string, text: string, emit: any) {
   linkFlag.value = !linkFlag.value
+  const pm = getPMEditor()
   // 内容模式：直接点击编辑超链接的情况
   if (clickedTarget.value) {
-    clickedTarget.value.setAttribute('href', url)
-    clickedTarget.value.textContent = text
+    if (pm) {
+      pm.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
+    } else {
+      clickedTarget.value.setAttribute('href', url)
+      clickedTarget.value.textContent = text
+    }
     emit('content-change')
     clickedTarget.value = null
+    return
+  }
+  if (pm) {
+    restoreCursorPosition()
+    pm.chain().focus().insertContent(`<a href="${url}">${text}</a>`).run()
+    emit('content-change')
     return
   }
   restoreCursorPosition()
@@ -70,6 +105,22 @@ export const MulFlag = ref(false)
 export function insertMulticolumn(column: string, emit: any) {
   MulFlag.value = !MulFlag.value
   restoreCursorPosition()
+  const pm = getPMEditor()
+  if (pm) {
+    const columnCount = parseInt(column)
+    pm.chain()
+      .focus()
+      .insertContent({
+        type: 'flexLayout',
+        content: Array.from({ length: columnCount }, () => ({
+          type: 'flexItem',
+          content: [{ type: 'paragraph' }]
+        }))
+      })
+      .run()
+    emit('content-change')
+    return
+  }
   const columnCount = parseInt(column)
   const columnWidth = 100 / columnCount
   const placeholders = Array(columnCount)
@@ -92,6 +143,12 @@ export const tableFlag = ref(false)
 export function InsertTable(col: string, row: string, emit: any) {
   tableFlag.value = !tableFlag.value
   restoreCursorPosition()
+  const pm = getPMEditor()
+  if (pm) {
+    pm.chain().focus().insertTable({ rows: +row, cols: +col, withHeaderRow: true }).run()
+    emit('content-change')
+    return
+  }
   const columnCount = +col,
     rowCount = +row
   const thead = Array(columnCount)
@@ -115,6 +172,16 @@ export function InsertTable(col: string, row: string, emit: any) {
 }
 
 export function InsertUserInfo() {
+  const pm = getPMEditor()
+  if (pm) {
+    pm.chain()
+      .focus()
+      .insertContent(
+        '<div class="head-layout"><h1>在此处可以编辑个人信息...</h1></div><p>这是容器外部,要写在外面的内容从这里开始写...</p>'
+      )
+      .run()
+    return
+  }
   const info = document.createElement('div')
   info.innerHTML =
     "<div class='head-layout'><h1>在此处可以编辑个人信息...</h1></div><br /><p>这是容器外部,要写在外面的内容从这里开始写...</p>"
@@ -122,6 +189,11 @@ export function InsertUserInfo() {
 }
 // 插入技能点（单个代码块）
 export function insertCode() {
+  const pm = getPMEditor()
+  if (pm) {
+    pm.chain().focus().insertContent('<code class="single-code">xxx</code>\u00a0').run()
+    return
+  }
   // 创建一个包含多列布局的临时div元素
   const code = document.createElement('span')
   code.innerHTML = `<code class='single-code'>xxx</code>&nbsp;`
@@ -204,9 +276,24 @@ export function useToolBarConfig(emit: any) {
       case 'toMarkdownMode':
         emit('toggle-editor-mode')
         break
-      default:
-        document.execCommand(command, false, undefined)
+      default: {
+        const pm = getPMEditor()
+        if (pm) {
+          const map: Record<string, () => void> = {
+            bold: () => pm.chain().focus().toggleBold().run(),
+            italic: () => pm.chain().focus().toggleItalic().run(),
+            underline: () => pm.chain().focus().toggleUnderline().run(),
+            strikeThrough: () => pm.chain().focus().toggleStrike().run(),
+            insertOrderedList: () => pm.chain().focus().toggleOrderedList().run(),
+            insertUnorderedList: () => pm.chain().focus().toggleBulletList().run(),
+            removeFormat: () => pm.chain().focus().unsetAllMarks().run()
+          }
+          map[command]?.()
+        } else {
+          document.execCommand(command, false, undefined)
+        }
         break
+      }
     }
     ;['insertUserInfo', 'insertCode', 'breakLayout'].includes(command) && emit('content-change')
     editor.focus()
@@ -255,12 +342,19 @@ function reductionSelection(target: Node) {
 }
 
 let cursorPosition: {
-  startContainer: Node | undefined
-  startOffset: number | undefined
-  endContainer: Node | undefined
-  endOffset: number | undefined
+  startContainer?: Node
+  startOffset?: number
+  endContainer?: Node
+  endOffset?: number
+  pm?: { from: number; to: number }
 } | null
 function saveCursorPosition() {
+  const pm = getPMEditor()
+  if (pm) {
+    const { from, to } = pm.state.selection
+    cursorPosition = { pm: { from, to } }
+    return cursorPosition
+  }
   const selection = getSelection()
   const range = selection?.getRangeAt(0)
   const startContainer = range?.startContainer
@@ -277,6 +371,13 @@ function saveCursorPosition() {
 
 function restoreCursorPosition() {
   if (!cursorPosition) return
+  const pm = getPMEditor()
+  if (pm && cursorPosition.pm) {
+    const { from, to } = cursorPosition.pm
+    pm.chain().focus().setTextSelection({ from, to }).run()
+    cursorPosition = null
+    return
+  }
   const selection = getSelection()
   const newRange = new Range()
   newRange.setStart(<Node>cursorPosition.startContainer, <number>cursorPosition.startOffset)

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // 生产同款 tag-style-panel：点击编辑器内 <code> 技能点 → 预设色 chips + 自定义文字/背景色
 import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { getPMEditor } from './pm/useEditor'
 
 const CHIPS = [
   { name: '默认', text: '', bg: '' },
@@ -59,8 +60,57 @@ function close() {
 function sync() {
   target?.closest('.writable-edit-mode')?.dispatchEvent(new Event('input', { bubbles: true }))
 }
+// PM：样式写进 code mark attrs（DOM 直改会被渲染回滚）
+function applyToPM(cssText: string) {
+  const e = getPMEditor()
+  if (!e || !target) return false
+  try {
+    const pos = e.view.posAtDOM(target, 0)
+    const $p = e.state.doc.resolve(pos)
+    const mark = $p.marks().find(m => m.type.name === 'code')
+    if (!mark) return false
+    // 该 code mark 的覆盖范围
+    let from = pos
+    let to = pos
+    const parent = $p.parent
+    const off = $p.parentOffset
+    parent.nodesBetween(off, off, (node, p) => {
+      if (node.marks.some(m => m.eq(mark))) {
+        from = $p.start() + p
+      }
+      return true
+    })
+    // 简化：以光标处 mark range 为准
+    const range = ((): { from: number; to: number } | null => {
+      let f = pos
+      let t = pos
+      parent.forEach((node, p2) => {
+        const s = $p.start() + p2
+        const epos = s + node.nodeSize
+        if (node.isText && node.marks.some(m => m.eq(mark)) && pos >= s && pos <= epos) {
+          // 向两侧扩展同 mark 的连续文本
+          f = s
+          t = epos
+        }
+      })
+      return f < t ? { from: f, to: t } : null
+    })()
+    if (!range) return false
+    const attrs = { ...mark.attrs, style: cssText }
+    e.view.dispatch(
+      e.state.tr
+        .removeMark(range.from, range.to, e.state.schema.marks.code)
+        .addMark(range.from, range.to, e.state.schema.marks.code.create(attrs))
+    )
+    return true
+  } catch {
+    return false
+  }
+}
 function apply(text: string, bgc: string) {
   if (!target) return
+  const css = `color:${text || 'inherit'};background:${bgc || 'rgba(0,0,0,0.06)'}`
+  if (applyToPM(!text && !bgc ? '' : css)) return
   target.style.color = text
   target.style.background = bgc || 'rgba(0,0,0,0.06)'
   if (!text && !bgc) {
@@ -71,11 +121,17 @@ function apply(text: string, bgc: string) {
 }
 function applyFg() {
   if (!target) return
+  const css = target.getAttribute('style') || ''
+  const next = css.replace(/color:[^;]+;?/, '') + `color:${fg.value};`
+  if (applyToPM(next)) return
   target.style.color = fg.value
   sync()
 }
 function applyBg() {
   if (!target) return
+  const css = target.getAttribute('style') || ''
+  const next = css.replace(/background:[^;]+;?/, '') + `background:${bg.value};`
+  if (applyToPM(next)) return
   target.style.background = bg.value
   sync()
 }

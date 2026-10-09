@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useToggleEditorMode } from './hook'
+import { getPMEditor } from './pm/useEditor'
 import { checkMouseSelect, selectIcon } from '../toolbar/hook'
 import { useResumeType } from '../../../hook'
 import RichToolbar from '../toolbar/richTool.vue'
@@ -38,12 +39,13 @@ if (localStorage.getItem('editor-theme') === 'dark') {
   isDark.value = true
 }
 
-// 撤销/重做可用态（生产同款禁用半透明）——跟 md 快照栈联动，execCommand 不可用
+// 撤销/重做可用态（生产同款禁用半透明）——PM history 原生驱动
 const canUndo = ref(false)
 const canRedo = ref(false)
 const refreshUndo = () => {
-  canUndo.value = editorStore.history.length > 0
-  canRedo.value = editorStore.future.length > 0
+  const e = getPMEditor()
+  canUndo.value = !!e?.can().undo()
+  canRedo.value = !!e?.can().redo()
 }
 const redo = () => {
   storeRedo()
@@ -96,12 +98,11 @@ onBeforeUnmount(() => clearInterval(undoTimer))
   <ImgResize />
   <SlashMenu />
   <BubbleMenu />
+  <!-- tiptap/ProseMirror 引擎挂载在此容器内（.tiptap.ProseMirror 为文档根） -->
   <div
     ref="DOMTree"
     @click="checkMouseSelect"
-    @input="ObserverContent"
     class="writable-edit-mode"
-    contenteditable
     spellcheck="false"
     @keyup="refreshUndo"
     :style="{ height: 'calc(100vh - 88px)', width: `${left}px`, overflowY: 'scroll' }"

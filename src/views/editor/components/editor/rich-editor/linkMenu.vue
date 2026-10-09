@@ -2,6 +2,7 @@
 // 生产同款 LinkMenu：光标进入链接 → 浮层 [icon + href | 打开链接 | 复制链接 | 移除链接]
 import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { successMessage } from '@/common/message'
+import { getPMEditor } from './pm/useEditor'
 
 const state = reactive({ visible: false, top: 0, left: 0, href: '' })
 const menuRef = ref<HTMLElement>()
@@ -53,14 +54,20 @@ function copyLink() {
   close()
 }
 function removeLink() {
-  if (!target) return close()
-  const frag = document.createDocumentFragment()
-  while (target.firstChild) frag.appendChild(target.firstChild)
-  target.replaceWith(frag)
+  const e = getPMEditor()
+  if (e) {
+    // PM：光标附近的 link mark 全域移除
+    const { from } = e.state.selection
+    e.chain().focus().setTextSelection(from).extendMarkRange('link').unsetLink().run()
+  } else if (target) {
+    const frag = document.createDocumentFragment()
+    while (target.firstChild) frag.appendChild(target.firstChild)
+    target.replaceWith(frag)
+    document
+      .querySelector('.writable-edit-mode')
+      ?.dispatchEvent(new Event('input', { bubbles: true }))
+  }
   close()
-  document
-    .querySelector('.writable-edit-mode')
-    ?.dispatchEvent(new Event('input', { bubbles: true }))
 }
 onMounted(() => {
   document.addEventListener('selectionchange', onSelectionChange)

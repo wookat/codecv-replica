@@ -2,6 +2,7 @@
 // 生产同款 column-resize：flex-layout 相邻卡片边界 ±8px 命中 → 拖拽改两栏百分比宽度
 // hover 时显示 .column-resize-line 竖线，拖动中显示 .column-resize-badge 百分比徽标，Esc 取消
 import { onBeforeUnmount, onMounted, reactive } from 'vue'
+import { getPMEditor } from './pm/useEditor'
 
 interface Hover {
   layout: HTMLElement
@@ -116,6 +117,26 @@ function onDragMove(ev: MouseEvent) {
   badge.text = `${leftPct} : ${rightPct}`
 }
 function endDrag() {
+  // PM：两栏宽度写进 flexItem 节点 style attr
+  const e = getPMEditor()
+  if (e && drag) {
+    for (const el of [drag.leftEl, drag.rightEl]) {
+      try {
+        const pos = e.view.posAtDOM(el, -1)
+        const node = pos >= 0 ? e.state.doc.nodeAt(pos) : null
+        if (node?.type.name === 'flexItem') {
+          e.view.dispatch(
+            e.state.tr.setNodeMarkup(pos, undefined, {
+              ...node.attrs,
+              style: el.getAttribute('style') || null
+            })
+          )
+        }
+      } catch {
+        /* skip */
+      }
+    }
+  }
   cleanup()
 }
 function onKey(ev: KeyboardEvent) {

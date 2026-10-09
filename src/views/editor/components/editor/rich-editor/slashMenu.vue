@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// 生产同款 / 斜杠命令菜单：行首输入 / 弹出，键入过滤（zh/en），↑↓ 选择，Enter 执行
+// 生产同款 / 斜杠命令菜单（ProseMirror 引擎版）：行首输入 / 弹出，键入过滤（zh/en），↑↓ 选择，Enter 执行
 import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { successMessage, errorMessage } from '@/common/message'
 import { getLocalStorage } from '@/common/localstorage'
@@ -7,6 +7,7 @@ import { TOKEN } from '@/store/modules/user'
 import { getPickerFile } from '@/utils/uploader'
 import { selectIcon, linkFlag } from '../toolbar/hook'
 import { reset } from '../toolbar/components/linkInput/hook'
+import { getPMEditor } from './pm/useEditor'
 
 interface Item {
   zh: string
@@ -24,91 +25,42 @@ const state = reactive({
   subOpen: false,
   grid: null as { row: number; col: number } | null
 })
-let anchorNode: Node | null = null // 命中的文本节点
-let matchStart = 0 // `/` 在文本中的下标
+// `/` 在 PM 文档中的位置（配合 $from 结算）
+let slashPos = -1
 
-/* ---------- 光标/工具 ---------- */
+/* ---------- 光标/PM 工具 ---------- */
+const ed = () => getPMEditor()
 const editorRoot = () => document.querySelector('.writable-edit-mode') as HTMLElement | null
-function sync() {
-  editorRoot()?.dispatchEvent(new Event('input', { bubbles: true }))
-}
 function caretRect(): DOMRect | null {
-  const sel = window.getSelection()
-  if (!sel?.rangeCount) return null
-  const r = sel.getRangeAt(0).cloneRange()
-  r.collapse(true)
-  const rects = r.getClientRects()
-  if (rects.length) return rects[0]
-  const el = (
-    r.startContainer.nodeType === 1 ? r.startContainer : r.startContainer.parentElement
-  ) as HTMLElement | null
-  return el?.getBoundingClientRect() || null
+  const e = ed()
+  if (!e) return null
+  return (e.view.coordsAtPos(e.state.selection.from) as unknown as DOMRect)
+    ? (() => {
+        const c = e.view.coordsAtPos(e.state.selection.from)
+        return {
+          top: c.top,
+          bottom: c.bottom,
+          left: c.left,
+          right: c.right,
+          x: c.left,
+          y: c.top,
+          width: 0,
+          height: c.bottom - c.top,
+          toJSON: () => ({})
+        } as DOMRect
+      })()
+    : null
 }
-function blockOf(node: Node | null): HTMLElement | null {
-  let el = (node?.nodeType === 1 ? node : node?.parentElement) as HTMLElement | null
-  const root = editorRoot()
-  while (el && el !== root && !/^(H[1-6]|P|UL|OL|BLOCKQUOTE|PRE|TABLE|DIV)$/.test(el.tagName)) {
-    el = el.parentElement
-  }
-  return el && el !== root ? el : null
-}
-// 删除 `/query` 文本并把光标留在该处
+// 删除 `/query` 文本并保留光标（PM deleteRange）
 function removeQuery() {
-  if (!anchorNode || anchorNode.nodeType !== 3) return
-  const text = anchorNode as Text
-  const sel = window.getSelection()
-  const caret = sel?.anchorOffset ?? text.length
-  text.data = text.data.slice(0, matchStart) + text.data.slice(caret)
-  if (!text.data.trim() && text.parentElement && text.parentElement.childNodes.length === 1) {
-    // 空段保留（光标留在空块里）
-  }
-  const r = document.createRange()
-  r.setStart(text, matchStart)
-  r.collapse(true)
-  sel?.removeAllRanges()
-  sel?.addRange(r)
+  const e = ed()
+  if (!e || slashPos < 0) return
+  const to = e.state.selection.from
+  if (to > slashPos) e.chain().focus().deleteRange({ from: slashPos, to }).run()
+  slashPos = -1
 }
-function placeCaret(el: Node) {
-  const r = document.createRange()
-  r.selectNodeContents(el)
-  r.collapse(false)
-  const s = window.getSelection()
-  s?.removeAllRanges()
-  s?.addRange(r)
-}
-function convertBlock(tag: string) {
-  const block = blockOf(anchorNode)
-  removeQuery()
-  if (block && block.tagName !== tag.toUpperCase()) {
-    const el = document.createElement(tag)
-    for (const c of Array.from(block.childNodes)) {
-      if ((c as HTMLElement).classList?.contains('drag-handle')) continue
-      el.appendChild(c)
-    }
-    block.replaceWith(el)
-    placeCaret(el)
-  }
-  sync()
-}
-function insertNode(node: Node, caretAfter = true) {
-  removeQuery()
-  const sel = window.getSelection()
-  let r = sel?.rangeCount ? sel.getRangeAt(0) : null
-  if (!r || !editorRoot()?.contains(r.commonAncestorContainer)) {
-    r = document.createRange()
-    r.selectNodeContents(editorRoot() as Node)
-    r.collapse(false)
-  }
-  r.deleteContents()
-  r.insertNode(node)
-  if (caretAfter) placeCaret(node)
-  sync()
-}
-function exec(cmd: string, arg?: string) {
-  removeQuery()
-  document.execCommand(cmd, false, arg)
-  sync()
-}
+const chain = () => ed()!.chain().focus()
+
 async function uploadImage(alt: string, cls = '') {
   removeQuery()
   try {
@@ -136,18 +88,20 @@ async function uploadImage(alt: string, cls = '') {
         fr.readAsDataURL(file)
       })
     }
-    const img = document.createElement('img')
-    img.src = url
-    img.alt = alt
-    img.style.maxWidth = '100%'
-    if (cls) img.className = cls
-    insertNode(img)
+    chain()
+      .setImage({ src: url, alt, class: cls || null, style: 'max-width:100%' } as never)
+      .run()
     successMessage('图片已插入')
   } catch {
     errorMessage('上传失败')
   }
 }
-const setHeading = (level: number) => () => convertBlock(`h${level}`)
+const setHeading = (level: number) => () => {
+  removeQuery()
+  chain()
+    .setNode('heading', { level: level as 1 | 2 | 3 | 4 | 5 | 6 })
+    .run()
+}
 const ITEMS: Item[] = [
   { zh: '模块标题', en: 'jianlimokuaibiaoti', icon: 'wrongly', act: setHeading(2) },
   {
@@ -155,13 +109,16 @@ const ITEMS: Item[] = [
     en: 'zuoyoubuju/column',
     icon: 'columns',
     act: () => {
-      const wrap = document.createElement('div')
-      wrap.className = 'flex-layout'
-      wrap.innerHTML =
-        '<div class="flex-layout-item"><p><br></p></div><div class="flex-layout-item"><p><br></p></div>'
-      insertNode(wrap, false)
-      placeCaret(wrap.querySelector('.flex-layout-item p') || wrap)
-      sync()
+      removeQuery()
+      chain()
+        .insertContent({
+          type: 'flexLayout',
+          content: [
+            { type: 'flexItem', content: [{ type: 'paragraph' }] },
+            { type: 'flexItem', content: [{ type: 'paragraph' }] }
+          ]
+        })
+        .run()
     }
   },
   {
@@ -192,60 +149,71 @@ const ITEMS: Item[] = [
     sub: 'table',
     act: (rows = 3, cols = 3) => {
       // prod: insertTable({rows,cols,withHeaderRow:true})
-      const table = document.createElement('table')
-      table.style.width = '100%'
-      const tbody = document.createElement('tbody')
-      for (let r = 0; r < rows; r++) {
-        const tr = document.createElement('tr')
-        for (let c = 0; c < cols; c++) {
-          const cell = document.createElement(r === 0 ? 'th' : 'td')
-          cell.innerHTML = '<br>'
-          tr.appendChild(cell)
-        }
-        tbody.appendChild(tr)
-      }
-      table.appendChild(tbody)
-      insertNode(table, false)
-      const p = document.createElement('p')
-      p.innerHTML = '<br>'
-      insertNode(p)
+      removeQuery()
+      chain().insertTable({ rows, cols, withHeaderRow: true }).run()
     }
   },
   {
     zh: '插入空白符',
     en: 'kongbaifu/space',
     icon: 'space',
-    act: () => insertNode(document.createTextNode(' '))
+    act: () => {
+      removeQuery()
+      chain().insertContent('\u00a0').run()
+    }
   },
-  { zh: '加粗', en: 'jiacu/bold', icon: 'bold', act: () => exec('bold') },
-  { zh: '斜体', en: 'xieti/italic', icon: 'italic', act: () => exec('italic') },
-  { zh: '引用', en: 'yinyong/quote', icon: 'quote', act: () => exec('formatBlock', 'blockquote') },
+  {
+    zh: '加粗',
+    en: 'jiacu/bold',
+    icon: 'bold',
+    act: () => {
+      removeQuery()
+      chain().toggleBold().run()
+    }
+  },
+  {
+    zh: '斜体',
+    en: 'xieti/italic',
+    icon: 'italic',
+    act: () => {
+      removeQuery()
+      chain().toggleItalic().run()
+    }
+  },
+  {
+    zh: '引用',
+    en: 'yinyong/quote',
+    icon: 'quote',
+    act: () => {
+      removeQuery()
+      chain().toggleBlockquote().run()
+    }
+  },
   {
     zh: '水平分割线',
     en: 'fengexian/horizontal',
     icon: 'segment',
     act: () => {
-      insertNode(document.createElement('hr'))
-      const p = document.createElement('p')
-      p.innerHTML = '<br>'
-      insertNode(p)
+      removeQuery()
+      chain().setHorizontalRule().run()
     }
   },
-  { zh: '删除线', en: 'shanchuxian/', icon: 'strike', act: () => exec('strikeThrough') },
+  {
+    zh: '删除线',
+    en: 'shanchuxian/',
+    icon: 'strike',
+    act: () => {
+      removeQuery()
+      chain().toggleStrike().run()
+    }
+  },
   {
     zh: '标签',
     en: 'biaoqian/code',
     icon: 'code',
     act: () => {
       removeQuery()
-      const code = document.createElement('code')
-      code.className = 'single-code'
-      code.textContent = '标签'
-      insertNode(code, false)
-      placeCaret(code)
-      const sel = window.getSelection()
-      sel?.selectAllChildren(code)
-      sync()
+      chain().insertContent('<code class="single-code">标签</code>').run()
     }
   },
   {
@@ -262,13 +230,19 @@ const ITEMS: Item[] = [
     zh: '有序列表',
     en: 'youxuliebiao/orderlist',
     icon: 'orderedlist',
-    act: () => exec('insertOrderedList')
+    act: () => {
+      removeQuery()
+      chain().toggleOrderedList().run()
+    }
   },
   {
     zh: '无序列表',
     en: 'wuxuliebiao/unorderlist',
     icon: 'unorderedlist',
-    act: () => exec('insertUnorderedList')
+    act: () => {
+      removeQuery()
+      chain().toggleBulletList().run()
+    }
   },
   {
     zh: '头像上传',
@@ -278,17 +252,22 @@ const ITEMS: Item[] = [
   }
 ]
 
-/* ---------- 触发/过滤 ---------- */
-function query(): { q: string; node: Text; start: number } | null {
-  const sel = window.getSelection()
-  if (!sel?.isCollapsed || !sel.rangeCount) return null
-  const n = sel.anchorNode
-  if (!n || n.nodeType !== 3) return null
-  if (!editorRoot()?.contains(n)) return null
-  const before = (n as Text).data.slice(0, sel.anchorOffset)
-  const m = /(^|\s)\/([^\s/]*)$/.exec(before)
+/* ---------- 触发/过滤：PM 选区读 `/` 前缀 ---------- */
+function query(): { q: string; pos: number } | null {
+  const e = ed()
+  if (!e) return null
+  const { $from, empty } = e.state.selection
+  if (!empty) return null
+  const textBefore = $from.parent.textBetween(0, $from.parentOffset, '\0', '\ufffc')
+  const m = /(^|\s)\/([^\s/]*)$/.exec(textBefore)
   if (!m) return null
-  return { q: m[2], node: n as Text, start: sel.anchorOffset - m[2].length - 1 }
+  const pos = $from.pos - m[2].length - 1
+  // 只认顶层/包装内的块（排除表格/列表内部）
+  for (let d = $from.depth; d > 0; d--) {
+    const n = $from.node(d)
+    if (['tableCell', 'tableHeader', 'listItem'].includes(n.type.name)) return null
+  }
+  return { q: m[2], pos }
 }
 function refresh() {
   const hit = query()
@@ -296,8 +275,7 @@ function refresh() {
     state.visible = false
     return
   }
-  anchorNode = hit.node
-  matchStart = hit.start
+  slashPos = hit.pos
   const q = hit.q.toLowerCase()
   state.items = q
     ? ITEMS.filter(i => i.zh.includes(hit.q) || i.en.toLowerCase().includes(q))
@@ -442,8 +420,8 @@ onBeforeUnmount(() => {
     width: 100%;
     border: none;
     background: transparent;
-    padding: 6px 8px;
     border-radius: 6px;
+    padding: 6px 8px;
     cursor: pointer;
     text-align: left;
     color: var(--font-color);
