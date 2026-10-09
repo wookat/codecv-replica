@@ -72,12 +72,14 @@ function onKey(ev: KeyboardEvent) {
 }
 onMounted(() => {
   window.addEventListener('side-tool-menu-trigger', onTrigger)
+  window.addEventListener('side-tool-menu-close', close)
   document.addEventListener('mousedown', onDocDown, true)
   document.addEventListener('keydown', onKey)
   document.addEventListener('scroll', close, true)
 })
 onBeforeUnmount(() => {
   window.removeEventListener('side-tool-menu-trigger', onTrigger)
+  window.removeEventListener('side-tool-menu-close', close)
   document.removeEventListener('mousedown', onDocDown, true)
   document.removeEventListener('keydown', onKey)
   document.removeEventListener('scroll', close, true)

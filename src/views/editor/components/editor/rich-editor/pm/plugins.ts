@@ -21,7 +21,8 @@ function handleDOM(pos: number, node: PMNode, view: EditorView) {
   grip.className = 'drag-btn'
   grip.draggable = true
   grip.title = '拖动调整顺序'
-  grip.addEventListener('click', ev => {
+  // PM 会吞 widget 区域的真 click → mousedown 触发菜单（dragstart 时由 sideTool 监听关闭）
+  grip.addEventListener('mousedown', ev => {
     ev.stopPropagation()
     // widget 位 pos 上 domAtPos 可能拿不到节点元素 → 防御：退化为 handle 自身
     let el: HTMLElement = h
@@ -39,6 +40,7 @@ function handleDOM(pos: number, node: PMNode, view: EditorView) {
     )
   })
   grip.addEventListener('dragstart', ev => {
+    window.dispatchEvent(new CustomEvent('side-tool-menu-close'))
     dragSrcPos = pos
     dragSrcSize = node.nodeSize
     ev.dataTransfer?.setData('text/plain', '')
@@ -53,7 +55,7 @@ function handleDOM(pos: number, node: PMNode, view: EditorView) {
   const add = document.createElement('div')
   add.className = 'add-btn'
   add.title = '添加内容'
-  add.addEventListener('click', ev => {
+  add.addEventListener('mousedown', ev => {
     ev.stopPropagation()
     let el: HTMLElement = h
     try {
