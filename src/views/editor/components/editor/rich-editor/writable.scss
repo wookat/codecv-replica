@@ -441,11 +441,12 @@
     top: 50%;
     transform: translateY(-50%);
   }
-  > :hover > .drag-handle,
-  .head-layout > :hover > .drag-handle,
-  .main-layout > :hover > .drag-handle,
-  .resume-module > :hover > .drag-handle,
-  .flex-layout > :hover > .drag-handle {
+  /* PM 会把 widget 再包一层 span，不能要求 drag-handle 是块的直接子元素 */
+  > :hover .drag-handle,
+  .head-layout > :hover .drag-handle,
+  .main-layout > :hover .drag-handle,
+  .resume-module > :hover .drag-handle,
+  .flex-layout > :hover .drag-handle {
     opacity: 1;
   }
   .is-draggable-hover {
