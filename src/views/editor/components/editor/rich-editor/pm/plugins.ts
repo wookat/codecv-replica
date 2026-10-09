@@ -23,7 +23,15 @@ function handleDOM(pos: number, node: PMNode, view: EditorView) {
   grip.title = '拖动调整顺序'
   grip.addEventListener('click', ev => {
     ev.stopPropagation()
-    const el = view.domAtPos(pos).node as HTMLElement
+    // widget 位 pos 上 domAtPos 可能拿不到节点元素 → 防御：退化为 handle 自身
+    let el: HTMLElement = h
+    try {
+      const got = view.domAtPos(pos).node
+      if (got instanceof HTMLElement) el = got
+      else if (got?.parentElement) el = got.parentElement
+    } catch {
+      /* use handle */
+    }
     window.dispatchEvent(
       new CustomEvent('side-tool-menu-trigger', {
         detail: { mode: 'row-actions', pos, node, anchorRect: h.getBoundingClientRect(), el }
@@ -47,15 +55,17 @@ function handleDOM(pos: number, node: PMNode, view: EditorView) {
   add.title = '添加内容'
   add.addEventListener('click', ev => {
     ev.stopPropagation()
+    let el: HTMLElement = h
+    try {
+      const got = view.domAtPos(pos).node
+      if (got instanceof HTMLElement) el = got
+      else if (got?.parentElement) el = got.parentElement
+    } catch {
+      /* use handle */
+    }
     window.dispatchEvent(
       new CustomEvent('side-tool-menu-trigger', {
-        detail: {
-          mode: 'insert',
-          pos,
-          node,
-          anchorRect: h.getBoundingClientRect(),
-          el: view.domAtPos(pos).node as HTMLElement
-        }
+        detail: { mode: 'insert', pos, node, anchorRect: h.getBoundingClientRect(), el }
       })
     )
   })
