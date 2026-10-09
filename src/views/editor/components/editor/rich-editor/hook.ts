@@ -247,7 +247,7 @@ export function useToggleEditorMode(resumeType: string) {
     stopMdWatch = watch(
       () => editorStore.MDContent,
       md => {
-        if (md && editor && editor.state.doc.childCount <= 1) fillContent()
+        if (md && editor && !editor.getText().trim()) fillContent()
       }
     )
     host.addEventListener('paste', onPaste)
