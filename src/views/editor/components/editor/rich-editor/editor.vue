@@ -26,7 +26,7 @@ const {
 } = useToggleEditorMode(resumeType.value)
 
 // 生产左栏同款：指南图标打开外部语雀排版指南；末位为日/夜间主题切换（html.dark）
-const GUIDE_DOC = 'https://www.yuque.com/xiongleixin/saqnu1/rxhlykmem82qbb8m'
+const GUIDE_DOC = '/syntax/helper'
 const openGuideDoc = () => window.open(GUIDE_DOC, '_blank')
 const isDark = ref(document.documentElement.classList.contains('dark'))
 const toggleDark = () => {

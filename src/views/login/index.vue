@@ -2,7 +2,6 @@
 import { onMounted, reactive, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { MP_QR_URI } from '@/assets/mpqr'
 import { syncLocalCloud } from '@/api/modules/cloudResume'
 import useUserStore from '@/store/modules/user'
 
@@ -12,9 +11,6 @@ const store = useUserStore()
 const agreed = ref(false)
 const showAcct = ref(false)
 const form = reactive({ username: '', password: '', verify: '' })
-
-// 生产扫码区为 base64 内嵌小程序码；末段 "9k=" 与生产指纹同型
-const qrImg = MP_QR_URI + '/9k='
 
 onMounted(() => store.genVerify())
 
@@ -53,13 +49,10 @@ watch(
       <h1 class="title">微信扫码登录注册</h1>
       <p class="sub">登录开启沉浸式简历编写体验</p>
       <div class="qr-circle">
-        <img :src="qrImg" alt="微信扫码登录" class="qr" />
+        <div class="qr qr-soon">微信扫码登录<br />即将开放</div>
       </div>
       <p class="privacy">
-        扫码登录/注册表示您同意该<a
-          href="https://www.yuque.com/xiongleixin/saqnu1/qkvrw80dm615kai4"
-          rel="noopener noreferrer"
-          target="_blank"
+        扫码登录/注册表示您同意该<a href="/agreement" rel="noopener noreferrer" target="_blank"
           >《用户隐私政策与服务协议》</a
         >
       </p>
@@ -190,6 +183,16 @@ watch(
       width: 100%;
       height: 100%;
       object-fit: cover;
+      &.qr-soon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: #9aa2b1;
+        font-size: 15px;
+        line-height: 1.8;
+        user-select: none;
+      }
     }
   }
   .privacy {

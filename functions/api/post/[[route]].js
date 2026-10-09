@@ -1,12 +1,15 @@
-// /api/post/page（POST）、/api/post/detail
+// /api/post/page（POST）、/api/post/detail、/api/post/submit（投稿，需登录，状态 pending 待审）
 import { json, readBody, loadSeed, sub } from '../../_lib.js'
+import { currentUserRow, publicUser } from '../../_auth.js'
 
 // 种子 ∪ D1 posts：同名 _id 以 D1 为准（admin 增改删实时生效）
 async function mergedPosts(env, request) {
   const seed = await loadSeed(env, request, 'posts.json', [])
   if (!env.DB) return seed
   try {
-    const { results } = await env.DB.prepare('SELECT * FROM posts').all()
+    const { results } = await env.DB.prepare(
+      "SELECT * FROM posts WHERE status = 'published' OR status IS NULL"
+    ).all()
     const map = new Map(seed.map(p => [p._id, { ...p }]))
     for (const r of results) {
       if (r.deleted) {
@@ -72,6 +75,44 @@ export async function onRequest(context) {
       data: filtered.slice(start, start + pageSize).map(p => ({ ...p, content: undefined })),
       total: filtered.length,
       message: '查询成功'
+    })
+  }
+
+  if (route === 'submit' && request.method === 'POST') {
+    const q = await readBody(request)
+    const auth = await currentUserRow(env, request, q)
+    if (!auth) return json(request, { code: 401, msg: '请先登录后再投稿' })
+    const title = String(q.title || '').trim()
+    const contentMd = String(q.contentMd ?? q.content_md ?? '')
+    if (title.length < 5) return json(request, { code: 400, msg: '标题至少 5 个字' })
+    if (contentMd.trim().length < 100) return json(request, { code: 400, msg: '正文至少 100 字' })
+    if (!env.DB) return json(request, { code: 503, msg: 'service unavailable' }, 503)
+    const id = `sub-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+    const now = Date.now()
+    const tags = Array.isArray(q.tags) ? q.tags.join(',') : String(q.tags || '')
+    await env.DB.prepare(
+      `INSERT INTO posts (_id,title,cover,category,tags,summary,content_md,author,status,view_count,publish_time,created_at,updated_at)
+       VALUES (?,?,?,?,?,?,?,?,?,0,?,?,?)`
+    )
+      .bind(
+        id,
+        title,
+        String(q.cover || ''),
+        String(q.category || '投稿'),
+        tags,
+        String(q.description || q.summary || ''),
+        contentMd,
+        publicUser(auth.row).username,
+        'pending',
+        now,
+        now,
+        now
+      )
+      .run()
+    return json(request, {
+      code: 200,
+      msg: '投稿成功，审核通过后展示在「求职攻略」板块',
+      data: { _id: id }
     })
   }
 

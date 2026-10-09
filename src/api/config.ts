@@ -2,6 +2,7 @@ import axios, { ResponseType } from 'axios'
 
 import { Tip } from '@/common/tip'
 import { errorMessage } from '@/common/message'
+import { getLocalStorage } from '@/common/localstorage'
 
 const service = axios.create({
   baseURL: import.meta.env.VITE_BASE_URL as string,
@@ -13,6 +14,8 @@ const service = axios.create({
 service.interceptors.request.use(
   config => {
     // showLoading()
+    const token = getLocalStorage('TOKEN') as string
+    if (token) config.headers.Authorization = `Bearer ${token}`
     if (config.url === '/fileUpload/upload') {
       ;(config as any).headers['Content-Type'] = 'multipart/form-data'
     }
@@ -40,7 +43,7 @@ service.interceptors.response.use(
 export function get(url: string, params: any = {}) {
   return new Promise((resolved, rejected) => {
     service
-      .get(url, params)
+      .get(url, { params })
       .then(
         resp => {
           resolved(resp)

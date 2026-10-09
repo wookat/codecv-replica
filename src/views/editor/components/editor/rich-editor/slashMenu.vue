@@ -2,9 +2,8 @@
 // 生产同款 / 斜杠命令菜单（ProseMirror 引擎版）：行首输入 / 弹出，键入过滤（zh/en），↑↓ 选择，Enter 执行
 import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { successMessage, errorMessage } from '@/common/message'
-import { getLocalStorage } from '@/common/localstorage'
-import { TOKEN } from '@/store/modules/user'
-import { getPickerFile } from '@/utils/uploader'
+import { pickAndUploadImage } from '@/utils/uploader'
+import { INSERT_ITEM_DEFS } from './insertItems'
 import { selectIcon, linkFlag } from '../toolbar/hook'
 import { reset } from '../toolbar/components/linkInput/hook'
 import { getPMEditor } from './pm/useEditor'
@@ -64,30 +63,8 @@ const chain = () => ed()!.chain().focus()
 async function uploadImage(alt: string, cls = '') {
   removeQuery()
   try {
-    const file = await getPickerFile({ multiple: false, accept: '.png,.jpg,.jpeg,.webp' })
-    if (!file) return
-    const token = (getLocalStorage(TOKEN) as string) || ''
-    const fd = new FormData()
-    fd.append('file', file)
-    const res = await fetch('/api/upload', {
-      method: 'POST',
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-      body: fd
-    })
-    let url = ''
-    if (res.ok) {
-      const data = await res.json()
-      if (data.code === 200) url = data.url
-    }
-    if (!url) {
-      // 未登录/上传失败 → data URL 兜底
-      url = await new Promise<string>((resolve, reject) => {
-        const fr = new FileReader()
-        fr.onload = () => resolve(String(fr.result))
-        fr.onerror = reject
-        fr.readAsDataURL(file)
-      })
-    }
+    const url = await pickAndUploadImage()
+    if (!url) return
     chain()
       .setImage({ src: url, alt, class: cls || null, style: 'max-width:100%' } as never)
       .run()
@@ -102,155 +79,85 @@ const setHeading = (level: number) => () => {
     .setNode('heading', { level: level as 1 | 2 | 3 | 4 | 5 | 6 })
     .run()
 }
-const ITEMS: Item[] = [
-  { zh: '模块标题', en: 'jianlimokuaibiaoti', icon: 'wrongly', act: setHeading(2) },
-  {
-    zh: '左右布局',
-    en: 'zuoyoubuju/column',
-    icon: 'columns',
-    act: () => {
-      removeQuery()
-      chain()
-        .insertContent({
-          type: 'flexLayout',
-          content: [
-            { type: 'flexItem', content: [{ type: 'paragraph' }] },
-            { type: 'flexItem', content: [{ type: 'paragraph' }] }
-          ]
-        })
-        .run()
-    }
+const ACTS: Record<string, (rows?: number, cols?: number) => void> = {
+  h2: setHeading(2),
+  cols: () => {
+    removeQuery()
+    chain()
+      .insertContent({
+        type: 'flexLayout',
+        content: [
+          { type: 'flexItem', content: [{ type: 'paragraph' }] },
+          { type: 'flexItem', content: [{ type: 'paragraph' }] }
+        ]
+      })
+      .run()
   },
-  {
-    zh: '插入图标',
-    en: 'charutubiao/icon',
-    icon: 'emoji',
-    act: () => {
-      removeQuery()
-      selectIcon.value = true
-    }
+  icon: () => {
+    removeQuery()
+    selectIcon.value = true
   },
-  {
-    zh: '插入图片',
-    en: 'tupian/image',
-    icon: 'image',
-    act: () => uploadImage('image')
+  img: () => uploadImage('image'),
+  h1: setHeading(1),
+  h2b: setHeading(2),
+  h3: setHeading(3),
+  h4: setHeading(4),
+  h5: setHeading(5),
+  h6: setHeading(6),
+  table: (rows = 3, cols = 3) => {
+    removeQuery()
+    chain().insertTable({ rows, cols, withHeaderRow: true }).run()
   },
-  { zh: '一级标题', en: 'yijibiaoti/heading', icon: 'head', act: setHeading(1) },
-  { zh: '二级标题', en: 'erjibiaoti/heading', icon: 'head', act: setHeading(2) },
-  { zh: '三级标题', en: 'sanjibiaoti/heading', icon: 'head', act: setHeading(3) },
-  { zh: '四级标题', en: 'sijibiaoti/heading', icon: 'head', act: setHeading(4) },
-  { zh: '五级标题', en: 'wujibiaoti/heading', icon: 'head', act: setHeading(5) },
-  { zh: '六级标题', en: 'liujibiaoti/heading', icon: 'head', act: setHeading(6) },
-  {
-    zh: '表格布局',
-    en: 'biaogebuju/table',
-    icon: 'table',
-    sub: 'table',
-    act: (rows = 3, cols = 3) => {
-      // prod: insertTable({rows,cols,withHeaderRow:true})
-      removeQuery()
-      chain().insertTable({ rows, cols, withHeaderRow: true }).run()
-    }
+  nbsp: () => {
+    removeQuery()
+    chain().insertContent('\u00a0').run()
   },
-  {
-    zh: '插入空白符',
-    en: 'kongbaifu/space',
-    icon: 'space',
-    act: () => {
-      removeQuery()
-      chain().insertContent('\u00a0').run()
-    }
+  bold: () => {
+    removeQuery()
+    chain().toggleBold().run()
   },
-  {
-    zh: '加粗',
-    en: 'jiacu/bold',
-    icon: 'bold',
-    act: () => {
-      removeQuery()
-      chain().toggleBold().run()
-    }
+  italic: () => {
+    removeQuery()
+    chain().toggleItalic().run()
   },
-  {
-    zh: '斜体',
-    en: 'xieti/italic',
-    icon: 'italic',
-    act: () => {
-      removeQuery()
-      chain().toggleItalic().run()
-    }
+  quote: () => {
+    removeQuery()
+    chain().toggleBlockquote().run()
   },
-  {
-    zh: '引用',
-    en: 'yinyong/quote',
-    icon: 'quote',
-    act: () => {
-      removeQuery()
-      chain().toggleBlockquote().run()
-    }
+  hr: () => {
+    removeQuery()
+    chain().setHorizontalRule().run()
   },
-  {
-    zh: '水平分割线',
-    en: 'fengexian/horizontal',
-    icon: 'segment',
-    act: () => {
-      removeQuery()
-      chain().setHorizontalRule().run()
-    }
+  strike: () => {
+    removeQuery()
+    chain().toggleStrike().run()
   },
-  {
-    zh: '删除线',
-    en: 'shanchuxian/',
-    icon: 'strike',
-    act: () => {
-      removeQuery()
-      chain().toggleStrike().run()
-    }
+  tag: () => {
+    removeQuery()
+    chain().insertContent('<code class="single-code">标签</code>').run()
   },
-  {
-    zh: '标签',
-    en: 'biaoqian/code',
-    icon: 'code',
-    act: () => {
-      removeQuery()
-      chain().insertContent('<code class="single-code">标签</code>').run()
-    }
+  link: () => {
+    removeQuery()
+    reset()
+    linkFlag.value = true
   },
-  {
-    zh: '插入链接',
-    en: 'charulianjie/link',
-    icon: 'link',
-    act: () => {
-      removeQuery()
-      reset()
-      linkFlag.value = true
-    }
+  ol: () => {
+    removeQuery()
+    chain().toggleOrderedList().run()
   },
-  {
-    zh: '有序列表',
-    en: 'youxuliebiao/orderlist',
-    icon: 'orderedlist',
-    act: () => {
-      removeQuery()
-      chain().toggleOrderedList().run()
-    }
+  ul: () => {
+    removeQuery()
+    chain().toggleBulletList().run()
   },
-  {
-    zh: '无序列表',
-    en: 'wuxuliebiao/unorderlist',
-    icon: 'unorderedlist',
-    act: () => {
-      removeQuery()
-      chain().toggleBulletList().run()
-    }
-  },
-  {
-    zh: '头像上传',
-    en: 'touxiang/image',
-    icon: 'user',
-    act: () => uploadImage('个人头像', 'cv-avatar-overlay')
-  }
-]
+  avatar: () => uploadImage('个人头像', 'cv-avatar-overlay')
+}
+const ITEMS: Item[] = INSERT_ITEM_DEFS.map(d => ({
+  zh: d.zh,
+  en: d.en,
+  icon: d.icon,
+  sub: d.sub,
+  act: ACTS[d.key]
+}))
 
 /* ---------- 触发/过滤：PM 选区读 `/` 前缀 ---------- */
 function query(): { q: string; pos: number } | null {

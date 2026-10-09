@@ -48,43 +48,21 @@ const minimal = computed(() => useRoute().path === '/progress')
         </li>
       </ul>
       <ul class="fcol">
-        <strong class="ftitle">社交媒体</strong>
+        <strong class="ftitle">帮助支持</strong>
         <li>
-          <a
-            href="https://www.xiaohongshu.com/user/profile/63f07ca4000000000f0112da"
-            target="_blank"
-            rel="noopener noreferrer"
-            >小红书</a
-          >
+          <router-link to="/syntax/helper">简历编写指南</router-link>
         </li>
         <li>
-          <a href="https://space.bilibili.com/455695921" target="_blank" rel="noopener noreferrer"
-            >B站</a
-          >
+          <router-link to="/feedback">意见反馈</router-link>
         </li>
-      </ul>
-      <ul>
-        <strong>联系方式/小程序</strong>
-        <ul class="mp-row">
-          <li class="mp-card first">
-            <img src="/static/jpg/wechat-BjrEoHaI.jpg" alt="微信客服" />
-            <strong>客服微信</strong>
-          </li>
-          <li class="mp-card">
-            <img src="/static/webp/miniprogram-Ceuprux3.webp" alt="职位投递进度管理" />
-            <strong>投递进度管理</strong>
-          </li>
-        </ul>
+        <li>
+          <router-link to="/agreement">用户协议与隐私政策</router-link>
+        </li>
       </ul>
     </div>
     <div v-if="!minimal" class="fline" />
     <div class="copyright">
-      <p class="icp">
-        CopyRight © 2023 CodeCV简历 |
-        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer"
-          >赣ICP备2023009154号</a
-        >
-      </p>
+      <p class="icp">CopyRight © 2025 CodeCV简历</p>
     </div>
   </div>
 </template>

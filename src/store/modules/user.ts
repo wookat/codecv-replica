@@ -48,9 +48,7 @@ const useUserStore = defineStore('userStore', {
         return
       }
       const cb = isLogin ? login : registerUser
-      const payload = isLogin
-        ? user
-        : { ...user, invite: localStorage.getItem('INVITE') || undefined }
+      const payload = isLogin ? user : { ...user, invite: getLocalStorage('INVITE') || undefined }
       cb(payload).then((res: any) => {
         if (res.code === 200) {
           this.loginState.logined = true

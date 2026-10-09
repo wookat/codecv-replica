@@ -9,9 +9,8 @@ import { successMessage, errorMessage } from '@/common/message'
 import { getPMEditor } from './pm/useEditor'
 import { selectIcon, linkFlag } from '../toolbar/hook'
 import { reset } from '../toolbar/components/linkInput/hook'
-import { getPickerFile } from '@/utils/uploader'
-import { getLocalStorage } from '@/common/localstorage'
-import { TOKEN } from '@/store/modules/user'
+import { pickAndUploadImage } from '@/utils/uploader'
+import { INSERT_ITEM_DEFS } from './insertItems'
 import type { Node as PMNode } from '@tiptap/pm/model'
 
 interface MenuState {
@@ -39,30 +38,7 @@ const state = reactive<MenuState>({
 const menuRef = ref<HTMLElement>()
 
 // prod add-btn 弹出的是与 slash 完全一致的 22 项 mention-menu（实测菜单文本逐项相同）
-const INSERT_ITEMS = [
-  { key: 'h2', label: '模块标题', en: 'jianlimokuaibiaoti', icon: 'wrongly' },
-  { key: 'cols', label: '左右布局', en: 'zuoyoubuju/column', icon: 'columns' },
-  { key: 'icon', label: '插入图标', en: 'charutubiao/icon', icon: 'emoji' },
-  { key: 'img', label: '插入图片', en: 'tupian/image', icon: 'image' },
-  { key: 'h1', label: '一级标题', en: 'yijibiaoti/heading', icon: 'head' },
-  { key: 'h2b', label: '二级标题', en: 'erjibiaoti/heading', icon: 'head' },
-  { key: 'h3', label: '三级标题', en: 'sanjibiaoti/heading', icon: 'head' },
-  { key: 'h4', label: '四级标题', en: 'sijibiaoti/heading', icon: 'head' },
-  { key: 'h5', label: '五级标题', en: 'wujibiaoti/heading', icon: 'head' },
-  { key: 'h6', label: '六级标题', en: 'liujibiaoti/heading', icon: 'head' },
-  { key: 'table', label: '表格布局', en: 'biaogebuju/table', icon: 'table' },
-  { key: 'nbsp', label: '插入空白符', en: 'kongbaifu/space', icon: 'space' },
-  { key: 'bold', label: '加粗', en: 'jiacu/bold', icon: 'bold' },
-  { key: 'italic', label: '斜体', en: 'xieti/italic', icon: 'italic' },
-  { key: 'quote', label: '引用', en: 'yinyong/quote', icon: 'quote' },
-  { key: 'hr', label: '水平分割线', en: 'fengexian/horizontal', icon: 'segment' },
-  { key: 'strike', label: '删除线', en: 'shanchuxian/', icon: 'strike' },
-  { key: 'tag', label: '标签', en: 'biaoqian/code', icon: 'code' },
-  { key: 'link', label: '插入链接', en: 'charulianjie/link', icon: 'link' },
-  { key: 'ol', label: '有序列表', en: 'youxuliebiao/orderlist', icon: 'orderedlist' },
-  { key: 'ul', label: '无序列表', en: 'wuxuliebiao/unorderlist', icon: 'unorderedlist' },
-  { key: 'avatar', label: '头像上传', en: 'touxiang/image', icon: 'user' }
-]
+const INSERT_ITEMS = INSERT_ITEM_DEFS.map(d => ({ ...d, label: d.zh }))
 
 function open(detail: {
   mode: MenuState['mode']
@@ -363,29 +339,8 @@ async function uploadAt(alt: string, cls = '') {
   const e = ed()
   if (!e) return
   try {
-    const file = await getPickerFile({ multiple: false, accept: '.png,.jpg,.jpeg,.webp' })
-    if (!file) return
-    const token = (getLocalStorage(TOKEN) as string) || ''
-    const fd = new FormData()
-    fd.append('file', file)
-    const res = await fetch('/api/upload', {
-      method: 'POST',
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-      body: fd
-    })
-    let url = ''
-    if (res.ok) {
-      const data = await res.json()
-      if (data.code === 200) url = data.url
-    }
-    if (!url) {
-      url = await new Promise<string>((resolve, reject) => {
-        const fr = new FileReader()
-        fr.onload = () => resolve(String(fr.result))
-        fr.onerror = reject
-        fr.readAsDataURL(file)
-      })
-    }
+    const url = await pickAndUploadImage()
+    if (!url) return
     e.chain()
       .focus()
       .setImage({ src: url, alt, class: cls || null, style: 'max-width:100%' } as never)

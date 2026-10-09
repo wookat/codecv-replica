@@ -100,7 +100,10 @@ async function redeem() {
   try {
     const res: any = await fetch('/user/redeem', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${(getLocalStorage('TOKEN') as string) || ''}`
+      },
       body: JSON.stringify({ username: getLocalStorage('USERNAME'), code })
     }).then(r => r.json())
     redeemMsg.value = res?.msg || '兑换失败'
@@ -147,8 +150,7 @@ function logout() {
         </span>
       </template>
       <div class="mp-qr">
-        <img src="/static/webp/miniprogram-Ceuprux3.webp" alt="CodeCV 小程序" />
-        <span>扫码体验小程序，随时导出</span>
+        <span class="mp-link" @click="router.push('/progress')">前往投递进度管理 →</span>
       </div>
     </el-popover>
     <div class="divider"></div>

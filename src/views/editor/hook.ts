@@ -295,12 +295,14 @@ export function useShowExport() {
     }
   }
 
+  const onScroll = useDebounceFn(setShowExport, 400)
+
   onActivated(() => {
-    document.addEventListener('scroll', useDebounceFn(setShowExport, 400))
+    document.addEventListener('scroll', onScroll)
   })
 
   onDeactivated(() => {
-    document.removeEventListener('scroll', setShowExport)
+    document.removeEventListener('scroll', onScroll)
   })
   return {
     showExport

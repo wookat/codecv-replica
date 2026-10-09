@@ -6,7 +6,6 @@ import useEditorStore from '@/store/modules/editor'
 const route = useRoute()
 const router = useRouter()
 const showTop = ref(false)
-const panel = ref<'' | 'wechat' | 'group'>('')
 
 function onScroll() {
   showTop.value = route.path.startsWith('/mianjing/p/') && window.scrollY > window.innerHeight
@@ -26,22 +25,7 @@ const tools = [
   {
     icon: 'problem',
     tip: '点击查看简历编写教程',
-    act: () =>
-      window.open(
-        editorStore.writable
-          ? 'https://www.yuque.com/xiongleixin/saqnu1/rxhlykmem82qbb8m'
-          : 'https://www.yuque.com/xiongleixin/saqnu1/sl2ai75t6xgbhg86'
-      )
-  },
-  {
-    icon: 'wechat',
-    tip: '作者微信联系方式',
-    act: () => (panel.value = panel.value === 'wechat' ? '' : 'wechat')
-  },
-  {
-    icon: 'group',
-    tip: '加入产品共建交流群',
-    act: () => (panel.value = panel.value === 'group' ? '' : 'group')
+    act: () => router.push('/syntax/helper')
   },
   {
     icon: 'edit',
@@ -72,31 +56,6 @@ const tools = [
         <i :class="`icon-${t.icon}`" class="iconfont"></i>
       </div>
     </template>
-    <Teleport to="body">
-      <div v-if="panel" class="ft-mask" @click="panel = ''">
-        <div
-          v-if="panel === 'wechat'"
-          class="flex justify-center bg-white flex-col gap-2 pt-5 rounded-xl items-center ft-card"
-          @click.stop
-        >
-          <h4 class="text-black">微信扫码联系客服</h4>
-          <img
-            src="/prod-assets/wechat-qr.jpg"
-            class="w-64 rounded-lg"
-            draggable="false"
-            alt="客服联系方式"
-          />
-        </div>
-        <div v-else class="ft-group" @click.stop>
-          <img
-            src="/prod-assets/group-qr.webp"
-            draggable="false"
-            class="w-[300px] rounded-lg"
-            alt="共建交流群"
-          />
-        </div>
-      </div>
-    </Teleport>
   </nav>
 </template>
 

@@ -58,6 +58,11 @@ export default {
     { path: '/member', name: 'member', component: () => import('@/views/member/index.vue') },
     { path: '/order', name: 'order', component: () => import('@/views/order/index.vue') },
     { path: '/feedback', name: 'feedback', component: () => import('@/views/feedback/index.vue') },
+    {
+      path: '/agreement',
+      name: 'agreement',
+      component: () => import('@/views/agreement/index.vue')
+    },
     { path: '/invite', name: 'invite', component: () => import('@/views/invite/index.vue') },
     {
       path: '/user/invite',

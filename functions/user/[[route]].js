@@ -6,7 +6,8 @@ import {
   issueToken,
   dropToken,
   tokenUser,
-  publicUser
+  publicUser,
+  currentUserRow
 } from '../_auth.js'
 
 export async function onRequest(context) {
@@ -53,7 +54,11 @@ export async function onRequest(context) {
   }
 
   if (route === 'logout') {
-    await dropToken(kv, q.username)
+    const username = await tokenUser(
+      kv,
+      q.token || (request.headers.get('authorization') || '').replace(/^Bearer\s+/i, '')
+    )
+    if (username) await dropToken(kv, username)
     return json(request, { code: 200, msg: '退出成功' })
   }
 
@@ -69,9 +74,11 @@ export async function onRequest(context) {
   }
 
   if (route === 'update') {
-    const { username } = q
-    const row = await db.prepare('SELECT id FROM users WHERE username = ?').bind(username).first()
-    if (!row) return json(request, { code: 404, msg: '用户不存在' })
+    const cur = await currentUserRow(env, request, q)
+    if (!cur || cur.row.username !== q.username) {
+      return json(request, { code: 401, msg: '登录状态已失效' })
+    }
+    const row = cur.row
     await db
       .prepare(
         'UPDATE users SET nickname=?, sex=?, professional=?, graduation=?, school=?, avatar=? WHERE id=?'
@@ -123,16 +130,24 @@ export async function onRequest(context) {
   }
 
   if (route === 'queryUserById') {
-    const row = await db.prepare('SELECT * FROM users WHERE id = ?').bind(q.uid).first()
-    return row
+    const cur = await currentUserRow(env, request, q)
+    if (!cur) return json(request, { code: 401, msg: '登录状态已失效' })
+    const row =
+      Number(q.uid) === cur.row.id
+        ? cur.row
+        : await db.prepare('SELECT * FROM users WHERE id = ?').bind(q.uid).first()
+    return row && (Number(q.uid) === cur.row.id || cur.row.is_admin)
       ? json(request, { code: 200, msg: '查询成功', data: publicUser(row) })
       : json(request, { code: 404, msg: '用户不存在' })
   }
 
   if (route === 'pwdUpdate') {
-    const { username, oPassword, nPassword } = q
-    const row = await db.prepare('SELECT * FROM users WHERE username = ?').bind(username).first()
-    if (!row) return json(request, { code: 404, msg: '用户不存在' })
+    const { oPassword, nPassword } = q
+    const cur = await currentUserRow(env, request, q)
+    if (!cur || cur.row.username !== q.username) {
+      return json(request, { code: 401, msg: '登录状态已失效' })
+    }
+    const row = cur.row
     if (!(await verifyPassword(oPassword || '', row.salt, row.pwd_hash))) {
       return json(request, { code: 400, msg: '原密码错误' })
     }
@@ -145,15 +160,13 @@ export async function onRequest(context) {
   }
 
   if (route === 'redeem') {
-    const { username, code } = q
-    if (!username || !code || String(code).length < 6) {
+    const { code } = q
+    const cur = await currentUserRow(env, request, q)
+    if (!cur) return json(request, { code: 401, msg: '请先登录后再兑换' })
+    if (!code || String(code).length < 6) {
       return json(request, { code: 400, msg: '兑换码格式不正确' })
     }
-    const u = await db
-      .prepare('SELECT id, vip_expire FROM users WHERE username = ?')
-      .bind(username)
-      .first()
-    if (!u) return json(request, { code: 404, msg: '用户不存在' })
+    const u = cur.row
     const c = await db
       .prepare('SELECT code, days, used_by FROM redeem_codes WHERE code = ?')
       .bind(String(code))

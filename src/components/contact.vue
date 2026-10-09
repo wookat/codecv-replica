@@ -7,6 +7,9 @@ const emit = defineEmits(['toggle'])
 
 <template>
   <toast-modal width="360px" v-if="open" :flag="open" @close="emit('toggle')">
-    <img width="300" src="@/assets/img/wechat.jpg" alt="我的微信" />
+    <div class="contact-body">
+      <p>遇到问题或有建议？</p>
+      <router-link class="contact-link" to="/feedback">前往意见反馈页</router-link>
+    </div>
   </toast-modal>
 </template>

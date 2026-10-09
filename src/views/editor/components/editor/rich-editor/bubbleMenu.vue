@@ -5,7 +5,7 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { successMessage, errorMessage } from '@/common/message'
 import { getLocalStorage } from '@/common/localstorage'
 import useUserStore, { TOKEN } from '@/store/modules/user'
-import { getPickerFile } from '@/utils/uploader'
+import { pickAndUploadImage } from '@/utils/uploader'
 import { getPMEditor } from './pm/useEditor'
 
 type Mode = 'tools' | 'ai' | 'link' | 'image'
@@ -238,29 +238,9 @@ function delImg() {
 async function replaceImg() {
   const e = ed()
   try {
-    const file = await getPickerFile({ multiple: false, accept: '.png,.jpg,.jpeg,.webp' })
-    if (!file || !e || imgPos.value < 0) return
-    const token = (getLocalStorage(TOKEN) as string) || ''
-    const fd = new FormData()
-    fd.append('file', file)
-    const res = await fetch('/api/upload', {
-      method: 'POST',
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-      body: fd
-    })
-    let url = ''
-    if (res.ok) {
-      const d = await res.json()
-      if (d.code === 200) url = d.url
-    }
-    if (!url) {
-      url = await new Promise<string>((resolve, reject) => {
-        const fr = new FileReader()
-        fr.onload = () => resolve(String(fr.result))
-        fr.onerror = reject
-        fr.readAsDataURL(file)
-      })
-    }
+    if (!e || imgPos.value < 0) return
+    const url = await pickAndUploadImage()
+    if (!url) return
     const tr = e.state.tr.setNodeMarkup(imgPos.value, undefined, {
       ...e.state.doc.nodeAt(imgPos.value)?.attrs,
       src: url

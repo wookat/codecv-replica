@@ -11,10 +11,7 @@ import FloatTools from '@/components/FloatTools.vue'
     <!-- 生产右侧悬浮工具栏全站挂载（编辑器页也有），仅登录页排除 -->
     <FloatTools v-if="!['/login'].includes($route.path)" />
     <router-view v-slot="{ Component }">
-      <keep-alive
-        :max="10"
-        include="home,editor,syntax,recruit,template,update,community,communityEditor,communityDetail"
-      >
+      <keep-alive :max="10" include="home,editor,syntax,template,update">
         <component :is="Component" />
       </keep-alive>
     </router-view>

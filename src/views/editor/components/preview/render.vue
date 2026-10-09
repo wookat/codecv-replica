@@ -4,11 +4,10 @@ import { useRenderHTML, useResumeType } from '../../hook'
 import { useThemeConfig } from '@/common/global'
 import { step, pageSize, fitStepToWidth } from '../tabbar/hook'
 import { onMounted, onUnmounted, ref } from 'vue'
-import { getPickerFile } from '@/utils/uploader'
+import { pickAndUploadImage } from '@/utils/uploader'
 import { getLocalStorage, setLocalStorage, removeLocalStorage } from '@/common/localstorage'
 import { refreshOverlays } from '@/utils/moduleCombine'
 import { successMessage } from '@/common/message'
-import { TOKEN } from '@/store/modules/user'
 
 defineEmits(['upload-avatar', 'html-convert'])
 
@@ -128,33 +127,8 @@ async function ctxAction(act: 'replace' | 'reset-position' | 'reset-size' | 'del
   if (!kind) return
   const key = ctxKey()
   if (act === 'replace') {
-    const file = await getPickerFile({ multiple: false, accept: '.png,.jpg,.jpeg,.webp' })
-    if (!file) return
-    const token = (getLocalStorage(TOKEN) as string) || ''
-    let url = ''
-    try {
-      const fd = new FormData()
-      fd.append('file', file)
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-        body: fd
-      })
-      if (res.ok) {
-        const d = await res.json()
-        if (d.code === 200) url = d.url
-      }
-    } catch {
-      /* fall back dataURL */
-    }
-    if (!url) {
-      url = await new Promise<string>((res, rej) => {
-        const fr = new FileReader()
-        fr.onload = () => res(String(fr.result))
-        fr.onerror = rej
-        fr.readAsDataURL(file)
-      })
-    }
+    const url = await pickAndUploadImage()
+    if (!url) return
     const prev = readCfg() || {}
     setLocalStorage(
       key,

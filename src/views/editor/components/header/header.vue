@@ -79,9 +79,7 @@ function saveName() {
 }
 // 移动端 ⋮ 菜单与桌面 nav 共用「使用教程」双链接逻辑
 function tutorHref() {
-  return editorStore.writable
-    ? 'https://www.yuque.com/xiongleixin/saqnu1/rxhlykmem82qbb8m'
-    : 'https://www.yuque.com/xiongleixin/saqnu1/sl2ai75t6xgbhg86'
+  return '/syntax/helper'
 }
 function openImport() {
   ;(document.getElementById('import_md') as HTMLInputElement | null)?.click()

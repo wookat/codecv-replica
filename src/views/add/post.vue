@@ -2,6 +2,7 @@
 import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { getLocalStorage } from '@/common/localstorage'
 
 const router = useRouter()
 const submitting = ref(false)
@@ -17,20 +18,30 @@ const valid = computed(() => f.title.trim().length >= 5 && f.contentMd.trim().le
 
 async function submit() {
   if (!valid.value) return ElMessage.warning('标题至少 5 字、正文至少 100 字')
+  const token = (getLocalStorage('TOKEN') as string) || ''
+  if (!token) return ElMessage.warning('请先登录后再投稿')
   submitting.value = true
-  const list = JSON.parse(localStorage.getItem('codecv-my-posts') || '[]')
-  list.unshift({
-    _id: 'local-' + Date.now(),
-    title: f.title,
-    description: f.description,
-    cover: f.cover,
-    tags: f.tags.split(/[,，\s]+/).filter(Boolean),
-    contentMd: f.contentMd,
-    status: 'pending',
-    create_time: Date.now()
-  })
-  localStorage.setItem('codecv-my-posts', JSON.stringify(list))
-  setTimeout(() => router.replace('/add/success'), 300)
+  try {
+    const res: any = await fetch('/api/post/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({
+        title: f.title,
+        description: f.description,
+        cover: f.cover,
+        tags: f.tags.split(/[,，\s]+/).filter(Boolean),
+        contentMd: f.contentMd
+      })
+    }).then(r => r.json())
+    if (res?.code === 401) return ElMessage.warning(res.msg || '请先登录后再投稿')
+    if (res?.code !== 200) return ElMessage.error(res?.msg || '投稿失败，请稍后再试')
+    ElMessage.success(res.msg || '投稿成功')
+    setTimeout(() => router.replace('/add/success'), 300)
+  } catch {
+    ElMessage.error('网络异常，请稍后再试')
+  } finally {
+    submitting.value = false
+  }
 }
 </script>
 

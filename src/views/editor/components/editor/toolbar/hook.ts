@@ -127,7 +127,7 @@ export function insertMulticolumn(column: string, emit: any) {
     .fill('')
     .map(
       (_, index) =>
-        `<div class='flex-layout-item' style='widht: ${columnWidth}%'>content${index + 1}</div>`
+        `<div class='flex-layout-item' style='width: ${columnWidth}%'>content${index + 1}</div>`
     )
     .join('')
   const multiColumnsHTML = `<div class='flex-layout'>${placeholders}</div><br>`

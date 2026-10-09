@@ -25,11 +25,11 @@ const resumes = ref<CloudResumeMeta[]>([])
 
 const guides = [
   {
-    url: 'https://www.yuque.com/xiongleixin/saqnu1/rxhlykmem82qbb8m',
+    url: '/syntax/helper',
     title: '所见即所得模式简历制作指南'
   },
   {
-    url: 'https://www.yuque.com/xiongleixin/saqnu1/sl2ai75t6xgbhg86',
+    url: '/syntax/helper',
     title: 'Markdown模式简历制作指南'
   }
 ]
@@ -112,9 +112,9 @@ onMounted(async () => {
     <div class="pf-cols">
       <!-- 左侧小程序卡 -->
       <aside class="pf-aside">
-        <h4>🎉 使用小程序管理投递进度</h4>
+        <h4>🎉 使用上岸雷达管理投递进度</h4>
         <div class="qr-wrap">
-          <img src="/static/webp/miniprogram-Ceuprux3.webp" alt="小程序投递进度管理" />
+          <router-link class="prog-link" to="/progress">前往投递进度管理 →</router-link>
         </div>
         <ul>
           <li>1. ✨ 无需制作烦琐的Excel表格</li>

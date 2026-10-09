@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import AsideRail from '@/components/AsideRail.vue'
+import { getLocalStorage } from '@/common/localstorage'
 
 interface FeedbackItem {
   content: string
@@ -31,32 +32,51 @@ const AVATARS = [
   '/static/png/avatar6-CPIstjYR.png'
 ]
 
-const LOCAL_KEY = 'codecv-feedbacks'
-
 onMounted(async () => {
-  const local: FeedbackItem[] = JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]')
+  const remote: FeedbackItem[] = (
+    (
+      await fetch('/api/feedback/list?pageSize=100')
+        .then(r => r.json())
+        .catch(() => null)
+    )?.data || []
+  ).map((r: any) => ({
+    content: r.content,
+    field: r.field || '匿名',
+    avatar: r.avatar || AVATARS[0],
+    time: r.created_at
+  }))
   const seed: FeedbackItem[] =
     (await fetch('/seeds/feedbacks.json')
       .then(r => r.json())
       .catch(() => [])) ?? []
-  list.value = [...local, ...seed]
+  list.value = [...remote, ...seed]
 })
 
-function submit() {
-  if (content.value.trim().length < 5) return ElMessage.warning('反馈内容至少 5 个字')
-  const item: FeedbackItem = {
-    content: content.value.trim(),
-    field: field.value.trim() || '匿名',
-    avatar: avatar.value,
-    time: Date.now(),
-    mine: true
+async function submit() {
+  const text = content.value.trim()
+  if (text.length < 5) return ElMessage.warning('反馈内容至少 5 个字')
+  const token = (getLocalStorage('TOKEN') as string) || ''
+  if (!token) return ElMessage.warning('请先登录后再反馈')
+  try {
+    const res: any = await fetch('/api/feedback/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ content: text, field: field.value.trim(), avatar: avatar.value })
+    }).then(r => r.json())
+    if (res?.code === 401) return ElMessage.warning(res.msg || '请先登录后再反馈')
+    if (res?.code !== 200) return ElMessage.error(res?.msg || '提交失败，请稍后再试')
+    list.value.unshift({
+      content: text,
+      field: field.value.trim() || '匿名',
+      avatar: avatar.value,
+      time: Date.now(),
+      mine: true
+    })
+    content.value = ''
+    ElMessage.success(res.msg || '感谢反馈，我们会认真阅读')
+  } catch {
+    ElMessage.error('网络异常，请稍后再试')
   }
-  const local = JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]')
-  local.unshift(item)
-  localStorage.setItem(LOCAL_KEY, JSON.stringify(local))
-  list.value.unshift(item)
-  content.value = ''
-  ElMessage.success('感谢反馈，我们会认真阅读')
 }
 </script>
 

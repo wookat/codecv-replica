@@ -49,17 +49,10 @@ if (getLocalStorage(TOKEN)) emit('close')
         <div class="lm-right">
           <template v-if="!accountMode">
             <h4>微信扫码登录</h4>
-            <img
-              class="lm-qr"
-              src="/static/webp/miniprogram-Ceuprux3.webp"
-              alt="微信扫码登录二维码"
-            />
-            <p class="lm-tip">有效期 <b>1分钟</b> 请及时扫码完成登录</p>
+            <div class="lm-qr lm-qr-soon">微信扫码登录<br />即将开放</div>
+            <p class="lm-tip">微信扫码登录即将开放，请使用账号密码登录</p>
             <p class="lm-agree">
-              登录表示您同意该<a
-                href="https://www.yuque.com/xiongleixin/saqnu1/qkvrw80dm615kai4"
-                target="_blank"
-                rel="noopener"
+              登录表示您同意该<a href="/agreement" target="_blank" rel="noopener"
                 >用户隐私政策与服务协议</a
               >
             </p>
@@ -176,6 +169,17 @@ if (getLocalStorage(TOKEN)) emit('close')
     background: linear-gradient(100deg, #eee 40%, #f7f7f7 50%, #eee 60%);
     background-size: 300% 100%;
     animation: lm-shimmer 2.4s linear infinite;
+    &.lm-qr-soon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #9aa2b1;
+      font-size: 15px;
+      line-height: 1.8;
+      animation: none;
+      background: #f3f5f7;
+    }
   }
   @keyframes lm-shimmer {
     0% {
