@@ -83,10 +83,10 @@
     }
   }
 
-  > p {
+  .tiptap > p {
     margin-top: 0.25rem;
   }
-  > :first-child {
+  .tiptap > :first-child {
     margin-top: 0;
   }
 
@@ -142,7 +142,7 @@
       }
     }
   }
-  > .flex-layout {
+  .tiptap > .flex-layout {
     align-items: flex-start;
   }
 

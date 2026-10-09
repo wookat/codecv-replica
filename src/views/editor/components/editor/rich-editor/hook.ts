@@ -64,11 +64,12 @@ export function useToggleEditorMode(resumeType: string) {
       return true
     })
     h2s.forEach((h, i) => {
-      spans.push({
-        start: h.pos,
-        end: i + 1 < h2s.length ? h2s[i + 1].pos : doc.content.size,
-        node: h.node
-      })
+      // span 结束位置取同级语义：到「下一个 H2」或「本 H2 所在父容器的内容边界」先到者，
+      // 否则顶层 H2 会把 main-layout 容器头一半内容卷进 span、嵌套末个 H2 会把容器外节点拖走。
+      const $h = doc.resolve(h.pos)
+      const parentEnd = h.pos - $h.parentOffset + $h.parent.nodeSize - 1
+      const nextH2 = i + 1 < h2s.length ? h2s[i + 1].pos : doc.content.size
+      spans.push({ start: h.pos, end: Math.min(nextH2, parentEnd), node: h.node })
     })
     return spans
   }
@@ -81,6 +82,15 @@ export function useToggleEditorMode(resumeType: string) {
     if (dir > 0 && i === mods.length - 1) return warningMessage('已经到最后了')
     const m = mods[i]
     const target = mods[i + dir]
+    // 相邻 H2 分属不同父容器（如 head-layout ↔ main-layout）时不搬——跨容器拼接会切坏容器
+    const doc = editor.state.doc
+    const parentKey = (p: number) => {
+      const $p = doc.resolve(p)
+      return `${$p.depth}:${p - $p.parentOffset}`
+    }
+    if (parentKey(m.start) !== parentKey(target.start)) {
+      return warningMessage(dir < 0 ? '已经是第一位了' : '已经到最后了')
+    }
     const tr = editor.state.tr
     const slice = editor.state.doc.slice(m.start, m.end)
     tr.delete(m.start, m.end)
@@ -206,7 +216,12 @@ export function useToggleEditorMode(resumeType: string) {
     nextTick(() => {
       const md = editorStore.MDContent
       if (md == null) return
-      editor!.commands.setContent(fontMark(markdownToHTML(md)))
+      // 初始填充不计入撤销栈——否则 Ctrl+Z 连按会把整份简历清成空文档并回写空 md
+      const html = fontMark(markdownToHTML(md))
+      editor!.commands.command(({ tr, commands }) => {
+        tr.setMeta('addToHistory', false)
+        return commands.setContent(html)
+      })
     })
   }
 
