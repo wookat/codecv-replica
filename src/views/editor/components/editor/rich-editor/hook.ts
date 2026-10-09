@@ -8,6 +8,8 @@ import { ElMessageBox } from 'element-plus'
 import { nextTick, onActivated, onBeforeUnmount, onMounted, ref } from 'vue'
 import { Editor } from '@tiptap/core'
 import { Node as PMNode } from '@tiptap/pm/model'
+import { markdownToHTML } from 'markdown-transform-html'
+import { fontMark } from '@/utils/moduleCombine'
 import { resumeExtensions } from './pm/schema'
 import { DragHandle, ModuleOps, TrailingNode } from './pm/plugins'
 import { setPMEditor } from './pm/useEditor'
@@ -44,42 +46,57 @@ export function useToggleEditorMode(resumeType: string) {
   }
 
   // ===== 模块操作（生产同款 hover 内联 上移/下移/删除该模块） =====
-  // 实现为 widget decoration：resumeModule 节点尾部挂 .mod-op 按钮，CSS hover 显隐
-  function moduleNodes() {
-    const list: { pos: number; node: PMNode }[] = []
-    editor?.state.doc.descendants((node, pos) => {
-      if (node.type.name === 'resumeModule') list.push({ pos, node })
-      return true
+  // prod PM 文档是扁平顶层块（无 resume-module 包装）：模块 = 顶层 H2 + 至下个 H2 前的兄弟块
+  interface ModSpan {
+    start: number
+    end: number
+    node: PMNode
+  }
+  function moduleSpans(): ModSpan[] {
+    const spans: ModSpan[] = []
+    if (!editor) return spans
+    const doc = editor.state.doc
+    let cur: ModSpan | null = null
+    doc.forEach((node, pos) => {
+      if (node.type.name === 'heading' && node.attrs.level === 2) {
+        if (cur) cur.end = pos
+        cur = { start: pos, end: doc.content.size, node }
+        spans.push(cur)
+      } else if (cur) {
+        cur.end = pos + node.nodeSize
+      }
     })
-    return list
+    return spans
   }
   function moveModulePos(pos: number, dir: -1 | 1) {
     if (!editor) return
-    const mods = moduleNodes()
-    const i = mods.findIndex(m => m.pos === pos)
+    const mods = moduleSpans()
+    const i = mods.findIndex(m => m.start === pos)
     if (i < 0) return
     if (dir < 0 && i === 0) return warningMessage('已经是第一位了')
     if (dir > 0 && i === mods.length - 1) return warningMessage('已经到最后了')
-    const node = mods[i].node
+    const m = mods[i]
     const target = mods[i + dir]
     const tr = editor.state.tr
-    tr.delete(pos, pos + node.nodeSize)
-    const ins = dir < 0 ? target.pos : target.pos - node.nodeSize + target.node.nodeSize
-    tr.insert(ins, node)
+    const slice = editor.state.doc.slice(m.start, m.end)
+    tr.delete(m.start, m.end)
+    const ins = dir < 0 ? target.start : target.end - (m.end - m.start)
+    tr.insert(ins, slice.content)
     editor.view.dispatch(tr.scrollIntoView())
   }
   async function removeModulePos(pos: number) {
     if (!editor) return
-    const node = editor.state.doc.nodeAt(pos)
-    if (!node) return
-    const title = node.firstChild?.textContent?.trim()
+    const mods = moduleSpans()
+    const m = mods.find(x => x.start === pos)
+    if (!m) return
+    const title = m.node.textContent?.trim()
     try {
       await ElMessageBox.confirm(
         `您确定要删除${title ? `【${title}】` : '此'}模块吗？`,
         '删除模块提示',
         { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
       )
-      editor.view.dispatch(editor.state.tr.delete(pos, pos + node.nodeSize))
+      editor.view.dispatch(editor.state.tr.delete(m.start, m.end))
     } catch {
       /* 取消 */
     }
@@ -98,11 +115,11 @@ export function useToggleEditorMode(resumeType: string) {
   function onChannelMsg(ev: MessageEvent) {
     const data = ev.data as { index?: number }
     if (typeof data?.index !== 'number' || !editor) return
-    const mods = moduleNodes()
+    const mods = moduleSpans()
     const m = mods[data.index]
     if (!m) return
     try {
-      const el = editor.view.domAtPos(m.pos).node as HTMLElement
+      const el = editor.view.domAtPos(m.start).node as HTMLElement
       const scroller = DOMTree.value
       if (scroller && scroller.scrollHeight > scroller.clientHeight) {
         scroller.scrollTo({ top: Math.max(0, el.offsetTop - 56), behavior: 'smooth' })
@@ -181,12 +198,13 @@ export function useToggleEditorMode(resumeType: string) {
   }
 
   // ===== 编辑器挂载 =====
+  // prod PM 文档 = md 方言渲染的扁平 DOM（无 resume-module/main-layout 包装，那些只在预览端存在）
   const fillContent = () => {
     if (!editorStore.writable || !editor) return
     nextTick(() => {
-      const ref = queryDOM('.reference-dom') as HTMLElement | null
-      if (!ref) return
-      editor!.commands.setContent(ref.innerHTML)
+      const md = editorStore.MDContent
+      if (md == null) return
+      editor!.commands.setContent(fontMark(markdownToHTML(md)))
     })
   }
 
