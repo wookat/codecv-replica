@@ -1,4 +1,4 @@
-import { markdownToHTML } from 'markdown-transform-html'
+import { markdownToHTML } from '@/lib/mth'
 import { getAvatarConfig } from '@/templates/config'
 import { getLocalStorage } from '@/common/localstorage'
 
