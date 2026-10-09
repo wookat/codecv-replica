@@ -1,8 +1,15 @@
 <script setup lang="ts">
-// 数据统计：复用 workbench 指标 + 近30日导出/校对趋势表
-import { onMounted, ref } from 'vue'
+// 数据统计：复用 workbench 指标 + 近30日导出/校对趋势折线图
+import { computed, onMounted, ref } from 'vue'
+import { use } from 'echarts/core'
+import { LineChart } from 'echarts/charts'
+import { GridComponent, TooltipComponent } from 'echarts/components'
+import { CanvasRenderer } from 'echarts/renderers'
+import VChart from 'vue-echarts'
 import { admin } from '@/api/modules/admin'
 import { fmtTime } from './composables'
+
+use([LineChart, GridComponent, TooltipComponent, CanvasRenderer])
 
 const stats = ref<Record<string, number>>({})
 const exportDays = ref<{ day: string; n: number }[]>([])
@@ -18,23 +25,41 @@ onMounted(async () => {
   if (e?.code === 200) exportDays.value = e.data.days
   if (p?.code === 200) proofreadDays.value = p.data.days
 })
+
+const lineOption = (days: { day: string; n: number }[], name: string) => ({
+  tooltip: { trigger: 'axis' as const },
+  grid: { left: 40, right: 16, top: 20, bottom: 28 },
+  xAxis: {
+    type: 'category' as const,
+    data: days.map(d => d.day.slice(5)),
+    axisLabel: { fontSize: 10 }
+  },
+  yAxis: { type: 'value' as const, minInterval: 1 },
+  series: [
+    {
+      name,
+      type: 'line' as const,
+      smooth: true,
+      showSymbol: false,
+      areaStyle: { opacity: 0.12 },
+      data: days.map(d => d.n)
+    }
+  ]
+})
+
+const exportOption = computed(() => lineOption(exportDays.value, '导出次数'))
+const proofreadOption = computed(() => lineOption(proofreadDays.value, '校对次数'))
 </script>
 
 <template>
   <div class="grids">
     <section class="panel">
       <h3>导出趋势（近30天）</h3>
-      <el-table :data="exportDays" size="small">
-        <el-table-column prop="day" label="日期" width="140" />
-        <el-table-column prop="n" label="导出次数" />
-      </el-table>
+      <VChart class="chart" :option="exportOption" autoresize />
     </section>
     <section class="panel">
       <h3>校对趋势（近30天）</h3>
-      <el-table :data="proofreadDays" size="small">
-        <el-table-column prop="day" label="日期" width="140" />
-        <el-table-column prop="n" label="校对次数" />
-      </el-table>
+      <VChart class="chart" :option="proofreadOption" autoresize />
     </section>
   </div>
   <p class="meta">更新于 {{ fmtTime(Date.now()) }}</p>
@@ -56,10 +81,13 @@ onMounted(async () => {
     margin-bottom: 12px;
   }
 }
+.chart {
+  height: 280px;
+}
 .meta {
   margin-top: 14px;
+  color: #999;
   font-size: 12px;
-  color: rgba(0, 0, 0, 0.4);
 }
 @media (max-width: 900px) {
   .grids {
