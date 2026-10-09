@@ -6,20 +6,62 @@ import { templateCategory } from './constant'
 import { useCategory, useTemplateData, useNotification } from './hook'
 import { numFormat } from '@/utils/format'
 import ToastModal from '@/components/toast-modal/toastModal.vue'
+import { computed, onMounted, ref } from 'vue'
+import { ElMessage } from 'element-plus'
+import { favoriteList } from '@/api/modules/favorite'
+import { currentUser } from '@/utils/auth'
 
-const { queryCategory, data } = useCategory()
+const { queryCategory, data, category } = useCategory()
 const { ranks } = useTemplateData()
 const { flag, close } = useNotification()
+
+const favTypes = ref<Set<string>>(new Set())
+const onlyFav = ref(false)
+onMounted(async () => {
+  const r = await favoriteList()
+  favTypes.value = new Set(r.types)
+})
+function onToggleFav(p: { type: string; favorited: boolean }) {
+  const s = new Set(favTypes.value)
+  if (p.favorited) s.add(p.type)
+  else s.delete(p.type)
+  favTypes.value = s
+}
+const shown = computed(() =>
+  onlyFav.value ? data.value.filter(t => favTypes.value.has(t.type)) : data.value
+)
+function toggleOnlyFav() {
+  if (!currentUser()) ElMessage.info('未登录收藏保存在本机，登录后可云端同步')
+  onlyFav.value = !onlyFav.value
+}
 </script>
 
 <template>
   <div class="resume-container flex">
     <div class="resume-left-container content-card" data-aos="fade-right">
       <NavBar button="创作模板" :tabs="templateCategory" @tab-click="queryCategory" />
-      <div class="resume-card-container" v-if="data.length">
-        <resume-card v-for="theme in data" :key="theme.id" :theme="theme" />
+      <div class="fav-bar">
+        <button class="fav-toggle" :class="{ on: onlyFav }" @click="toggleOnlyFav">
+          ★ 只看收藏（{{ favTypes.size }}）
+        </button>
       </div>
-      <Empty v-else title="暂时没有这类模板 你可以点击右上角创作模板或联系作者添加～" />
+      <div class="resume-card-container" v-if="shown.length">
+        <resume-card
+          v-for="theme in shown"
+          :key="theme.id"
+          :theme="theme"
+          :favorited="favTypes.has(theme.type)"
+          @toggle-fav="onToggleFav"
+        />
+      </div>
+      <Empty
+        v-else
+        :title="
+          onlyFav
+            ? '还没有收藏模板，点击卡片右上角 ☆ 收藏'
+            : '暂时没有这类模板 你可以点击右上角创作模板或联系作者添加～'
+        "
+      />
     </div>
     <div class="resume-right-container" data-aos="fade-left">
       <div class="resume-hot-rank content-card mb-20">
@@ -68,6 +110,24 @@ const { flag, close } = useNotification()
 </template>
 
 <style lang="scss" scoped>
+.fav-bar {
+  width: 100%;
+  margin: 0 0 10px;
+  .fav-toggle {
+    border: 1px solid var(--border-color, #e5e5e5);
+    background: var(--background);
+    color: var(--font-color);
+    border-radius: 16px;
+    padding: 4px 14px;
+    font-size: 12px;
+    cursor: pointer;
+    &.on {
+      color: #f5a623;
+      border-color: #f5a623;
+    }
+  }
+}
+
 .resume-container {
   max-width: var(--max-width);
   margin: 20px auto;

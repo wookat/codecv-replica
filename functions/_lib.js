@@ -31,6 +31,21 @@ export async function readBody(request) {
 
 export const onRequestOptions = context => json(context.request, {})
 
+/** 写一条用户通知（best-effort，失败静默） */
+export async function notify(db, userId, title, content, type, link) {
+  if (!userId) return
+  try {
+    await db
+      .prepare(
+        'INSERT INTO notifications (user_id,title,content,type,link,is_read,created_at) VALUES (?,?,?,?,?,0,?)'
+      )
+      .bind(userId, title, content || '', type || 'system', link || '', Date.now())
+      .run()
+  } catch {
+    /* 通知失败不阻断主流程 */
+  }
+}
+
 export const sub = (field, v) =>
   !v ||
   String(field ?? '')

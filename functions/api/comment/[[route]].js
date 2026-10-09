@@ -1,5 +1,5 @@
 // /api/comment/list|create —— 面经详情评论（list 公开，create 需登录）
-import { json, readBody } from '../../_lib.js'
+import { json, readBody, notify } from '../../_lib.js'
 import { currentUserRow } from '../../_auth.js'
 
 export async function onRequest(context) {
@@ -37,6 +37,21 @@ export async function onRequest(context) {
       )
       .bind(String(doc), auth.row.id, nickname, String(content).trim(), Date.now())
       .run()
+    const owner = await db
+      .prepare('SELECT user_id, title FROM mianjing_submissions WHERE id = ?')
+      .bind(+doc || 0)
+      .first()
+      .catch(() => null)
+    if (owner?.user_id && owner.user_id !== auth.row.id) {
+      await notify(
+        db,
+        owner.user_id,
+        '收到新评论',
+        `${nickname} 评论了你的面经「${owner.title || ''}」`,
+        'comment',
+        `/mianjing/p/${doc}`
+      )
+    }
     return json(request, {
       code: 200,
       data: { id: r.meta.last_row_id, nickname },

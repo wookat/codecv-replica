@@ -1,5 +1,5 @@
 // /api/share/create|get —— 简历分享链接（create 需登录，get 公开只读）
-import { json, readBody } from '../../_lib.js'
+import { json, readBody, notify } from '../../_lib.js'
 import { currentUserRow } from '../../_auth.js'
 
 const SHARE_ID_LEN = 10
@@ -59,7 +59,7 @@ export async function onRequest(context) {
     if (!type) return json(request, { code: 400, msg: '缺少简历类型' })
     const row = await db
       .prepare(
-        'SELECT name, md AS content, style, view_num, is_public FROM resumes WHERE resume_type = ? AND is_public = 1 ORDER BY updated_at DESC LIMIT 1'
+        'SELECT user_id, name, md AS content, style, view_num, is_public FROM resumes WHERE resume_type = ? AND is_public = 1 ORDER BY updated_at DESC LIMIT 1'
       )
       .bind(type)
       .first()
@@ -68,6 +68,25 @@ export async function onRequest(context) {
       .prepare('UPDATE resumes SET view_num = view_num + 1 WHERE resume_type = ? AND is_public = 1')
       .bind(type)
       .run()
+    if (row.user_id) {
+      const seen = await db
+        .prepare(
+          "SELECT id FROM notifications WHERE user_id = ? AND type = 'share-view' AND link = ? LIMIT 1"
+        )
+        .bind(row.user_id, `/cv/${type}`)
+        .first()
+        .catch(() => null)
+      if (!seen) {
+        await notify(
+          db,
+          row.user_id,
+          '你的公开简历被查看了',
+          `「${row.name || type}」第一次被他人查看`,
+          'share-view',
+          `/cv/${type}`
+        )
+      }
+    }
     return json(request, {
       code: 200,
       data: { ...row, viewNum: (row.view_num || 0) + 1 },

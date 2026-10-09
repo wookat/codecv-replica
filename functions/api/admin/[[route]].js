@@ -1,6 +1,6 @@
 // /api/admin/* — 后台管理端点集合（对齐 prod 逆向清单）
 // 鉴权：Bearer token -> users.is_admin=1。GET 读 query，POST 读 body。
-import { json, readBody, loadSeed } from '../../_lib.js'
+import { json, readBody, loadSeed, notify } from '../../_lib.js'
 import { currentUserRow } from '../../_auth.js'
 
 const pageOf = q => ({
@@ -397,10 +397,34 @@ export async function onRequest(context) {
       : json(request, { code: 404, msg: '投稿不存在' })
   }
   if (route === 'mianjing/review' && request.method === 'POST') {
+    const status = String(q.status || 'approved')
+    const sub = await db
+      .prepare('SELECT user_id, title FROM mianjing_submissions WHERE id = ?')
+      .bind(+q.id)
+      .first()
     await db
       .prepare('UPDATE mianjing_submissions SET status = ? WHERE id = ?')
-      .bind(String(q.status || 'approved'), +q.id)
+      .bind(status, +q.id)
       .run()
+    if (sub?.user_id && (status === 'approved' || status === 'published')) {
+      await notify(
+        db,
+        sub.user_id,
+        '面经审核通过',
+        `你的面经「${sub.title || ''}」已发布`,
+        'review',
+        `/mianjing/p/${q.id}`
+      )
+    } else if (sub?.user_id && status === 'rejected') {
+      await notify(
+        db,
+        sub.user_id,
+        '面经未通过审核',
+        `你的面经「${sub.title || ''}」未通过审核，可修改后重新提交`,
+        'review',
+        '/mianjing/mine'
+      )
+    }
     return json(request, { code: 200, message: '已更新' })
   }
   if (route === 'mianjing/save' && request.method === 'POST') {

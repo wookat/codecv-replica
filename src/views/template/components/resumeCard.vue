@@ -1,17 +1,37 @@
 <script setup lang="ts">
 import { type TemplateType } from '@/templates/config'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import { favoriteToggle } from '@/api/modules/favorite'
 
-defineProps<{ theme: TemplateType }>()
+const props = defineProps<{ theme: TemplateType; favorited?: boolean }>()
+const emit = defineEmits(['toggle-fav'])
 const router = useRouter()
 
 const edit = (type: string) => {
   router.push({ path: '/editor', query: { type } })
 }
+
+async function toggleFav(e: MouseEvent) {
+  e.stopPropagation()
+  const r = await favoriteToggle(props.theme.type)
+  emit('toggle-fav', { type: props.theme.type, favorited: r.favorited })
+  ElMessage.success(
+    r.favorited ? (r.cloud ? '已收藏' : '已收藏（登录后可云端同步）') : '已取消收藏'
+  )
+}
 </script>
 
 <template>
   <div class="resume-card" data-aos="zoom-in">
+    <button
+      class="fav-star"
+      :class="{ on: favorited }"
+      :title="favorited ? '取消收藏' : '收藏模板'"
+      @click="toggleFav"
+    >
+      {{ favorited ? '★' : '☆' }}
+    </button>
     <p class="template-hot" v-show="theme.hot">
       <i class="iconfont icon-hot font-20"></i> {{ theme.hot }}
     </p>
@@ -35,6 +55,22 @@ const edit = (type: string) => {
   transition: transform 0.4s;
   color: var(--font-color);
   cursor: pointer;
+
+  .fav-star {
+    position: absolute;
+    top: -25px;
+    right: 0;
+    z-index: 2;
+    border: none;
+    background: transparent;
+    font-size: 18px;
+    line-height: 25px;
+    color: #bbb;
+    cursor: pointer;
+    &.on {
+      color: #f5a623;
+    }
+  }
 
   .template-hot {
     height: 25px;

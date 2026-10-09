@@ -5,13 +5,56 @@ import { useRoute } from 'vue-router'
 import { allOverlaysHTML, convertDOM } from '@/utils/moduleCombine'
 import { templates } from '@/templates/config'
 import { applyTemplateTheme, importCSS } from '@/utils'
-import { getShare, shareView } from '@/api/modules/share'
+import { createComment, getShare, listComments, shareView } from '@/api/modules/share'
 
 const route = useRoute()
 const html = ref('')
 const name = ref('')
 const type = ref('')
 const viewNum = ref(0)
+const shareId = ref('')
+
+interface CommentRow {
+  id: number
+  nickname: string
+  content: string
+  created_at: number
+}
+const comments = ref<CommentRow[]>([])
+const draft = ref('')
+const posting = ref(false)
+const cmtMsg = ref('')
+
+async function loadComments() {
+  if (!shareId.value) return
+  const res = await listComments(`share-${shareId.value}`)
+  if (res?.code === 200) comments.value = res.data || []
+}
+
+async function sendComment() {
+  const content = draft.value.trim()
+  if (!content) return
+  posting.value = true
+  cmtMsg.value = ''
+  const res = await createComment(`share-${shareId.value}`, content)
+  posting.value = false
+  if (res?.code === 200) {
+    draft.value = ''
+    loadComments()
+  } else if (res?.code === 401) {
+    cmtMsg.value = '请先登录后再评论'
+  } else {
+    cmtMsg.value = res?.msg || '评论失败'
+  }
+}
+
+function fmtTime(ts: number) {
+  const d = new Date(ts)
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(
+    d.getMinutes()
+  )}`
+}
 
 const SHARE_KEY = 'codecv-share'
 
@@ -25,6 +68,8 @@ function render(type_: string, name_: string, md: string) {
 
 onMounted(async () => {
   const id = route.params.id as string
+  shareId.value = id
+  loadComments()
   // 公开简历分享：/share/<resume_type> 实时内容 + 被查看计数（对照生产 cv.share/view）
   try {
     const res = await shareView(id)
@@ -70,6 +115,24 @@ const tpl = computed(() => templates.value.find(t => t.type === type.value))
         <router-link :to="`/editor/${type}`" class="sh-btn">用同款模板</router-link>
       </div>
       <div class="cv-preview markdown-transform-html jufe" v-html="html"></div>
+      <section class="sh-comments">
+        <h3>评论（{{ comments.length }}）</h3>
+        <ul v-if="comments.length" class="cmt-list">
+          <li v-for="c in comments" :key="c.id">
+            <b>{{ c.nickname }}</b>
+            <span class="cmt-time">{{ fmtTime(c.created_at) }}</span>
+            <p>{{ c.content }}</p>
+          </li>
+        </ul>
+        <p v-else class="cmt-none">还没有评论，来抢沙发</p>
+        <div class="cmt-box">
+          <textarea v-model="draft" maxlength="500" placeholder="说点什么…（登录后可评论）" />
+          <button class="sh-btn" :disabled="posting" @click="sendComment">
+            {{ posting ? '发送中…' : '发表评论' }}
+          </button>
+        </div>
+        <p v-if="cmtMsg" class="cmt-msg">{{ cmtMsg }}</p>
+      </section>
     </div>
     <div v-else class="sh-empty">
       <h2>分享不存在或已过期</h2>
