@@ -60,24 +60,17 @@ function handleDOM(pos: number, node: PMNode, view: EditorView) {
     let bestEl = null as HTMLElement | null
     let bestDist = Infinity
     let above = true
-    view.state.doc.forEach((n, p) => {
-      let el: HTMLElement | null = null
-      try {
-        const got = view.domAtPos(p).node
-        el = got instanceof HTMLElement ? got : got.parentElement
-      } catch {
-        return
-      }
-      const r = el?.getBoundingClientRect()
-      if (!r || !r.height) return
+    for (const b of topBlockRects(view)) {
+      const r = b.el.getBoundingClientRect()
+      if (!r.height) continue
       const mid = r.top + r.height / 2
       const dist = Math.abs(clientY - mid)
       if (dist < bestDist) {
         bestDist = dist
-        bestEl = el
+        bestEl = b.el
         above = clientY < mid
       }
-    })
+    }
     if (bestEl !== dropMark) {
       clearDropMark()
       dropMark = bestEl
@@ -176,27 +169,31 @@ function handleDOM(pos: number, node: PMNode, view: EditorView) {
   return h
 }
 
-// 顶层块落点：返回目标块的起始 pos（在目标块之前插入）
+// 顶层块落点：view.dom 顶层子元素与 doc 顶层块一一对应（widget 装饰在块内部不占顶层位）
+function topBlockRects(view: EditorView): { el: HTMLElement; pos: number; size: number }[] {
+  const kids = Array.from(view.dom.children) as HTMLElement[]
+  const out: { el: HTMLElement; pos: number; size: number }[] = []
+  let i = 0
+  view.state.doc.forEach((node, pos) => {
+    const el = kids[i++]
+    if (el) out.push({ el, pos, size: node.nodeSize })
+  })
+  return out
+}
+
 function dropTargetPos(view: EditorView, clientY: number) {
   let bestPos = -1
   let bestDist = Infinity
-  view.state.doc.forEach((node, pos) => {
-    let el: HTMLElement | null = null
-    try {
-      const got = view.domAtPos(pos).node
-      el = got instanceof HTMLElement ? got : got.parentElement
-    } catch {
-      return
-    }
-    const r = el?.getBoundingClientRect()
-    if (!r || !r.height) return
+  for (const b of topBlockRects(view)) {
+    const r = b.el.getBoundingClientRect()
+    if (!r.height) continue
     const mid = r.top + r.height / 2
     const dist = Math.abs(clientY - mid)
     if (dist < bestDist) {
       bestDist = dist
-      bestPos = clientY < mid ? pos : pos + node.nodeSize
+      bestPos = clientY < mid ? b.pos : b.pos + b.size
     }
-  })
+  }
   return bestPos
 }
 
