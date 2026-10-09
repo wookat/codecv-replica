@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ElMessage, ElMessageBox } from 'element-plus'
+import AdminTablePage from './AdminTablePage.vue'
 import { admin } from '@/api/modules/admin'
 import { useAdminPage } from './composables'
 
@@ -21,8 +22,8 @@ async function del(t: any) {
 </script>
 
 <template>
-  <div class="panel">
-    <div class="bar">
+  <AdminTablePage :total="total" :page="page" @update:page="changePage">
+    <template #toolbar>
       <el-input
         v-model="keyword"
         placeholder="搜索模板名"
@@ -31,7 +32,7 @@ async function del(t: any) {
         @keyup.enter="search"
       />
       <el-button type="primary" @click="search">搜索</el-button>
-    </div>
+    </template>
     <el-table v-loading="loading" :data="rows" size="small">
       <el-table-column prop="type" label="type" width="200" />
       <el-table-column prop="name" label="名称" min-width="180" />
@@ -50,14 +51,7 @@ async function del(t: any) {
         </template>
       </el-table-column>
     </el-table>
-    <el-pagination
-      layout="total, prev, pager, next"
-      :total="total"
-      :page-size="30"
-      :current-page="page"
-      @current-change="changePage"
-    />
-  </div>
+  </AdminTablePage>
 </template>
 
 <style scoped>

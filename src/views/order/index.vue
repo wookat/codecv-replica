@@ -3,7 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getLocalStorage } from '@/common/localstorage'
-import { currentUser } from '@/utils/auth'
+import { useRequireAuth } from '@/utils/requireAuth'
 import LoginModal from '@/components/LoginModal.vue'
 
 interface Order {
@@ -16,7 +16,7 @@ interface Order {
 }
 
 const router = useRouter()
-const user = ref(currentUser())
+const { user } = useRequireAuth()
 const loginModal = ref(!user.value)
 const orders = ref<Order[]>([])
 const page = ref(1)
