@@ -105,7 +105,7 @@ onBeforeUnmount(() => clearInterval(undoTimer))
     class="writable-edit-mode"
     spellcheck="false"
     @keyup="refreshUndo"
-    :style="{ height: 'calc(100vh - 88px)', width: `${left}px`, overflowY: 'scroll' }"
+    :style="{ height: 'calc(100vh - 88px)', width: `${left}px` }"
   ></div>
 </template>
 

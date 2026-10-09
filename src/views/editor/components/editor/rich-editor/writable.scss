@@ -1,21 +1,9 @@
 /* 所见即所得编辑皮肤 —— 逐条对齐 codecvcv.com .tiptap 规则（已实测抓取） */
+/* 与 prod 同构：.writable-edit-mode 只是定位壳，纸面样式+滚动都在 .tiptap
+   （prod .tiptap: h:100vh, overflow-y:auto, pad 54/45/18/52, scrollbar hidden） */
 .writable-edit-mode {
-  background: var(--background);
-  color: var(--writable-font-color, #333);
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  border-radius: 0.75rem;
-  padding: 54px 45px 18px 52px;
   position: relative;
-  outline: none;
   min-width: 480px;
-
-  &:focus {
-    outline: none;
-  }
-  &::-webkit-scrollbar {
-    display: none;
-  }
 
   * {
     line-height: 30px;
@@ -23,8 +11,23 @@
 
   /* tiptap/ProseMirror 引擎根：与生产 .tiptap.ProseMirror 同角色 */
   .tiptap {
+    background: var(--background);
+    color: var(--writable-font-color, #333);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    border-radius: 0.75rem;
+    padding: 54px 45px 18px 52px;
+    position: relative;
+    height: 100%;
+    overflow-y: auto;
     outline: none;
     min-height: 60vh;
+    &:focus {
+      outline: none;
+    }
+    &::-webkit-scrollbar {
+      display: none;
+    }
     /* 块级节点需定位上下文挂绝对定位的 drag-handle/mod-op */
     p,
     h1,
