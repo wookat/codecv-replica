@@ -13,6 +13,8 @@ export async function onRequest(context) {
   const { request, env } = context
   const url = new URL(request.url)
   if (request.method === 'OPTIONS') return json(request, {})
+  // /user/invite 等前端页面路由也落进本 Function——GET 一律放行给 SPA 静态资源
+  if (request.method === 'GET') return context.next()
   const route = url.pathname.split('/').pop()
   const q = await readBody(request)
   const db = env.DB

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import useUserStore from '@/store/modules/user'
 import { updateUserInfo } from '@/api/modules/user'
@@ -23,6 +23,14 @@ fetch('/api/schools', {
   .then(r => r.json())
   .then(d => (schools.value = d?.data || []))
   .catch(() => undefined)
+
+// 打开弹层时先水合 userInfo（会话恢复场景 uid=0 且字段空白，保存前也拦一次）
+watch(
+  () => props.modelValue,
+  v => {
+    if (v) void store.ensureHydrated()
+  }
+)
 
 async function saveProfile() {
   saving.value = true
