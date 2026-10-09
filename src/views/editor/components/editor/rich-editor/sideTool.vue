@@ -76,7 +76,11 @@ function open(detail: {
   state.el = detail.el
   state.mode = detail.mode
   const r = detail.anchorRect
-  state.top = Math.min(window.innerHeight - 320, r.bottom + 8)
+  // 视口下方放不下时翻到锚点上方（菜单最高 ~320px）
+  const MENU_H = 320
+  const below = window.innerHeight - r.bottom - 8
+  state.top = below >= 200 ? r.bottom + 8 : r.top - MENU_H - 8
+  if (state.top < 8) state.top = 8
   state.left = Math.max(8, Math.min(window.innerWidth - 185, r.left))
   state.gridOpen = false
   state.grid = null

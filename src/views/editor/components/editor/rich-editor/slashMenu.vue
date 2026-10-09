@@ -286,8 +286,12 @@ function refresh() {
   }
   const r = caretRect()
   if (r) {
-    state.top = r.bottom + 6
-    state.left = Math.max(8, Math.min(window.innerWidth - 200, r.left))
+    // 视口下方放不下时翻到光标上方（菜单最高 320px）
+    const MENU_H = 320
+    const below = window.innerHeight - r.bottom - 6
+    state.top = below >= Math.min(MENU_H, 200) ? r.bottom + 6 : r.top - MENU_H - 6
+    if (state.top < 8) state.top = 8
+    state.left = Math.max(8, Math.min(window.innerWidth - 208, r.left))
   }
   state.index = 0
   state.visible = true
