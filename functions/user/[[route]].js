@@ -13,9 +13,9 @@ export async function onRequest(context) {
   const { request, env } = context
   const url = new URL(request.url)
   if (request.method === 'OPTIONS') return json(request, {})
-  // /user/invite 等前端页面路由也落进本 Function——GET 一律放行给 SPA 静态资源
-  if (request.method === 'GET') return context.next()
+  // /user/invite 是前端页面路由——仅它放行给 SPA；其余 GET（如 /user/info 配额接口）走 API
   const route = url.pathname.split('/').pop()
+  if (request.method === 'GET' && route !== 'info') return context.next()
   const q = await readBody(request)
   const db = env.DB
   const kv = env.UPSTASH_KV

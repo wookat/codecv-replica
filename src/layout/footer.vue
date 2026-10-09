@@ -27,23 +27,23 @@ const minimal = computed(() => useRoute().path === '/progress')
             href="https://test.zalize.com?utm_source=codecv"
             target="_blank"
             rel="noopener noreferrer"
-            >OfferStar - Ai笔试面试辅助工具</a
+            >答对 - AI笔试面试辅助工具</a
           >
         </li>
         <li class="mr2">
           <a
-            href="https://english.codecvcv.com?utm_source=codecv"
+            href="https://apply.zalize.com?utm_source=codecv"
             target="_blank"
             rel="noopener noreferrer"
-            >言究社 - 免费英语学习平台</a
+            >速申 - 网申简历助手</a
           >
         </li>
         <li class="mr2">
           <a
-            href="https://niubi.codecvcv.com?utm_source=codecv"
+            href="https://jobs.zalize.com?utm_source=codecv"
             target="_blank"
             rel="noopener noreferrer"
-            >牛笔AI - 极简AI发文助手</a
+            >上岸雷达 - 校招进度追踪</a
           >
         </li>
       </ul>
