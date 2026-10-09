@@ -20,6 +20,31 @@ const savedSel = ref<{ from: number; to: number } | null>(null)
 const imgPos = ref(-1)
 const imgSrc = ref('')
 
+// prod: A 字色触发 → 小色板（设 textStyle color；空串=移除 mark 回默认）
+const colorOpen = ref(false)
+const FONT_COLORS = [
+  '',
+  '#1f2329',
+  '#787774',
+  '#d44c47',
+  '#d9730d',
+  '#cb912f',
+  '#448361',
+  '#337ea9',
+  '#9065b0',
+  '#c14c8a',
+  '#f6a22f',
+  '#e8b424'
+]
+function setFg(c: string) {
+  const e = ed()
+  if (!e) return
+  restoreSel()
+  if (c) e.chain().focus().setColor(c).run()
+  else e.chain().focus().unsetColor().run()
+  colorOpen.value = false
+}
+
 const userStore = useUserStore()
 const POSITION_KEY = 'cv-ai-target-position'
 const POSITIONS = [
@@ -453,6 +478,29 @@ onBeforeUnmount(() => {
             <i class="iconfont icon-strike" />
           </button>
         </el-tooltip>
+        <!-- prod: icon-tagfill 标签 + A 字色触发 -->
+        <el-tooltip content="标签" placement="top">
+          <button class="bubble-menu-item" @click="chain().toggleCode().run()">
+            <i class="iconfont icon-tagfill" />
+          </button>
+        </el-tooltip>
+        <div class="color-wrap">
+          <el-tooltip content="字体颜色" placement="top">
+            <button class="bubble-menu-item color-trigger" @click="colorOpen = !colorOpen">
+              <span class="color-a">A</span>
+            </button>
+          </el-tooltip>
+          <div v-if="colorOpen" class="color-panel floating-shadow">
+            <button
+              v-for="c in FONT_COLORS"
+              :key="c"
+              class="swatch"
+              :style="{ background: c || 'transparent', border: c ? 'none' : '1px solid #ccc' }"
+              :title="c || '默认'"
+              @click="setFg(c)"
+            ></button>
+          </div>
+        </div>
         <div class="bm-divider" />
         <el-tooltip content="插入链接" placement="top">
           <button class="bubble-menu-item" @click="openLinkMode">
@@ -495,6 +543,35 @@ onBeforeUnmount(() => {
   padding: 4px 6px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.16);
   display: flex;
+}
+.color-wrap {
+  position: relative;
+}
+.color-a {
+  font-weight: 700;
+  font-size: 13px;
+  border-bottom: 2.5px solid var(--theme, #f6a22f);
+  line-height: 1.1;
+}
+.color-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  display: grid;
+  grid-template-columns: repeat(6, 18px);
+  gap: 6px;
+  padding: 10px;
+  background: var(--background, #fff);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.16);
+  z-index: 5;
+  .swatch {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 0;
+  }
 }
 html.dark .bubble-menu {
   background: #222;

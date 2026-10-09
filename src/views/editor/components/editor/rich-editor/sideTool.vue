@@ -5,8 +5,13 @@
 //  - block 模式（光标停在空段落）: 正文/模块标题/小标题 + 插入左右布局 + 插入空白符
 import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { resumeDOMStruct2Markdown } from '@/utils/dom2md'
-import { successMessage } from '@/common/message'
+import { successMessage, errorMessage } from '@/common/message'
 import { getPMEditor } from './pm/useEditor'
+import { selectIcon, linkFlag } from '../toolbar/hook'
+import { reset } from '../toolbar/components/linkInput/hook'
+import { getPickerFile } from '@/utils/uploader'
+import { getLocalStorage } from '@/common/localstorage'
+import { TOKEN } from '@/store/modules/user'
 import type { Node as PMNode } from '@tiptap/pm/model'
 
 interface MenuState {
@@ -17,6 +22,8 @@ interface MenuState {
   pos: number
   node: PMNode | null
   el: HTMLElement | null
+  gridOpen: boolean
+  grid: { row: number; col: number } | null
 }
 const state = reactive<MenuState>({
   visible: false,
@@ -25,16 +32,36 @@ const state = reactive<MenuState>({
   left: 0,
   pos: -1,
   node: null,
-  el: null
+  el: null,
+  gridOpen: false,
+  grid: null
 })
 const menuRef = ref<HTMLElement>()
 
+// prod add-btn 弹出的是与 slash 完全一致的 22 项 mention-menu（实测菜单文本逐项相同）
 const INSERT_ITEMS = [
-  { key: 'p', label: '正文', en: 'zhengwen/paragraph' },
-  { key: 'h2', label: '模块标题', en: 'erjibiaoti/heading' },
-  { key: 'h3', label: '小标题', en: 'sanjibiaoti/heading' },
-  { key: 'cols', label: '插入左右布局', en: 'multi columns', icon: true },
-  { key: 'nbsp', label: '插入空白符，保留空行', en: 'insert nbsp', icon: true }
+  { key: 'h2', label: '模块标题', en: 'jianlimokuaibiaoti', icon: 'wrongly' },
+  { key: 'cols', label: '左右布局', en: 'zuoyoubuju/column', icon: 'columns' },
+  { key: 'icon', label: '插入图标', en: 'charutubiao/icon', icon: 'emoji' },
+  { key: 'img', label: '插入图片', en: 'tupian/image', icon: 'image' },
+  { key: 'h1', label: '一级标题', en: 'yijibiaoti/heading', icon: 'head' },
+  { key: 'h2b', label: '二级标题', en: 'erjibiaoti/heading', icon: 'head' },
+  { key: 'h3', label: '三级标题', en: 'sanjibiaoti/heading', icon: 'head' },
+  { key: 'h4', label: '四级标题', en: 'sijibiaoti/heading', icon: 'head' },
+  { key: 'h5', label: '五级标题', en: 'wujibiaoti/heading', icon: 'head' },
+  { key: 'h6', label: '六级标题', en: 'liujibiaoti/heading', icon: 'head' },
+  { key: 'table', label: '表格布局', en: 'biaogebuju/table', icon: 'table' },
+  { key: 'nbsp', label: '插入空白符', en: 'kongbaifu/space', icon: 'space' },
+  { key: 'bold', label: '加粗', en: 'jiacu/bold', icon: 'bold' },
+  { key: 'italic', label: '斜体', en: 'xieti/italic', icon: 'italic' },
+  { key: 'quote', label: '引用', en: 'yinyong/quote', icon: 'quote' },
+  { key: 'hr', label: '水平分割线', en: 'fengexian/horizontal', icon: 'segment' },
+  { key: 'strike', label: '删除线', en: 'shanchuxian/', icon: 'strike' },
+  { key: 'tag', label: '标签', en: 'biaoqian/code', icon: 'code' },
+  { key: 'link', label: '插入链接', en: 'charulianjie/link', icon: 'link' },
+  { key: 'ol', label: '有序列表', en: 'youxuliebiao/orderlist', icon: 'orderedlist' },
+  { key: 'ul', label: '无序列表', en: 'wuxuliebiao/unorderlist', icon: 'unorderedlist' },
+  { key: 'avatar', label: '头像上传', en: 'touxiang/image', icon: 'user' }
 ]
 
 function open(detail: {
@@ -51,6 +78,8 @@ function open(detail: {
   const r = detail.anchorRect
   state.top = Math.min(window.innerHeight - 320, r.bottom + 8)
   state.left = Math.max(8, Math.min(window.innerWidth - 185, r.left))
+  state.gridOpen = false
+  state.grid = null
   state.visible = true
 }
 function onTrigger(ev: Event) {
@@ -221,19 +250,24 @@ function insert(key: string) {
   if (!e || !n || state.pos < 0) return close()
   const doc = e.state.doc
 
-  // block 模式：空段落 → 转换/替换
+  const lv = key.match(/^h(\d)b?$/)?.[1]
+  // block 模式：空段落 → 就地转换/替换
   if (state.mode === 'block' && n.type.name === 'paragraph' && !n.textContent.trim()) {
-    if (key === 'p') return close()
-    if (key === 'h2' || key === 'h3') {
+    if (lv) {
       e.chain()
         .focus()
-        .setNode('heading', { level: +key[1] as 2 | 3 })
+        .setNode('heading', { level: +lv as 1 | 2 | 3 | 4 | 5 | 6 })
         .run()
-    } else if (key === 'nbsp') {
+      return close()
+    }
+    if (key === 'p') return close()
+    if (key === 'nbsp') {
       e.chain()
         .insertContentAt(state.pos + 1, '\u00a0')
         .run()
-    } else if (key === 'cols') {
+      return close()
+    }
+    if (key === 'cols') {
       e.chain()
         .insertContentAt(state.pos, {
           type: 'flexLayout',
@@ -243,35 +277,135 @@ function insert(key: string) {
           ]
         })
         .run()
+      return close()
     }
-    return close()
   }
 
-  // insert 模式：该块之后插入
+  // insert 模式：该块之后插入（光标落到插入点，与 slash 菜单同语义）
   const ins = Math.min(state.pos + n.nodeSize, doc.content.size)
-  if (key === 'p' || key === 'h2' || key === 'h3') {
-    const content =
-      key === 'p' ? { type: 'paragraph' } : { type: 'heading', attrs: { level: +key[1] } }
-    e.chain().focus().insertContentAt(ins, content).run()
-  } else if (key === 'cols') {
-    e.chain()
-      .focus()
-      .insertContentAt(ins, {
+  const ch = e.chain().focus()
+  switch (key) {
+    case 'cols':
+      ch.insertContentAt(ins, {
         type: 'flexLayout',
         content: [
           { type: 'flexItem', content: [{ type: 'paragraph' }] },
           { type: 'flexItem', content: [{ type: 'paragraph' }] }
         ]
-      })
-      .run()
-  } else if (key === 'nbsp') {
-    e.chain().focus().insertContentAt(ins, { type: 'paragraph', content: [] }).run()
-    // 在段首填 &nbsp;
-    e.chain()
-      .insertContentAt(ins + 1, '\u00a0')
-      .run()
+      }).run()
+      break
+    case 'icon':
+      ch.setTextSelection(ins).run()
+      selectIcon.value = true
+      break
+    case 'img':
+      ch.setTextSelection(ins).run()
+      void uploadAt('image')
+      break
+    case 'avatar':
+      ch.setTextSelection(ins).run()
+      void uploadAt('个人头像', 'cv-avatar-overlay')
+      break
+    case 'nbsp':
+      ch.insertContentAt(ins, {
+        type: 'paragraph',
+        content: [{ type: 'text', text: '\u00a0' }]
+      }).run()
+      break
+    case 'bold':
+      ch.setTextSelection(ins).toggleBold().run()
+      break
+    case 'italic':
+      ch.setTextSelection(ins).toggleItalic().run()
+      break
+    case 'strike':
+      ch.setTextSelection(ins).toggleStrike().run()
+      break
+    case 'quote':
+      ch.insertContentAt(ins, { type: 'blockquote', content: [{ type: 'paragraph' }] }).run()
+      break
+    case 'hr':
+      ch.insertContentAt(ins, { type: 'horizontalRule' }).run()
+      break
+    case 'tag':
+      ch.insertContentAt(ins, {
+        type: 'paragraph',
+        content: [{ type: 'text', text: '标签', marks: [{ type: 'code' }] }]
+      }).run()
+      break
+    case 'link':
+      ch.setTextSelection(ins).run()
+      reset()
+      linkFlag.value = true
+      break
+    case 'ol':
+      ch.setTextSelection(ins).toggleOrderedList().run()
+      break
+    case 'ul':
+      ch.setTextSelection(ins).toggleBulletList().run()
+      break
+    case 'table':
+      // 点表格式只展开网格子菜单，不执行
+      state.gridOpen = true
+      return
+    default:
+      if (lv) ch.insertContentAt(ins, { type: 'heading', attrs: { level: +lv } }).run()
   }
   close()
+}
+
+// 插入图片（与 slash 菜单同实现：上传 KV，未登录 dataURL 兜底）
+async function uploadAt(alt: string, cls = '') {
+  const e = ed()
+  if (!e) return
+  try {
+    const file = await getPickerFile({ multiple: false, accept: '.png,.jpg,.jpeg,.webp' })
+    if (!file) return
+    const token = (getLocalStorage(TOKEN) as string) || ''
+    const fd = new FormData()
+    fd.append('file', file)
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      body: fd
+    })
+    let url = ''
+    if (res.ok) {
+      const data = await res.json()
+      if (data.code === 200) url = data.url
+    }
+    if (!url) {
+      url = await new Promise<string>((resolve, reject) => {
+        const fr = new FileReader()
+        fr.onload = () => resolve(String(fr.result))
+        fr.onerror = reject
+        fr.readAsDataURL(file)
+      })
+    }
+    e.chain()
+      .focus()
+      .setImage({ src: url, alt, class: cls || null, style: 'max-width:100%' } as never)
+      .run()
+    successMessage('图片已插入')
+  } catch {
+    errorMessage('上传失败')
+  }
+}
+function pickCell(row: number, col: number) {
+  const e = ed()
+  const n = state.node
+  if (!e || !n || state.pos < 0) return close()
+  const ins = Math.min(state.pos + n.nodeSize, e.state.doc.content.size)
+  e.chain()
+    .focus()
+    .setTextSelection(ins)
+    .insertTable({ rows: row + 1, cols: col + 1, withHeaderRow: true })
+    .run()
+  close()
+}
+const GRID = 10
+function cellHit(r: number, c: number) {
+  return state.grid ? r <= state.grid.row && c <= state.grid.col : false
 }
 </script>
 
@@ -343,26 +477,42 @@ function insert(key: string) {
           </button>
         </template>
         <template v-else-if="state.mode === 'insert'">
-          <button v-for="it in INSERT_ITEMS" :key="it.key" class="item" @click="insert(it.key)">
-            <i
-              v-if="it.icon"
-              class="iconfont item-icon"
-              :class="it.key === 'cols' ? 'icon-columns' : 'icon-space'"
-            ></i>
-            <span v-else class="item-text">{{
-              it.key === 'p' ? '正文' : it.key.toUpperCase()
-            }}</span>
-            <span class="labels"
-              ><p>{{ it.label }}</p>
-              <sub>{{ it.en }}</sub></span
-            >
-          </button>
+          <div class="mention-menu">
+            <button v-for="it in INSERT_ITEMS" :key="it.key" class="item" @click="insert(it.key)">
+              <i class="iconfont item-icon" :class="'icon-' + it.icon"></i>
+              <span class="labels"
+                ><p>{{ it.label }}</p>
+                <sub>{{ it.en }}</sub></span
+              >
+              <i v-if="it.key === 'table'" class="sub-arrow">&gt;</i>
+            </button>
+          </div>
+          <div v-if="state.gridOpen" class="st-grid">
+            <div class="st-grid__label" :class="{ 'is-active': state.grid }">
+              {{ state.grid ? `${state.grid.row + 1} x ${state.grid.col + 1}` : '表格' }}
+            </div>
+            <div class="st-grid__cells" @mouseleave="state.grid = null">
+              <button
+                v-for="i in GRID * GRID"
+                :key="i"
+                type="button"
+                class="st-grid__cell"
+                :class="{ 'is-highlighted': cellHit(Math.floor((i - 1) / GRID), (i - 1) % GRID) }"
+                @mouseenter="state.grid = { row: Math.floor((i - 1) / GRID), col: (i - 1) % GRID }"
+                @click="pickCell(Math.floor((i - 1) / GRID), (i - 1) % GRID)"
+              ></button>
+            </div>
+          </div>
         </template>
         <template v-else>
           <!-- 生产同款 block-menu 横排胶囊 -->
           <div class="block-menu">
             <button
-              v-for="it in INSERT_ITEMS.slice(0, 3)"
+              v-for="it in [
+                { key: 'p', label: '正文' },
+                { key: 'h2', label: '模块标题' },
+                { key: 'h3', label: '小标题' }
+              ]"
               :key="it.key"
               class="block-menu-item"
               @click="insert(it.key)"

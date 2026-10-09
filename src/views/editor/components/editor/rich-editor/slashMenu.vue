@@ -363,21 +363,26 @@ onBeforeUnmount(() => {
       <div
         v-if="state.visible"
         ref="listRef"
-        class="slash-menu-shell mention-menu floating-shadow"
+        class="slash-menu-shell mention-menu-shell floating-shadow"
         :style="{ top: state.top + 'px', left: state.left + 'px' }"
       >
-        <button
-          v-for="(it, i) in state.items"
-          :key="it.zh"
-          class="slash-item"
-          :class="{ active: i === state.index }"
-          @mouseenter="onItemEnter(i)"
-          @click="run(it)"
-        >
-          <i class="iconfont item-icon" :class="'icon-' + it.icon"></i>
-          <p>{{ it.zh }}</p>
-          <sub>{{ it.en }}</sub>
-        </button>
+        <div class="mention-menu">
+          <button
+            v-for="(it, i) in state.items"
+            :key="it.zh"
+            class="slash-item"
+            :class="{ active: i === state.index }"
+            @mouseenter="onItemEnter(i)"
+            @click="run(it)"
+          >
+            <i class="iconfont item-icon" :class="'icon-' + it.icon"></i>
+            <span class="item-text-wrap">
+              <p>{{ it.zh }}</p>
+              <sub>{{ it.en }}</sub>
+            </span>
+            <i v-if="it.sub" class="sub-arrow">&gt;</i>
+          </button>
+        </div>
         <div v-if="state.subOpen" class="table-grid-selector" @mouseenter="state.subOpen = true">
           <div class="table-grid-selector__label" :class="{ 'is-active': state.grid }">
             {{ state.grid ? `${state.grid.row + 1} x ${state.grid.col + 1}` : '表格' }}
@@ -436,18 +441,28 @@ onBeforeUnmount(() => {
       font-size: 14px;
       background: rgba(0, 0, 0, 0.04);
     }
-    p {
-      font-size: 13px;
-      line-height: 1.2;
+    .item-text-wrap {
+      flex: 1;
+      min-width: 0;
+      text-align: left;
+      p {
+        font-size: 13px;
+        line-height: 1.25;
+      }
+      sub {
+        display: block;
+        font-size: 10px;
+        color: #999;
+        line-height: 1.2;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
     }
-    sub {
-      font-size: 10px;
+    .sub-arrow {
+      font-style: normal;
       color: #999;
-      margin-left: 4px;
-      max-width: 90px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      font-size: 12px;
     }
   }
 }
