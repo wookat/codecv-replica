@@ -46,7 +46,7 @@ export function useMoveLayout() {
     window.removeEventListener('mouseup', up)
     window.removeEventListener('mousemove', move)
   })
-  return { left, down, top }
+  return { left, down }
 }
 
 // 证件照/校徽覆盖层拖拽：预览纸面内按住图片拖动重新定位（生产同款）

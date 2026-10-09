@@ -9,7 +9,6 @@ declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     AccountSettings: typeof import('./src/components/AccountSettings.vue')['default']
     AsideRail: typeof import('./src/components/AsideRail.vue')['default']
-    BrowseHistory: typeof import('./src/components/browse-history/browseHistory.vue')['default']
     Contact: typeof import('./src/components/contact.vue')['default']
     ElBadge: typeof import('element-plus/es')['ElBadge']
     ElBreadcrumb: typeof import('element-plus/es')['ElBreadcrumb']
@@ -47,7 +46,6 @@ declare module '@vue/runtime-core' {
     ElTimelineItem: typeof import('element-plus/es')['ElTimelineItem']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
     Empty: typeof import('./src/components/empty.vue')['default']
-    EmptyState: typeof import('./src/components/EmptyState.vue')['default']
     ExportTotal: typeof import('./src/components/exportTotal.vue')['default']
     FloatTools: typeof import('./src/components/FloatTools.vue')['default']
     LoginModal: typeof import('./src/components/LoginModal.vue')['default']
@@ -61,7 +59,6 @@ declare module '@vue/runtime-core' {
     RouterView: typeof import('vue-router')['RouterView']
     ThemeToggle: typeof import('./src/components/themeToggle.vue')['default']
     ToastModal: typeof import('./src/components/toast-modal/toastModal.vue')['default']
-    UserInfo: typeof import('./src/components/userInfo.vue')['default']
     UserTooltip: typeof import('./src/components/userTooltip.vue')['default']
   }
   export interface ComponentCustomProperties {
