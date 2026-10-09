@@ -128,6 +128,55 @@ export const DragHandle = Extension.create({
     return [
       new Plugin({
         key: new PluginKey('dragHandle'),
+        view(view) {
+          // PM 对 widget 区域的 DOM 事件会被吞/改写，dragover/drop 走 window 级监听兜底
+          const onDragOver = (ev: DragEvent) => {
+            if (dragSrcPos < 0) return
+            ev.preventDefault()
+            if (ev.dataTransfer) ev.dataTransfer.dropEffect = 'move'
+          }
+          const onDrop = (ev: DragEvent) => {
+            if (dragSrcPos < 0) return
+            ev.preventDefault()
+            ev.stopPropagation()
+            const dst = dropTargetPos(view, ev.clientY)
+            if (dst < 0) {
+              dragSrcPos = -1
+              return
+            }
+            const { state } = view
+            const node = state.doc.nodeAt(dragSrcPos)
+            if (!node || node.nodeSize !== dragSrcSize) {
+              dragSrcPos = -1
+              return
+            }
+            const tr = state.tr
+            const adjDst = dst > dragSrcPos ? dst - dragSrcSize : dst
+            if (adjDst !== dragSrcPos) {
+              tr.delete(dragSrcPos, dragSrcPos + dragSrcSize)
+              const ins = Math.min(Math.max(adjDst, 0), tr.doc.content.size)
+              tr.insert(ins, node)
+              view.dispatch(tr.scrollIntoView())
+            }
+            dragSrcPos = -1
+          }
+          const onDragEnd = () => {
+            dragSrcPos = -1
+            view.dom
+              .querySelectorAll('.is-dragging')
+              .forEach(x => x.classList.remove('is-dragging'))
+          }
+          window.addEventListener('dragover', onDragOver, true)
+          window.addEventListener('drop', onDrop, true)
+          window.addEventListener('dragend', onDragEnd, true)
+          return {
+            destroy() {
+              window.removeEventListener('dragover', onDragOver, true)
+              window.removeEventListener('drop', onDrop, true)
+              window.removeEventListener('dragend', onDragEnd, true)
+            }
+          }
+        },
         props: {
           decorations(state) {
             const decos: Decoration[] = []
@@ -141,41 +190,6 @@ export const DragHandle = Extension.create({
               )
             })
             return DecorationSet.create(state.doc, decos)
-          },
-          handleDOMEvents: {
-            drop(view, ev) {
-              const e = ev as DragEvent
-              if (dragSrcPos < 0) return false
-              e.preventDefault()
-              const dst = dropTargetPos(view, e.clientY)
-              if (dst < 0) {
-                dragSrcPos = -1
-                return true
-              }
-              const { state } = view
-              const node = state.doc.nodeAt(dragSrcPos)
-              if (!node || node.nodeSize !== dragSrcSize) {
-                dragSrcPos = -1
-                return true
-              }
-              const tr = state.tr
-              const adjDst = dst > dragSrcPos ? dst - dragSrcSize : dst
-              if (adjDst === dragSrcPos) {
-                dragSrcPos = -1
-                return true
-              }
-              tr.delete(dragSrcPos, dragSrcPos + dragSrcSize)
-              const ins = Math.min(Math.max(adjDst, 0), tr.doc.content.size)
-              tr.insert(ins, node)
-              view.dispatch(tr.scrollIntoView())
-              dragSrcPos = -1
-              return true
-            },
-            dragover(view, ev) {
-              if (dragSrcPos < 0) return false
-              ev.preventDefault()
-              return true
-            }
           }
         }
       })
