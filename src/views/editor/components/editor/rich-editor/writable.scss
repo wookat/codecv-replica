@@ -513,6 +513,37 @@ html.dark .writable-edit-mode {
   color-scheme: dark;
 }
 
+/* 生产同款模块操作钮：flat 文档下挂顶层 H2，hover 才显示（上移主题色/下移主题色/删除红色） */
+.tiptap > h2 .mod-ops {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s;
+  z-index: 5;
+}
+.tiptap > h2:hover .mod-ops {
+  opacity: 1;
+  visibility: visible;
+}
+.tiptap > h2 .mod-op {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 6px;
+  background-color: var(--theme);
+  color: #fff;
+  cursor: pointer;
+  line-height: 0;
+}
+.tiptap > h2 .mod-op.remove-module {
+  background-color: rgb(239 68 68);
+}
 /* 生产同款模块操作钮：hover .resume-module 右上角内联（上移主题色/下移主题色/删除红色） */
 .resume-module .mod-op {
   position: absolute;
