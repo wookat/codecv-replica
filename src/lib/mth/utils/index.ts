@@ -38,7 +38,7 @@ export function isNoOrderList(s: string) {
 }
 
 export function isTitle(s: string) {
-  return s.indexOf('#') != -1
+  return /^\s*#{1,6}\s/.test(s)
 }
 
 export function isImage(s: string) {
