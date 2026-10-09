@@ -119,10 +119,14 @@ export function useToggleEditorMode(resumeType: string) {
     const m = mods[data.index]
     if (!m) return
     try {
-      const el = editor.view.domAtPos(m.start).node as HTMLElement
-      const scroller = DOMTree.value
+      const dn = editor.view.domAtPos(m.start).node as Node
+      const el = (dn.nodeType === 1 ? dn : dn.parentElement) as HTMLElement | null
+      if (!el) return
+      const scroller = el.closest('.tiptap') as HTMLElement | null
       if (scroller && scroller.scrollHeight > scroller.clientHeight) {
-        scroller.scrollTo({ top: Math.max(0, el.offsetTop - 56), behavior: 'smooth' })
+        const top =
+          scroller.scrollTop + el.getBoundingClientRect().top - scroller.getBoundingClientRect().top
+        scroller.scrollTo({ top: Math.max(0, top - 56), behavior: 'smooth' })
       } else {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }
