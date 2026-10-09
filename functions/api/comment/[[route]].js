@@ -15,7 +15,7 @@ export async function onRequest(context) {
     if (!doc) return json(request, { code: 400, msg: '缺少文档 id' })
     const { results } = await db
       .prepare(
-        'SELECT id, nickname, content, created_at FROM comments WHERE doc_id = ? ORDER BY created_at DESC LIMIT 100'
+        'SELECT id, user_id, nickname, content, created_at FROM comments WHERE doc_id = ? ORDER BY created_at DESC LIMIT 100'
       )
       .bind(String(doc))
       .all()

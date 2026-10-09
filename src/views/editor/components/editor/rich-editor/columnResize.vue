@@ -53,18 +53,29 @@ function hitTest(layout: HTMLElement, x: number): Hover | null {
   }
   return null
 }
+let hoverRaf = 0
+let hoverEv: MouseEvent | null = null
 function onMove(ev: MouseEvent) {
   if (drag) {
     onDragMove(ev)
     return
   }
-  const t = ev.target instanceof Element ? ev.target : null
-  const layout = t?.closest('.flex-layout') as HTMLElement | null
-  if (!layout || !layout.closest('.writable-edit-mode')) {
-    hover.value = null
-    return
-  }
-  hover.value = hitTest(layout, ev.clientX)
+  // 全局 mousemove 命中检测 rAF 节流：每帧至多一次 getBoundingClientRect 批读
+  hoverEv = ev
+  if (hoverRaf) return
+  hoverRaf = requestAnimationFrame(() => {
+    hoverRaf = 0
+    const e2 = hoverEv
+    hoverEv = null
+    if (!e2) return
+    const t = e2.target instanceof Element ? e2.target : null
+    const layout = t?.closest('.flex-layout') as HTMLElement | null
+    if (!layout || !layout.closest('.writable-edit-mode')) {
+      hover.value = null
+      return
+    }
+    hover.value = hitTest(layout, e2.clientX)
+  })
 }
 function startDrag(ev: MouseEvent) {
   if (!hover.value) return
@@ -172,6 +183,7 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
   document.removeEventListener('mousemove', onMove, true)
+  if (hoverRaf) cancelAnimationFrame(hoverRaf)
   cleanup()
 })
 </script>

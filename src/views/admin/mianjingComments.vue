@@ -1,11 +1,21 @@
 <script setup lang="ts">
 import { admin } from '@/api/modules/admin'
 import { useAdminPage, fmtTime } from './composables'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
-const { rows, total, page, keyword, loading, search, changePage } = useAdminPage(p =>
+const { rows, total, page, keyword, loading, load, search, changePage } = useAdminPage(p =>
   admin.mianjingComments({ ...p, doc: keyword.value })
 )
 const fmt = fmtTime
+
+async function del(row: { id: number }) {
+  await ElMessageBox.confirm('删除该评论及其回复？', '删除评论', { type: 'warning' })
+  const res = await admin.commentDelete(row.id)
+  if (res?.code === 200) {
+    ElMessage.success('已删除')
+    load()
+  } else ElMessage.error(res?.msg || '删除失败')
+}
 </script>
 
 <template>
@@ -29,6 +39,11 @@ const fmt = fmtTime
       <el-table-column prop="content" label="评论内容" min-width="260" />
       <el-table-column label="时间" width="170">
         <template #default="{ row }">{{ fmt(row.created_at) }}</template>
+      </el-table-column>
+      <el-table-column label="操作" width="90" fixed="right">
+        <template #default="{ row }">
+          <el-button type="danger" link size="small" @click="del(row)">删除</el-button>
+        </template>
       </el-table-column>
     </el-table>
     <el-pagination

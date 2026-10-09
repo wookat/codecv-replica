@@ -467,6 +467,15 @@ export async function onRequest(context) {
       .all()
     return json(request, paged(results, { cur, size }))
   }
+  if (route === 'comment/delete' && request.method === 'POST') {
+    const r = await db
+      .prepare('DELETE FROM comments WHERE id=? OR parent_id=?')
+      .bind(+q.id, +q.id)
+      .run()
+    return r.meta.changes
+      ? json(request, { code: 200, message: '已删除' })
+      : json(request, { code: 404, msg: '评论不存在' })
+  }
   if (route === 'mianjing/dict') {
     const meta = await loadSeed(env, request, 'mianjing-meta.json', {})
     const { results: extra } = await db.prepare('SELECT * FROM mj_dict').all()

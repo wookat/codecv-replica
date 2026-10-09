@@ -67,25 +67,48 @@ function applyToPM(cssText: string) {
   try {
     const pos = e.view.posAtDOM(target, 0)
     const $p = e.state.doc.resolve(pos)
-    const mark = $p.marks().find(m => m.type.name === 'code')
-    if (!mark) return false
-    // 该 code mark 的覆盖范围
     const parent = $p.parent
-    // 以光标处 mark range 为准
-    const range = ((): { from: number; to: number } | null => {
-      let f = pos
-      let t = pos
+    // 按覆盖该位置的文本节点找 code mark（marks() 在 mark 起始边界会取空）
+    const hit = ((): { mark: any; from: number; to: number } | null => {
+      let found: { mark: any; from: number; to: number } | null = null
       parent.forEach((node, p2) => {
         const s = $p.start() + p2
         const epos = s + node.nodeSize
-        if (node.isText && node.marks.some(m => m.eq(mark)) && pos >= s && pos <= epos) {
-          // 向两侧扩展同 mark 的连续文本
-          f = s
-          t = epos
-        }
+        const m = node.isText && node.marks.find(x => x.type.name === 'code')
+        if (m && pos >= s && pos <= epos) found = { mark: m, from: s, to: epos }
       })
-      return f < t ? { from: f, to: t } : null
+      return found
     })()
+    if (!hit) return false
+    const { mark } = hit
+    // 向两侧扩展同 mark 的连续文本（多轮扩张，向左可能不止一个邻接节点）
+    const kids: { s: number; e: number; same: boolean }[] = []
+    parent.forEach((node, p2) => {
+      const s = $p.start() + p2
+      kids.push({
+        s,
+        e: s + node.nodeSize,
+        same: !!(node.isText && node.marks.some(m => m.eq(mark)))
+      })
+    })
+    let f = hit.from
+    let t = hit.to
+    let changed = true
+    while (changed) {
+      changed = false
+      for (const k of kids) {
+        if (!k.same) continue
+        if (k.e === f) {
+          f = k.s
+          changed = true
+        }
+        if (k.s === t) {
+          t = k.e
+          changed = true
+        }
+      }
+    }
+    const range = f < t ? { from: f, to: t } : null
     if (!range) return false
     const attrs = { ...mark.attrs, style: cssText }
     e.view.dispatch(

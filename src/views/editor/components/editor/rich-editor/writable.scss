@@ -3,7 +3,9 @@
    （prod .tiptap: h:100vh, overflow-y:auto, pad 54/45/18/52, scrollbar hidden） */
 .writable-edit-mode {
   position: relative;
-  min-width: 480px;
+  /* 窄栏不溢出：下限 clamp 到自身宽度（左栏拖到 <480px 时纸面随栏压缩而非裁切） */
+  min-width: min(480px, 100%);
+  container-type: inline-size;
 
   /* EditorContent 渲染的无类名中间层，需继承高度 .tiptap 的 100% 才解析 */
   > div {
@@ -625,4 +627,11 @@ html.dark .resume-module .mod-op {
 }
 .resume-image-context-menu__cancel {
   opacity: 0.6;
+}
+
+/* 窄栏纸面：容器 <560px 时收横向留白，优先保内容可读（≥560px 仍 prod 对齐 pad 54/45/18/52） */
+@container (max-width: 560px) {
+  .writable-edit-mode .tiptap {
+    padding: 30px 18px;
+  }
 }

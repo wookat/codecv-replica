@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { computed, ref, watchEffect } from 'vue'
+import { computed, onMounted, ref, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { loadTemplateContent, resolveTemplateType, templates } from '@/templates/config'
 import { convertDOM } from '@/utils/moduleCombine'
+import { favoriteList, favoriteToggle } from '@/api/modules/favorite'
+import { ElMessage } from 'element-plus'
 
 const route = useRoute()
 const router = useRouter()
@@ -96,6 +98,20 @@ const hotRank = computed(() =>
 function useTemplate() {
   router.push(`/editor/${type.value}`)
 }
+
+// 模板收藏：登录走云端，未登录本机保存（与模板中心卡片星标同逻辑）
+const fav = ref(false)
+onMounted(async () => {
+  const r = await favoriteList()
+  fav.value = r.types.includes(type.value)
+})
+async function toggleFav() {
+  const r = await favoriteToggle(type.value)
+  fav.value = r.favorited
+  ElMessage.success(
+    r.favorited ? (r.cloud ? '已收藏' : '已收藏（登录后可云端同步）') : '已取消收藏'
+  )
+}
 </script>
 
 <template>
@@ -127,6 +143,14 @@ function useTemplate() {
             </p>
             <div class="actions">
               <button class="primary" @click="useTemplate"><span>点击使用该模板</span></button>
+              <button
+                class="fav-btn"
+                :class="{ on: fav }"
+                :title="fav ? '取消收藏' : '收藏模板'"
+                @click="toggleFav"
+              >
+                {{ fav ? '★ 已收藏' : '☆ 收藏模板' }}
+              </button>
               <router-link to="/jianlimoban" class="ghost">换一个模板</router-link>
             </div>
             <div class="fit">
@@ -416,6 +440,26 @@ export default { name: 'jianlimoban-detail' }
       &:hover {
         filter: brightness(1.05);
         transform: scale(0.99);
+      }
+    }
+    .fav-btn {
+      width: 100%;
+      padding: 10px 0;
+      border: 1px solid #e5e7eb;
+      border-radius: 999px;
+      font-size: 14px;
+      cursor: pointer;
+      color: #6b7280;
+      background: #fff;
+      transition: all 0.2s;
+      &:hover {
+        border-color: #f5a623;
+        color: #f5a623;
+      }
+      &.on {
+        border-color: #f5a623;
+        color: #f5a623;
+        background: #fff8ec;
       }
     }
     .ghost {

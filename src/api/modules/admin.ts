@@ -64,6 +64,7 @@ export const admin = {
     adPost('/api/admin/mianjing/review', { id, status }),
   mianjingComments: (p: { page?: number; pageSize?: number; doc?: string }) =>
     adGet(`/api/admin/mianjing/comments${qs(p)}`),
+  commentDelete: (id: number) => adPost('/api/admin/comment/delete', { id }),
   mianjingDict: () => adGet('/api/admin/mianjing/dict'),
   mianjingSaveDict: (f: object) => adPost('/api/admin/mianjing/save-dict', f),
   mianjingUploadLogo: (slug: string, dataUrl: string) =>

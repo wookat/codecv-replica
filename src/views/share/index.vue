@@ -6,6 +6,8 @@ import { allOverlaysHTML, convertDOM } from '@/utils/moduleCombine'
 import { templates } from '@/templates/config'
 import { applyTemplateTheme, importCSS } from '@/utils'
 import { createComment, getShare, listComments, shareView } from '@/api/modules/share'
+import { engagementCommentDelete } from '@/api/modules/engagement'
+import { fetchUserInfo } from '@/api/modules/cloudResume'
 
 const route = useRoute()
 const html = ref('')
@@ -16,11 +18,13 @@ const shareId = ref('')
 
 interface CommentRow {
   id: number
+  user_id?: number
   nickname: string
   content: string
   created_at: number
 }
 const comments = ref<CommentRow[]>([])
+const myUid = ref(0)
 const draft = ref('')
 const posting = ref(false)
 const cmtMsg = ref('')
@@ -48,6 +52,15 @@ async function sendComment() {
   }
 }
 
+async function delComment(c: CommentRow) {
+  const res = await engagementCommentDelete(c.id)
+  if (res?.code === 200) {
+    comments.value = comments.value.filter(x => x.id !== c.id)
+  } else {
+    cmtMsg.value = res?.msg || '删除失败'
+  }
+}
+
 function fmtTime(ts: number) {
   const d = new Date(ts)
   const p = (n: number) => String(n).padStart(2, '0')
@@ -70,6 +83,9 @@ onMounted(async () => {
   const id = route.params.id as string
   shareId.value = id
   loadComments()
+  fetchUserInfo().then(info => {
+    if (info) myUid.value = info.uid
+  })
   // 公开简历分享：/share/<resume_type> 实时内容 + 被查看计数（对照生产 cv.share/view）
   try {
     const res = await shareView(id)
@@ -121,6 +137,9 @@ const tpl = computed(() => templates.value.find(t => t.type === type.value))
           <li v-for="c in comments" :key="c.id">
             <b>{{ c.nickname }}</b>
             <span class="cmt-time">{{ fmtTime(c.created_at) }}</span>
+            <button v-if="myUid && c.user_id === myUid" class="cmt-del" @click="delComment(c)">
+              删除
+            </button>
             <p>{{ c.content }}</p>
           </li>
         </ul>
@@ -179,6 +198,18 @@ const tpl = computed(() => templates.value.find(t => t.type === type.value))
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+.cmt-del {
+  float: right;
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  color: #909399;
+  cursor: pointer;
+  padding: 0;
+  &:hover {
+    color: #f56c6c;
+  }
 }
 .sh-empty {
   text-align: center;
