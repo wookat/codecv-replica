@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // 生产同款「导入简历」三步向导：上传(文件/粘贴) → 选择模板 → 预览创建
 // 文件侧支持 .md/.txt/.json；pdf/docx 需要云端 AI 解析（暂降级提示粘贴文本）
+import { mdContentKey } from '@/common/storageKeys'
 import { computed, nextTick, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -108,7 +109,7 @@ async function confirmCreate() {
   creating.value = true
   const newType = `${pickedTpl.value}~${Date.now().toString(36)}`
   try {
-    setLocalStorage(`markdown-content-${newType}`, mdText.value, 1000 * 60 * 60 * 24 * 30)
+    setLocalStorage(mdContentKey(newType), mdText.value, 1000 * 60 * 60 * 24 * 30)
     const tk = getLocalStorage('TOKEN')
     if (tk) {
       const res = await cloudSave({

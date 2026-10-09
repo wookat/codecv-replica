@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { mdContentKey } from '@/common/storageKeys'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -70,7 +71,7 @@ async function copy(r: CloudResumeMeta) {
     return ElMessage.error(res?.msg || '创建副本失败')
   }
   // 云端已有副本行；本地同步实例内容，编辑器即可直接打开
-  setLocalStorage(`markdown-content-${res.data.type}`, r.content || '')
+  setLocalStorage(mdContentKey(res.data.type), r.content || '')
   await scan()
   ElMessage.success('已创建副本')
 }
@@ -79,7 +80,7 @@ async function remove(type: string) {
   await ElMessageBox.confirm('删除后不可恢复，确定删除这份简历吗？', '删除简历', {
     type: 'warning'
   })
-  localStorage.removeItem(`markdown-content-${type}`)
+  localStorage.removeItem(mdContentKey(type))
   await cloudDelete(type)
   await scan()
   ElMessage.success('已删除')

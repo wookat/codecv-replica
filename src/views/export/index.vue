@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { mdContentKey } from '@/common/storageKeys'
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { allOverlaysHTML, convertDOM } from '@/utils/moduleCombine'
@@ -18,7 +19,7 @@ onMounted(async () => {
   applyTemplateTheme(id)
   let md = ''
   try {
-    const raw = localStorage.getItem(`markdown-content-${id}`)
+    const raw = localStorage.getItem(mdContentKey(id))
     md = raw ? JSON.parse(raw).value ?? '' : ''
   } catch {
     /* ignore */

@@ -1,7 +1,6 @@
 import useEditorStore from '@/store/modules/editor'
 import { TOKEN } from '@/store/modules/user'
 import { getLocalStorage } from '@/common/localstorage'
-import { queryDOM } from '@/utils'
 import { resumeDOMStruct2Markdown } from '@/utils/dom2md'
 import { warningMessage } from '@/common/message'
 import { ElMessageBox } from 'element-plus'

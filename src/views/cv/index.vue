@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { mdContentKey } from '@/common/storageKeys'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { allOverlaysHTML, convertDOM } from '@/utils/moduleCombine'
@@ -14,7 +15,6 @@ const tpl = computed(() =>
 
 onMounted(async () => {
   const type = resolveTemplateType(route.params.type as string)
-  const t = templates.value.find(x => x.type === type)
   importCSS(type)
   applyTemplateTheme(type)
   // 公开简历页：/cv/<type>/<id> 先按 id 解析实例内容（分享快照/云端简历/实例键），
@@ -37,7 +37,7 @@ onMounted(async () => {
   }
   if (!md) {
     try {
-      for (const key of [id ? `markdown-content-${id}` : '', `markdown-content-${type}`]) {
+      for (const key of [id ? mdContentKey(id) : '', mdContentKey(type)]) {
         if (!key) continue
         const raw = localStorage.getItem(key)
         md = raw ? JSON.parse(raw).value ?? '' : ''

@@ -70,17 +70,8 @@ function applyToPM(cssText: string) {
     const mark = $p.marks().find(m => m.type.name === 'code')
     if (!mark) return false
     // 该 code mark 的覆盖范围
-    let from = pos
-    let to = pos
     const parent = $p.parent
-    const off = $p.parentOffset
-    parent.nodesBetween(off, off, (node, p) => {
-      if (node.marks.some(m => m.eq(mark))) {
-        from = $p.start() + p
-      }
-      return true
-    })
-    // 简化：以光标处 mark range 为准
+    // 以光标处 mark range 为准
     const range = ((): { from: number; to: number } | null => {
       let f = pos
       let t = pos

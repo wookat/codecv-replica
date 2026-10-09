@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import nav from '@/common/nav/nav'
-import useEditorStore from '@/store/modules/editor'
 
 defineEmits(['import-md'])
 
-const editorStore = useEditorStore()
 // 生产使用教程链接随编辑模式切换：所见即所得→rich 指南，markdown→md 指南
 function tutorHref() {
   return '/syntax/helper'

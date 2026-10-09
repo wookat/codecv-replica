@@ -1,5 +1,6 @@
 <script setup lang="ts">
 // 生产同款「简历语言翻译」弹层：选语言 → 开始翻译 → 二次确认后应用
+import { mdContentKey } from '@/common/storageKeys'
 import { nextTick, ref, watch } from 'vue'
 import useEditorStore from '@/store/modules/editor'
 import { errorMessage, successMessage, warningMessage } from '@/common/message'
@@ -82,7 +83,7 @@ function apply() {
 async function saveAsNew() {
   if (!translated.value) return
   const newType = `${props.resumeType}~${Date.now().toString(36)}`
-  setLocalStorage(`markdown-content-${newType}`, translated.value)
+  setLocalStorage(mdContentKey(newType), translated.value)
   const tk = token()
   if (tk) {
     const res = await cloudSave({

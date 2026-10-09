@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { mdContentKey } from '@/common/storageKeys'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { allOverlaysHTML, convertDOM } from '@/utils/moduleCombine'
@@ -50,7 +51,7 @@ onMounted(async () => {
   )
   const s = reg[id]
   if (!s) return
-  const raw = localStorage.getItem(`markdown-content-${s.type}`)
+  const raw = localStorage.getItem(mdContentKey(s.type))
   const md = raw ? JSON.parse(raw).value ?? '' : ''
   if (md) render(s.type, s.name, md)
 })

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 // 生产同款分享弹层：公开访问开关 + 分享链接 + 被查看次数 + 复制
+import { mdContentKey } from '@/common/storageKeys'
 import { ref, watch, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { shareState, shareToggle } from '@/api/modules/share'
@@ -36,7 +37,7 @@ async function toggle(v: boolean) {
   loading.value = true
   // 开启分享前先把当前内容写云端——未保存过云端的简历开分享会得到死链
   if (v) {
-    const content = getLocalStorage(`markdown-content-${props.resumeType}`) as string
+    const content = getLocalStorage(mdContentKey(props.resumeType)) as string
     const saved = await cloudSaveNow(props.resumeType, content || '')
     if (saved?.code !== 200) {
       loading.value = false

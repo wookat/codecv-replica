@@ -29,7 +29,6 @@ let slashPos = -1
 
 /* ---------- 光标/PM 工具 ---------- */
 const ed = () => getPMEditor()
-const editorRoot = () => document.querySelector('.writable-edit-mode') as HTMLElement | null
 function caretRect(): DOMRect | null {
   const e = ed()
   if (!e) return null

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import useEditorStore from '@/store/modules/editor'
 
 const route = useRoute()
 const router = useRouter()
@@ -18,8 +17,6 @@ onMounted(() => {
   window.addEventListener('scroll', onScroll, { passive: true })
 })
 onUnmounted(() => window.removeEventListener('scroll', onScroll))
-
-const editorStore = useEditorStore()
 
 const tools = [
   {
