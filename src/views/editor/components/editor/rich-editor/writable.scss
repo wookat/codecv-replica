@@ -533,8 +533,8 @@ html.dark .writable-edit-mode {
   color-scheme: dark;
 }
 
-/* 生产同款模块操作钮：flat 文档下挂顶层 H2，hover 才显示（上移主题色/下移主题色/删除红色） */
-.tiptap > h2 .mod-ops {
+/* 生产同款模块操作钮：挂 H2（顶层与 main-layout 嵌套皆适用），hover 才显示 */
+.tiptap h2 .mod-ops {
   position: absolute;
   top: 4px;
   right: 4px;
@@ -546,11 +546,11 @@ html.dark .writable-edit-mode {
   transition: opacity 0.15s;
   z-index: 5;
 }
-.tiptap > h2:hover .mod-ops {
+.tiptap h2:hover .mod-ops {
   opacity: 1;
   visibility: visible;
 }
-.tiptap > h2 .mod-op {
+.tiptap h2 .mod-op {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -561,7 +561,7 @@ html.dark .writable-edit-mode {
   cursor: pointer;
   line-height: 0;
 }
-.tiptap > h2 .mod-op.remove-module {
+.tiptap h2 .mod-op.remove-module {
   background-color: rgb(239 68 68);
 }
 /* 生产同款模块操作钮：hover .resume-module 右上角内联（上移主题色/下移主题色/删除红色） */
