@@ -11,7 +11,7 @@ import { ElMessage } from 'element-plus'
 import { favoriteList } from '@/api/modules/favorite'
 import { currentUser } from '@/utils/auth'
 
-const { queryCategory, data, category } = useCategory()
+const { queryCategory, data } = useCategory()
 const { ranks } = useTemplateData()
 const { flag, close } = useNotification()
 

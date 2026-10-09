@@ -1,5 +1,5 @@
 // 模板收藏：登录走云端 /api/favorite/*，未登录落 localStorage（提示登录同步）
-import { getLocalStorage, setLocalStorage } from '@/common/localstorage'
+import { getLocalStorage } from '@/common/localstorage'
 import { currentUser } from '@/utils/auth'
 
 const FAV_KEY = 'tpl-favorites'
