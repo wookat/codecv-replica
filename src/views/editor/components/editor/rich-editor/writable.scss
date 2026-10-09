@@ -453,6 +453,17 @@
     background-color: var(--body-background);
     border-radius: 0.375rem;
   }
+  /* 指针拖拽：拖动中的源块淡显 + 落点指示条 */
+  .is-dragging {
+    opacity: 0.35;
+    border-radius: 0.375rem;
+  }
+  .drop-above {
+    box-shadow: 0 -2px 0 0 var(--theme-color, #4f8cff);
+  }
+  .drop-below {
+    box-shadow: 0 2px 0 0 var(--theme-color, #4f8cff);
+  }
   /* 生产同款拖放落点主题色闪烁 */
   .is-dropped-flash {
     animation: dropped-flash 1.2s ease-out;

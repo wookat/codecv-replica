@@ -46,32 +46,110 @@ function handleDOM(pos: number, node: PMNode, view: EditorView) {
 
   const grip = document.createElement('div')
   grip.className = 'drag-btn'
-  grip.draggable = true
   grip.title = '拖动调整顺序'
-  // PM 会吞 widget 区域的真 click → mousedown 触发菜单
+  // 指针事件拖拽（PM 吞 widget 区 HTML5 DnD 事件，pointer 流必生效）
+  let pressX = 0
+  let pressY = 0
+  let dragging = false
+  let dropMark = null as HTMLElement | null
+  const clearDropMark = () => {
+    dropMark?.classList.remove('drop-above', 'drop-below')
+    dropMark = null as HTMLElement | null
+  }
+  const markTarget = (clientY: number) => {
+    let bestEl = null as HTMLElement | null
+    let bestDist = Infinity
+    let above = true
+    view.state.doc.forEach((n, p) => {
+      let el: HTMLElement | null = null
+      try {
+        const got = view.domAtPos(p).node
+        el = got instanceof HTMLElement ? got : got.parentElement
+      } catch {
+        return
+      }
+      const r = el?.getBoundingClientRect()
+      if (!r || !r.height) return
+      const mid = r.top + r.height / 2
+      const dist = Math.abs(clientY - mid)
+      if (dist < bestDist) {
+        bestDist = dist
+        bestEl = el
+        above = clientY < mid
+      }
+    })
+    if (bestEl !== dropMark) {
+      clearDropMark()
+      dropMark = bestEl
+    }
+    if (dropMark) {
+      dropMark.classList.toggle('drop-above', above)
+      dropMark.classList.toggle('drop-below', !above)
+    }
+  }
   grip.addEventListener('mousedown', ev => {
     ev.stopPropagation()
-    window.dispatchEvent(
-      new CustomEvent('side-tool-menu-trigger', {
-        detail: {
-          mode: 'row-actions',
-          pos,
-          node,
-          anchorRect: h.getBoundingClientRect(),
-          el: blockEl(view, pos, h)
-        }
-      })
-    )
+    ev.preventDefault()
   })
-  grip.addEventListener('dragstart', ev => {
-    window.dispatchEvent(new CustomEvent('side-tool-menu-close'))
-    dragSrcPos = pos
-    dragSrcSize = node.nodeSize
-    ev.dataTransfer?.setData('text/plain', '')
-    blockEl(view, pos, h).classList.add('is-dragging')
+  grip.addEventListener('pointerdown', ev => {
     ev.stopPropagation()
+    ev.preventDefault()
+    pressX = ev.clientX
+    pressY = ev.clientY
+    dragging = false
+    grip.setPointerCapture(ev.pointerId)
   })
-  grip.addEventListener('dragend', () => {
+  grip.addEventListener('pointermove', ev => {
+    if (!grip.hasPointerCapture(ev.pointerId)) return
+    if (!dragging && Math.hypot(ev.clientX - pressX, ev.clientY - pressY) > 4) {
+      dragging = true
+      window.dispatchEvent(new CustomEvent('side-tool-menu-close'))
+      dragSrcPos = pos
+      dragSrcSize = node.nodeSize
+      blockEl(view, pos, h).classList.add('is-dragging')
+    }
+    if (dragging) markTarget(ev.clientY)
+  })
+  grip.addEventListener('pointerup', ev => {
+    if (!grip.hasPointerCapture(ev.pointerId)) return
+    grip.releasePointerCapture(ev.pointerId)
+    if (dragging) {
+      clearDropMark()
+      view.dom.querySelectorAll('.is-dragging').forEach(x => x.classList.remove('is-dragging'))
+      const dst = dropTargetPos(view, ev.clientY)
+      if (dst >= 0 && dragSrcPos >= 0) {
+        const cur = view.state.doc.nodeAt(dragSrcPos)
+        if (cur && cur.nodeSize === dragSrcSize) {
+          const adjDst = dst > dragSrcPos ? dst - dragSrcSize : dst
+          if (adjDst !== dragSrcPos) {
+            const tr = view.state.tr
+            tr.delete(dragSrcPos, dragSrcPos + dragSrcSize)
+            const ins = Math.min(Math.max(adjDst, 0), tr.doc.content.size)
+            tr.insert(ins, cur)
+            view.dispatch(tr.scrollIntoView())
+          }
+        }
+      }
+      dragSrcPos = -1
+      dragging = false
+    } else {
+      window.dispatchEvent(
+        new CustomEvent('side-tool-menu-trigger', {
+          detail: {
+            mode: 'row-actions',
+            pos,
+            node,
+            anchorRect: h.getBoundingClientRect(),
+            el: blockEl(view, pos, h)
+          }
+        })
+      )
+    }
+  })
+  grip.addEventListener('pointercancel', () => {
+    dragging = false
+    dragSrcPos = -1
+    clearDropMark()
     view.dom.querySelectorAll('.is-dragging').forEach(x => x.classList.remove('is-dragging'))
   })
 
@@ -128,55 +206,6 @@ export const DragHandle = Extension.create({
     return [
       new Plugin({
         key: new PluginKey('dragHandle'),
-        view(view) {
-          // PM 对 widget 区域的 DOM 事件会被吞/改写，dragover/drop 走 window 级监听兜底
-          const onDragOver = (ev: DragEvent) => {
-            if (dragSrcPos < 0) return
-            ev.preventDefault()
-            if (ev.dataTransfer) ev.dataTransfer.dropEffect = 'move'
-          }
-          const onDrop = (ev: DragEvent) => {
-            if (dragSrcPos < 0) return
-            ev.preventDefault()
-            ev.stopPropagation()
-            const dst = dropTargetPos(view, ev.clientY)
-            if (dst < 0) {
-              dragSrcPos = -1
-              return
-            }
-            const { state } = view
-            const node = state.doc.nodeAt(dragSrcPos)
-            if (!node || node.nodeSize !== dragSrcSize) {
-              dragSrcPos = -1
-              return
-            }
-            const tr = state.tr
-            const adjDst = dst > dragSrcPos ? dst - dragSrcSize : dst
-            if (adjDst !== dragSrcPos) {
-              tr.delete(dragSrcPos, dragSrcPos + dragSrcSize)
-              const ins = Math.min(Math.max(adjDst, 0), tr.doc.content.size)
-              tr.insert(ins, node)
-              view.dispatch(tr.scrollIntoView())
-            }
-            dragSrcPos = -1
-          }
-          const onDragEnd = () => {
-            dragSrcPos = -1
-            view.dom
-              .querySelectorAll('.is-dragging')
-              .forEach(x => x.classList.remove('is-dragging'))
-          }
-          window.addEventListener('dragover', onDragOver, true)
-          window.addEventListener('drop', onDrop, true)
-          window.addEventListener('dragend', onDragEnd, true)
-          return {
-            destroy() {
-              window.removeEventListener('dragover', onDragOver, true)
-              window.removeEventListener('drop', onDrop, true)
-              window.removeEventListener('dragend', onDragEnd, true)
-            }
-          }
-        },
         props: {
           decorations(state) {
             const decos: Decoration[] = []
