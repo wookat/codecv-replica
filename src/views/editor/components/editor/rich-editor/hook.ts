@@ -5,7 +5,7 @@ import { queryDOM } from '@/utils'
 import { resumeDOMStruct2Markdown } from '@/utils/dom2md'
 import { warningMessage } from '@/common/message'
 import { ElMessageBox } from 'element-plus'
-import { nextTick, onActivated, onBeforeUnmount, onMounted, ref } from 'vue'
+import { nextTick, onActivated, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { Editor } from '@tiptap/core'
 import { Node as PMNode } from '@tiptap/pm/model'
 import { markdownToHTML } from '@/lib/mth'
@@ -126,6 +126,7 @@ export function useToggleEditorMode(resumeType: string) {
 
   // ===== 预览→编辑滚动联动：BroadcastChannel 广播 index → 滚到第 N 个 resume-module =====
   let modChannel: BroadcastChannel | null = null
+  let stopMdWatch: (() => void) | null = null
   function onChannelMsg(ev: MessageEvent) {
     const data = ev.data as { index?: number }
     if (typeof data?.index !== 'number') return
@@ -241,6 +242,14 @@ export function useToggleEditorMode(resumeType: string) {
       onCreate: () => fillContent()
     })
     setPMEditor(editor)
+    // 模板正文是懒加载的——md 晚于 PM 挂载到达时，只在文档仍为空时补灌一次
+    stopMdWatch?.()
+    stopMdWatch = watch(
+      () => editorStore.MDContent,
+      md => {
+        if (md && editor && editor.state.doc.childCount <= 1) fillContent()
+      }
+    )
     host.addEventListener('paste', onPaste)
     document.addEventListener('selectionchange', onSelectionChange)
     window.addEventListener('module-op', onModuleOp)
@@ -254,6 +263,8 @@ export function useToggleEditorMode(resumeType: string) {
     modChannel?.close()
     DOMTree.value?.removeEventListener('paste', onPaste)
     window.removeEventListener('module-op', onModuleOp)
+    stopMdWatch?.()
+    stopMdWatch = null
     editor?.destroy()
     editor = null
     setPMEditor(null)
