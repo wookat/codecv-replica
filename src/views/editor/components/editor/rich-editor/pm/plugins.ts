@@ -301,8 +301,8 @@ export const ModuleOps = Extension.create({
         props: {
           decorations(state) {
             const decos: Decoration[] = []
-            state.doc.forEach((node, pos) => {
-              if (node.type.name !== 'heading' || node.attrs.level !== 2) return
+            state.doc.descendants((node, pos) => {
+              if (node.type.name !== 'heading' || node.attrs.level !== 2) return true
               decos.push(
                 Decoration.widget(
                   pos + node.nodeSize - 1,

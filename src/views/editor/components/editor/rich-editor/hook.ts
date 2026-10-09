@@ -53,18 +53,22 @@ export function useToggleEditorMode(resumeType: string) {
     node: PMNode
   }
   function moduleSpans(): ModSpan[] {
+    // 模块 = H2 及其后跟内容：顶层与嵌套（main-layout/head-layout 容器内）都收集，
+    // end 取下一个 H2 的 pos（末个到文档尾），使两种布局的模块都能整体搬移/删除。
     const spans: ModSpan[] = []
     if (!editor) return spans
     const doc = editor.state.doc
-    let cur: ModSpan | null = null
-    doc.forEach((node, pos) => {
-      if (node.type.name === 'heading' && node.attrs.level === 2) {
-        if (cur) cur.end = pos
-        cur = { start: pos, end: doc.content.size, node }
-        spans.push(cur)
-      } else if (cur) {
-        cur.end = pos + node.nodeSize
-      }
+    const h2s: { pos: number; node: PMNode }[] = []
+    doc.descendants((node, pos) => {
+      if (node.type.name === 'heading' && node.attrs.level === 2) h2s.push({ pos, node })
+      return true
+    })
+    h2s.forEach((h, i) => {
+      spans.push({
+        start: h.pos,
+        end: i + 1 < h2s.length ? h2s[i + 1].pos : doc.content.size,
+        node: h.node
+      })
     })
     return spans
   }
@@ -114,24 +118,18 @@ export function useToggleEditorMode(resumeType: string) {
   let modChannel: BroadcastChannel | null = null
   function onChannelMsg(ev: MessageEvent) {
     const data = ev.data as { index?: number }
-    if (typeof data?.index !== 'number' || !editor) return
-    const mods = moduleSpans()
-    const m = mods[data.index]
-    if (!m) return
-    try {
-      const dn = editor.view.domAtPos(m.start).node as Node
-      const el = (dn.nodeType === 1 ? dn : dn.parentElement) as HTMLElement | null
-      if (!el) return
-      const scroller = el.closest('.tiptap') as HTMLElement | null
-      if (scroller && scroller.scrollHeight > scroller.clientHeight) {
-        const top =
-          scroller.scrollTop + el.getBoundingClientRect().top - scroller.getBoundingClientRect().top
-        scroller.scrollTo({ top: Math.max(0, top - 56), behavior: 'smooth' })
-      } else {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }
-    } catch {
-      /* node may not be mounted yet */
+    if (typeof data?.index !== 'number') return
+    // 模块顺序 = 顶层 H2 的 DOM 顺序，与 moduleSpans 一致；直接取 DOM 节点避免 PM 边界差异
+    const h2s = DOMTree.value?.querySelectorAll(':scope .tiptap h2')
+    const el = h2s?.[data.index] as HTMLElement | undefined
+    if (!el) return
+    const scroller = el.closest('.tiptap') as HTMLElement | null
+    if (scroller && scroller.scrollHeight > scroller.clientHeight) {
+      const top =
+        scroller.scrollTop + el.getBoundingClientRect().top - scroller.getBoundingClientRect().top
+      scroller.scrollTo({ top: Math.max(0, top - 56), behavior: 'smooth' })
+    } else {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
   }
 
