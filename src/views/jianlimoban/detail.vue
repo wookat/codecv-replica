@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { resolveTemplateType, templates } from '@/templates/config'
+import { loadTemplateContent, resolveTemplateType, templates } from '@/templates/config'
 import { convertDOM } from '@/utils/moduleCombine'
 
 const route = useRoute()
@@ -38,15 +38,18 @@ const related = computed<any[]>(() => {
   )
 })
 
-const seoHtml = computed(() => {
-  if (!tpl.value) return ''
+const seoHtml = ref('')
+watchEffect(async () => {
+  seoHtml.value = ''
+  if (!tpl.value) return
+  const md = await loadTemplateContent(type.value)
   try {
     // 生产同款 sr-only SEO 块：页面 h1 只有一个（模板名），简历正文标题降为 h2
-    return convertDOM(tpl.value.content)
+    seoHtml.value = convertDOM(md)
       .innerHTML.replace(/<h1/g, '<h2')
       .replace(/<\/h1>/g, '</h2>')
   } catch {
-    return ''
+    /* ignore */
   }
 })
 

@@ -3,20 +3,15 @@ import { defineStore } from 'pinia'
 import pinia from '@/store'
 import { getLocalStorage, setLocalStorage } from '@/common/localstorage'
 import { showMessageVN } from '@/common/message'
-import { templates } from '@/templates/config'
+import { loadTemplateContent } from '@/templates/config'
 import { cloudPush } from '@/api/modules/cloudResume'
 
 const MARKDOWN_CONTENT = 'markdown-content'
 const WRITABLE = 'writable'
 
-export const getCurrentTypeContent = (type: string): string => {
+export const getCurrentTypeContent = async (type: string): Promise<string> => {
   const base = type.split('~')[0] // 副本实例键回落到母版模板内容
-  for (const template of templates.value) {
-    if (base === template.type) {
-      return template.content
-    }
-  }
-  return ''
+  return await loadTemplateContent(base)
 }
 
 const useEditorStore = defineStore('editorStore', {
@@ -36,11 +31,11 @@ const useEditorStore = defineStore('editorStore', {
   }),
   actions: {
     // 初始化编辑器内容（默认为Markdown模式）
-    initMDContent(resumeType: string) {
+    async initMDContent(resumeType: string) {
       const cacheKey = MARKDOWN_CONTENT + '-' + resumeType
       this.MDContent = getLocalStorage(cacheKey)
         ? (getLocalStorage(cacheKey) as string)
-        : getCurrentTypeContent(resumeType)
+        : await getCurrentTypeContent(resumeType)
     },
     setMDContent(nv: string, resumeType: string, fromHistory = false) {
       if (nv !== this.MDContent && !fromHistory) {

@@ -53,7 +53,6 @@ for (const entry of index) {
     name: names[type] || entry.name,
     font: raw.font || '',
     lineHeight: Number(raw.lineHeight || 25),
-    content: localize(raw.content.trim(), slug),
     primaryColor: raw.primaryColor,
     primaryBackground: raw.primaryBgColor,
     img: `/covers/${slug}.webp`,
@@ -85,12 +84,27 @@ for (const entry of index) {
       2
     ).replace(/"([^"\\]+)":/g, '$1:')}\n`
   )
+  // 正文 markdown 独立成 content.ts——config.ts 懒加载，不进首屏 meta bundle
+  // prettier 引号口径：比较串内 ' 与 " 数量，选少转义的引号（平手取单引号）
+  const mdStr = localize(raw.content.trim(), slug)
+  const sq = (mdStr.match(/'/g) || []).length
+  const dq = (mdStr.match(/"/g) || []).length
+  const mdEmit =
+    sq <= dq
+      ? `'${JSON.stringify(mdStr).slice(1, -1).replace(/\\"/g, '"').replace(/'/g, "\\'")}'`
+      : JSON.stringify(mdStr)
+  writeFileSync(
+    resolve(dir, 'content.ts'),
+    `// 由 scripts/gen-templates.mjs 生成——勿手改（源：scripts/seeds/codecv/raw/${slug}.json）\nexport default ${mdEmit}\n`
+  )
   writeFileSync(resolve(dir, 'style.scss'), readFileSync(skinPath, 'utf8'))
   done++
 }
 // 生产「综合排序」= index.json 数组序；生成静态顺序表供 config.ts 排序
 writeFileSync(
   resolve(root, 'src/templates/order.ts'),
-  `// 由 scripts/gen-templates.mjs 生成——勿手改（生产模板中心综合排序序）\nexport const TYPE_ORDER: string[] = [\n${typeOrder.map(t => `  '${t}'`).join(',\n')}\n]\n`
+  `// 由 scripts/gen-templates.mjs 生成——勿手改（生产模板中心综合排序序）\nexport const TYPE_ORDER: string[] = [\n${typeOrder
+    .map(t => `  '${t}'`)
+    .join(',\n')}\n]\n`
 )
 console.log(`生成 ${done} 套模板模块 → src/templates/modules/<type>/`)

@@ -17,7 +17,7 @@ type SubModule = {
   name: string
   font?: string
   lineHeight?: number
-  content: string
+  content?: string
   primaryColor: string
   primaryBackground: string
   img: string
@@ -51,6 +51,28 @@ for (const [path, curModule] of moduleEntries) {
 // 「综合排序」与生产一致：index.json 数组序（非热度/数字前缀序）
 const ORDER = new Map(TYPE_ORDER.map((t, i) => [t, i]))
 templates.value.sort((a, b) => (ORDER.get(a.type) ?? 9999) - (ORDER.get(b.type) ?? 9999))
+
+// 正文 markdown 懒加载：114 套 content.ts 不进首屏 meta bundle，按 type 按需 import
+const contentLoaders = import.meta.glob<{ default: string }>('./modules/*/content.ts')
+const contentCache = new Map<string, Promise<string>>()
+
+export function loadTemplateContent(type: string): Promise<string> {
+  const base = type.split('~')[0]
+  const t = templates.value.find(x => x.type === base)
+  if (t?.content) return Promise.resolve(t.content)
+  const loader = contentLoaders[`./modules/${base}/content.ts`]
+  if (!loader) return Promise.resolve('')
+  let p = contentCache.get(base)
+  if (!p) {
+    p = loader().then(m => {
+      const md = m.default
+      if (t) t.content = md
+      return md
+    })
+    contentCache.set(base, p)
+  }
+  return p
+}
 
 // URL 里的模板标识宽容解析：支持 type（agent_development）、slug（cv-agent-development）、
 // 以及 slug 去掉 cv- 前缀（agent-development），统一回落到真实 type

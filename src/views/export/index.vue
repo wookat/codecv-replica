@@ -11,7 +11,7 @@ const router = useRouter()
 const html = ref('')
 const type = ref('')
 
-onMounted(() => {
+onMounted(async () => {
   const id = resolveTemplateType(route.params.id as string)
   type.value = id
   importCSS(id)
@@ -24,7 +24,7 @@ onMounted(() => {
     /* ignore */
   }
   // 未编辑过的模板：回落到模板内置内容，保证打印/导出永远有简历
-  if (!md) md = getCurrentTypeContent(id)
+  if (!md) md = await getCurrentTypeContent(id)
   if (md) html.value = convertDOM(md).innerHTML + allOverlaysHTML(id)
 })
 

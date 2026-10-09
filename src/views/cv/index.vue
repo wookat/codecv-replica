@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { allOverlaysHTML, convertDOM } from '@/utils/moduleCombine'
-import { resolveTemplateType, templates } from '@/templates/config'
+import { loadTemplateContent, resolveTemplateType, templates } from '@/templates/config'
 import { applyTemplateTheme, importCSS } from '@/utils'
 
 const route = useRoute()
@@ -11,7 +11,7 @@ const tpl = computed(() =>
   templates.value.find(t => t.type === resolveTemplateType(route.params.type as string))
 )
 
-onMounted(() => {
+onMounted(async () => {
   const type = resolveTemplateType(route.params.type as string)
   const t = templates.value.find(x => x.type === type)
   importCSS(type)
@@ -24,7 +24,7 @@ onMounted(() => {
   } catch {
     /* ignore */
   }
-  if (!md) md = t?.content ?? ''
+  if (!md) md = await loadTemplateContent(type)
   if (md) html.value = convertDOM(md).innerHTML + allOverlaysHTML(type)
 })
 </script>
