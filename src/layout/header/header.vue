@@ -1,7 +1,14 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
 import Nav from './components/nav.vue'
 import User from './components/user.vue'
 import NavMoblie from './components/navMoblie.vue'
+
+// 含弹层组件的交互区只在客户端渲染，SSR/水合首帧保持一致
+const mounted = ref(false)
+onMounted(() => {
+  mounted.value = true
+})
 </script>
 
 <template>
@@ -11,10 +18,10 @@ import NavMoblie from './components/navMoblie.vue'
         <img src="/static/svg/logo-BFLBP-GO.svg" alt="CodeCV 简历" draggable="false" />
       </div>
       <Nav />
-      <User />
+      <User v-if="mounted" />
     </div>
     <div class="header-800">
-      <NavMoblie />
+      <NavMoblie v-if="mounted" />
     </div>
   </div>
 </template>

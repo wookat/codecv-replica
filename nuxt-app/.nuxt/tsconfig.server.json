@@ -1,0 +1,550 @@
+{
+  "compilerOptions": {
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "jsx": "preserve",
+    "allowSyntheticDefaultImports": true,
+    "jsxFactory": "h",
+    "jsxFragmentFactory": "Fragment",
+    "paths": {
+      "#imports": [
+        "./types/nitro-imports"
+      ],
+      "~/*": [
+        "../*"
+      ],
+      "@/*": [
+        "../*"
+      ],
+      "~~/*": [
+        "../*"
+      ],
+      "@@/*": [
+        "../*"
+      ],
+      "nuxt": [
+        "../node_modules/nuxt"
+      ],
+      "@nuxt/devtools": [
+        "../node_modules/@nuxt/devtools"
+      ],
+      "@vue/runtime-core": [
+        "../node_modules/@vue/runtime-core"
+      ],
+      "@vue/compiler-sfc": [
+        "../node_modules/@vue/compiler-sfc"
+      ],
+      "@nuxt/schema": [
+        "../node_modules/@nuxt/schema"
+      ],
+      "defu": [
+        "../node_modules/defu"
+      ],
+      "h3": [
+        "../node_modules/h3"
+      ],
+      "consola": [
+        "../node_modules/consola"
+      ],
+      "crossws": [
+        "../node_modules/crossws"
+      ],
+      "unplugin-vue-router/client": [
+        "../node_modules/unplugin-vue-router/client"
+      ],
+      "nitropack": [
+        "../node_modules/nitropack"
+      ],
+      "vite/client": [
+        "../node_modules/vite/client"
+      ],
+      "nitropack/types": [
+        "../node_modules/nitropack/types"
+      ],
+      "nitropack/runtime": [
+        "../node_modules/nitropack/runtime"
+      ],
+      "#shared": [
+        "../shared"
+      ],
+      "#shared/*": [
+        "../shared/*"
+      ],
+      "assets": [
+        "../assets"
+      ],
+      "assets/*": [
+        "../assets/*"
+      ],
+      "public": [
+        "../public"
+      ],
+      "public/*": [
+        "../public/*"
+      ],
+      "#server": [
+        "../server"
+      ],
+      "#server/*": [
+        "../server/*"
+      ],
+      "#build": [
+        "./"
+      ],
+      "#build/*": [
+        "./*"
+      ],
+      "#internal/nuxt/paths": [
+        "../node_modules/@nuxt/nitro-server/dist/runtime/utils/paths"
+      ],
+      "#unhead/composables": [
+        "../node_modules/nuxt/dist/head/runtime/composables/v3"
+      ],
+      "pinia": [
+        "../node_modules/pinia"
+      ],
+      "pinia/*": [
+        "../node_modules/pinia/*"
+      ],
+      "element-plus": [
+        "../node_modules/element-plus"
+      ],
+      "element-plus/*": [
+        "../node_modules/element-plus/*"
+      ],
+      "@element-plus/icons-vue": [
+        "../node_modules/@element-plus/icons-vue"
+      ],
+      "@element-plus/icons-vue/*": [
+        "../node_modules/@element-plus/icons-vue/*"
+      ],
+      "@vueuse/core": [
+        "../node_modules/@vueuse/core"
+      ],
+      "@vueuse/core/*": [
+        "../node_modules/@vueuse/core/*"
+      ],
+      "@floating-ui/dom": [
+        "../node_modules/@floating-ui/dom"
+      ],
+      "@floating-ui/dom/*": [
+        "../node_modules/@floating-ui/dom/*"
+      ],
+      "@tiptap/core": [
+        "../node_modules/@tiptap/core"
+      ],
+      "@tiptap/core/*": [
+        "../node_modules/@tiptap/core/*"
+      ],
+      "@tiptap/vue-3": [
+        "../node_modules/@tiptap/vue-3"
+      ],
+      "@tiptap/vue-3/*": [
+        "../node_modules/@tiptap/vue-3/*"
+      ],
+      "@tiptap/pm": [
+        "../node_modules/@tiptap/pm"
+      ],
+      "@tiptap/pm/*": [
+        "../node_modules/@tiptap/pm/*"
+      ],
+      "@tiptap/starter-kit": [
+        "../node_modules/@tiptap/starter-kit"
+      ],
+      "@tiptap/starter-kit/*": [
+        "../node_modules/@tiptap/starter-kit/*"
+      ],
+      "@tiptap/extension-blockquote": [
+        "../node_modules/@tiptap/extension-blockquote"
+      ],
+      "@tiptap/extension-blockquote/*": [
+        "../node_modules/@tiptap/extension-blockquote/*"
+      ],
+      "@tiptap/extension-bold": [
+        "../node_modules/@tiptap/extension-bold"
+      ],
+      "@tiptap/extension-bold/*": [
+        "../node_modules/@tiptap/extension-bold/*"
+      ],
+      "@tiptap/extension-bullet-list": [
+        "../node_modules/@tiptap/extension-bullet-list"
+      ],
+      "@tiptap/extension-bullet-list/*": [
+        "../node_modules/@tiptap/extension-bullet-list/*"
+      ],
+      "@tiptap/extension-character-count": [
+        "../node_modules/@tiptap/extension-character-count"
+      ],
+      "@tiptap/extension-character-count/*": [
+        "../node_modules/@tiptap/extension-character-count/*"
+      ],
+      "@tiptap/extension-code": [
+        "../node_modules/@tiptap/extension-code"
+      ],
+      "@tiptap/extension-code/*": [
+        "../node_modules/@tiptap/extension-code/*"
+      ],
+      "@tiptap/extension-code-block": [
+        "../node_modules/@tiptap/extension-code-block"
+      ],
+      "@tiptap/extension-code-block/*": [
+        "../node_modules/@tiptap/extension-code-block/*"
+      ],
+      "@tiptap/extension-code-block-lowlight": [
+        "../node_modules/@tiptap/extension-code-block-lowlight"
+      ],
+      "@tiptap/extension-code-block-lowlight/*": [
+        "../node_modules/@tiptap/extension-code-block-lowlight/*"
+      ],
+      "@tiptap/extension-color": [
+        "../node_modules/@tiptap/extension-color"
+      ],
+      "@tiptap/extension-color/*": [
+        "../node_modules/@tiptap/extension-color/*"
+      ],
+      "@tiptap/extension-document": [
+        "../node_modules/@tiptap/extension-document"
+      ],
+      "@tiptap/extension-document/*": [
+        "../node_modules/@tiptap/extension-document/*"
+      ],
+      "@tiptap/extension-dropcursor": [
+        "../node_modules/@tiptap/extension-dropcursor"
+      ],
+      "@tiptap/extension-dropcursor/*": [
+        "../node_modules/@tiptap/extension-dropcursor/*"
+      ],
+      "@tiptap/extension-gapcursor": [
+        "../node_modules/@tiptap/extension-gapcursor"
+      ],
+      "@tiptap/extension-gapcursor/*": [
+        "../node_modules/@tiptap/extension-gapcursor/*"
+      ],
+      "@tiptap/extension-hard-break": [
+        "../node_modules/@tiptap/extension-hard-break"
+      ],
+      "@tiptap/extension-hard-break/*": [
+        "../node_modules/@tiptap/extension-hard-break/*"
+      ],
+      "@tiptap/extension-heading": [
+        "../node_modules/@tiptap/extension-heading"
+      ],
+      "@tiptap/extension-heading/*": [
+        "../node_modules/@tiptap/extension-heading/*"
+      ],
+      "@tiptap/extension-highlight": [
+        "../node_modules/@tiptap/extension-highlight"
+      ],
+      "@tiptap/extension-highlight/*": [
+        "../node_modules/@tiptap/extension-highlight/*"
+      ],
+      "@tiptap/extension-bubble-menu": [
+        "../node_modules/@tiptap/extension-bubble-menu"
+      ],
+      "@tiptap/extension-bubble-menu/*": [
+        "../node_modules/@tiptap/extension-bubble-menu/*"
+      ],
+      "@tiptap/extension-floating-menu": [
+        "../node_modules/@tiptap/extension-floating-menu"
+      ],
+      "@tiptap/extension-floating-menu/*": [
+        "../node_modules/@tiptap/extension-floating-menu/*"
+      ],
+      "@tiptap/extension-list": [
+        "../node_modules/@tiptap/extension-list"
+      ],
+      "@tiptap/extension-list/*": [
+        "../node_modules/@tiptap/extension-list/*"
+      ],
+      "@tiptap/extension-list-keymap": [
+        "../node_modules/@tiptap/extension-list-keymap"
+      ],
+      "@tiptap/extension-list-keymap/*": [
+        "../node_modules/@tiptap/extension-list-keymap/*"
+      ],
+      "@tiptap/extensions": [
+        "../node_modules/@tiptap/extensions"
+      ],
+      "@tiptap/extensions/*": [
+        "../node_modules/@tiptap/extensions/*"
+      ],
+      "@tiptap/extension-horizontal-rule": [
+        "../node_modules/@tiptap/extension-horizontal-rule"
+      ],
+      "@tiptap/extension-horizontal-rule/*": [
+        "../node_modules/@tiptap/extension-horizontal-rule/*"
+      ],
+      "@tiptap/extension-image": [
+        "../node_modules/@tiptap/extension-image"
+      ],
+      "@tiptap/extension-image/*": [
+        "../node_modules/@tiptap/extension-image/*"
+      ],
+      "@tiptap/extension-italic": [
+        "../node_modules/@tiptap/extension-italic"
+      ],
+      "@tiptap/extension-italic/*": [
+        "../node_modules/@tiptap/extension-italic/*"
+      ],
+      "@tiptap/extension-link": [
+        "../node_modules/@tiptap/extension-link"
+      ],
+      "@tiptap/extension-link/*": [
+        "../node_modules/@tiptap/extension-link/*"
+      ],
+      "@tiptap/extension-list-item": [
+        "../node_modules/@tiptap/extension-list-item"
+      ],
+      "@tiptap/extension-list-item/*": [
+        "../node_modules/@tiptap/extension-list-item/*"
+      ],
+      "@tiptap/extension-ordered-list": [
+        "../node_modules/@tiptap/extension-ordered-list"
+      ],
+      "@tiptap/extension-ordered-list/*": [
+        "../node_modules/@tiptap/extension-ordered-list/*"
+      ],
+      "@tiptap/extension-paragraph": [
+        "../node_modules/@tiptap/extension-paragraph"
+      ],
+      "@tiptap/extension-paragraph/*": [
+        "../node_modules/@tiptap/extension-paragraph/*"
+      ],
+      "@tiptap/extension-placeholder": [
+        "../node_modules/@tiptap/extension-placeholder"
+      ],
+      "@tiptap/extension-placeholder/*": [
+        "../node_modules/@tiptap/extension-placeholder/*"
+      ],
+      "@tiptap/extension-strike": [
+        "../node_modules/@tiptap/extension-strike"
+      ],
+      "@tiptap/extension-strike/*": [
+        "../node_modules/@tiptap/extension-strike/*"
+      ],
+      "@tiptap/extension-table": [
+        "../node_modules/@tiptap/extension-table"
+      ],
+      "@tiptap/extension-table/*": [
+        "../node_modules/@tiptap/extension-table/*"
+      ],
+      "@tiptap/extension-table-cell": [
+        "../node_modules/@tiptap/extension-table-cell"
+      ],
+      "@tiptap/extension-table-cell/*": [
+        "../node_modules/@tiptap/extension-table-cell/*"
+      ],
+      "@tiptap/extension-table-header": [
+        "../node_modules/@tiptap/extension-table-header"
+      ],
+      "@tiptap/extension-table-header/*": [
+        "../node_modules/@tiptap/extension-table-header/*"
+      ],
+      "@tiptap/extension-table-row": [
+        "../node_modules/@tiptap/extension-table-row"
+      ],
+      "@tiptap/extension-table-row/*": [
+        "../node_modules/@tiptap/extension-table-row/*"
+      ],
+      "@tiptap/extension-text": [
+        "../node_modules/@tiptap/extension-text"
+      ],
+      "@tiptap/extension-text/*": [
+        "../node_modules/@tiptap/extension-text/*"
+      ],
+      "@tiptap/extension-text-align": [
+        "../node_modules/@tiptap/extension-text-align"
+      ],
+      "@tiptap/extension-text-align/*": [
+        "../node_modules/@tiptap/extension-text-align/*"
+      ],
+      "@tiptap/extension-text-style": [
+        "../node_modules/@tiptap/extension-text-style"
+      ],
+      "@tiptap/extension-text-style/*": [
+        "../node_modules/@tiptap/extension-text-style/*"
+      ],
+      "@tiptap/extension-underline": [
+        "../node_modules/@tiptap/extension-underline"
+      ],
+      "@tiptap/extension-underline/*": [
+        "../node_modules/@tiptap/extension-underline/*"
+      ],
+      "vue-codemirror": [
+        "../node_modules/vue-codemirror"
+      ],
+      "vue-codemirror/*": [
+        "../node_modules/vue-codemirror/*"
+      ],
+      "codemirror": [
+        "../node_modules/codemirror"
+      ],
+      "codemirror/*": [
+        "../node_modules/codemirror/*"
+      ],
+      "@codemirror/view": [
+        "../node_modules/@codemirror/view"
+      ],
+      "@codemirror/view/*": [
+        "../node_modules/@codemirror/view/*"
+      ],
+      "@codemirror/state": [
+        "../node_modules/@codemirror/state"
+      ],
+      "@codemirror/state/*": [
+        "../node_modules/@codemirror/state/*"
+      ],
+      "@codemirror/language": [
+        "../node_modules/@codemirror/language"
+      ],
+      "@codemirror/language/*": [
+        "../node_modules/@codemirror/language/*"
+      ],
+      "@codemirror/lang-css": [
+        "../node_modules/@codemirror/lang-css"
+      ],
+      "@codemirror/lang-css/*": [
+        "../node_modules/@codemirror/lang-css/*"
+      ],
+      "@codemirror/lang-markdown": [
+        "../node_modules/@codemirror/lang-markdown"
+      ],
+      "@codemirror/lang-markdown/*": [
+        "../node_modules/@codemirror/lang-markdown/*"
+      ],
+      "@codemirror/theme-one-dark": [
+        "../node_modules/@codemirror/theme-one-dark"
+      ],
+      "@codemirror/theme-one-dark/*": [
+        "../node_modules/@codemirror/theme-one-dark/*"
+      ],
+      "echarts": [
+        "../node_modules/echarts"
+      ],
+      "echarts/*": [
+        "../node_modules/echarts/*"
+      ],
+      "vue-echarts": [
+        "../node_modules/vue-echarts"
+      ],
+      "vue-echarts/*": [
+        "../node_modules/vue-echarts/*"
+      ],
+      "aos": [
+        "../node_modules/aos"
+      ],
+      "aos/*": [
+        "../node_modules/aos/*"
+      ],
+      "nprogress": [
+        "../node_modules/nprogress"
+      ],
+      "nprogress/*": [
+        "../node_modules/nprogress/*"
+      ],
+      "driver.js": [
+        "../node_modules/driver.js"
+      ],
+      "driver.js/*": [
+        "../node_modules/driver.js/*"
+      ],
+      "croppie": [
+        "../node_modules/croppie"
+      ],
+      "croppie/*": [
+        "../node_modules/croppie/*"
+      ],
+      "lucide-vue-next": [
+        "../node_modules/lucide-vue-next"
+      ],
+      "lucide-vue-next/*": [
+        "../node_modules/lucide-vue-next/*"
+      ],
+      "vue3-emoji-picker": [
+        "../node_modules/vue3-emoji-picker"
+      ],
+      "vue3-emoji-picker/*": [
+        "../node_modules/vue3-emoji-picker/*"
+      ],
+      "picture-verification-code": [
+        "../node_modules/picture-verification-code"
+      ],
+      "picture-verification-code/*": [
+        "../node_modules/picture-verification-code/*"
+      ],
+      "fontfaceobserver": [
+        "../node_modules/fontfaceobserver"
+      ],
+      "fontfaceobserver/*": [
+        "../node_modules/fontfaceobserver/*"
+      ],
+      "lowlight": [
+        "../node_modules/lowlight"
+      ],
+      "lowlight/*": [
+        "../node_modules/lowlight/*"
+      ],
+      "markdown-it": [
+        "../node_modules/markdown-it"
+      ],
+      "markdown-it/*": [
+        "../node_modules/markdown-it/*"
+      ],
+      "markdown-it-task-lists": [
+        "../node_modules/markdown-it-task-lists"
+      ],
+      "markdown-it-task-lists/*": [
+        "../node_modules/markdown-it-task-lists/*"
+      ],
+      "dayjs": [
+        "../node_modules/dayjs"
+      ],
+      "dayjs/*": [
+        "../node_modules/dayjs/*"
+      ],
+      "ofetch": [
+        "../node_modules/ofetch"
+      ],
+      "ofetch/*": [
+        "../node_modules/ofetch/*"
+      ],
+      "typenet": [
+        "../node_modules/typenet"
+      ],
+      "typenet/*": [
+        "../node_modules/typenet/*"
+      ]
+    },
+    "lib": [
+      "esnext",
+      "webworker",
+      "dom.iterable"
+    ],
+    "noUncheckedIndexedAccess": true,
+    "allowArbitraryExtensions": true
+  },
+  "include": [
+    "./types/nitro-nuxt.d.ts",
+    "../node_modules/runtime/server",
+    "../node_modules/dist/runtime/server",
+    "../server/**/*",
+    "../shared/**/*.d.ts",
+    "./types/nitro.d.ts",
+    "../**/*"
+  ],
+  "exclude": [
+    "../node_modules",
+    "../../node_modules",
+    "../node_modules/nuxt/node_modules",
+    "../node_modules/@pinia/nuxt/node_modules",
+    "../node_modules/@nuxt/telemetry/node_modules",
+    "../dist"
+  ]
+}

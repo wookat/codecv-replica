@@ -188,7 +188,10 @@ const faqs = [
   }
 ]
 
+// 弹层类交互控件只在客户端渲染，SSR/水合首帧保持一致
+const mounted = ref(false)
 onMounted(() => {
+  mounted.value = true
   refreshProgress()
   loadList()
   loadToday()
@@ -221,7 +224,7 @@ onMounted(() => {
       <section aria-label="搜索筛选">
         <div class="filter-card">
           <div class="filter-grid">
-            <el-select v-model="query.batch" placeholder="招聘批次" clearable>
+            <el-select v-if="mounted" v-model="query.batch" placeholder="招聘批次" clearable>
               <el-option
                 v-for="o in batchOptions"
                 :key="o.value"
@@ -229,7 +232,7 @@ onMounted(() => {
                 :value="o.value"
               />
             </el-select>
-            <el-select v-model="query.channel" placeholder="招聘类型" clearable>
+            <el-select v-if="mounted" v-model="query.channel" placeholder="招聘类型" clearable>
               <el-option v-for="c in channelOptions" :key="c" :label="c" :value="c" />
             </el-select>
             <el-input
@@ -348,16 +351,12 @@ onMounted(() => {
             </el-table-column>
             <el-table-column prop="title" label="招聘标题" min-width="200">
               <template #default="{ row }">
-                <el-tooltip :content="row.title" placement="top">
-                  <div class="fw line-2">{{ row.title || '-' }}</div>
-                </el-tooltip>
+                <div class="fw line-2" :title="row.title">{{ row.title || '-' }}</div>
               </template>
             </el-table-column>
             <el-table-column prop="company" label="公司" min-width="150">
               <template #default="{ row }">
-                <el-tooltip :content="row.company" placement="top">
-                  <div class="fw line-2">{{ row.company || '-' }}</div>
-                </el-tooltip>
+                <div class="fw line-2" :title="row.company">{{ row.company || '-' }}</div>
               </template>
             </el-table-column>
             <el-table-column prop="workLocation" label="工作地点" width="150">
@@ -365,20 +364,21 @@ onMounted(() => {
                 <div v-if="row.workLocation && row.workLocation !== '-'" class="loc-wrap">
                   <div class="loc-chips">
                     <template v-for="(loc, i) in splitTags(row.workLocation)" :key="i">
-                      <el-tooltip v-if="i < 2" :content="loc" placement="top">
-                        <span
-                          class="loc-chip"
-                          :style="locationStyle(loc)"
-                          :title="`点击筛选 ${loc} 的岗位`"
-                          @click="filterByLocation(loc)"
-                          >{{ loc }}</span
-                        >
-                      </el-tooltip>
+                      <span
+                        v-if="i < 2"
+                        class="loc-chip"
+                        :style="locationStyle(loc)"
+                        :title="`点击筛选 ${loc} 的岗位`"
+                        @click="filterByLocation(loc)"
+                        >{{ loc }}</span
+                      >
                     </template>
-                    <div v-if="splitTags(row.workLocation).length > 2" class="loc-more">
-                      <el-tooltip :content="row.workLocation" placement="top">
-                        +{{ splitTags(row.workLocation).length - 2 }}
-                      </el-tooltip>
+                    <div
+                      v-if="splitTags(row.workLocation).length > 2"
+                      class="loc-more"
+                      :title="row.workLocation"
+                    >
+                      +{{ splitTags(row.workLocation).length - 2 }}
                     </div>
                   </div>
                 </div>
@@ -392,11 +392,12 @@ onMounted(() => {
             </el-table-column>
             <el-table-column prop="positions" label="岗位" width="240">
               <template #default="{ row }">
-                <el-tooltip :content="row.positions" placement="top">
-                  <div class="line-2">
-                    {{ row.positions === '多岗位' ? '岗位较多，点击投递查看' : row.positions }}
-                  </div>
-                </el-tooltip>
+                <div
+                  class="line-2"
+                  :title="row.positions === '多岗位' ? '岗位较多，点击投递查看' : row.positions"
+                >
+                  {{ row.positions === '多岗位' ? '岗位较多，点击投递查看' : row.positions }}
+                </div>
               </template>
             </el-table-column>
             <el-table-column prop="channel" label="招聘类型" width="100">
@@ -410,12 +411,12 @@ onMounted(() => {
             <el-table-column label="投递进度" width="150">
               <template #default="{ row }">
                 <div v-if="row._id" class="prog-cell">
-                  <el-tooltip
+                  <span
                     v-if="!progress[row._id] || progress[row._id].status === '待投递'"
-                    :content="progress[row._id] ? '取消收藏' : '先收藏，简历准备好后一起投递'"
-                    placement="top"
+                    class="star"
+                    :title="progress[row._id] ? '取消收藏' : '先收藏，简历准备好后一起投递'"
+                    @click="toggleStar(row)"
                   >
-                    <span class="star" @click="toggleStar(row)">
                       <svg
                         class="star-icon"
                         viewBox="0 0 24 24"
@@ -428,8 +429,7 @@ onMounted(() => {
                           d="M12 2.5l2.95 5.98 6.6.96-4.78 4.66 1.13 6.57L12 17.56l-5.9 3.11 1.13-6.57L2.45 9.44l6.6-.96L12 2.5z"
                         />
                       </svg>
-                    </span>
-                  </el-tooltip>
+                  </span>
                   <el-select
                     v-if="progress[row._id]"
                     :model-value="progress[row._id].status"

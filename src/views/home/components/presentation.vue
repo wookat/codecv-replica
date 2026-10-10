@@ -8,20 +8,16 @@ const { presentationData, presentationIndex, styleConfig } = usePresentation()
 
 <template>
   <div class="presentation">
-    <el-tooltip
+    <img
       v-for="(theme, idx) in presentationData"
       :key="theme.id"
-      placement="top"
-      :content="theme.name"
-    >
-      <img
-        :class="{ light: !isDark }"
-        :style="styleConfig[idx]"
-        :src="theme.img"
-        :alt="theme.name"
-        @click="$router.push({ path: '/editor', query: { type: theme.type } })"
-      />
-    </el-tooltip>
+      :class="{ light: !isDark }"
+      :style="styleConfig[idx]"
+      :src="theme.img"
+      :alt="theme.name"
+      :title="theme.name"
+      @click="$router.push({ path: '/editor', query: { type: theme.type } })"
+    />
   </div>
 
   <ul class="presentation-indicator" data-aos="zoom-in">

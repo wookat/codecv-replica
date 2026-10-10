@@ -94,6 +94,7 @@ export default defineNuxtConfig({
   modules: ['@pinia/nuxt'],
   build: { transpile: ['element-plus', '@element-plus/icons-vue', 'picture-verification-code', 'aos', 'nprogress'] },
   vite: {
+    define: { __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: 'true' },
     resolve: { alias: sharedAlias }
   },
   css: [
