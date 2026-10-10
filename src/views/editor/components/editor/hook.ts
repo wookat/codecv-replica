@@ -18,13 +18,16 @@ export function reactiveWritable(resumeType: string) {
 
 // 左右移动伸缩布局
 export function useMoveLayout() {
-  // 生产版左栏默认宽 500px（1440 视口下实测），可拖动伸缩
-  const left = ref(500)
+  // 生产版左栏默认宽 500px（1440 视口下实测），可拖动伸缩；窄视口收敛到可用范围
+  const fitWidth = () => Math.min(500, Math.max(280, window.innerWidth - 40))
+  const left = ref(fitWidth())
   let flag = false
 
-  function move(event: MouseEvent) {
+  const clamp = (v: number) => Math.min(Math.max(280, v), window.innerWidth - 24)
+  function move(event: MouseEvent | TouchEvent) {
     if (!flag) return
-    left.value = event.clientX - 15
+    const x = 'touches' in event ? event.touches[0]?.clientX ?? 0 : event.clientX
+    left.value = clamp(x - 15)
   }
 
   function down() {
@@ -37,14 +40,24 @@ export function useMoveLayout() {
     flag = false
   }
 
+  function onResize() {
+    left.value = clamp(left.value)
+  }
+
   onActivated(() => {
     window.addEventListener('mouseup', up)
     window.addEventListener('mousemove', move)
+    window.addEventListener('touchend', up)
+    window.addEventListener('touchmove', move, { passive: true })
+    window.addEventListener('resize', onResize)
   })
 
   onDeactivated(() => {
     window.removeEventListener('mouseup', up)
     window.removeEventListener('mousemove', move)
+    window.removeEventListener('touchend', up)
+    window.removeEventListener('touchmove', move)
+    window.removeEventListener('resize', onResize)
   })
   return { left, down }
 }

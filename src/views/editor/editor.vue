@@ -51,6 +51,20 @@ startGuide()
     margin: 0 10px;
     border-radius: 10px;
   }
+
+  /* 窄屏：隐藏实时预览栏——编辑栏已由 useMoveLayout 收敛为全宽 */
+  @media (max-width: 760px) {
+    .markdown-render,
+    .standby-export {
+      display: none;
+    }
+    :deep(.markdown-edit) {
+      margin: 0 6px 10px;
+    }
+    :deep(.move) {
+      display: none;
+    }
+  }
   .standby-export {
     position: absolute;
     top: 120px;

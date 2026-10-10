@@ -49,7 +49,7 @@ function setMode(m: 'edit' | 'md') {
     </div>
     <RichEditor :left="left" v-if="writable" />
     <MDEditor :left="left" v-if="!writable" />
-    <div class="move absolute" @mousedown="down">
+    <div class="move absolute" @mousedown="down" @touchstart.passive="down">
       <span>.</span>
       <span>.</span>
       <span>.</span>
