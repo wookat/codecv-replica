@@ -402,13 +402,14 @@ function onSelChange() {
   }
   if (empty || !sel?.anchorNode || !editorRoot()?.contains(sel.anchorNode)) {
     // 光标空选但位于表格/多列布局内 → 上下文操作菜单
+    const ctxHit = isTableCtx() ? 'table' : isFlexCtx() ? 'flex' : 'none'
     if (
       sel?.anchorNode &&
       editorRoot()?.contains(sel.anchorNode) &&
       mode.value !== 'ai' &&
       mode.value !== 'link' &&
       mode.value !== 'image' &&
-      (isTableCtx() ? showCtx('table') : isFlexCtx() ? showCtx('flex') : false)
+      (ctxHit === 'table' ? showCtx('table') : ctxHit === 'flex' ? showCtx('flex') : false)
     ) {
       return
     }
@@ -474,15 +475,25 @@ function onDocDown(e: MouseEvent) {
     else hide()
   }
 }
+// DOM selectionchange 先于 PM 内部状态同步——延迟一帧再读 e.state.selection 才拿到新选区
+let selRaf = 0
+function scheduleSel() {
+  cancelAnimationFrame(selRaf)
+  selRaf = requestAnimationFrame(onSelChange)
+}
 onMounted(() => {
-  document.addEventListener('selectionchange', onSelChange)
+  document.addEventListener('selectionchange', scheduleSel)
   document.addEventListener('click', onClick, true)
   document.addEventListener('mousedown', onDocDown, true)
+  // PM 自己的 selectionUpdate：保证编辑器状态已就位（DOM 事件时序可能超前）
+  ed()?.on('selectionUpdate', scheduleSel)
 })
 onBeforeUnmount(() => {
-  document.removeEventListener('selectionchange', onSelChange)
+  cancelAnimationFrame(selRaf)
+  document.removeEventListener('selectionchange', scheduleSel)
   document.removeEventListener('click', onClick, true)
   document.removeEventListener('mousedown', onDocDown, true)
+  ed()?.off('selectionUpdate', scheduleSel)
 })
 </script>
 
