@@ -25,6 +25,7 @@ const emit = defineEmits([
   'download-md',
   'import-md',
   'download-picture',
+  'download-docx',
   'print-page'
 ])
 
@@ -67,7 +68,7 @@ onMounted(async () => {
   fileName.value = mine?.name || '免费在线简历制作工具CodeCV简历'
 })
 // 导出计数：对照生产「累计导出」——PDF/PNG 类导出都递增
-function exportFile2(kind: 'dynamic' | 'native' | 'picture' | 'md') {
+function exportFile2(kind: 'dynamic' | 'native' | 'picture' | 'md' | 'docx') {
   if (kind !== 'md') cloudIncExport(resumeType.value)
   exportFile(kind)
 }
@@ -127,6 +128,7 @@ function openImport() {
           <el-dropdown-menu>
             <el-dropdown-item @click="exportFile2('dynamic')">PDF</el-dropdown-item>
             <el-dropdown-item @click="exportFile2('picture')">PNG</el-dropdown-item>
+            <el-dropdown-item @click="exportFile2('docx')">Word</el-dropdown-item>
             <el-dropdown-item @click="exportFile('md')">MD</el-dropdown-item>
             <el-dropdown-item @click="exportFile2('native')">PDF(备用)</el-dropdown-item>
             <el-dropdown-item divided @click="proofreadVisible = true">

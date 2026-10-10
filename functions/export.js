@@ -63,6 +63,11 @@ export async function onRequestPost(context) {
   const { request, env } = context
   const { content, style, link, name, type } = await request.json()
   const isPdf = Number(type) === 0
+  const isDocx = Number(type) === 2
+  // docx 只能走自托管渲染服务的 pandoc 分支——CF BR 无 docx 端点
+  if (isDocx && !env.RENDER_URL) {
+    return json(request, { msg: 'word export service unavailable' }, 503)
+  }
   if (!env.RENDER_URL && (!env.CF_ACCOUNT_ID || !env.BR_API_TOKEN)) {
     return json(request, { msg: 'export service unavailable' }, 503)
   }
@@ -377,19 +382,28 @@ export async function onRequestPost(context) {
   //  justify/one-page/custom-css は必ず最後に置いて既定値を上書きさせる ——
   //  prod の style 連結順と同じ)。
   const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}<style>${cloudFaces}${fonts}${markNormalize}${liFix}${offFix}${fixedStyle}</style></head><body>${fixedContent}${watermark}${fontWait}</body></html>`
+  // docx 用軽量 HTML：pandoc 只取語義，水印/脚本/字體声明統統無用且遠程 img 会拖慢解析
+  const docxHtml = `<!doctype html><html><head><meta charset="utf-8"></head><body>${fixedContent}</body></html>`
   // 優先: 自托管 Chrome114 渲染サービス (prod と同一 Skia m114)
   if (env.RENDER_URL) {
     try {
       const r = await fetch(env.RENDER_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: env.RENDER_TOKEN, html, type: isPdf ? 'pdf' : 'png' }),
+        body: JSON.stringify({
+          token: env.RENDER_TOKEN,
+          html: isDocx ? docxHtml : html,
+          type: isPdf ? 'pdf' : isDocx ? 'docx' : 'png'
+        }),
         signal: AbortSignal.timeout(60000)
       })
       if (r.ok) {
         const { data } = await r.json()
         if (Array.isArray(data) && data.length) {
-          return json(request, isPdf ? { pdf: { data } } : { picture: { data } })
+          return json(
+            request,
+            isPdf ? { pdf: { data } } : isDocx ? { docx: { data } } : { picture: { data } }
+          )
         }
       }
       // 自托管失敗 → CF BR へフォールバック
@@ -397,6 +411,7 @@ export async function onRequestPost(context) {
       /* fallthrough */
     }
   }
+  if (isDocx) return json(request, { msg: 'word export render failed' }, 503)
   const endpoint = isPdf ? 'pdf' : 'screenshot'
   const body = isPdf
     ? {

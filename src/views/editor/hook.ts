@@ -133,8 +133,8 @@ export function useDownLoad(type: Ref<string>) {
     style = resetStyle + resumeBgColor + style
     return { style, link: linkURL, content: html }
   }
-  // 导出PDF & 图片
-  const downloadDynamic = async (isPDF: boolean, fileName?: string) => {
+  // 导出PDF & 图片 & Word
+  const downloadDynamic = async (kind: 'pdf' | 'png' | 'docx', fileName?: string) => {
     const { content: html, style, link } = await exportPreHandler()
     const content = html.cloneNode(true) as HTMLElement
     // 相对路径的图片在远端无站点 base URL 的环境下无法加载，导出前统一绝对化
@@ -142,20 +142,30 @@ export function useDownLoad(type: Ref<string>) {
       const src = img.getAttribute('src')
       if (src && !/^(https?:|data:|blob:)/.test(src)) img.src = new URL(src, location.origin).href
     })
-    !isPDF && ensureEmptyPreWhiteSpace(content)
+    kind !== 'pdf' && ensureEmptyPreWhiteSpace(content)
     showLoading('正在导出请耐心等待...')
     try {
-      const pdfData = await resumeExport({
+      const resData = await resumeExport({
         content: content.outerHTML,
         style,
         link,
         name: type.value,
-        type: isPDF ? 0 : 1
+        type: kind === 'pdf' ? 0 : kind === 'png' ? 1 : 2
       })
-      const buffer = isPDF ? pdfData.pdf.data : pdfData.picture.data
-      const _fileName = (fileName || document.title) + (isPDF ? '.pdf' : '.png')
-      const fileType = isPDF ? 'application/pdf' : 'image/png'
-      downloadOfBuffer(buffer, _fileName, fileType)
+      const buffer =
+        kind === 'pdf'
+          ? resData.pdf.data
+          : kind === 'png'
+          ? resData.picture.data
+          : resData.docx.data
+      const ext = kind === 'pdf' ? '.pdf' : kind === 'png' ? '.png' : '.docx'
+      const fileType =
+        kind === 'pdf'
+          ? 'application/pdf'
+          : kind === 'png'
+          ? 'image/png'
+          : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      downloadOfBuffer(buffer, (fileName || document.title) + ext, fileType)
       successMessage('导出成功～')
     } catch (e: any) {
       const errorMsg =
