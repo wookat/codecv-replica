@@ -114,6 +114,10 @@ export default defineNuxtConfig({
           content:
             '免费在线Markdown简历制作工具，专业中英文简历模板免费下载，涵盖前后端、产品、运营等岗位，所见即所得，支持PDF/Word导出。'
         }
+      ],
+      link: [
+        { rel: 'stylesheet', href: '/fonts/iconfont.css' },
+        { rel: 'stylesheet', href: '/fonts/resume-fonts.css' }
       ]
     }
   },
