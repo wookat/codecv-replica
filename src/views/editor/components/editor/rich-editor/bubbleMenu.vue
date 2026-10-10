@@ -1,14 +1,16 @@
 <script setup lang="ts">
 // 生产同款选中文本浮动菜单（ProseMirror 引擎版）：
 // 标题级别 / AI润色 / B I U S / 链接 / 列表 / 引用 / 清除格式；图片点选走图片模式
+// 光标/选区落入表格 → 表格行列操作；落入多列布局 → 列操作（prod 内容模式同款编辑入口）
 import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { CellSelection } from '@tiptap/pm/tables'
 import { successMessage, errorMessage } from '@/common/message'
 import { getLocalStorage } from '@/common/localstorage'
 import useUserStore, { TOKEN } from '@/store/modules/user'
 import { pickAndUploadImage } from '@/utils/uploader'
 import { getPMEditor } from './pm/useEditor'
 
-type Mode = 'tools' | 'ai' | 'link' | 'image'
+type Mode = 'tools' | 'ai' | 'link' | 'image' | 'table' | 'flex'
 const state = ref({ visible: false, top: 0, left: 0 })
 const mode = ref<Mode>('tools')
 const curLevel = ref<number>(0)
@@ -257,6 +259,125 @@ async function replaceImg() {
   }
 }
 
+/* ---------- 表格/多列布局 上下文 ---------- */
+const isTableCtx = () => !!ed()?.isActive('table')
+function flexLayoutPos(): number {
+  const e = ed()
+  if (!e) return -1
+  const $f = e.state.selection.$from
+  for (let d = $f.depth; d > 0; d--) {
+    const n = $f.node(d)
+    if (n.type.name === 'flexLayout') return $f.before(d)
+  }
+  return -1
+}
+const isFlexCtx = () => !isTableCtx() && flexLayoutPos() >= 0
+// 用选区所在 DOM 找 table/flex-layout 元素，菜单锚到其左上角上方
+function ctxRect(kind: 'table' | 'flex'): DOMRect | null {
+  const e = ed()
+  if (!e) return null
+  let node: Node | null = null
+  try {
+    node = e.view.domAtPos(e.state.selection.$from.pos).node
+  } catch {
+    return null
+  }
+  const el = node instanceof HTMLElement ? node : node?.parentElement
+  const t = el?.closest(kind === 'table' ? 'table' : '.flex-layout')
+  return t?.getBoundingClientRect() ?? null
+}
+function showCtx(kind: 'table' | 'flex') {
+  const r = ctxRect(kind)
+  if (!r) return false
+  mode.value = kind
+  state.value = {
+    visible: true,
+    top: Math.max(8, r.top - 42),
+    left: Math.max(8, Math.min(window.innerWidth - 430, r.left))
+  }
+  return true
+}
+
+/* ---------- 表格操作 ---------- */
+function tcmd(
+  c:
+    | 'addRowBefore'
+    | 'addRowAfter'
+    | 'addColumnBefore'
+    | 'addColumnAfter'
+    | 'deleteRow'
+    | 'deleteColumn'
+    | 'toggleHeaderRow'
+    | 'mergeOrSplit'
+    | 'deleteTable'
+) {
+  const e = ed()
+  if (!e) return
+  e.chain().focus()[c]().run()
+  if (c === 'deleteTable') hide()
+}
+
+/* ---------- 多列布局操作 ---------- */
+function flexItemPos(): number {
+  const e = ed()
+  if (!e) return -1
+  const $f = e.state.selection.$from
+  for (let d = $f.depth; d > 0; d--) {
+    if ($f.node(d).type.name === 'flexItem') return $f.before(d)
+  }
+  return -1
+}
+function flexAddCol() {
+  const e = ed()
+  const p = flexLayoutPos()
+  const fl = e && p >= 0 ? e.state.doc.nodeAt(p) : null
+  if (e && fl) {
+    e.chain()
+      .insertContentAt(p + fl.nodeSize - 1, {
+        type: 'flexItem',
+        content: [{ type: 'paragraph' }]
+      })
+      .run()
+  }
+}
+function flexDelCol() {
+  const e = ed()
+  const p = flexLayoutPos()
+  const ip = flexItemPos()
+  const fl = e && p >= 0 ? e.state.doc.nodeAt(p) : null
+  if (e && fl && fl.childCount > 1 && ip >= 0) {
+    const it = e.state.doc.nodeAt(ip)
+    if (it)
+      e.chain()
+        .deleteRange({ from: ip, to: ip + it.nodeSize })
+        .run()
+    hide()
+  }
+}
+function flexReset() {
+  const e = ed()
+  const p = flexLayoutPos()
+  const fl = e && p >= 0 ? e.state.doc.nodeAt(p) : null
+  if (e && fl) {
+    const tr = e.state.tr
+    fl.forEach((child, offset) => {
+      tr.setNodeMarkup(p + 1 + offset, undefined, { ...child.attrs, style: null })
+    })
+    e.view.dispatch(tr)
+  }
+}
+function flexDelLayout() {
+  const e = ed()
+  const p = flexLayoutPos()
+  const fl = e && p >= 0 ? e.state.doc.nodeAt(p) : null
+  if (e && fl) {
+    e.chain()
+      .deleteRange({ from: p, to: p + fl.nodeSize })
+      .run()
+    hide()
+  }
+}
+
 /* ---------- 显示/定位 ---------- */
 function show(rect: { top: number; left: number; width: number }) {
   state.value = {
@@ -274,10 +395,27 @@ function onSelChange() {
   if (!e) return
   const { from, to, empty } = e.state.selection
   const sel = window.getSelection()
+  const cellSel = e.state.selection instanceof CellSelection
+  // 单元格多选 → 表格模式（合并/行列操作对象）
+  if (cellSel) {
+    if (showCtx('table')) return
+  }
   if (empty || !sel?.anchorNode || !editorRoot()?.contains(sel.anchorNode)) {
+    // 光标空选但位于表格/多列布局内 → 上下文操作菜单
+    if (
+      sel?.anchorNode &&
+      editorRoot()?.contains(sel.anchorNode) &&
+      mode.value !== 'ai' &&
+      mode.value !== 'link' &&
+      mode.value !== 'image' &&
+      (isTableCtx() ? showCtx('table') : isFlexCtx() ? showCtx('flex') : false)
+    ) {
+      return
+    }
     if (!streaming.value && mode.value !== 'ai' && mode.value !== 'link') hide()
     return
   }
+  if (mode.value === 'table' || mode.value === 'flex') mode.value = 'tools'
   if (to > from && e.state.doc.textBetween(from, to, ' ').trim()) {
     saveSel()
     curLevel.value = currentLevel()
@@ -329,6 +467,9 @@ function onClick(e: MouseEvent) {
 function onDocDown(e: MouseEvent) {
   const t = e.target as HTMLElement
   if (state.value.visible && !t.closest('.bubble-menu')) {
+    // 表格/布局模式下点进同一容器不算离开（selectionchange 会重定位或关闭）
+    if (mode.value === 'table' && t.closest('table')) return
+    if (mode.value === 'flex' && t.closest('.flex-layout')) return
     if (mode.value === 'link' || mode.value === 'ai') mode.value = 'tools'
     else hide()
   }
@@ -416,6 +557,29 @@ onBeforeUnmount(() => {
         </select>
         <button class="ai-position-skip" @click="skipPos">跳过，直接润色</button>
         <button class="link-confirm" @click="pickPos">确认</button>
+      </div>
+      <!-- 表格模式：行列编辑 -->
+      <div v-else-if="mode === 'table'" class="bm-row">
+        <button class="bubble-menu-item tbtn" @click="tcmd('addRowBefore')">↑行</button>
+        <button class="bubble-menu-item tbtn" @click="tcmd('addRowAfter')">↓行</button>
+        <button class="bubble-menu-item tbtn" @click="tcmd('addColumnBefore')">←列</button>
+        <button class="bubble-menu-item tbtn" @click="tcmd('addColumnAfter')">→列</button>
+        <div class="bm-divider" />
+        <button class="bubble-menu-item tbtn" @click="tcmd('deleteRow')">删行</button>
+        <button class="bubble-menu-item tbtn" @click="tcmd('deleteColumn')">删列</button>
+        <div class="bm-divider" />
+        <button class="bubble-menu-item tbtn" @click="tcmd('toggleHeaderRow')">表头</button>
+        <button class="bubble-menu-item tbtn" @click="tcmd('mergeOrSplit')">合并</button>
+        <div class="bm-divider" />
+        <button class="bubble-menu-item tbtn link-danger" @click="tcmd('deleteTable')">删表</button>
+      </div>
+      <!-- 多列布局模式 -->
+      <div v-else-if="mode === 'flex'" class="bm-row">
+        <button class="bubble-menu-item tbtn" @click="flexAddCol">加列</button>
+        <button class="bubble-menu-item tbtn" @click="flexDelCol">删列</button>
+        <button class="bubble-menu-item tbtn" @click="flexReset">均分</button>
+        <div class="bm-divider" />
+        <button class="bubble-menu-item tbtn link-danger" @click="flexDelLayout">删布局</button>
       </div>
       <!-- 主工具行 -->
       <div v-else class="bm-row">
@@ -597,6 +761,12 @@ html.dark .bubble-menu-item {
   height: 16px;
   background: rgba(0, 0, 0, 0.12);
   margin: 0 4px;
+}
+.tbtn {
+  width: auto;
+  padding: 0 7px;
+  font-size: 12px;
+  white-space: nowrap;
 }
 html.dark .bm-divider {
   background: rgba(255, 255, 255, 0.16);
