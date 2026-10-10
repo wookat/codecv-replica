@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // 生产同款「导入简历」三步向导：上传(文件/粘贴) → 选择模板 → 预览创建
-// 文件侧支持 .md/.txt/.json；pdf/docx 需要云端 AI 解析（暂降级提示粘贴文本）
+// 文件侧支持 .md/.txt/.json + .pdf/.docx（后者走 /api/import/parse 云端 AI 解析）
 import { mdContentKey } from '@/common/storageKeys'
 import { computed, nextTick, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
@@ -47,12 +47,12 @@ function onDrop(e: DragEvent) {
   if (f) importFile(f)
 }
 
+const parsing = ref(false)
 async function importFile(f: File) {
   if (f.size > 10 * 1024 * 1024) return ElMessage.warning('单个文件最大 10MB')
-  if (/\.(pdf|docx?)$/i.test(f.name))
-    return ElMessage.warning('该格式需要云端 AI 解析，暂未开放——请粘贴简历文本')
+  if (/\.(pdf|docx)$/i.test(f.name)) return importBinary(f)
   if (!/\.(md|markdown|txt|json)$/i.test(f.name))
-    return ElMessage.warning('仅支持 .md / .txt / .json，或粘贴文本')
+    return ElMessage.warning('仅支持 .md / .txt / .json / .pdf / .docx，或粘贴文本')
   let text = await f.text()
   if (text.trim().length < 10) return ElMessage.warning('文件内容过短')
   if (/\.json$/i.test(f.name)) {
@@ -62,6 +62,35 @@ async function importFile(f: File) {
   mdText.value = text
   fileName.value = f.name
   step.value = 1
+}
+
+// pdf/docx → 云端 AI 解析成 CodeCV md（/api/import/parse：VPS 抽文本 + swe-2 转方言）
+async function importBinary(f: File) {
+  parsing.value = true
+  try {
+    const fd = new FormData()
+    fd.append('file', f, f.name)
+    const tk = (getLocalStorage('TOKEN') as string) || ''
+    const res = await fetch('/api/import/parse', {
+      method: 'POST',
+      headers: tk ? { Authorization: `Bearer ${tk}` } : undefined,
+      body: fd
+    })
+    const data = await res.json()
+    if (data.code === -1000) {
+      ElMessage.warning(data.message || '请先登录后再导入')
+      return router.push('/login')
+    }
+    if (data.code !== 200 || !data.data?.md)
+      return ElMessage.warning(data.message || '简历解析失败，请更换文件或粘贴文本')
+    mdText.value = data.data.md
+    fileName.value = f.name.replace(/\.[^.]+$/, '')
+    step.value = 1
+  } catch {
+    ElMessage.error('解析服务异常，请稍后重试或使用文本粘贴导入')
+  } finally {
+    parsing.value = false
+  }
 }
 function usePaste() {
   const t = pasteText.value.trim()
@@ -172,8 +201,8 @@ async function confirmCreate() {
         <div v-if="mode === 'file'">
           <div
             class="drop"
-            :class="{ on: dragging }"
-            @click="pick"
+            :class="{ on: dragging, busy: parsing }"
+            @click="!parsing && pick()"
             @dragover.prevent="dragging = true"
             @dragleave="dragging = false"
             @drop.prevent="onDrop"
@@ -190,12 +219,13 @@ async function confirmCreate() {
               <path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5" />
               <path d="M5 13v5a2 2 0 002 2h10a2 2 0 002-2v-5" />
             </svg>
-            <b>拖拽简历到这里</b>
-            <span class="or">或点击选择文件</span>
+            <b>{{ parsing ? 'AI 正在解析简历…' : '拖拽简历到这里' }}</b>
+            <span class="or">{{ parsing ? '通常需要 5-15 秒，请稍候' : '或点击选择文件' }}</span>
             <div class="fmts">
               <span class="fmt">.md</span><span class="fmt">.txt</span><span class="fmt">.json</span
-              ><span class="fmt off">.pdf(待开放)</span>
+              ><span class="fmt">.pdf</span><span class="fmt">.docx</span>
             </div>
+            <span class="parse-tip">.pdf / .docx 由云端 AI 解析（消耗 AI 次数）</span>
             <span class="limit">单个文件最大 10MB</span>
           </div>
         </div>
@@ -266,7 +296,7 @@ async function confirmCreate() {
       ref="fileInput"
       type="file"
       class="hidden"
-      accept=".md,.markdown,.txt,.json"
+      accept=".md,.markdown,.txt,.json,.pdf,.docx"
       @change="onFile"
     />
   </div>
@@ -335,6 +365,10 @@ async function confirmCreate() {
     }
   }
 }
+.parse-tip {
+  font-size: 12px;
+  color: #c0c4cc;
+}
 .drop {
   border: 2px dashed #dcdfe6;
   border-radius: 14px;
@@ -349,6 +383,10 @@ async function confirmCreate() {
   &.on {
     border-color: var(--theme);
     background: rgba(0, 0, 0, 0.015);
+  }
+  &.busy {
+    cursor: wait;
+    opacity: 0.7;
   }
   .d-ic {
     width: 40px;
