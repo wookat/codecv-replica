@@ -134,7 +134,7 @@ async function submit() {
               :pager-count="5"
               :total="list.length"
               background
-              small
+              size="small"
               layout="prev, pager, next"
             />
           </div>

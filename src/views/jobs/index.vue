@@ -417,18 +417,18 @@ onMounted(() => {
                     :title="progress[row._id] ? '取消收藏' : '先收藏，简历准备好后一起投递'"
                     @click="toggleStar(row)"
                   >
-                      <svg
-                        class="star-icon"
-                        viewBox="0 0 24 24"
-                        :fill="progress[row._id] ? '#f7ba2a' : 'none'"
-                        stroke="#f7ba2a"
-                        stroke-width="1.6"
-                        stroke-linejoin="round"
-                      >
-                        <path
-                          d="M12 2.5l2.95 5.98 6.6.96-4.78 4.66 1.13 6.57L12 17.56l-5.9 3.11 1.13-6.57L2.45 9.44l6.6-.96L12 2.5z"
-                        />
-                      </svg>
+                    <svg
+                      class="star-icon"
+                      viewBox="0 0 24 24"
+                      :fill="progress[row._id] ? '#f7ba2a' : 'none'"
+                      stroke="#f7ba2a"
+                      stroke-width="1.6"
+                      stroke-linejoin="round"
+                    >
+                      <path
+                        d="M12 2.5l2.95 5.98 6.6.96-4.78 4.66 1.13 6.57L12 17.56l-5.9 3.11 1.13-6.57L2.45 9.44l6.6-.96L12 2.5z"
+                      />
+                    </svg>
                   </span>
                   <el-select
                     v-if="progress[row._id]"

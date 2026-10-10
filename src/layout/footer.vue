@@ -2,7 +2,8 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 // 生产 /progress 为极简页脚（仅版权行）
-const minimal = computed(() => useRoute().path === '/progress')
+const route = useRoute()
+const minimal = computed(() => route.path === '/progress')
 </script>
 
 <template>
