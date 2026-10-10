@@ -172,7 +172,10 @@ export const resumeExtensions = [
     heading: { levels: [1, 2, 3, 4, 5, 6] },
     undoRedo: { depth: 200 },
     hardBreak: false, // br 在模板里是 &nbsp; 占位符，禁用 Shift+Enter 意外换行
-    code: false // 用下方扩展版（带 class/style attrs，标签样式面板可写）
+    code: false, // 用下方扩展版（带 class/style attrs，标签样式面板可写）
+    link: false, // v3 StarterKit 内置 link/underline/trailingNode——下方独立注册的会重名
+    underline: false,
+    trailingNode: false
   }),
   // 行内 code：保留 class/style（<code class="single-code"> 技能标签）
   Code.extend({
