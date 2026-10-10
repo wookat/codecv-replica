@@ -49,6 +49,7 @@ declare module '@vue/runtime-core' {
     Empty: typeof import('./src/components/empty.vue')['default']
     ExportTotal: typeof import('./src/components/exportTotal.vue')['default']
     FloatTools: typeof import('./src/components/FloatTools.vue')['default']
+    ImageCropper: typeof import('./src/components/ImageCropper.vue')['default']
     LoginModal: typeof import('./src/components/LoginModal.vue')['default']
     Logo: typeof import('./src/components/logo.vue')['default']
     MenuBar: typeof import('./src/components/menu-bar/menu-bar/MenuBar.vue')['default']

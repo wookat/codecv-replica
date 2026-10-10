@@ -1,5 +1,5 @@
 import { post } from '../config'
-import axios from 'axios'
+import { ofetch } from 'ofetch'
 
 /* ===== 校招岗位 ===== */
 export interface JobQuery {
@@ -99,8 +99,7 @@ export interface MianjingPosition {
 
 async function getJson(path: string) {
   const base = (import.meta.env.VITE_BASE_URL as string) || ''
-  const res = await axios.get(base + path)
-  return res.data
+  return await ofetch(base + path)
 }
 
 export function mianjingList(

@@ -1,6 +1,7 @@
 import { getLocalStorage, removeLocalStorage, setLocalStorage } from '@/common/localstorage'
 import { createStyle, query, removeHeadStyle, createDIV } from '@/utils'
 import { getFontFamily, getPrimaryBGColor, getPrimaryColor } from '@/templates/config'
+import { loadFont } from '@/utils/font'
 import { onActivated, onMounted, reactive, ref } from 'vue'
 
 const get = getLocalStorage,
@@ -235,6 +236,12 @@ export function useCustomFont(resumeType: string) {
     set(cacheKey, fontFamily)
     const renderCV = queryRenderCV()
     ensureEmptyPreWhiteSpace(renderCV)
+    // 字体就绪后再分页——swap 阶段量的是回退字体宽度会误判页数（prod useCustomFont 同款等待）
+    if (fontFamily) {
+      void loadFont(fontFamily).then(ok => {
+        if (ok && renderCV) splitPage(renderCV)
+      })
+    }
     !first && splitPage(renderCV)
   }
 

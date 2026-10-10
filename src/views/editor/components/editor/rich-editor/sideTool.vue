@@ -3,7 +3,7 @@
 //  - row-actions 模式（点 ⋮⋮ 手柄）: 创建副本/复制为Markdown/复制纯文本 | 上移/下移 | 列块操作 | 删除
 //  - insert 模式（点 + 钮）: 正文/模块标题/小标题 + 插入左右布局 + 插入空白符
 //  - block 模式（光标停在空段落）: 正文/模块标题/小标题 + 插入左右布局 + 插入空白符
-import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { resumeDOMStruct2Markdown } from '@/utils/dom2md'
 import { successMessage, errorMessage } from '@/common/message'
 import { getPMEditor } from './pm/useEditor'
@@ -11,6 +11,7 @@ import { selectIcon, linkFlag } from '../toolbar/hook'
 import { reset } from '../toolbar/components/linkInput/hook'
 import { pickAndUploadImage } from '@/utils/uploader'
 import { INSERT_ITEM_DEFS } from './insertItems'
+import { placeMenu, posOf, rectEl } from './fpos'
 import type { Node as PMNode } from '@tiptap/pm/model'
 
 interface MenuState {
@@ -40,6 +41,7 @@ const state = reactive<MenuState>({
   gridLeft: 0
 })
 const menuRef = ref<HTMLElement>()
+const gridRef = ref<HTMLElement>()
 let openedAt = 0
 
 // prod add-btn 弹出的是与 slash 完全一致的 22 项 mention-menu（实测菜单文本逐项相同）
@@ -57,15 +59,9 @@ function open(detail: {
   state.el = detail.el
   state.mode = detail.mode
   const r = detail.anchorRect
-  // 视口下方放不下时翻到锚点上方（菜单最高 ~320px）
-  const MENU_H = 320
-  const below = window.innerHeight - r.bottom - 8
-  state.top = below >= 200 ? r.bottom + 8 : r.top - MENU_H - 8
-  if (state.top < 8) state.top = 8
-  state.left = Math.max(8, Math.min(window.innerWidth - 185, r.left))
   state.gridOpen = false
   state.grid = null
-  state.visible = true
+  void placeMenu(state, () => menuRef.value, rectEl(r), { placement: 'bottom-start', offset: 8 })
   openedAt = Date.now()
 }
 function onTrigger(ev: Event) {
@@ -340,10 +336,22 @@ function insert(key: string, ev?: MouseEvent) {
       break
     case 'table': {
       // 点表格只展开网格子菜单（菜单右侧 flyout），不执行
-      const r = (ev?.currentTarget as HTMLElement | null)?.getBoundingClientRect()
-      state.gridTop = Math.max(8, Math.min((r ? r.top : state.top) - 6, window.innerHeight - 190))
-      state.gridLeft = Math.min(state.left + 181, window.innerWidth - 184)
+      const itemR = (ev?.currentTarget as HTMLElement | null)?.getBoundingClientRect()
+      const anchor = itemR ?? menuRef.value?.getBoundingClientRect()
+      if (!anchor) return
+      state.gridTop = -9999
+      state.gridLeft = -9999
       state.gridOpen = true
+      void nextTick().then(async () => {
+        const p = await posOf(rectEl(anchor), gridRef.value, {
+          placement: 'right-start',
+          offset: 6
+        })
+        if (p && state.gridOpen) {
+          state.gridTop = p.top
+          state.gridLeft = p.left
+        }
+      })
       return
     }
     default:
@@ -357,7 +365,7 @@ async function uploadAt(alt: string, cls = '') {
   const e = ed()
   if (!e) return
   try {
-    const url = await pickAndUploadImage()
+    const url = await pickAndUploadImage(undefined, { crop: cls === 'cv-avatar-overlay' })
     if (!url) return
     e.chain()
       .focus()
@@ -501,6 +509,7 @@ function cellHit(r: number, c: number) {
     </Transition>
     <div
       v-if="state.visible && state.gridOpen"
+      ref="gridRef"
       class="st-grid floating-shadow"
       :style="{ top: state.gridTop + 'px', left: state.gridLeft + 'px' }"
     >

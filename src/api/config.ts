@@ -1,83 +1,37 @@
-import axios, { ResponseType } from 'axios'
+import { ofetch } from 'ofetch'
 
 import { Tip } from '@/common/tip'
 import { errorMessage } from '@/common/message'
 import { getLocalStorage } from '@/common/localstorage'
 
-const service = axios.create({
-  baseURL: import.meta.env.VITE_BASE_URL as string,
+const service = ofetch.create({
+  baseURL: (import.meta.env.VITE_BASE_URL as string) || undefined,
   timeout: 5000,
-  withCredentials: true,
-  responseType: 'json'
-})
-// 请求拦截 统一配置
-service.interceptors.request.use(
-  config => {
-    // showLoading()
+  credentials: 'include',
+  onRequest({ options }) {
     const token = getLocalStorage('TOKEN') as string
-    if (token) config.headers.Authorization = `Bearer ${token}`
-    if (config.url === '/fileUpload/upload') {
-      ;(config as any).headers['Content-Type'] = 'multipart/form-data'
+    if (token) {
+      const headers = new Headers(options.headers)
+      headers.set('Authorization', `Bearer ${token}`)
+      options.headers = headers
     }
-    return config
   },
-  err => {
-    // hideLoading()
-    errorMessage(err)
-    return Promise.reject(new Error(err))
+  onResponseError({ response }) {
+    errorMessage(response._data ?? response.statusText)
   }
-)
-// 统一在此处解构一层data
-service.interceptors.response.use(
-  data => {
-    return data.data
-  },
-  err => {
-    // hideLoading()
-    errorMessage(err)
-    return Promise.reject(new Error(err))
-  }
-)
+})
 
 // get method
 export function get(url: string, params: any = {}) {
-  return new Promise((resolved, rejected) => {
-    service
-      .get(url, { params })
-      .then(
-        resp => {
-          resolved(resp)
-        },
-        err => {
-          errorMessage(Tip.NETWORK_ERROR)
-          rejected(err)
-        }
-      )
-      .catch(err => {
-        // 弹出错误提示
-        rejected(err)
-        errorMessage(Tip.NETWORK_ERROR)
-      })
+  return service(url, { method: 'GET', query: params }).catch(err => {
+    errorMessage(Tip.NETWORK_ERROR)
+    return Promise.reject(err)
   })
 }
 // post method
-export function post(url: string, data: any = {}, type?: ResponseType) {
-  return new Promise((resolved, rejected) => {
-    service
-      .post(url, data, { responseType: type || 'json' })
-      .then(
-        resp => {
-          resolved(resp)
-        },
-        err => {
-          errorMessage(Tip.NETWORK_ERROR)
-          rejected(err)
-        }
-      )
-      .catch(err => {
-        // 弹出错误提示
-        errorMessage(Tip.NETWORK_ERROR)
-        rejected(err)
-      })
+export function post(url: string, data: any = {}) {
+  return service(url, { method: 'POST', body: data }).catch(err => {
+    errorMessage(Tip.NETWORK_ERROR)
+    return Promise.reject(err)
   })
 }

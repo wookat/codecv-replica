@@ -7,6 +7,7 @@ import { INSERT_ITEM_DEFS } from './insertItems'
 import { selectIcon, linkFlag } from '../toolbar/hook'
 import { reset } from '../toolbar/components/linkInput/hook'
 import { getPMEditor } from './pm/useEditor'
+import { placeMenu, rectEl } from './fpos'
 
 interface Item {
   zh: string
@@ -66,7 +67,7 @@ const chain = () => {
 async function uploadImage(alt: string, cls = '') {
   removeQuery()
   try {
-    const url = await pickAndUploadImage()
+    const url = await pickAndUploadImage(undefined, { crop: cls === 'cv-avatar-overlay' })
     if (!url) return
     chain()
       .setImage({ src: url, alt, class: cls || null, style: 'max-width:100%' } as never)
@@ -195,16 +196,12 @@ function refresh() {
     return
   }
   const r = caretRect()
-  if (r) {
-    // 视口下方放不下时翻到光标上方（菜单最高 320px）
-    const MENU_H = 320
-    const below = window.innerHeight - r.bottom - 6
-    state.top = below >= Math.min(MENU_H, 200) ? r.bottom + 6 : r.top - MENU_H - 6
-    if (state.top < 8) state.top = 8
-    state.left = Math.max(8, Math.min(window.innerWidth - 208, r.left))
-  }
   state.index = 0
-  state.visible = true
+  if (r) {
+    void placeMenu(state, () => listRef.value, rectEl(r), { placement: 'bottom-start', offset: 6 })
+  } else {
+    state.visible = true
+  }
 }
 function close() {
   state.visible = false

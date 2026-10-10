@@ -3,6 +3,7 @@
 import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { successMessage } from '@/common/message'
 import { getPMEditor } from './pm/useEditor'
+import { placeMenu, rectEl } from './fpos'
 
 const state = reactive({ visible: false, top: 0, left: 0, href: '' })
 const menuRef = ref<HTMLElement>()
@@ -24,9 +25,7 @@ function onSelectionChange() {
     target = a
     state.href = a.getAttribute('href') || ''
     const r = a.getBoundingClientRect()
-    state.top = r.bottom + 6
-    state.left = Math.max(8, Math.min(window.innerWidth - 240, r.left))
-    state.visible = true
+    void placeMenu(state, () => menuRef.value, rectEl(r), { placement: 'bottom-start', offset: 6 })
   }, 120)
 }
 function onDocDown(ev: MouseEvent) {

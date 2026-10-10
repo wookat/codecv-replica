@@ -2,6 +2,7 @@
 // 生产同款 tag-style-panel：点击编辑器内 <code> 技能点 → 预设色 chips + 自定义文字/背景色
 import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { getPMEditor } from './pm/useEditor'
+import { placeMenu, rectEl } from './fpos'
 
 const CHIPS = [
   { name: '默认', text: '', bg: '' },
@@ -26,9 +27,7 @@ let target: HTMLElement | null = null
 function openFor(code: HTMLElement) {
   target = code
   const r = code.getBoundingClientRect()
-  state.top = r.bottom + 6
-  state.left = Math.max(8, Math.min(window.innerWidth - 330, r.left))
-  state.visible = true
+  void placeMenu(state, () => panelRef.value, rectEl(r), { placement: 'bottom-start', offset: 6 })
   fg.value = code.style.color || '#333333'
   bg.value = code.style.backgroundColor ? rgb2hex(code.style.backgroundColor) : '#fbf3db'
 }

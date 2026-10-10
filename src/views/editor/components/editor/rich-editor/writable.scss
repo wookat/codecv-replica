@@ -640,3 +640,58 @@ html.dark .resume-module .mod-op {
     padding: 30px 18px 18px 46px;
   }
 }
+/* lowlight 代码块语法高亮（github 主题，prod 同款 lowlight） */
+.tiptap pre code {
+  .hljs-comment,
+  .hljs-quote {
+    color: #6a737d;
+    font-style: italic;
+  }
+  .hljs-keyword,
+  .hljs-selector-tag,
+  .hljs-template-tag,
+  .hljs-type {
+    color: #d73a49;
+  }
+  .hljs-string,
+  .hljs-regexp,
+  .hljs-addition,
+  .hljs-meta .hljs-string {
+    color: #032f62;
+  }
+  .hljs-number,
+  .hljs-literal,
+  .hljs-symbol,
+  .hljs-bullet,
+  .hljs-link {
+    color: #005cc5;
+  }
+  .hljs-title,
+  .hljs-section,
+  .hljs-name,
+  .hljs-selector-id,
+  .hljs-selector-class {
+    color: #6f42c1;
+  }
+  .hljs-attr,
+  .hljs-attribute,
+  .hljs-variable,
+  .hljs-template-variable,
+  .hljs-class .hljs-title {
+    color: #e36209;
+  }
+  .hljs-built_in,
+  .hljs-builtin-name {
+    color: #005cc5;
+  }
+  .hljs-deletion {
+    color: #b31d28;
+    background: #ffeef0;
+  }
+  .hljs-emphasis {
+    font-style: italic;
+  }
+  .hljs-strong {
+    font-weight: bold;
+  }
+}

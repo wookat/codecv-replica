@@ -9,9 +9,11 @@ import { getLocalStorage } from '@/common/localstorage'
 import useUserStore, { TOKEN } from '@/store/modules/user'
 import { pickAndUploadImage } from '@/utils/uploader'
 import { getPMEditor } from './pm/useEditor'
+import { placeMenu, rectEl } from './fpos'
 
 type Mode = 'tools' | 'ai' | 'link' | 'image' | 'table' | 'flex'
 const state = ref({ visible: false, top: 0, left: 0 })
+const menuEl = ref<HTMLElement>()
 const mode = ref<Mode>('tools')
 const curLevel = ref<number>(0)
 const linkUrl = ref('')
@@ -290,11 +292,7 @@ function showCtx(kind: 'table' | 'flex') {
   const r = ctxRect(kind)
   if (!r) return false
   mode.value = kind
-  state.value = {
-    visible: true,
-    top: Math.max(8, r.top - 42),
-    left: Math.max(8, Math.min(window.innerWidth - 430, r.left))
-  }
+  void placeMenu(state.value, () => menuEl.value, rectEl(r), { placement: 'top-start', offset: 6 })
   return true
 }
 
@@ -380,11 +378,7 @@ function flexDelLayout() {
 
 /* ---------- 显示/定位 ---------- */
 function show(rect: { top: number; left: number; width: number }) {
-  state.value = {
-    visible: true,
-    top: Math.max(8, rect.top - 46),
-    left: Math.max(8, Math.min(window.innerWidth - 460, rect.left + rect.width / 2 - 170))
-  }
+  void placeMenu(state.value, () => menuEl.value, rectEl(rect), { placement: 'top', offset: 8 })
 }
 function hide() {
   state.value.visible = false
@@ -501,6 +495,7 @@ onBeforeUnmount(() => {
   <Teleport to="body">
     <div
       v-if="state.visible"
+      ref="menuEl"
       class="bubble-menu"
       :style="{ top: state.top + 'px', left: state.left + 'px' }"
       @mousedown.prevent

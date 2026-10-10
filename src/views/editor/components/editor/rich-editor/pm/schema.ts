@@ -15,6 +15,8 @@ import Highlight from '@tiptap/extension-highlight'
 import Image from '@tiptap/extension-image'
 import TextAlign from '@tiptap/extension-text-align'
 import Code from '@tiptap/extension-code'
+import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight'
+import { common, createLowlight } from 'lowlight'
 
 // ---------- 全局属性保留：class/style/data-*/id 在所有节点上透传 ----------
 const PreserveAttrs = Extension.create({
@@ -161,6 +163,8 @@ const Doc = Node.create({
   content: '(topwrap|block)+'
 })
 
+const lowlight = createLowlight(common)
+
 // ---------- table 用宽松 cell：生产 td/th 内可以是任意块 ----------
 const CvTableCell = TableCell.extend({ content: 'block+' })
 const CvTableHeader = TableHeader.extend({ content: 'block+' })
@@ -173,6 +177,7 @@ export const resumeExtensions = [
     undoRedo: { depth: 200 },
     hardBreak: false, // br 在模板里是 &nbsp; 占位符，禁用 Shift+Enter 意外换行
     code: false, // 用下方扩展版（带 class/style attrs，标签样式面板可写）
+    codeBlock: false, // 用 CodeBlockLowlight 版（prod 同款 lowlight 语法高亮）
     link: false, // v3 StarterKit 内置 link/underline/trailingNode——下方独立注册的会重名
     underline: false,
     trailingNode: false
@@ -213,6 +218,7 @@ export const resumeExtensions = [
       }
     }
   }),
+  CodeBlockLowlight.configure({ lowlight, defaultLanguage: null }),
   Table.configure({ resizable: true, lastColumnResizable: false }),
   TableRow,
   CvTableHeader,

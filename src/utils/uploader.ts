@@ -1,3 +1,4 @@
+import { createApp, h } from 'vue'
 import { getLocalStorage } from '@/common/localstorage'
 import { TOKEN } from '@/store/modules/user'
 import { errorMessage } from '../common/message'
@@ -30,14 +31,61 @@ export function getPickerFile(options: IUploadOptions) {
 
 const IMAGE_ACCEPT = '.png,.jpg,.jpeg,.webp'
 
+// prod 同款 croppie 裁剪：裁剪确认后返回 Blob，取消返回 null
+function cropFile(file: File): Promise<Blob | null> {
+  return new Promise(resolve => {
+    const host = document.createElement('div')
+    document.body.appendChild(host)
+    const url = URL.createObjectURL(file)
+    import('@/components/ImageCropper.vue').then(({ default: Cropper }) => {
+      const cleanup = (blob: Blob | null) => {
+        app.unmount()
+        host.remove()
+        URL.revokeObjectURL(url)
+        resolve(blob)
+      }
+      const app = createApp({
+        render: () =>
+          h(Cropper, {
+            src: url,
+            onDone: (b: Blob) => cleanup(b),
+            onCancel: () => cleanup(null)
+          })
+      })
+      app.mount(host)
+    })
+  })
+}
+
+function fileToDataURL(file: File | Blob): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    const fr = new FileReader()
+    fr.onload = () => resolve(String(fr.result))
+    fr.onerror = reject
+    fr.readAsDataURL(file)
+  })
+}
+
 // 选图 → 上传 /api/upload（KV）；未登录或上传失败时回落 dataURL。返回 null 表示用户取消
-export async function pickAndUploadImage(accept = IMAGE_ACCEPT): Promise<string | null> {
-  const file = await getPickerFile({ multiple: false, accept })
-  if (!file) return null
+// opts.crop=true 时先弹裁剪层（证件照/头像等需要构图的场景）
+export async function pickAndUploadImage(
+  accept = IMAGE_ACCEPT,
+  opts?: { crop?: boolean; viewport?: { width: number; height: number } }
+): Promise<string | null> {
+  const picked = await getPickerFile({ multiple: false, accept })
+  if (!picked) return null
+  let file: File | Blob = picked
+  let fileName = picked.name
+  if (opts?.crop) {
+    const blob = await cropFile(picked)
+    if (!blob) return null
+    file = blob
+    fileName = picked.name.replace(/\.[^.]+$/, '') + '.png'
+  }
   const token = (getLocalStorage(TOKEN) as string) || ''
   try {
     const fd = new FormData()
-    fd.append('file', file)
+    fd.append('file', file, fileName)
     const res = await fetch('/api/upload', {
       method: 'POST',
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
@@ -50,10 +98,5 @@ export async function pickAndUploadImage(accept = IMAGE_ACCEPT): Promise<string 
   } catch {
     /* fall back to dataURL */
   }
-  return await new Promise<string>((resolve, reject) => {
-    const fr = new FileReader()
-    fr.onload = () => resolve(String(fr.result))
-    fr.onerror = reject
-    fr.readAsDataURL(file)
-  })
+  return await fileToDataURL(file)
 }

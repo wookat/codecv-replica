@@ -127,7 +127,7 @@ async function ctxAction(act: 'replace' | 'reset-position' | 'reset-size' | 'del
   if (!kind) return
   const key = ctxKey()
   if (act === 'replace') {
-    const url = await pickAndUploadImage()
+    const url = await pickAndUploadImage(undefined, { crop: kind === 'avatar' })
     if (!url) return
     const prev = readCfg() || {}
     setLocalStorage(

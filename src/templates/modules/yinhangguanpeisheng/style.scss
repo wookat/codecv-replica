@@ -1,4 +1,4 @@
-@import url("../../common.css");
+@import url('../../common.css');
 .markdown-transform-html {
   font-size: 13px;
   padding: 30px 40px;
@@ -38,7 +38,7 @@
 }
 
 .markdown-transform-html .single-code::after {
-  content: "";
+  content: '';
   position: absolute;
   width: 100%;
   height: 100%;
