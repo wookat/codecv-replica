@@ -3,13 +3,13 @@
 // flex-layout/flex-layout-item/常规块），渲染回同构 DOM，保证 resumeDOMStruct2Markdown 零改动
 import { Extension, Mark, Node, mergeAttributes } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
-import Table from '@tiptap/extension-table'
+import { Table } from '@tiptap/extension-table'
 import TableRow from '@tiptap/extension-table-row'
 import TableHeader from '@tiptap/extension-table-header'
 import TableCell from '@tiptap/extension-table-cell'
 import Link from '@tiptap/extension-link'
 import Underline from '@tiptap/extension-underline'
-import TextStyle from '@tiptap/extension-text-style'
+import { TextStyle } from '@tiptap/extension-text-style'
 import Color from '@tiptap/extension-color'
 import Highlight from '@tiptap/extension-highlight'
 import Image from '@tiptap/extension-image'
@@ -170,7 +170,7 @@ export const resumeExtensions = [
   StarterKit.configure({
     document: false,
     heading: { levels: [1, 2, 3, 4, 5, 6] },
-    history: { depth: 200 },
+    undoRedo: { depth: 200 },
     hardBreak: false, // br 在模板里是 &nbsp; 占位符，禁用 Shift+Enter 意外换行
     code: false // 用下方扩展版（带 class/style attrs，标签样式面板可写）
   }),
