@@ -13,12 +13,6 @@ export async function onRequest(context) {
   const auth = await currentUserRow(env, request, q)
   if (!auth) return json(request, { code: 401, msg: '请先登录' })
 
-  await db
-    .prepare(
-      'CREATE TABLE IF NOT EXISTS tpl_favorites (user_id INTEGER, tpl_type TEXT, created_at INTEGER, PRIMARY KEY (user_id, tpl_type))'
-    )
-    .run()
-
   if (route === 'toggle' && request.method === 'POST') {
     const type = String(q.type || '')
     if (!type) return json(request, { code: 400, msg: '缺少模板类型' })

@@ -57,7 +57,11 @@ function removeQuery() {
   if (to > slashPos) e.chain().focus().deleteRange({ from: slashPos, to }).run()
   slashPos = -1
 }
-const chain = () => ed()!.chain().focus()
+const chain = () => {
+  const e = ed()
+  if (!e) throw new Error('editor unmounted')
+  return e.chain().focus()
+}
 
 async function uploadImage(alt: string, cls = '') {
   removeQuery()

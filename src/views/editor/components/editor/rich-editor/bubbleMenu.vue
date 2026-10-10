@@ -69,7 +69,11 @@ const LEVELS = [
 
 const ed = () => getPMEditor()
 const editorRoot = () => document.querySelector('.writable-edit-mode') as HTMLElement | null
-const chain = () => ed()!.chain().focus()
+const chain = () => {
+  const e = ed()
+  if (!e) throw new Error('editor unmounted')
+  return e.chain().focus()
+}
 
 function saveSel() {
   const e = ed()

@@ -146,10 +146,11 @@ export function useToggleEditorMode(resumeType: string) {
   // ===== 空段落 block-menu：光标停在顶层空块 → 弹 insert 菜单（生产同款） =====
   let blockMenuTimer = 0
   function onSelectionChange() {
-    if (!editor) return
+    const ed = editor
+    if (!ed) return
     window.clearTimeout(blockMenuTimer)
     blockMenuTimer = window.setTimeout(() => {
-      const { $from, empty } = editor!.state.selection
+      const { $from, empty } = ed.state.selection
       if (!empty) return
       // 只认顶层或包装节点内的空段落（H/P 级块）
       const node = $from.parent
@@ -159,7 +160,7 @@ export function useToggleEditorMode(resumeType: string) {
         const n = $from.node(d)
         if (['tableCell', 'tableHeader', 'listItem'].includes(n.type.name)) return
       }
-      const el = editor!.view.domAtPos($from.before()).node as HTMLElement
+      const el = ed.view.domAtPos($from.before()).node as HTMLElement
       window.dispatchEvent(
         new CustomEvent('side-tool-menu-trigger', {
           detail: {
@@ -212,13 +213,14 @@ export function useToggleEditorMode(resumeType: string) {
   // ===== 编辑器挂载 =====
   // prod PM 文档 = md 方言渲染的扁平 DOM（无 resume-module/main-layout 包装，那些只在预览端存在）
   const fillContent = () => {
-    if (!editorStore.writable || !editor) return
+    const ed = editor
+    if (!editorStore.writable || !ed) return
     nextTick(() => {
       const md = editorStore.MDContent
       if (md == null) return
       // 初始填充不计入撤销栈——否则 Ctrl+Z 连按会把整份简历清成空文档并回写空 md
       const html = fontMark(markdownToHTML(md))
-      editor!.commands.command(({ tr, commands }) => {
+      ed.commands.command(({ tr, commands }) => {
         tr.setMeta('addToHistory', false)
         return commands.setContent(html)
       })

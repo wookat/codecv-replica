@@ -194,8 +194,8 @@ function act(key: string) {
     case 'deleteLastCol': {
       const flPos = flexLayoutPosOf()
       const fl = flPos >= 0 ? doc.nodeAt(flPos) : null
-      if (fl && fl.childCount > 1) {
-        const last = fl.lastChild!
+      const last = fl?.lastChild
+      if (fl && fl.childCount > 1 && last) {
         const lastPos = flPos + fl.nodeSize - 1 - last.nodeSize
         e.chain()
           .deleteRange({ from: lastPos, to: lastPos + last.nodeSize })

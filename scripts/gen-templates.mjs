@@ -18,11 +18,11 @@ const OUT = resolve(root, 'src/templates/modules')
 
 const index = JSON.parse(readFileSync(resolve(SEED, 'index.json'), 'utf8'))
 // 分类页卡片展示的生产 createTime（YYYY-MM-DD）
-const CTIME_PATH = '/home/ubuntu/codecv-replica-data/seeds/template-ctime.json'
-const ctime = existsSync(CTIME_PATH) ? JSON.parse(readFileSync(CTIME_PATH, 'utf8')) : {}
+const ctimePath = resolve(SEED, 'template-ctime.json')
+const ctime = existsSync(ctimePath) ? JSON.parse(readFileSync(ctimePath, 'utf8')) : {}
 // 生产卡片展示名（基准名，不带“简历”后缀；从页面 HTML 反解）
-const NAMES_PATH = '/home/ubuntu/codecv-replica-data/seeds/template-names.json'
-const names = existsSync(NAMES_PATH) ? JSON.parse(readFileSync(NAMES_PATH, 'utf8')) : {}
+const namesPath = resolve(SEED, 'template-names.json')
+const names = existsSync(namesPath) ? JSON.parse(readFileSync(namesPath, 'utf8')) : {}
 const EMAIL_RE = /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g
 
 const localize = (md, slug) =>
