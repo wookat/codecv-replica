@@ -63,7 +63,7 @@ export function usePresentation() {
   ]
 
   onMounted(() => {
-    timer = setInterval(() => {
+    timer = window.setInterval(() => {
       presentationIndex.value = (presentationIndex.value + 1) % styleConfig.length
       presentationData.unshift(presentationData.pop() as (typeof presentationData)[0])
     }, 3000)

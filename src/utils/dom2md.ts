@@ -16,6 +16,15 @@ function getTagName(node: HTMLElement) {
   return node?.tagName.toLowerCase()
 }
 
+// flex-layout-item 内联 style(width%/text-align) → 方言列规格 ' N' | ' N right'
+function colSpec(el: HTMLElement | null | undefined): string {
+  if (!el) return ''
+  const w = /^\s*(\d+(?:\.\d+)?)%\s*;?/.exec(el.style?.width || '')?.[1]
+  if (!w) return ''
+  const a = el.style?.textAlign
+  return ` ${w}${a ? ` ${a}` : ''}`
+}
+
 // 处理HTML结构转markdown内容
 export function resumeDOMStruct2Markdown({
   parent,
@@ -37,7 +46,11 @@ export function resumeDOMStruct2Markdown({
     // 模板配置的头像/校徽覆盖层不属于文档内容，序列化回 md 时跳过
     if (classList.contains('cv-avatar-overlay') || classList.contains('cv-badge-overlay')) return ''
     if (classList.contains('flex-layout')) {
-      result += '::: start\n' // 如果是指定的类名，则添加起始语法到结果字符串中
+      // '::: start N' 的 N 是首列宽度（见 lib/mth columnSpec）
+      const first = Array.from(children).find(c =>
+        (c as HTMLElement).classList?.contains('flex-layout-item')
+      ) as HTMLElement | undefined
+      result += '::: start' + colSpec(first) + '\n'
     } else if (classList.contains('iconfont')) {
       result += `icon:${classList[1].slice(5)} ` // 如果是指定的类名，则添加 icon 语法到结果字符串中
     } else if (classList.contains('head-layout')) {
@@ -87,7 +100,8 @@ export function resumeDOMStruct2Markdown({
     } else if (classList.contains('main-layout')) {
       result += '::: mainEnd' // 同上
     } else if (classList.contains('flex-layout-item') && !latest) {
-      result += '\n:::' // 如果是指定的类名，则添加内容语法到结果字符串中
+      // 分隔行 '::: N [align]' 描述的是下一列规格
+      result += '\n:::' + colSpec((node as HTMLElement).nextElementSibling as HTMLElement | null)
     } else if (tagName == 'a') {
       result += `](${(node as HTMLElement).getAttribute('href')})`
     } else if (['b', 'strong'].includes(tagName)) {
