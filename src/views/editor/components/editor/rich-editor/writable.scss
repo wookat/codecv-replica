@@ -395,7 +395,10 @@
     position: relative;
   }
   /* 拖拽手柄：悬停块级节点左侧出现 ⋮⋮ + ＋（对齐生产 tiptap drag-handle） */
-  .drag-handle {
+  /* 必须带 .tiptap 前缀：上层 `.tiptap div{position:relative}` 的特异性
+     高于裸 .drag-handle，否则 position:absolute 被顶掉、手柄变成 436px
+     宽的流内横条压在块上。 */
+  .tiptap .drag-handle {
     position: absolute;
     left: -46px;
     top: 0;
@@ -630,8 +633,10 @@ html.dark .resume-module .mod-op {
 }
 
 /* 窄栏纸面：容器 <560px 时收横向留白，优先保内容可读（≥560px 仍 prod 对齐 pad 54/45/18/52） */
+/* 注意：左侧 padding 不得低于 46px——drag-handle 以 left:-46px 挂在块级节点上，
+   收过头手柄会飞出纸面左缘（x<0）看不见也点不到。 */
 @container (max-width: 560px) {
   .writable-edit-mode .tiptap {
-    padding: 30px 18px;
+    padding: 30px 18px 18px 46px;
   }
 }
