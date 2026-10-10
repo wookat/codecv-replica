@@ -4,7 +4,8 @@
 //    (Skia m114, 与 prod 同版本), 经 cloudflared 隧道 https://cvrender.zalize.com
 // 2. Cloudflare Browser Rendering REST (CF_ACCOUNT_ID + BR_API_TOKEN, Skia m128)
 //    自托管失败时回退; 两者都未配置时 503。
-import { json } from './_lib.js'
+import { json, memberTier } from './_lib.js'
+import { currentUserRow } from './_auth.js'
 
 export const onRequestOptions = context => json(context.request, {})
 
@@ -71,6 +72,9 @@ export async function onRequestPost(context) {
   if (!env.RENDER_URL && (!env.CF_ACCOUNT_ID || !env.BR_API_TOKEN)) {
     return json(request, { msg: 'export service unavailable' }, 503)
   }
+  // 「移除水印」会员权益：Bearer 有效会员导出时跳过水印注入
+  const u = await currentUserRow(env, request).catch(() => null)
+  const noWatermark = !!u && memberTier(u.row) !== null
   const origin = new URL(request.url).origin
   // prod と同じくスキン CSS はサーバー側で name から注入する
   // (/css/style_<name>.css を全テンプレ分静的配備済み)。
@@ -138,7 +142,7 @@ export async function onRequestPost(context) {
   // マーカー要素を立てて waitForSelector で同期する。
   const fontWait = `<script>document.fonts.ready.then(()=>{const d=document.createElement('div');d.id='fonts-ready';document.body.appendChild(d)})</script>`
   // prod の透かし実測(PDF内 1588x2246 ラスタ画像+SMask alpha≈0.18 から逆算):
-  // ・2行構成「CodeCV简历」(bold ~32px) + 「www.codecvcv.com」(regular ~15px)
+  // ・2行構成「CodeCV简历」(bold ~32px) + 「codecv.zalize.com」(regular ~15px)
   // ・右下がり 27.3° 回転、色 #808080 / alpha 0.18 (白地合成 ≈ #E8E8E8)
   // ・インスタンス中心(1588x2246 smask 実測): 偶数行 x=151+273c / 奇数行 x=287.5+273c,
   //   各行 y=122.5+215k で全 5 行 —— CSS px 換算済み(画像は2px/css)
@@ -151,7 +155,11 @@ export async function onRequestPost(context) {
     `<img src="${origin}/codecv-assets/wm-raster.png" style="position:${
       isPdf ? 'fixed' : 'absolute'
     };left:0;top:${top}px;width:794px;height:1123px;z-index:2147483000;pointer-events:none">`
-  const watermark = isPdf ? wmImg(0) : wmImg(0) + wmImg(1123) + wmImg(2246) + wmImg(3369)
+  const watermark = noWatermark
+    ? ''
+    : isPdf
+    ? wmImg(0)
+    : wmImg(0) + wmImg(1123) + wmImg(2246) + wmImg(3369)
   // prod の export リクエスト style フィールドに同梱される正規化ルールを同じく
   // 同梱（mark 内の色/背景を outer 側に正規化・全要素 line-height:20px 強制）
   const markNormalize = `.markdown-transform-html mark { color: inherit; }

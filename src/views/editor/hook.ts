@@ -18,6 +18,7 @@ import useEditorStore from '@/store/modules/editor'
 import { resolveTemplateType } from '@/templates/config'
 import { allOverlaysHTML, convertDOM } from '@/utils/moduleCombine'
 import { resumeExport, setExportCount, setTemplateCondition } from '@/api/modules/resume'
+import { fetchUserInfo } from '@/api/modules/cloudResume'
 import {
   CUSTOM_CSS_STYLE,
   CUSTOM_MARKDOWN_PRIMARY_COLOR,
@@ -201,18 +202,24 @@ export function useDownLoad(type: Ref<string>) {
     })
 
     // 打印层：克隆 + 皮肤样式 + 水印栅格（prod 同构 /codecv-assets/wm-raster.png）
+    // 「移除水印」会员权益：有效会员导出跳过水印注入
     const { style, link } = await exportPreHandler()
+    const info = await fetchUserInfo()
+    const noWatermark =
+      Number((info as { member_expires?: number } | null)?.member_expires || 0) > Date.now()
     const wrap = document.createElement('div')
     wrap.className = 'codecv-print-only'
     const linkTag = link !== 'none' ? `<link rel="stylesheet" href="${link}">` : ''
     wrap.innerHTML = `${linkTag}<style>${style}
 .codecv-print-only .jufe{width:210mm;min-height:295mm;margin:0 auto;position:relative;}</style>`
     wrap.appendChild(clone)
-    const wm = document.createElement('img')
-    wm.src = `${location.origin}/codecv-assets/wm-raster.png`
-    wm.style.cssText =
-      'position:fixed;left:0;top:0;width:794px;height:1123px;z-index:2147483000;pointer-events:none'
-    wrap.appendChild(wm)
+    if (!noWatermark) {
+      const wm = document.createElement('img')
+      wm.src = `${location.origin}/codecv-assets/wm-raster.png`
+      wm.style.cssText =
+        'position:fixed;left:0;top:0;width:794px;height:1123px;z-index:2147483000;pointer-events:none'
+      wrap.appendChild(wm)
+    }
     document.body.appendChild(wrap)
     const cleanup = () => {
       window.removeEventListener('afterprint', cleanup)
