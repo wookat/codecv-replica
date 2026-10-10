@@ -23,6 +23,8 @@ interface MenuState {
   el: HTMLElement | null
   gridOpen: boolean
   grid: { row: number; col: number } | null
+  gridTop: number
+  gridLeft: number
 }
 const state = reactive<MenuState>({
   visible: false,
@@ -33,9 +35,12 @@ const state = reactive<MenuState>({
   node: null,
   el: null,
   gridOpen: false,
-  grid: null
+  grid: null,
+  gridTop: 0,
+  gridLeft: 0
 })
 const menuRef = ref<HTMLElement>()
+let openedAt = 0
 
 // prod add-btn 弹出的是与 slash 完全一致的 22 项 mention-menu（实测菜单文本逐项相同）
 const INSERT_ITEMS = INSERT_ITEM_DEFS.map(d => ({ ...d, label: d.zh }))
@@ -61,6 +66,7 @@ function open(detail: {
   state.gridOpen = false
   state.grid = null
   state.visible = true
+  openedAt = Date.now()
 }
 function onTrigger(ev: Event) {
   const d = (ev as CustomEvent).detail
@@ -73,7 +79,15 @@ function close() {
 function onDocDown(ev: MouseEvent) {
   const t = ev.target as HTMLElement
   if (menuRef.value?.contains(t)) return
-  if (t.closest?.('.drag-handle')) return
+  if (t.closest?.('.drag-handle,.st-grid')) return
+  close()
+}
+// 点击让 PM 聚焦编辑器会触发 scrollIntoView 滚动——开屏瞬间的滚动不应当关菜单；
+// 菜单自身是 overflow-y:auto 的可滚列表，菜单内部滚动更不能关
+function onScroll(ev: Event) {
+  if (Date.now() - openedAt < 200) return
+  if (ev.target instanceof HTMLElement && ev.target.closest?.('.side-tool-floating-menu,.st-grid'))
+    return
   close()
 }
 function onKey(ev: KeyboardEvent) {
@@ -84,14 +98,14 @@ onMounted(() => {
   window.addEventListener('side-tool-menu-close', close)
   document.addEventListener('mousedown', onDocDown, true)
   document.addEventListener('keydown', onKey)
-  document.addEventListener('scroll', close, true)
+  document.addEventListener('scroll', onScroll, true)
 })
 onBeforeUnmount(() => {
   window.removeEventListener('side-tool-menu-trigger', onTrigger)
   window.removeEventListener('side-tool-menu-close', close)
   document.removeEventListener('mousedown', onDocDown, true)
   document.removeEventListener('keydown', onKey)
-  document.removeEventListener('scroll', close, true)
+  document.removeEventListener('scroll', onScroll, true)
 })
 
 // ---------- PM 节点工具 ----------
@@ -224,7 +238,7 @@ function act(key: string) {
   close()
 }
 
-function insert(key: string) {
+function insert(key: string, ev?: MouseEvent) {
   const e = ed()
   const n = state.node
   if (!e || !n || state.pos < 0) return close()
@@ -324,10 +338,14 @@ function insert(key: string) {
     case 'ul':
       ch.setTextSelection(ins).toggleBulletList().run()
       break
-    case 'table':
-      // 点表格式只展开网格子菜单，不执行
+    case 'table': {
+      // 点表格只展开网格子菜单（菜单右侧 flyout），不执行
+      const r = (ev?.currentTarget as HTMLElement | null)?.getBoundingClientRect()
+      state.gridTop = Math.max(8, Math.min((r ? r.top : state.top) - 6, window.innerHeight - 190))
+      state.gridLeft = Math.min(state.left + 181, window.innerWidth - 184)
       state.gridOpen = true
       return
+    }
     default:
       if (lv) ch.insertContentAt(ins, { type: 'heading', attrs: { level: +lv } }).run()
   }
@@ -437,7 +455,12 @@ function cellHit(r: number, c: number) {
         </template>
         <template v-else-if="state.mode === 'insert'">
           <div class="mention-menu">
-            <button v-for="it in INSERT_ITEMS" :key="it.key" class="item" @click="insert(it.key)">
+            <button
+              v-for="it in INSERT_ITEMS"
+              :key="it.key"
+              class="item"
+              @click="insert(it.key, $event)"
+            >
               <i class="iconfont item-icon" :class="'icon-' + it.icon"></i>
               <span class="labels"
                 ><p>{{ it.label }}</p>
@@ -445,22 +468,6 @@ function cellHit(r: number, c: number) {
               >
               <i v-if="it.key === 'table'" class="sub-arrow">&gt;</i>
             </button>
-          </div>
-          <div v-if="state.gridOpen" class="st-grid">
-            <div class="st-grid__label" :class="{ 'is-active': state.grid }">
-              {{ state.grid ? `${state.grid.row + 1} x ${state.grid.col + 1}` : '表格' }}
-            </div>
-            <div class="st-grid__cells" @mouseleave="state.grid = null">
-              <button
-                v-for="i in GRID * GRID"
-                :key="i"
-                type="button"
-                class="st-grid__cell"
-                :class="{ 'is-highlighted': cellHit(Math.floor((i - 1) / GRID), (i - 1) % GRID) }"
-                @mouseenter="state.grid = { row: Math.floor((i - 1) / GRID), col: (i - 1) % GRID }"
-                @click="pickCell(Math.floor((i - 1) / GRID), (i - 1) % GRID)"
-              ></button>
-            </div>
           </div>
         </template>
         <template v-else>
@@ -492,6 +499,26 @@ function cellHit(r: number, c: number) {
         </template>
       </div>
     </Transition>
+    <div
+      v-if="state.visible && state.gridOpen"
+      class="st-grid floating-shadow"
+      :style="{ top: state.gridTop + 'px', left: state.gridLeft + 'px' }"
+    >
+      <div class="st-grid__label" :class="{ 'is-active': state.grid }">
+        {{ state.grid ? `${state.grid.row + 1} x ${state.grid.col + 1}` : '表格' }}
+      </div>
+      <div class="st-grid__cells" @mouseleave="state.grid = null">
+        <button
+          v-for="i in GRID * GRID"
+          :key="i"
+          type="button"
+          class="st-grid__cell"
+          :class="{ 'is-highlighted': cellHit(Math.floor((i - 1) / GRID), (i - 1) % GRID) }"
+          @mouseenter="state.grid = { row: Math.floor((i - 1) / GRID), col: (i - 1) % GRID }"
+          @click="pickCell(Math.floor((i - 1) / GRID), (i - 1) % GRID)"
+        ></button>
+      </div>
+    </div>
   </Teleport>
 </template>
 
@@ -568,6 +595,44 @@ function cellHit(r: number, c: number) {
     height: 1px;
     background: rgba(0, 0, 0, 0.08);
     margin: 4px 6px;
+  }
+}
+// 表格尺寸网格：fixed flyout——必须在菜单外（overflow-y:auto 会裁剪右侧弹层）
+.st-grid {
+  position: fixed;
+  z-index: 3101;
+  width: 176px;
+  padding: 10px;
+  background: var(--background);
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  .st-grid__label {
+    font-size: 12px;
+    color: #999;
+    text-align: center;
+    margin-bottom: 8px;
+    &.is-active {
+      color: var(--font-color);
+      font-weight: 600;
+    }
+  }
+  .st-grid__cells {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 2px;
+  }
+  .st-grid__cell {
+    width: 14px;
+    height: 14px;
+    padding: 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 2px;
+    background: #fff;
+    cursor: pointer;
+    &.is-highlighted {
+      background: var(--theme);
+      border-color: var(--theme);
+    }
   }
 }
 // 生产 block-menu 横排胶囊样式
