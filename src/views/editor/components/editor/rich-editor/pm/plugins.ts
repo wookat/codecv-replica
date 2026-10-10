@@ -275,6 +275,19 @@ export const DragHandle = Extension.create({
                 })
               )
             })
+            // 模块级手柄：resumeModule 实际嵌在 mainLayout 内（非 doc 直接子节点），
+            // 仅靠顶层遍历只余零散块有手柄 → 模块无法拖拽/中间插入
+            state.doc.descendants((node, pos) => {
+              if (node.type.name === 'resumeModule') {
+                decos.push(
+                  Decoration.widget(pos + 1, (view: EditorView) => handleDOM(pos, node, view), {
+                    key: `dh-m-${pos}`
+                  })
+                )
+                return false
+              }
+              return true
+            })
             return DecorationSet.create(state.doc, decos)
           }
         }
