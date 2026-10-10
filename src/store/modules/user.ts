@@ -8,7 +8,12 @@ import { login, logout, registerUser, verify } from '@/api/modules/user'
 import { userForm } from '@/layout/header/hook'
 import { IUser, IUserInfo } from '@@types/type'
 
-const codeInstance = new VerificationCode()
+// 惰性实例化：SSR/构建期无 document，验证码仅在客户端动作内创建
+let codeInstance: VerificationCode | null = null
+function getCodeInstance() {
+  if (!codeInstance) codeInstance = new VerificationCode()
+  return codeInstance
+}
 export const TOKEN = 'TOKEN',
   USERNAME = 'USERNAME',
   SET_TOKEN = 'SET_TOKEN',
@@ -109,7 +114,7 @@ const useUserStore = defineStore('userStore', {
     },
     genVerify() {
       this.loginState.verify = createCode()
-      this.loginState.verifyImg = codeInstance.render(this.loginState.verify)
+      this.loginState.verifyImg = getCodeInstance().render(this.loginState.verify)
     },
     setUserInfo(target: IUserInfo, userInfo: IUserInfo) {
       target.uid = userInfo.uid

@@ -56,7 +56,7 @@ watchEffect(async () => {
 })
 
 watchEffect(() => {
-  if (tpl.value) {
+  if (tpl.value && typeof document !== 'undefined') {
     const n = `${tpl.value.name}简历模板`
     document.title = `${n}免费下载_${n}制作 - CodeCV简历`
   }

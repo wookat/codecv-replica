@@ -20,6 +20,7 @@ const useEditorStore = defineStore('editorStore', {
     nativeContent: '',
     // 生产版默认进入「编辑」所见即所得模式；用户显式切到 MD 才持久化 false
     writable: (() => {
+      if (typeof localStorage === 'undefined') return true
       const raw = localStorage.getItem(WRITABLE)
       return raw === null ? true : Boolean(getLocalStorage(WRITABLE))
     })(),

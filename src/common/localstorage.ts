@@ -1,6 +1,7 @@
 type LocalStorageValue<T> = { value: T; expires: number }
 
 export function setLocalStorage(key: string, value: unknown, expires: number = 1000 * 60 * 60 * 3) {
+  if (typeof localStorage === 'undefined') return false
   const result: LocalStorageValue<typeof value> = {
     value,
     expires: Date.now() + expires
@@ -10,6 +11,7 @@ export function setLocalStorage(key: string, value: unknown, expires: number = 1
 }
 
 export function getLocalStorage(key: string) {
+  if (typeof localStorage === 'undefined') return false
   const currentTime = Date.now()
 
   const value = localStorage.getItem(key)
@@ -27,6 +29,7 @@ export function getLocalStorage(key: string) {
 }
 
 export function removeLocalStorage(key: string) {
+  if (typeof localStorage === 'undefined') return false
   if (!getLocalStorage(key)) {
     return false
   }

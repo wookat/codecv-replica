@@ -1,7 +1,7 @@
 import { ElLoading } from 'element-plus'
 import 'element-plus/es/components/loading/style/css'
 
-export const wOpen = window.open
+export const wOpen: typeof window.open = (...args) => window.open(...args)
 
 // 模板皮肤 css chunk 的 URL 映射：vite 构建后每套皮肤的 <link> href 带 hash，
 // 通过动态 import 前后对比 <link> 集合来捕获，导出 PDF 时用确定性的皮肤地址

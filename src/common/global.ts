@@ -21,6 +21,7 @@ export function useThemeConfig() {
       writableFontColor = isDark.value ? '#d1d1d1' : '#545a69',
       linearBGC = isDark.value ? background : '#fbe9db'
 
+    if (typeof document === 'undefined') return
     document.body.style.setProperty('--theme', theme)
     document.body.style.setProperty('--background', background)
     document.body.style.setProperty('--font-color', fontColor)

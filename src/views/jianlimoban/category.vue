@@ -163,7 +163,7 @@ const sumTitle = computed(() => {
 watchEffect(() => {
   if (route.name !== 'template-category') return
   const n = cat.value?.name ?? ''
-  if (!n) return
+  if (!n || typeof document === 'undefined') return
   const short = n.replace(/简历模板$/, '')
   document.title = `${short}简历模板_${short}个人简历免费下载 - CodeCV简历`
 })
