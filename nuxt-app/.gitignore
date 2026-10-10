@@ -1,0 +1,5 @@
+nuxt-app/.nuxt/
+nuxt-app/dist/
+nuxt-app/.output/
+nuxt-app/.wrangler/
+nuxt-app/node_modules/
