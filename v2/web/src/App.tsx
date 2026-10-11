@@ -3,8 +3,11 @@ import { api } from './core/api/client'
 import TemplateGallery from './features/templates/TemplateGallery'
 import EditorPage from './features/resume/EditorPage'
 import ResumeList from './features/resume/ResumeList'
+import PublicResume from './features/resume/PublicResume'
 
 export default function App() {
+  const pubMatch = location.pathname.match(/^\/r\/([\w-]+)/)
+  if (pubMatch) return <PublicResume id={pubMatch[1]} />
   const [token, setToken] = useState(localStorage.getItem('v2:token'))
   const [user, setUser] = useState('')
   const [pass, setPass] = useState('')

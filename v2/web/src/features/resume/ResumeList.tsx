@@ -40,6 +40,15 @@ export default function ResumeList({ onEdit }: { onEdit: (resumeId: string) => v
               <button className="bg-black text-white rounded px-2 py-1" onClick={() => onEdit(r.id)}>继续编辑</button>
               <button className="border rounded px-2 py-1" onClick={() => rename(r)}>改名</button>
               <button className="border rounded px-2 py-1" onClick={() => copy(r)}>复制</button>
+              <button className="border rounded px-2 py-1" onClick={async () => {
+                const src = await api.resume(r.id)
+                const map = Object.fromEntries((src.extras ?? []).map((e: any) => [e.fieldKey, e.valueMd]))
+                map.share_on = '1'
+                await api.saveExtras(r.id, map)
+                const link = location.origin + '/r/' + r.id
+                await navigator.clipboard.writeText(link).catch(() => {})
+                alert('已开启分享，链接已复制：' + link)
+              }}>分享</button>
               <button className="border rounded px-2 py-1 text-red-500" onClick={() => del(r)}>删除</button>
             </div>
           </div>

@@ -51,6 +51,14 @@ app.get('/thumb/:tpl', async c => {
   c.executionCtx.waitUntil(c.env.UPSTASH_KV.put(key, png, { expirationTtl: 7 * 24 * 3600 }))
   return new Response(png.buffer as ArrayBuffer, { headers: { 'content-type': 'image/png', 'cache-control': 'public, max-age=86400' } })
 })
+// GET /share/:id — 公开只读简历（resume_extra.share_on='1' 才返回）
+app.get('/share/:id', async c => {
+  const [r] = await db(c).select().from(s.resume).where(eq(s.resume.id, c.req.param('id')))
+  if (!r) return c.json({ error: 'not found' }, 404)
+  const ex = await db(c).select().from(s.resumeExtra).where(eq(s.resumeExtra.resumeId, r.id))
+  if (!ex.find(e => e.fieldKey === 'share_on' && e.valueMd === '1')) return c.json({ error: 'not shared' }, 404)
+  return c.json({ title: r.title, templateId: r.templateId, contentMd: r.contentMd })
+})
 app.post('/auth/logout', async c => {
   const t = bearerToken(c.req.raw)
   if (t) await c.env.UPSTASH_KV.delete(`sess:${t}`)
