@@ -28,7 +28,14 @@ export default function ResumeList({ onEdit }: { onEdit: (resumeId: string) => v
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <h2 className="text-lg font-semibold mb-4">我的简历（{list.length}）</h2>
+      <div className="flex items-center gap-3 mb-4">
+        <h2 className="text-lg font-semibold">我的简历（{list.length}）</h2>
+        <button className="text-xs border rounded px-2 py-1" onClick={async () => {
+          const r = await api.migrateV1().catch(e => ({ error: String(e) }) as any)
+          alert(r.error ? '迁移失败：' + r.error : `迁移完成：新增 ${r.migrated} 份（v1 共 ${r.total} 份）`)
+          load()
+        }}>从旧站迁移简历</button>
+      </div>
       {err && <div className="text-red-500 text-sm mb-2">{err}</div>}
       {!list.length && <div className="text-neutral-400 text-sm">还没有简历——去模板中心挑一个模板建一份</div>}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">

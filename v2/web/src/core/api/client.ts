@@ -22,6 +22,9 @@ export const api = {
     req<{ token: string; username: string }>('/auth/register', { method: 'POST', body: JSON.stringify({ username, password }) }),
   masters: () => req<any[]>('/master'),
   createMaster: (name: string) => req<any>('/master', { method: 'POST', body: JSON.stringify({ name }) }),
+  migrateV1: () => req<{ migrated: number; total: number }>('/migrate/v1', { method: 'POST' }),
+  ai: (action: string, text: string, jd?: string) =>
+    req<{ text: string }>('/ai', { method: 'POST', body: JSON.stringify({ action, text, jd }) }),
   importMaster: (b: { name?: string; filename: string; data: string }) =>
     req<any>('/master/import', { method: 'POST', body: JSON.stringify(b) }),
   items: (masterId: string) => req<any[]>(`/master/${masterId}/items`),

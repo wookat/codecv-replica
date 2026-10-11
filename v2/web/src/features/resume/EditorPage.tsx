@@ -6,6 +6,7 @@ import { api } from '../../core/api/client'
 import { composeMd, skinHref, templateMeta, type SelItem } from './composer'
 import PreviewPane from './PreviewPane'
 import ContentEditor from './ContentEditor'
+import AiPanel from './AiPanel'
 import catalog from '../templates/catalog.json'
 
 export default function EditorPage({ templateId: initTpl, masterId, resumeId: initRid, onBack }: {
@@ -22,6 +23,7 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
   const [photo, setPhoto] = useState('')
   const extrasRef = { current: {} as Record<string, string> }
   const [rid, setRid] = useState(initRid)
+  const [aiOpen, setAiOpen] = useState(false)
   const dirtyRef = { current: false }
   const saveTimer = { current: 0 as any }
 
@@ -145,6 +147,8 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
             <input type="file" accept="image/*" className="hidden"
               onChange={e => e.target.files?.[0] && uploadPhoto(e.target.files[0])} />
           </label>)}
+        <button className={`text-xs border rounded px-2 py-1 ${aiOpen ? 'bg-black text-white' : ''}`}
+          onClick={() => setAiOpen(!aiOpen)}>AI</button>
         <div className="flex-1" />
         <button className="text-xs border rounded px-2 py-1" onClick={printPdf}>打印 PDF</button>
         <button className="text-xs bg-black text-white rounded px-2 py-1" disabled={!!exporting}
@@ -167,6 +171,8 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
         <div className="flex-1">
           <PreviewPane md={md} skinCss={skinHref(meta?.slug ?? tplId)} primaryColor={meta?.primaryColor} font={meta?.font} opts={opts} avatar={avatar} photo={photo} />
         </div>
+        {aiOpen && <AiPanel md={md} onClose={() => setAiOpen(false)}
+          onApply={(t, m) => { dirtyRef.current = true; setMd(m === 'replace' ? t : md + '\n' + t); setAiOpen(false) }} />}
       </div>
     </div>
   )

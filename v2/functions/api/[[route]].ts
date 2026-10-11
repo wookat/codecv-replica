@@ -220,6 +220,45 @@ app.put('/resumes/:id/selections', async c => {
 })
 
 // ---- 模板补充字段 ----
+// POST /ai — 站内 AI：生成/润色/校对/翻译（aicdks swe-2-medium 中转）
+app.post('/ai', async c => {
+  const { action, text, jd } = await c.req.json() as any
+  const prompts: Record<string, string> = {
+    perf: `润色下面这段简历内容，使其更专业、有结果导向（保留 markdown 格式，只返回润色后文本）：\n${text}`,
+    gen: `根据下面信息写一段简历 markdown（小节 ##、要点 -、加粗 **）：\n${text}${jd ? `\n目标岗位：${jd}` : ''}`,
+    proof: `校对下面简历文本的错别字与语病，返回修正后的文本（保留 markdown 格式）：\n${text}`,
+    translate: `把下面简历内容翻译成${(jd || '英文')}（保留 markdown 格式）：\n${text}`,
+  }
+  const prompt = prompts[action]
+  if (!prompt) return c.json({ error: 'unknown action' }, 400)
+  const r = await fetch('https://api.aicdks.com/v1/chat/completions', {
+    method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${(c.env as any).GP_LLM_API_KEY}` },
+    body: JSON.stringify({ model: 'swe-2-medium', messages: [{ role: 'user', content: prompt }], temperature: 0.3 }) })
+  if (!r.ok) return c.json({ error: 'LLM ' + r.status }, 502)
+  const out = (await r.json() as any).choices?.[0]?.message?.content || ''
+  return c.json({ text: out })
+})
+
+// POST /migrate/v1 — 把当前用户在 v1 老站的简历（resumes 表）搬入 v2 resume
+app.post('/migrate/v1', async c => {
+  const uname = c.get('userId')
+  const u = await c.env.DB.prepare('SELECT id FROM users WHERE username=?').bind(uname).first<any>()
+  if (!u) return c.json({ error: 'user not found' }, 404)
+  const rows = await c.env.DB.prepare('SELECT id, name, md, style, updated_at FROM resumes WHERE user_id=?').bind(u.id).all<any>()
+  let n = 0
+  for (const r of rows.results ?? []) {
+    const exist = await c.env.DB.prepare('SELECT id FROM resume WHERE user_id=? AND title=? AND content_md=?')
+      .bind(uname, r.name || 'v1 简历', r.md || '').first()
+    if (exist) continue
+    await db(c).insert(s.resume).values({
+      id: uid(), userId: uname, templateId: String(r.style || 'cv-1').replace(/^(?!cv-)/, 'cv-'),
+      title: r.name || 'v1 简历', contentMd: r.md || '', createdAt: Date.now(), updatedAt: r.updated_at || Date.now(),
+    })
+    n++
+  }
+  return c.json({ migrated: n, total: (rows.results ?? []).length })
+})
+
 app.post('/export', exportRoute())
 app.all('/mcp', mcpRoute())
 
