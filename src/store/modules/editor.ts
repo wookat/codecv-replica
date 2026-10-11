@@ -41,7 +41,9 @@ const useEditorStore = defineStore('editorStore', {
         try {
           const cloud = await cloudList()
           const hit = cloud.find(r => r.type === resumeType)
-          if (hit?.content) {
+          // 空白内容视为未命中——PM 初始空文档序列化可能污染过云端/本地，
+          // 命中空白会锁死成空文档，必须继续回落到模板正文
+          if (hit?.content?.trim()) {
             this.MDContent = hit.content
             setLocalStorage(cacheKey, hit.content)
             return
@@ -50,9 +52,11 @@ const useEditorStore = defineStore('editorStore', {
           /* 云端不可达时回落本地缓存 */
         }
       }
-      this.MDContent = getLocalStorage(cacheKey)
-        ? (getLocalStorage(cacheKey) as string)
-        : await getCurrentTypeContent(resumeType)
+      const cached = getLocalStorage(cacheKey)
+      this.MDContent =
+        typeof cached === 'string' && cached.trim()
+          ? cached
+          : await getCurrentTypeContent(resumeType)
     },
     setMDContent(nv: string, resumeType: string, fromHistory = false) {
       if (nv !== this.MDContent && !fromHistory) {
@@ -63,6 +67,9 @@ const useEditorStore = defineStore('editorStore', {
       this.MDContent = nv
       // 处理之后的操作
       if (!nv) return
+      // 空白序列化只进内存态不落盘/上云：PM 挂载初期（云端/模板未就绪时）
+      // 会序列化空文档，若持久化会污染 localStorage 与云端简历
+      if (!nv.trim()) return
       setLocalStorage(`${MARKDOWN_CONTENT}-${resumeType}`, nv)
       cloudPush(resumeType, nv)
     },
