@@ -1,6 +1,6 @@
 import { templates } from '@/templates/config'
 import TypeNet from 'typenet'
-import { onActivated, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { onMounted, onUnmounted, reactive, ref } from 'vue'
 import avatar1 from '@/assets/svg/avataaars1.svg'
 import avatar2 from '@/assets/svg/avataaars2.svg'
 import avatar3 from '@/assets/svg/avataaars3.svg'
@@ -160,7 +160,7 @@ export function useGiteeRepoStars() {
   function createAnimateEffect() {
     return animate[Math.floor(Math.random() * 10) % animate.length]
   }
-  onActivated(query)
+  onMounted(query)
   return {
     repoStars,
     createAnimateEffect

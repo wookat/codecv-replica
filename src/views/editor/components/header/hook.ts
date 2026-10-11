@@ -1,4 +1,4 @@
-import { onActivated, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 
 export function useFile(emit: any) {
   const fileName = ref('')
@@ -11,7 +11,7 @@ export function useFile(emit: any) {
     emit('import-md', event?.target?.files[0])
   }
 
-  onActivated(() => (fileName.value = document.title))
+  onMounted(() => (fileName.value = document.title))
   return {
     fileName,
     exportFile,

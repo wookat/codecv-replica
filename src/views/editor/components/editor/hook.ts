@@ -1,5 +1,5 @@
 import useEditorStore from '@/store/modules/editor'
-import { Ref, computed, nextTick, onActivated, onDeactivated, ref, watchEffect } from 'vue'
+import { Ref, computed, nextTick, onBeforeUnmount, onMounted, ref, watchEffect } from 'vue'
 import { linkFlag, selectIcon } from './toolbar/hook'
 import { clickedTarget } from '../../hook'
 import { setClickedLinkText, setClickedLinkURL } from './toolbar/components/linkInput/hook'
@@ -44,7 +44,7 @@ export function useMoveLayout() {
     left.value = clamp(left.value)
   }
 
-  onActivated(() => {
+  onMounted(() => {
     window.addEventListener('mouseup', up)
     window.addEventListener('mousemove', move)
     window.addEventListener('touchend', up)
@@ -52,7 +52,7 @@ export function useMoveLayout() {
     window.addEventListener('resize', onResize)
   })
 
-  onDeactivated(() => {
+  onBeforeUnmount(() => {
     window.removeEventListener('mouseup', up)
     window.removeEventListener('mousemove', move)
     window.removeEventListener('touchend', up)
@@ -149,7 +149,7 @@ export function useOverlayDrag(resumeType: Ref<string>) {
     window.addEventListener('mouseup', up)
   }
   document.addEventListener('mousedown', down)
-  onDeactivated(() => document.removeEventListener('mousedown', down))
+  onBeforeUnmount(() => document.removeEventListener('mousedown', down))
 }
 
 export function injectWritableModeAvatarEvent(

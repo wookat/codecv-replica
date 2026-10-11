@@ -4,7 +4,7 @@ import { getLocalStorage } from '@/common/localstorage'
 import { resumeDOMStruct2Markdown } from '@/utils/dom2md'
 import { warningMessage } from '@/common/message'
 import { ElMessageBox } from 'element-plus'
-import { nextTick, onActivated, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { Editor } from '@tiptap/core'
 import { Node as PMNode } from '@tiptap/pm/model'
 import { markdownToHTML } from '@/lib/mth'
@@ -271,7 +271,7 @@ export function useToggleEditorMode(resumeType: string) {
     setPMEditor(null)
   })
 
-  onActivated(fillContent)
+  onMounted(fillContent)
 
   // 撤销/重做：PM history 原生（生产同款）
   const undo = () => {

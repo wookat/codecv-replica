@@ -1,4 +1,4 @@
-import { onActivated, onDeactivated, onMounted, Ref, ref, watch } from 'vue'
+import { onBeforeUnmount, onMounted, Ref, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useDebounceFn } from '@vueuse/core'
 
@@ -51,7 +51,7 @@ export function useRenderHTML(resumeType: Ref<string>) {
   const editorStore = useEditorStore()
 
   onMounted(() => importCSS(resumeType.value))
-  onActivated(() => {
+  onMounted(() => {
     importCSS(resumeType.value)
     renderDOM.value.innerHTML =
       convertDOM(editorStore.MDContent).innerHTML + allOverlaysHTML(resumeType.value)
@@ -89,7 +89,7 @@ export function useResumeType() {
     return resolveTemplateType(base) + (suffix ? `~${suffix}` : '')
   }
   const resumeType = ref(resolveKey(route.query.type))
-  onActivated(() => {
+  onMounted(() => {
     resumeType.value = resolveKey(route.query.type)
   })
   return {
@@ -314,11 +314,11 @@ export function useShowExport() {
 
   const onScroll = useDebounceFn(setShowExport, 400)
 
-  onActivated(() => {
+  onMounted(() => {
     document.addEventListener('scroll', onScroll)
   })
 
-  onDeactivated(() => {
+  onBeforeUnmount(() => {
     document.removeEventListener('scroll', onScroll)
   })
   return {

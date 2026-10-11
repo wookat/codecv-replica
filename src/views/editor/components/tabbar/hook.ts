@@ -2,7 +2,7 @@ import { getLocalStorage, removeLocalStorage, setLocalStorage } from '@/common/l
 import { createStyle, query, removeHeadStyle, createDIV } from '@/utils'
 import { getFontFamily, getPrimaryBGColor, getPrimaryColor } from '@/templates/config'
 import { loadFont } from '@/utils/font'
-import { onActivated, onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 
 const get = getLocalStorage,
   set = setLocalStorage
@@ -93,7 +93,7 @@ export function useCustomCSS(resumeType: string) {
     cssText.value = ''
   }
 
-  onActivated(() => !query(cacheKey) && setTimeout(setStyle, 50))
+  onMounted(() => !query(cacheKey) && setTimeout(setStyle, 50))
 
   return {
     cssDialog,
@@ -125,7 +125,7 @@ export function usePrimaryBGColor(resumeType: string) {
     set(cacheKey, color)
   }
 
-  onActivated(() => !query(cacheKey) && setPrimaryColor(primaryColor.value))
+  onMounted(() => !query(cacheKey) && setPrimaryColor(primaryColor.value))
 
   return {
     primaryColor,
@@ -156,7 +156,7 @@ export function usePrimaryColor(resumeType: string) {
     set(cacheKey, value)
   }
 
-  onActivated(() => !query(cacheKey) && setColor(color.value))
+  onMounted(() => !query(cacheKey) && setColor(color.value))
 
   return {
     color,
@@ -245,7 +245,7 @@ export function useCustomFont(resumeType: string) {
     !first && splitPage(renderCV)
   }
 
-  onActivated(() => setFont(font.value, true))
+  onMounted(() => setFont(font.value, true))
 
   return {
     fontOptions,
@@ -309,7 +309,7 @@ export function useLineHeight(resumeType: string) {
     upsertPersistStyle(cacheKey, `.markdown-transform-html * { line-height: ${n}px; }`)
     reSplit()
   }
-  onActivated(() => restorePersistStyle(cacheKey))
+  onMounted(() => restorePersistStyle(cacheKey))
   return { lineHeight, lineHeightOptions, applyLineHeight: apply }
 }
 
@@ -327,7 +327,7 @@ export function usePageMargin(resumeType: string) {
     )
     reSplit()
   }
-  onActivated(() => restorePersistStyle(cacheKey))
+  onMounted(() => restorePersistStyle(cacheKey))
   return { pageMarginTB, pageMarginLR, applyPageMargin: apply }
 }
 
@@ -345,7 +345,7 @@ export function useParaSpacing(resumeType: string) {
     )
     reSplit()
   }
-  onActivated(() => restorePersistStyle(cacheKey))
+  onMounted(() => restorePersistStyle(cacheKey))
   return { paraSpacing, applyParaSpacing: apply }
 }
 
@@ -364,7 +364,7 @@ export function useFontSize(resumeType: string) {
     upsertPersistStyle(cacheKey, `.jufe { font-size: ${n}px !important; }`)
     reSplit()
   }
-  onActivated(() => restorePersistStyle(cacheKey))
+  onMounted(() => restorePersistStyle(cacheKey))
   return { fontSize, fontSizeOptions, applyFontSize: apply }
 }
 
@@ -386,7 +386,7 @@ export function useJustify(resumeType: string) {
       removeLocalStorage(cacheKey)
     }
   }
-  onActivated(() => restorePersistStyle(cacheKey))
+  onMounted(() => restorePersistStyle(cacheKey))
   return { justified, toggleJustify }
 }
 
@@ -435,7 +435,7 @@ export function useOnePage(resumeType: string) {
     }
     smartOnePage()
   }
-  onActivated(() => restorePersistStyle(cacheKey))
+  onMounted(() => restorePersistStyle(cacheKey))
   return { smartOnePage, toggleOnePage, onePageApplied }
 }
 
@@ -505,7 +505,7 @@ export function useBadge(resumeType: string) {
       }
     })
   }
-  onActivated(bindDrag)
+  onMounted(bindDrag)
   return { setBadge }
 }
 
@@ -622,7 +622,7 @@ export function useAdjust(resumeType: string) {
     priorityInsert(isAppend, styleDOM)
   }
   // 如果页面中没有用户调整了的样式 那么就需要去初始化
-  onActivated(() => !query(cacheKey) && initAdjustCSS())
+  onMounted(() => !query(cacheKey) && initAdjustCSS())
   return { adjustMargin, visible, confirmAdjustment, properties }
 }
 

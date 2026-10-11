@@ -379,9 +379,19 @@ export async function onRequestPost(context) {
   // prod 実測 style の正規化:
   // ・.jufe *{font-family} を prod 形「主族, sans-serif, serif」に揃える
   //   (我方编辑器が多段フォールバックを出すと未収録字の度量がずれる)。
+  // ・ただし CJK フォールバックは 'Noto Sans SC' を明示差し込む:
+  //   ブラウザ内スタックも同じ解決先だが、レンダラの環境フォントに依存せず
+  //   収録済み webfont(NotoSansSC = prod 実測埋込書体)へ確実に落ちる。
   let fixedStyle = (style || '').replace(
     /\.jufe \* ?\{ ?font-family: ?([^;}]+);? ?\}/g,
-    (m, fl) => `.jufe * { font-family: ${fl.split(',')[0].trim()}, sans-serif, serif; }`
+    (m, fl) => {
+      const first = fl.split(',')[0].trim()
+      const fall =
+        first === `'Noto Sans SC'` || first === `"Noto Sans SC"`
+          ? 'sans-serif'
+          : `'Noto Sans SC', sans-serif`
+      return `.jufe * { font-family: ${first}, ${fall}, serif; }`
+    }
   )
   // (末尾の *{line-height} 統一ルールは試したが回帰した —— prod 側では
   //   非 li 行距もテンプレ既定値が効いており、20px 強制は整列を崩す)

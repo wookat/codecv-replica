@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { getExportCount } from '@/api/modules/resume'
-import { onActivated, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 
 const total = ref(0)
-onActivated(() => {
+onMounted(() => {
   ;(async () => {
     total.value = parseInt((await getExportCount()) as string)
   })()

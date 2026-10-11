@@ -1,4 +1,4 @@
-import { nextTick, onActivated, ref } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
 import { IMenuBarItem } from '../../type'
 
 // let levels = { h1: 1, h2: 1, h3: 1, h4: 1, h5: 1,h6: 1}
@@ -8,7 +8,7 @@ export default function useMenuBarTitleConfigura(root: string) {
   nextTick(() => {
     oMenuBarTitleData.value = genMenuBarData(root)
   })
-  onActivated(() => {
+  onMounted(() => {
     oMenuBarTitleData.value = genMenuBarData(root)
   })
 
