@@ -12,4 +12,4 @@ wrangler d1 execute codecv-db --remote --file migrations/00XX_名称.sql
 d1_migrations 跟踪表；新增文件继续按 execute --file 逐份应用，文件编号即历史。
 迁移文件必须幂等（CREATE TABLE IF NOT EXISTS / ALTER 前自查列存在），可重跑。
 
-当前最新：0013_favorites.sql
+当前最新：0014_feedbacks.sql

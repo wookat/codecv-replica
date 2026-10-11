@@ -51,6 +51,14 @@ export async function cloudSaveNow(
 
 // 按 type 去抖上传（编辑器每次击键都会触发 setMDContent）
 const pending = new Map<string, ReturnType<typeof setTimeout>>()
+// 失败提示节流：自动同步失败要可见（配额 403/断网），但连续击键不能刷屏
+let lastSyncWarn = 0
+async function syncWarn(msg: string) {
+  if (Date.now() - lastSyncWarn < 30000) return
+  lastSyncWarn = Date.now()
+  const { ElMessage } = await import('element-plus')
+  ElMessage.error(msg)
+}
 export function cloudPush(type: string, content: string) {
   if (!token()) return
   const prev = pending.get(type)
@@ -65,9 +73,16 @@ export function cloudPush(type: string, content: string) {
         method: 'POST',
         headers: h,
         body: JSON.stringify({ type, content })
-      }).catch(() => {
-        /* 云端同步失败静默 */
       })
+        .then(async res => {
+          const data = await res.json().catch(() => null)
+          if (!res.ok || (data && data.code !== 200)) {
+            syncWarn(data?.msg || `云端同步失败(${data?.code || res.status})，内容仅保留在本地`)
+          }
+        })
+        .catch(() => {
+          syncWarn('网络异常，云端同步失败，内容仅保留在本地')
+        })
     }, 1500)
   )
 }
@@ -233,7 +248,9 @@ export async function fetchUserInfo(): Promise<UserInfo | null> {
   }
 }
 
-// 合并策略：云端独有 → 落入 localStorage（编辑器可打开）；本地独有 → 上传；同名保留本地并覆盖云端
+// 合并策略：云端为准、localStorage 只做离线镜像。
+// 云端有 → 无条件覆写本地（同名也一样，杜绝本地陈旧值存活）；
+// 本地独有 → 仅当内容非空白才上传（把未登录期的离线创作保下来）
 export async function syncLocalCloud() {
   if (!token()) return
   const cloud = await cloudList()
@@ -243,16 +260,14 @@ export async function syncLocalCloud() {
     if (key.startsWith(MD_PREFIX)) localTypes.add(key.slice(MD_PREFIX.length))
   }
   for (const r of cloud) {
-    if (!r.type || !r.content) continue
-    if (!localTypes.has(r.type)) {
-      setLocalStorage(`${MD_PREFIX}${r.type}`, r.content)
-    }
+    if (!r.type || !r.content?.trim()) continue
+    setLocalStorage(`${MD_PREFIX}${r.type}`, r.content)
   }
   const cloudTypes = new Set(cloud.map(r => r.type))
   for (const t of localTypes) {
     if (!cloudTypes.has(t)) {
       const raw = getLocalStorage(`${MD_PREFIX}${t}`)
-      if (typeof raw === 'string' && raw) cloudPush(t, raw)
+      if (typeof raw === 'string' && raw.trim()) cloudPush(t, raw)
     }
   }
 }
