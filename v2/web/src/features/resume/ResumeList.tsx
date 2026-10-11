@@ -30,14 +30,14 @@ export default function ResumeList({ onEdit }: { onEdit: (resumeId: string) => v
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <div className="flex items-center gap-3 mb-4">
+      <div className="flex items-center gap-3 mb-4 flex-wrap">
         <h2 className="text-lg font-semibold">我的简历（{list.length}）</h2>
         <button className="text-xs border rounded px-2 py-1" onClick={async () => {
           const r = await api.migrateV1().catch(e => ({ error: String(e) }) as any)
           alert(r.error ? '迁移失败：' + r.error : `迁移完成：新增 ${r.migrated} 份（v1 共 ${r.total} 份）`)
           load()
         }}>从旧站迁移简历</button>
-        {sel.size > 0 && <div className="flex gap-2 text-xs">
+        {sel.size > 0 && <div className="flex gap-2 text-xs flex-wrap">
           <button className="border rounded px-2 py-1" onClick={async () => {
             for (const id of sel) { const r = list.find(x => x.id === id)!; await copy(r) }
             setSel(new Set())
@@ -65,7 +65,7 @@ export default function ResumeList({ onEdit }: { onEdit: (resumeId: string) => v
             <input type="checkbox" aria-label="选择这份简历" className="absolute top-3 right-3" checked={sel.has(r.id)} onChange={() => tog(r.id)} />
             <div className="font-medium truncate pr-5">{r.title || r.templateId}</div>
             <div className="text-xs text-neutral-400 mt-1">{r.templateId} · {new Date(r.updatedAt || r.updated_at || 0).toLocaleString()}</div>
-            <div className="flex gap-2 mt-3 text-xs">
+            <div className="flex gap-2 mt-3 text-xs flex-wrap">
               <button className="bg-black text-white rounded px-2 py-1" onClick={() => onEdit(r.id)}>继续编辑</button>
               <button className="border rounded px-2 py-1" onClick={() => rename(r)}>改名</button>
               <button className="border rounded px-2 py-1" onClick={() => copy(r)}>复制</button>

@@ -14,7 +14,7 @@ function SortableRow({ sel, onVariant, onRemove }: { sel: Sel; onVariant: (v: st
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: sel.itemId })
   return (
     <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }}
-      className="flex items-center gap-1 bg-white rounded px-2 py-1.5 mb-1 border">
+      className="flex items-center gap-1 bg-white rounded px-2 py-1.5 mb-1 border max-w-full overflow-hidden">
       <span {...attributes} {...listeners} className="cursor-grab text-neutral-400 select-none">⠿</span>
       <span className="flex-1 text-xs truncate">{sel.title}</span>
       <VariantSelect itemId={sel.itemId} value={sel.variantId} onChange={onVariant} />
@@ -107,14 +107,14 @@ export default function MasterLibrary({ masterId, onSelect, templateId }: {
         onClick={() => setJdOpen(true)}>✨ 按 JD 一键选取</button>
       {jdOpen && (
         <div className="border rounded-lg p-2 bg-blue-50/50 space-y-2">
-          <div className="flex gap-2 text-xs">
+          <div className="flex gap-2 text-xs flex-wrap">
             <button className={batchMode ? 'text-neutral-400' : 'font-semibold'} onClick={() => setBatchMode(false)}>单 JD</button>
             <button className={batchMode ? 'font-semibold' : 'text-neutral-400'} onClick={() => setBatchMode(true)}>批量海投</button>
           </div>
           <textarea className="w-full border rounded px-2 py-1 text-xs h-28"
             placeholder={batchMode ? '每段 JD 之间用单独一行 --- 分隔（最多5个）' : '粘贴目标岗位 JD…'}
             value={jd} onChange={e => setJd(e.target.value)} />
-          <div className="flex gap-2 items-center">
+          <div className="flex gap-2 items-center flex-wrap">
             <button className="bg-blue-600 text-white text-xs rounded px-3 py-1" disabled={jdBusy} onClick={applyJd}>
               {jdBusy ? '处理中…' : 'AI 推荐并替换已选'}</button>
             {templateId && !batchMode && <button className="text-xs bg-green-600 text-white rounded px-3 py-1" disabled={jdBusy} onClick={async () => {
@@ -172,7 +172,7 @@ export default function MasterLibrary({ masterId, onSelect, templateId }: {
       })}
       <div className="pt-2 border-t">
         <div className="text-xs font-semibold mb-1">+ 新条目</div>
-        <div className="flex gap-1">
+        <div className="flex gap-1 flex-wrap">
           <select aria-label="新条目类别" className="border rounded px-1 text-xs" value={newItem.section} onChange={e => setNewItem({ ...newItem, section: e.target.value })}>
             {SECTIONS.map(s2 => <option key={s2} value={s2}>{SEC_LABEL[s2]}</option>)}
           </select>

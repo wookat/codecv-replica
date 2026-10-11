@@ -73,7 +73,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-neutral-50">
-      <div className="border-b bg-white px-6 py-3 flex items-center gap-4">
+      <div className="border-b bg-white px-3 sm:px-6 py-3 flex items-center gap-2 sm:gap-4 flex-wrap">
         <h1 className="font-bold text-base">CodeCV</h1>
         <button className={`text-sm px-2 py-1 rounded ${page === 'templates' ? 'bg-black text-white' : 'border'}`}
           onClick={() => setPage('templates')}>模板中心</button>
