@@ -4,7 +4,7 @@ import { markdownToHTML } from '../../../../../src/lib/mth/index'
 
 export default function PreviewPane({ md, skinCss, primaryColor = '#333', font = '', opts = {}, avatar, photo }: {
   md: string; skinCss: string; primaryColor?: string; font?: string
-  opts?: { zoom?: number; fontSize?: number; lineHeight?: number; color?: string; showPages?: boolean }
+  opts?: { zoom?: number; fontSize?: number; lineHeight?: number; color?: string; showPages?: boolean; fontFamily?: string }
   avatar?: { top: number; left: number; type?: string } | null
   photo?: string
 }) {
@@ -22,9 +22,9 @@ export default function PreviewPane({ md, skinCss, primaryColor = '#333', font =
   }, [md])
 
   return (
-    <div className="h-full overflow-auto bg-neutral-200 p-4" style={{ fontFamily: font }}>
+    <div className="h-full overflow-auto bg-neutral-200 p-4" style={{ fontFamily: opts.fontFamily || font }}>
       <link rel="stylesheet" href={skinCss} />
-      <style>{`.markdown-transform-html{--markdown-primary-bg-color:${opts.color || primaryColor};font-size:${opts.fontSize || 14}px;line-height:${opts.lineHeight || 1.6}}`}</style>
+      <style>{`.markdown-transform-html{--markdown-primary-bg-color:${opts.color || primaryColor};font-size:${opts.fontSize || 14}px;line-height:${opts.lineHeight || 1.6}${opts.fontFamily ? `;font-family:${opts.fontFamily}` : ''}}`}</style>
       {err && <div className="text-red-500 text-sm mb-2">渲染错误: {err}</div>}
       <div className="re-render mx-auto relative" style={{ width: 794, zoom: opts.zoom ?? 1 }}>
         <div ref={ref} className="markdown-transform-html jufe" />

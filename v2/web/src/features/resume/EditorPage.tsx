@@ -141,6 +141,16 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
             onChange={e => setOpts({ ...opts, zoom: +e.target.value })}>
             {[0.5,0.7,0.85,1,1.25,1.5].map(v => <option key={v} value={v}>{v}</option>)}
           </select></label>
+        <label className="text-xs">字体
+          <select className="border rounded px-1 py-0.5 ml-1" value={opts.fontFamily || ''}
+            onChange={e => setOpts({ ...opts, fontFamily: e.target.value || undefined })}>
+            <option value="">模板默认</option>
+            <option value="'Noto Sans SC', sans-serif">黑体</option>
+            <option value="'Noto Serif SC', serif">宋体</option>
+            <option value="'LXGW WenKai', 'Kaiti SC', serif">楷体</option>
+            <option value="Arial, 'Helvetica Neue', sans-serif">英文无衬线</option>
+            <option value="Georgia, 'Times New Roman', serif">英文衬线</option>
+          </select></label>
         {avatar && (
           <label className="text-xs border rounded px-2 py-1 cursor-pointer">
             {photo ? '更换照片' : '上传照片'}

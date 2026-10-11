@@ -258,6 +258,12 @@ app.post('/ai', async c => {
     perf: `润色下面这段简历内容，使其更专业、有结果导向（保留 markdown 格式，只返回润色后文本）：\n${text}`,
     gen: `根据下面信息写一段简历 markdown（小节 ##、要点 -、加粗 **）：\n${text}${jd ? `\n目标岗位：${jd}` : ''}`,
     proof: `校对下面简历文本的错别字与语病，返回修正后的文本（保留 markdown 格式）：\n${text}`,
+    score: `你是简历评估专家。给下面这份简历打分并输出：
+总分：X/100
+分项：内容完整度 X/30、岗位匹配 X/25、表达质量 X/25、格式规范 X/20
+Top3 问题（各一行，指出具体位置）：
+简历文本：
+${text}`,
     translate: `把下面简历内容翻译成${(jd || '英文')}（保留 markdown 格式）：\n${text}`,
   }
   const prompt = prompts[action]

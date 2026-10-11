@@ -8,9 +8,10 @@ export default function AiPanel({ md, onApply, onClose }: {
   const [jd, setJd] = useState('')
   const [busy, setBusy] = useState('')
   const [out, setOut] = useState('')
+  const [lastAction, setLastAction] = useState('')
   const run = async (a: string) => {
     setBusy(a); setOut('')
-    try { setOut((await api.ai(a, md, jd)).text) } catch (e) { setOut('失败：' + String(e).slice(0, 100)) }
+    try { setOut((await api.ai(a, md, jd)).text); setLastAction(a) } catch (e) { setOut('失败：' + String(e).slice(0, 100)) }
     setBusy('')
   }
   return (
@@ -21,13 +22,13 @@ export default function AiPanel({ md, onApply, onClose }: {
       </div>
       <input className="w-full border rounded px-2 py-1 text-xs" placeholder="目标岗位 JD（生成/翻译语言可选）" value={jd} onChange={e => setJd(e.target.value)} />
       <div className="flex gap-2 flex-wrap">
-        {[['gen', '生成'], ['perf', '润色'], ['proof', '校对'], ['translate', '翻译']].map(([a, l]) => (
+        {[['gen', '生成'], ['perf', '润色'], ['proof', '校对'], ['score', '评分'], ['translate', '翻译']].map(([a, l]) => (
           <button key={a} className="border rounded px-2 py-1 text-xs" disabled={!!busy} onClick={() => run(a)}>
             {busy === a ? '…' : l}
           </button>
         ))}
       </div>
-      {out && (
+      {out && busy !== 'score' && lastAction !== 'score' && (
         <>
           <pre className="whitespace-pre-wrap border rounded p-2 text-xs max-h-48 overflow-auto bg-white">{out}</pre>
           <div className="flex gap-2">

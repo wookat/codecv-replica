@@ -103,7 +103,7 @@ export default function App() {
         ? <TemplateGallery onPick={id => { setResumeId(undefined); setTemplateId(id); setPage('editor') }} />
         : page === 'resumes'
         ? <ResumeList onEdit={id => { setTemplateId(''); setResumeId(id); setPage('editor') }} />
-        : page === 'vip' ? <VipPage /> : page === 'admin' ? <AdminPage /> : page === 'community' ? <CommunityPage /> : <ProgressPage />
+        : page === 'vip' ? <VipPage /> : page === 'admin' ? <AdminPage /> : page === 'community' ? <CommunityPage /> : <ProgressPage />}
     </div>
   )
 }
