@@ -1,7 +1,9 @@
 <template>
   <el-config-provider :locale="zhCn">
     <NuxtLayout>
-      <NuxtPage :keepalive="{ max: 10, include: ['home', 'editor', 'syntax', 'template', 'update'] }" />
+      <NuxtPage
+        :keepalive="{ max: 10, include: ['home', 'editor', 'syntax', 'template', 'update'] }"
+      />
     </NuxtLayout>
   </el-config-provider>
 </template>

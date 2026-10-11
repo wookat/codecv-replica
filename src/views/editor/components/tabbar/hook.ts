@@ -29,15 +29,36 @@ export const stepTouched = ref(false)
 
 export function setStep(val: number | any) {
   stepTouched.value = true
+  const outer = document.querySelector('.outer') as HTMLElement | null
+  // 手动缩放同样封顶在窗格可容纳值：窄窗格下 100% 只会把纸面右缘截断
+  if (outer?.clientWidth) {
+    const fit = Math.floor((((outer.clientWidth - 24) / paperOuterWidth()) * 100) / 10) * 10
+    const cap = Math.min(100, Math.max(30, fit))
+    step.value = Math.min(Number(val) || cap, cap)
+    return
+  }
   step.value = val
 }
 
 const A4_CSS_PX = 794
 
+// 纸面真实渲染宽度（含皮肤边框/外边距），量不到回落 A4 标准宽
+function paperOuterWidth() {
+  const el = document.querySelector('.re-render .jufe-wrapper-page') as HTMLElement | null
+  if (!el) return A4_CSS_PX
+  const cs = getComputedStyle(el)
+  return el.offsetWidth + (parseFloat(cs.marginLeft) || 0) + (parseFloat(cs.marginRight) || 0)
+}
+
 export function fitStepToWidth(availWidth: number) {
-  if (stepTouched.value || !availWidth) return
-  const fit = Math.floor((((availWidth - 24) / A4_CSS_PX) * 100) / 10) * 10
-  step.value = Math.min(100, Math.max(30, fit))
+  if (!availWidth) return
+  const fit = Math.floor((((availWidth - 24) / paperOuterWidth()) * 100) / 10) * 10
+  const clamped = Math.min(100, Math.max(30, fit))
+  // 缩放永不超过窗格可容纳值，否则纸面右缘硬截断；超限连同手动设定一并回收
+  if (!stepTouched.value || step.value > clamped) {
+    stepTouched.value = false
+    step.value = clamped
+  }
 }
 
 function queryRenderCV() {

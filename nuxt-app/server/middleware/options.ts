@@ -10,10 +10,8 @@ export default defineEventHandler(event => {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': event.headers.get('origin') || '*',
       'Access-Control-Allow-Credentials': 'true',
-      'Access-Control-Allow-Headers':
-        event.headers.get('access-control-request-headers') || '*',
-      'Access-Control-Allow-Methods':
-        event.headers.get('access-control-request-method') || '*'
+      'Access-Control-Allow-Headers': event.headers.get('access-control-request-headers') || '*',
+      'Access-Control-Allow-Methods': event.headers.get('access-control-request-method') || '*'
     }
   })
 })

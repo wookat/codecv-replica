@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import View from '@/views/member/index.vue'</script>
+import View from '@/views/member/index.vue'
+</script>
 <template>
   <View />
 </template>
