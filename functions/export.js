@@ -399,7 +399,10 @@ export async function onRequestPost(context) {
   // (attr 断片: テーマ変数 + ユーザー調整の Line_Height/font_size/para_spacing/
   //  justify/one-page/custom-css は必ず最後に置いて既定値を上書きさせる ——
   //  prod の style 連結順と同じ)。
-  const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}<style>${cloudFaces}${fonts}${markNormalize}${liFix}${offFix}${fixedStyle}</style></head><body>${fixedContent}${watermark}${fontWait}</body></html>`
+  // @page ピン留め：HTML 側で紙サイズを確定させ、CLI(m114) と BR(m128) が
+  // 各々のデフォルトから導出する 0.15% のスケール差を根絶する
+  const pagePin = `@page { size: 210mm 297mm; margin: 0; }`
+  const html = `<!doctype html><html><head><meta charset="utf-8">${linkTag}<style>${pagePin}${cloudFaces}${fonts}${markNormalize}${liFix}${offFix}${fixedStyle}</style></head><body>${fixedContent}${watermark}${fontWait}</body></html>`
   // docx 用軽量 HTML：pandoc 只取語義，水印/脚本/字體声明統統無用且遠程 img 会拖慢解析
   const docxHtml = `<!doctype html><html><head><meta charset="utf-8"></head><body>${fixedContent}</body></html>`
   // 優先: 自托管 Chrome114 渲染サービス (prod と同一 Skia m114)
@@ -438,6 +441,8 @@ export async function onRequestPost(context) {
         pdfOptions: {
           // width/height は CF BR では無視され Letter に落ちるため format 指定が必須（小文字のみ受理）
           format: 'a4',
+          // HTML 内の @page size を優先させ、CLI パスと同一の用紙サイズに収束させる
+          preferCSSPageSize: true,
           printBackground: true,
           margin: { top: 0, right: 0, bottom: 0, left: 0 }
         },
