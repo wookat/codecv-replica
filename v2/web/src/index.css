@@ -57,3 +57,10 @@ html.cv-dark .cv-pill, html.cv-dark .cv-chip { background: #10151c; }
 .cv-modal { width: min(1180px, 96vw); }
 html.cv-dark .hover\:bg-black\/5:hover { background: rgba(255,255,255,.06); }
 @media (max-width: 640px) { .cv-pv-list { display: none; } }
+html.cv-dark .cv-light-zone { --cv-bg:#f5f6f8; --cv-card:#fff; --cv-line:#e8eaed; --cv-text:#1f2329; --cv-sub:#6b7280; --cv-faint:#9ca3af; --cv-brand-soft:#eaf1ff; background:#fff; color:#1f2329; }
+html.cv-dark .cv-light-zone .bg-white, html.cv-dark .cv-light-zone .bg-neutral-50, html.cv-dark .cv-light-zone .bg-neutral-200 { background:#fff !important; }
+html.cv-dark .cv-light-zone .bg-neutral-50 { background:#fafafa !important; }
+html.cv-dark .cv-light-zone .text-neutral-500 { color:#6b7280 !important; }
+html.cv-dark .cv-light-zone .text-neutral-400 { color:#9ca3af !important; }
+html.cv-dark .cv-light-zone .border, html.cv-dark .cv-light-zone .border-b, html.cv-dark .cv-light-zone .border-r { border-color:#e8eaed !important; }
+html.cv-dark .cv-light-zone .cm-editor { background:#fff; color:#1f2329; }

@@ -179,7 +179,7 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
         <button className="cv-btn cv-btn-ghost text-xs" disabled={!!exporting}
           onClick={() => exportPdf('docx')}>{exporting === 'docx' ? '渲染中…' : '导出 docx'}</button>
       </div>
-      {histOpen && <div className="border-b bg-white px-3 py-2 max-h-40 overflow-auto">
+      {histOpen && <div className="cv-light-zone border-b bg-white px-3 py-2 max-h-40 overflow-auto">
         <div className="flex items-center justify-between mb-1">
           <span className="text-xs font-semibold">版本历史（保留最近 30 次改动）</span>
           <button className="text-xs text-neutral-400" onClick={() => setHistOpen(false)}>关闭</button>
@@ -194,7 +194,7 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
           }}>恢复此版本</button>
         </div>)}
       </div>}
-      <div className="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden">
+      <div className="cv-light-zone flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden">
         <div className="md:w-80 w-full md:border-r border-b bg-neutral-50 md:overflow-y-auto">
           <MasterPick masterId={masterId} onSelect={setSels} templateId={tplId} />
         </div>
