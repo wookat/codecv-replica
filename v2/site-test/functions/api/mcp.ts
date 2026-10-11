@@ -38,6 +38,7 @@ export default function mcpRoute() {
 
     server.tool('master_get', '读大简历全部条目及各条目的全部版本(md 内容)', { masterId: z.string() },
       async ({ masterId }) => {
+        if (!await ownM(masterId)) return text(JSON.stringify({ error: 'not found' }))
         const items = await db.select().from(s.resumeItem).where(eq(s.resumeItem.masterId, masterId)).orderBy(asc(s.resumeItem.sort))
         const out = []
         for (const it of items) {
@@ -51,6 +52,7 @@ export default function mcpRoute() {
       masterId: z.string(), section: z.enum(['education', 'internship', 'project', 'award', 'skill', 'selfeval', 'other']),
       title: z.string(), contentMd: z.string().optional(), label: z.string().optional(),
     }, async ({ masterId, section, title, contentMd, label }) => {
+      if (!await ownM(masterId)) return text(JSON.stringify({ error: 'not found' }))
       const row = { id: uid(), masterId, section, title, sort: 0, metaJson: '{}', createdAt: now(), updatedAt: now() }
       await db.insert(s.resumeItem).values(row)
       let variant = null
@@ -64,6 +66,7 @@ export default function mcpRoute() {
     server.tool('master_add_variant', '给条目挂新版本（同一项目的不同写法）', {
       itemId: z.string(), label: z.string(), contentMd: z.string(),
     }, async ({ itemId, label, contentMd }) => {
+      if (!await ownI(itemId)) return text(JSON.stringify({ error: 'not found' }))
       const row = { id: uid(), itemId, label, contentMd, createdAt: now() }
       await db.insert(s.itemVariant).values(row)
       return text(JSON.stringify(row))
@@ -72,6 +75,7 @@ export default function mcpRoute() {
     server.tool('master_update_variant', '改写某版本 md 内容', {
       variantId: z.string(), contentMd: z.string(),
     }, async ({ variantId, contentMd }) => {
+      if (!await ownV(variantId)) return text(JSON.stringify({ error: 'not found' }))
       await db.update(s.itemVariant).set({ contentMd }).where(eq(s.itemVariant.id, variantId))
       return text(JSON.stringify({ ok: true }))
     })
@@ -102,11 +106,25 @@ export default function mcpRoute() {
       return text(JSON.stringify({ masterId: master.id, items: out.length }))
     })
 
+    const ownM = async (mid: string) =>
+      (await db.select({ id: s.masterResume.id }).from(s.masterResume).where(and(eq(s.masterResume.id, mid), eq(s.masterResume.userId, userId)))).length > 0
+    const ownI = async (iid: string) => {
+      const [it] = await db.select().from(s.resumeItem).where(eq(s.resumeItem.id, iid))
+      return !!it && ownM(it.masterId)
+    }
+    const ownV = async (vid: string) => {
+      const [v] = await db.select().from(s.itemVariant).where(eq(s.itemVariant.id, vid))
+      return !!v && ownI(v.itemId)
+    }
+    const ownR = async (rid: string) =>
+      (await db.select({ id: s.resume.id }).from(s.resume).where(and(eq(s.resume.id, rid), eq(s.resume.userId, userId)))).length > 0
+
     // ---- ② 按 JD 选取建简历：AI 自己读大简历→决定选取→此工具落库并合成 md ----
     server.tool('resume_select', '为大简历按 JD 建一份岗位简历：写选取清单并返回合成 md', {
       masterId: z.string(), templateId: z.string(), title: z.string().optional(), targetJd: z.string(),
       selections: z.array(z.object({ itemId: z.string(), variantId: z.string().nullable().optional(), ord: z.number() })),
     }, async ({ masterId, templateId, title, targetJd, selections }) => {
+      if (!await ownM(masterId)) return text(JSON.stringify({ error: 'not found' }))
       const row = { id: uid(), userId, masterId, templateId, title: title ?? '', targetJd: targetJd ?? '', contentMd: '', createdAt: now(), updatedAt: now() }
       await db.insert(s.resume).values(row)
       for (const it of selections)
@@ -137,7 +155,7 @@ export default function mcpRoute() {
     }, async ({ resumeId, md, templateId }) => {
       let contentMd = md ?? ''
       if (!contentMd && resumeId) {
-        const [r] = await db.select().from(s.resume).where(eq(s.resume.id, resumeId))
+        const [r] = await db.select().from(s.resume).where(and(eq(s.resume.id, resumeId), eq(s.resume.userId, userId)))
         if (r) contentMd = r.contentMd || await composeFor(db, resumeId, r.title)
       }
       const png = await renderPng(c, contentMd, templateId)
