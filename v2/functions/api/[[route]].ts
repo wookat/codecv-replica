@@ -172,17 +172,42 @@ app.patch('/master/:id', async c => {
   return c.json({ ok: true })
 })
 
+// ---- 归属校验 ----
+async function ownResume(c: any, rid: string) {
+  const r = await db(c).select({ id: s.resume.id }).from(s.resume)
+    .where(and(eq(s.resume.id, rid), eq(s.resume.userId, c.get('userId')))).limit(1)
+  return r.length > 0
+}
+async function ownMaster(c: any, mid: string) {
+  const r = await db(c).select({ id: s.masterResume.id }).from(s.masterResume)
+    .where(and(eq(s.masterResume.id, mid), eq(s.masterResume.userId, c.get('userId')))).limit(1)
+  return r.length > 0
+}
+async function ownItem(c: any, iid: string) {
+  const it = await db(c).select().from(s.resumeItem).where(eq(s.resumeItem.id, iid)).limit(1)
+  return it.length > 0 && ownMaster(c, it[0].masterId)
+}
+async function ownVariant(c: any, vid: string) {
+  const v = await db(c).select().from(s.itemVariant).where(eq(s.itemVariant.id, vid)).limit(1)
+  return v.length > 0 && ownItem(c, v[0].itemId)
+}
+const forbid = (c: any) => c.json({ error: 'not found' }, 404)
+
 // ---- 条目 ----
 const ItemBody = z.object({ section: z.string(), title: z.string(), sort: z.number().optional(), meta: z.record(z.any()).optional() })
 app.get('/master/:id/items', async c =>
-  c.json(await db(c).select().from(s.resumeItem).where(eq(s.resumeItem.masterId, c.req.param('id'))).orderBy(asc(s.resumeItem.sort))))
+  await ownMaster(c, c.req.param('id'))
+    ? c.json(await db(c).select().from(s.resumeItem).where(eq(s.resumeItem.masterId, c.req.param('id'))).orderBy(asc(s.resumeItem.sort)))
+    : forbid(c))
 app.post('/master/:id/items', async c => {
+  if (!await ownMaster(c, c.req.param('id'))) return forbid(c)
   const b = ItemBody.parse(await c.req.json())
   const row = { id: uid(), masterId: c.req.param('id'), section: b.section, title: b.title, sort: b.sort ?? 0, metaJson: JSON.stringify(b.meta ?? {}), createdAt: now(), updatedAt: now() }
   await db(c).insert(s.resumeItem).values(row)
   return c.json(row, 201)
 })
 app.patch('/items/:id', async c => {
+  if (!await ownItem(c, c.req.param('id'))) return forbid(c)
   const b = ItemBody.partial().parse(await c.req.json())
   const set: any = { updatedAt: now() }
   if (b.section !== undefined) set.section = b.section
@@ -193,6 +218,7 @@ app.patch('/items/:id', async c => {
   return c.json({ ok: true })
 })
 app.delete('/items/:id', async c => {
+  if (!await ownItem(c, c.req.param('id'))) return forbid(c)
   await db(c).delete(s.resumeItem).where(eq(s.resumeItem.id, c.req.param('id')))
   return c.json({ ok: true })
 })
@@ -200,19 +226,24 @@ app.delete('/items/:id', async c => {
 // ---- 版本 ----
 const VariantBody = z.object({ label: z.string().default('默认'), contentMd: z.string() })
 app.get('/items/:id/variants', async c =>
-  c.json(await db(c).select().from(s.itemVariant).where(eq(s.itemVariant.itemId, c.req.param('id')))))
+  await ownItem(c, c.req.param('id'))
+    ? c.json(await db(c).select().from(s.itemVariant).where(eq(s.itemVariant.itemId, c.req.param('id'))))
+    : forbid(c))
 app.post('/items/:id/variants', async c => {
+  if (!await ownItem(c, c.req.param('id'))) return forbid(c)
   const b = VariantBody.parse(await c.req.json())
   const row = { id: uid(), itemId: c.req.param('id'), label: b.label, contentMd: b.contentMd, createdAt: now() }
   await db(c).insert(s.itemVariant).values(row)
   return c.json(row, 201)
 })
 app.patch('/variants/:id', async c => {
+  if (!await ownVariant(c, c.req.param('id'))) return forbid(c)
   const b = VariantBody.partial().parse(await c.req.json())
   await db(c).update(s.itemVariant).set(b).where(eq(s.itemVariant.id, c.req.param('id')))
   return c.json({ ok: true })
 })
 app.delete('/variants/:id', async c => {
+  if (!await ownVariant(c, c.req.param('id'))) return forbid(c)
   await db(c).delete(s.itemVariant).where(eq(s.itemVariant.id, c.req.param('id')))
   return c.json({ ok: true })
 })
@@ -237,7 +268,8 @@ app.post('/resumes', async c => {
   return c.json(row, 201)
 })
 app.get('/resumes/:id', async c => {
-  const [r] = await db(c).select().from(s.resume).where(eq(s.resume.id, c.req.param('id')))
+  const [r] = await db(c).select().from(s.resume)
+    .where(and(eq(s.resume.id, c.req.param('id')), eq(s.resume.userId, c.get('userId'))))
   if (!r) return c.json({ error: 'not found' }, 404)
   const sel = await db(c).select().from(s.resumeSelection).where(eq(s.resumeSelection.resumeId, r.id)).orderBy(asc(s.resumeSelection.ord))
   const extra = await db(c).select().from(s.resumeExtra).where(eq(s.resumeExtra.resumeId, r.id))
@@ -259,8 +291,11 @@ app.patch('/resumes/:id', async c => {
   return c.json({ ok: true })
 })
 app.get('/resumes/:id/versions', async c =>
-  c.json(await c.env.DB.prepare('SELECT id, substr(content_md,1,60) preview, created_at FROM resume_version WHERE resume_id=? ORDER BY created_at DESC').bind(c.req.param('id')).all().then(r => r.results)))
+  await ownResume(c, c.req.param('id'))
+    ? c.json(await c.env.DB.prepare('SELECT id, substr(content_md,1,60) preview, created_at FROM resume_version WHERE resume_id=? ORDER BY created_at DESC').bind(c.req.param('id')).all().then(r => r.results))
+    : forbid(c))
 app.post('/resumes/:id/versions/:vid/restore', async c => {
+  if (!await ownResume(c, c.req.param('id'))) return forbid(c)
   const v = await c.env.DB.prepare('SELECT content_md FROM resume_version WHERE id=? AND resume_id=?').bind(c.req.param('vid'), c.req.param('id')).first<any>()
   if (!v) return c.json({ error: 'not found' }, 404)
   await db(c).update(s.resume).set({ contentMd: v.content_md, updatedAt: now() }).where(and(eq(s.resume.id, c.req.param('id')), eq(s.resume.userId, c.get('userId'))))
@@ -273,8 +308,9 @@ app.delete('/resumes/:id', async c => {
 
 // ---- 选取清单（整组覆盖写）----
 app.put('/resumes/:id/selections', async c => {
-  const list = z.array(z.object({ itemId: z.string(), variantId: z.string().nullable().optional(), ord: z.number(), overrides: z.record(z.any()).optional() })).parse(await c.req.json())
   const rid = c.req.param('id')
+  if (!await ownResume(c, rid)) return forbid(c)
+  const list = z.array(z.object({ itemId: z.string(), variantId: z.string().nullable().optional(), ord: z.number(), overrides: z.record(z.any()).optional() })).parse(await c.req.json())
   await db(c).delete(s.resumeSelection).where(eq(s.resumeSelection.resumeId, rid))
   for (const it of list)
     await db(c).insert(s.resumeSelection).values({ resumeId: rid, itemId: it.itemId, variantId: it.variantId ?? null, ord: it.ord, overridesJson: JSON.stringify(it.overrides ?? {}) })
@@ -309,6 +345,7 @@ app.post('/master/chat', async c => {
 app.post('/jd/select', async c => {
   const { masterId, jd } = await c.req.json() as any
   if (!masterId || !jd) return c.json({ error: 'missing masterId/jd' }, 400)
+  if (!await ownMaster(c, masterId)) return forbid(c)
   const items = await db(c).select().from(s.resumeItem).where(eq(s.resumeItem.masterId, masterId)).orderBy(asc(s.resumeItem.sort))
   if (!items.length) return c.json({ error: '大简历为空，先建条目' }, 400)
   const pool: any[] = []
@@ -344,6 +381,7 @@ async function genResume(c: any, masterId: string, jd: string, templateId: strin
       if ((cnt?.c ?? 0) >= quota) throw Object.assign(new Error('quota'), { quota: true })
     }
   }
+  if (!await ownMaster(c, masterId)) throw Object.assign(new Error('forbid'), { forbid: true })
   const items = await db(c).select().from(s.resumeItem).where(eq(s.resumeItem.masterId, masterId)).orderBy(asc(s.resumeItem.sort))
   if (!items.length) throw Object.assign(new Error('empty'), { empty: true })
   const pool: any[] = []; const vMap = new Map<string, any>()
@@ -396,6 +434,7 @@ app.post('/jd/generate', async c => {
   catch (e: any) {
     if (e?.quota) return c.json({ error: '简历份数已达上限，升级会员可建更多', code: 'quota' }, 403)
     if (e?.empty) return c.json({ error: '大简历为空，先用 AI 建库或导入简历' }, 400)
+    if (e?.forbid) return forbid(c)
     return c.json({ error: String(e?.message || e) }, 502)
   }
 })
@@ -415,6 +454,7 @@ app.post('/jd/batch', async c => {
 app.post('/jd/gap', async c => {
   const { masterId, jd } = await c.req.json() as any
   if (!masterId || !jd) return c.json({ error: 'missing masterId/jd' }, 400)
+  if (!await ownMaster(c, masterId)) return forbid(c)
   const items = await db(c).select().from(s.resumeItem).where(eq(s.resumeItem.masterId, masterId)).orderBy(asc(s.resumeItem.sort))
   const pool: any[] = []
   for (const it of items) {
@@ -745,8 +785,9 @@ app.post('/export', exportRoute())
 app.all('/mcp', mcpRoute())
 
 app.put('/resumes/:id/extras', async c => {
-  const map = z.record(z.string()).parse(await c.req.json())
   const rid = c.req.param('id')
+  if (!await ownResume(c, rid)) return forbid(c)
+  const map = z.record(z.string()).parse(await c.req.json())
   await db(c).delete(s.resumeExtra).where(eq(s.resumeExtra.resumeId, rid))
   for (const [k, v] of Object.entries(map))
     await db(c).insert(s.resumeExtra).values({ resumeId: rid, fieldKey: k, valueMd: v })
