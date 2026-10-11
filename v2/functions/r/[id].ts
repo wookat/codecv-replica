@@ -6,6 +6,7 @@ const mdLite = (md: string) => esc(md)
   .replace(/^- (.*)$/gm, '<li>$1</li>')
   .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
   .replace(/\n{2,}/g, '</p><p>').replace(/\n/g, '<br>')
+  .replace(/(<li>(?:(?!<\/li>).)*<\/li>(?:<br>)?)+/g, m => `<ul>${m.replace(/<br>/g, '')}</ul>`)
 
 export const onRequestGet: PagesFunction = async (context) => {
   const env: any = context.env

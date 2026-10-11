@@ -22,14 +22,15 @@ export const onRequestGet: PagesFunction = async (context) => {
 <style>body{font-family:system-ui,sans-serif;margin:0;background:#f5f5f5;color:#222}
 .wrap{max-width:860px;margin:0 auto;padding:32px 16px}
 .card{background:#fff;border-radius:12px;padding:24px;display:flex;gap:24px;flex-wrap:wrap}
-img{width:320px;max-width:100%;border:1px solid #eee;border-radius:8px}
+.frame{width:320px;max-width:100%;aspect-ratio:5/7;overflow:hidden;border:1px solid #eee;border-radius:8px;background:#f5f5f5}
+img{width:100%;height:auto;display:block}
 h1{font-size:22px;margin:0 0 12px}
 .tag{display:inline-block;background:#eef;border-radius:4px;padding:2px 8px;font-size:12px;margin-right:6px;color:#55c}
 .cta{display:inline-block;background:#000;color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;margin-top:16px}
 p{color:#555;line-height:1.7}</style></head><body><main><div class="wrap">
 <a href="/" style="color:#666;font-size:13px">← CodeCV 简历工具</a>
 <div class="card" style="margin-top:12px">
-<img src="/api/v2/thumb/${id}" alt="${esc(name)}简历模板预览图" loading="lazy">
+<div class="frame"><img src="/api/v2/thumb/${id}" alt="${esc(name)}简历模板预览图" fetchpriority="high" width="794"></div>
 <div style="flex:1;min-width:240px">
 <h1>${esc(name)}</h1>
 <div>${tags.map(t => `<span class="tag">${esc(String(t))}</span>`).join('')}</div>
