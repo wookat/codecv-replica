@@ -1,0 +1,37 @@
+// 投递进度看板：新增投递 + 状态流推进
+import { useEffect, useState } from 'react'
+import { api } from '../../core/api/client'
+
+const STAGES = ['已投递', '筛选中', '笔试', '一面', '二面', '三面', 'Offer', '流程终止']
+
+export default function ProgressPage() {
+  const [list, setList] = useState<any[]>([])
+  const [f, setF] = useState<any>({ status: '已投递' })
+  const load = () => api.progressList().then(setList).catch(() => {})
+  useEffect(() => { load() }, [])
+  return (
+    <div className="p-6 max-w-5xl mx-auto">
+      <h2 className="text-lg font-semibold mb-4">投递进度（{list.length}）</h2>
+      <div className="flex gap-2 mb-4 text-xs flex-wrap">
+        <input className="border rounded px-2 py-1" placeholder="公司" onChange={e => setF({ ...f, name: e.target.value })} />
+        <input className="border rounded px-2 py-1" placeholder="岗位" onChange={e => setF({ ...f, post: e.target.value })} />
+        <input className="border rounded px-2 py-1" placeholder="工作地点" onChange={e => setF({ ...f, workLocation: e.target.value })} />
+        <input className="border rounded px-2 py-1" placeholder="渠道" onChange={e => setF({ ...f, channel: e.target.value })} />
+        <button className="bg-black text-white rounded px-3" onClick={async () => { await api.addProgress(f); load() }}>+ 投递</button>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {list.map(p => (
+          <div key={p.id} className="border rounded-lg p-3 bg-white text-sm">
+            <div className="font-medium">{p.name}</div>
+            <div className="text-xs text-neutral-500">{p.post} · {p.workLocation}</div>
+            <div className="text-[10px] text-neutral-400">{p.channel} · 更新 {new Date(p.update_time).toLocaleDateString()}</div>
+            <select className="mt-2 border rounded px-1 py-0.5 text-xs w-full" value={p.status}
+              onChange={async e => { await api.updateProgress(p.id, { status: e.target.value }); load() }}>
+              {STAGES.map(x => <option key={x}>{x}</option>)}
+            </select>
+            <button className="text-[10px] text-red-400 mt-1" onClick={async () => { await api.delProgress(p.id); load() }}>删除</button>
+          </div>))}
+      </div>
+    </div>
+  )
+}

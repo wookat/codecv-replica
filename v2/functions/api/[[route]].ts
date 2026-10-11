@@ -471,6 +471,51 @@ app.post('/mianjing', async c => {
     .bind(u.id, b.title || '', b.company_name || '', b.grade || '', b.batch || '', b.round || '', b.result || '', b.school || '', b.major || '', b.anonymous ? 1 : 0, b.content_md || b.content || '', Date.now()).run()
   return c.json({ ok: true }, 201)
 })
+// ---- 长尾：schools 字典 / 邀请记录 / 投递进度 ----
+app.get('/schools', async c => {
+  const r = await c.env.ASSETS.fetch(new URL('/seeds/schools.json', c.req.url))
+  return new Response(r.body, { headers: { 'content-type': 'application/json' } })
+})
+app.get('/invites', async c => {
+  const u = await meRow(c)
+  const r = await c.env.DB.prepare(`SELECT i.order_no AS orderNo, i.commission, i.settle_status AS settleStatus, i.created_at, u.username AS invitee
+    FROM invites i JOIN users u ON u.id=i.invitee_id WHERE i.inviter_id=? ORDER BY i.created_at DESC LIMIT 100`).bind(u.id).all<any>()
+  const total = await c.env.DB.prepare('SELECT COALESCE(SUM(commission),0) s FROM invites WHERE inviter_id=?').bind(u.id).first<any>()
+  return c.json({ records: r.results ?? [], total: total?.s ?? 0 })
+})
+app.get('/progress', async c => {
+  const u = await meRow(c)
+  const r = await c.env.DB.prepare('SELECT id, name, post, work_location AS workLocation, status, channel, link, mark, update_time FROM progress WHERE user_id=? ORDER BY update_time DESC').bind(u.id).all<any>()
+  return c.json(r.results ?? [])
+})
+app.post('/progress', async c => {
+  const u = await meRow(c)
+  const b = await c.req.json() as any
+  const now = Date.now()
+  const r = await c.env.DB.prepare(`INSERT INTO progress (user_id, name, post, work_location, status, channel, link, mark, snapshot, post_time, update_time, create_time)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`)
+    .bind(u.id, b.name || '', b.post || '', b.workLocation || '', b.status || '已投递', b.channel || '', b.link || '', b.mark || '', '{}', now, now, now).run()
+  const pid = r.meta.last_row_id
+  await c.env.DB.prepare('INSERT INTO progress_events (progress_id, status, time) VALUES (?,?,?)').bind(pid, b.status || '已投递', now).run()
+  return c.json({ id: pid }, 201)
+})
+app.patch('/progress/:id', async c => {
+  const u = await meRow(c)
+  const b = await c.req.json() as any
+  const pid = c.req.param('id')
+  const fields: string[] = []; const vals: any[] = []
+  for (const [k, col] of Object.entries({ name: 'name', post: 'post', workLocation: 'work_location', status: 'status', channel: 'channel', link: 'link', mark: 'mark' }) as any)
+    if (b[k] !== undefined) { fields.push(`${col}=?`); vals.push(b[k]) }
+  fields.push('update_time=?'); vals.push(Date.now(), pid, u.id)
+  await c.env.DB.prepare(`UPDATE progress SET ${fields.join(',')} WHERE id=? AND user_id=?`).bind(...vals).run()
+  if (b.status) await c.env.DB.prepare('INSERT INTO progress_events (progress_id, status, time) VALUES (?,?,?)').bind(pid, b.status, Date.now()).run()
+  return c.json({ ok: true })
+})
+app.delete('/progress/:id', async c => {
+  const u = await meRow(c)
+  await c.env.DB.prepare('DELETE FROM progress WHERE id=? AND user_id=?').bind(c.req.param('id'), u.id).run()
+  return c.json({ ok: true })
+})
 app.post('/export', exportRoute())
 app.all('/mcp', mcpRoute())
 

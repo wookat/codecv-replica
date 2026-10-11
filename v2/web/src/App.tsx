@@ -8,6 +8,7 @@ import Landing from './features/landing/Landing'
 import VipPage from './features/vip/VipPage'
 import AdminPage from './features/admin/AdminPage'
 import CommunityPage from './features/community/CommunityPage'
+import ProgressPage from './features/progress/ProgressPage'
 
 export default function App() {
   const pubMatch = location.pathname.match(/^\/r\/([\w-]+)/)
@@ -19,7 +20,7 @@ export default function App() {
   const [pass, setPass] = useState('')
   const [masters, setMasters] = useState<any[]>([])
   const [masterId, setMasterId] = useState('')
-  const [page, setPage] = useState<'templates' | 'editor' | 'resumes' | 'vip' | 'admin' | 'community'>('templates')
+  const [page, setPage] = useState<'templates' | 'editor' | 'resumes' | 'vip' | 'admin' | 'community' | 'progress'>('templates')
   const [templateId, setTemplateId] = useState('')
   const [resumeId, setResumeId] = useState<string | undefined>()
   const [regMode, setRegMode] = useState(false)
@@ -72,6 +73,8 @@ export default function App() {
           onClick={() => setPage('admin')}>后台</button>
         <button className={`text-sm px-2 py-1 rounded ${page === 'community' ? 'bg-black text-white' : 'border'}`}
           onClick={() => setPage('community')}>社区</button>
+        <button className={`text-sm px-2 py-1 rounded ${page === 'progress' ? 'bg-black text-white' : 'border'}`}
+          onClick={() => setPage('progress')}>投递</button>
         <select className="border rounded px-2 py-1 text-sm" value={masterId} onChange={e => setMasterId(e.target.value)}>
           {masters.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
         </select>
@@ -100,7 +103,7 @@ export default function App() {
         ? <TemplateGallery onPick={id => { setResumeId(undefined); setTemplateId(id); setPage('editor') }} />
         : page === 'resumes'
         ? <ResumeList onEdit={id => { setTemplateId(''); setResumeId(id); setPage('editor') }} />
-        : page === 'vip' ? <VipPage /> : page === 'admin' ? <AdminPage /> : <CommunityPage />
+        : page === 'vip' ? <VipPage /> : page === 'admin' ? <AdminPage /> : page === 'community' ? <CommunityPage /> : <ProgressPage />
     </div>
   )
 }
