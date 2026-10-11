@@ -1,9 +1,11 @@
 // 归一化渲染验收：mth(orig) vs mth(canon) 逐套比对
 // 分类: identical（渲染一致）/ improved（修复了原就错误的渲染）/ regression（零容忍）
-// 依赖: /tmp/mth-bundle.mjs（esbuild 打包的 mth 引擎）、/tmp/v2-norm.mjs
+// 依赖: .cache/ 下的 esbuild 产物（gate.mjs 负责生成）
 // 用法: node scripts/verify-render.mjs [单个文件名]
-import { markdownToHTML } from '/tmp/mth-bundle.mjs'
-import { normalizeMd } from '/tmp/v2-norm.mjs'
+const MTH = new URL('../.cache/mth-bundle.mjs', import.meta.url).pathname
+const NORM = new URL('../.cache/v2-norm.mjs', import.meta.url).pathname
+const { markdownToHTML } = await import(MTH)
+const { normalizeMd } = await import(NORM)
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 

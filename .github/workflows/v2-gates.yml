@@ -1,0 +1,20 @@
+name: v2 验收门
+on:
+  push:
+    paths: ['v2/**', 'src/lib/mth/**', 'public/seeds/**', '.github/workflows/v2-gates.yml']
+  pull_request:
+    paths: ['v2/**', 'src/lib/mth/**', 'public/seeds/**']
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+        working-directory: v2
+      - name: Phase 0 三条验收门（未编辑≡原文 / 渲染一致 / 编辑块无损）
+        run: node scripts/gate.mjs
+        working-directory: v2
