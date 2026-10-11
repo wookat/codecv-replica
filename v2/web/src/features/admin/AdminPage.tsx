@@ -9,18 +9,20 @@ export default function AdminPage() {
   const [orders, setOrders] = useState<any[]>([])
   const [days, setDays] = useState(30)
   const [codes, setCodes] = useState<string[]>([])
+  const [events, setEvents] = useState<any[]>([])
   const [denied, setDenied] = useState(false)
   useEffect(() => {
     api.adminStats().then(setStats).catch(() => setDenied(true))
     api.adminUsers().then(setUsers).catch(() => {})
     api.adminOrders().then(setOrders).catch(() => {})
+    api.adminEvents().then(setEvents).catch(() => {})
   }, [])
   if (denied) return <div className="p-8 text-neutral-400">无管理员权限</div>
   const upd = async (id: number, b: any) => { await api.adminUpdateUser(id, b); setUsers(await api.adminUsers()) }
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <div className="flex gap-2 mb-4 text-sm">
-        {[['stats', '数据看板'], ['users', '用户管理'], ['orders', '订单'], ['redeem', '兑换码']].map(([k, l]) => (
+        {[['stats', '数据看板'], ['users', '用户管理'], ['orders', '订单'], ['redeem', '兑换码'], ['events', '告警事件']].map(([k, l]) => (
           <button key={k} className={`px-3 py-1 rounded ${tab === k ? 'bg-black text-white' : 'border'}`} onClick={() => setTab(k)}>{l}</button>
         ))}
       </div>
@@ -56,6 +58,16 @@ export default function AdminPage() {
           <tbody>{orders.map(o => (
             <tr key={o.orderNo} className="border-t"><td className="p-2">{o.orderNo}</td><td className="text-center">{o.username}</td>
               <td className="text-center">{o.plan}</td><td className="text-center">¥{(o.amount / 100).toFixed(2)}</td><td className="text-center">{o.status}</td></tr>))}
+          </tbody>
+        </table>
+      )}
+      {tab === 'events' && (
+        <table className="w-full text-xs border bg-white">
+          <thead><tr className="bg-neutral-50"><th className="p-2 text-left">类型</th><th className="text-left">详情</th><th>用户</th><th>时间</th></tr></thead>
+          <tbody>{events.map((e, i) => (
+            <tr key={i} className="border-t"><td className="p-2">{e.kind}</td>
+              <td className="max-w-xs truncate">{e.detail}</td><td className="text-center">{e.username}</td>
+              <td className="text-center">{new Date(e.created_at).toLocaleString()}</td></tr>))}
           </tbody>
         </table>
       )}

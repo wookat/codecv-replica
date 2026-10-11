@@ -256,7 +256,7 @@ app.post('/ai', async c => {
   const r = await fetch('https://api.aicdks.com/v1/chat/completions', {
     method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${(c.env as any).GP_LLM_API_KEY}` },
     body: JSON.stringify({ model: 'swe-2-medium', messages: [{ role: 'user', content: prompt }], temperature: 0.3 }) })
-  if (!r.ok) return c.json({ error: 'LLM ' + r.status }, 502)
+  if (!r.ok) { logEvent(c, 'ai_fail', 'LLM ' + r.status); return c.json({ error: 'LLM ' + r.status }, 502) }
   const out = (await r.json() as any).choices?.[0]?.message?.content || ''
   return c.json({ text: out })
 })
@@ -304,6 +304,12 @@ const VIP_TIERS: Record<string, { days: number; cv: number; uploadMB: number }> 
   '终身会员': { days: 36500, cv: -1, uploadMB: 10 },
 }
 const PLANS: Record<string, number> = { '月度会员': 1990, '季度会员': 3990, '年度会员': 9990, '终身会员': 19900 } // 分
+// 事件落库（监控告警：失败事件写 ops_events，admin/stats 面板展示）
+const logEvent = (c: any, kind: string, detail: string, user?: string) => {
+  try { c.executionCtx?.waitUntil(
+    c.env.DB.prepare('INSERT INTO ops_events (kind, detail, username, created_at) VALUES (?,?,?,?)')
+      .bind(kind, String(detail).slice(0, 500), user || c.get?.('userId') || '', Date.now()).run()) } catch {}
+}
 const meRow = async (c: any) =>
   c.env.DB.prepare('SELECT id, vip_expire, vip_plan, ai, inviter FROM users WHERE username=?').bind(c.get('userId')).first<any>()
 const tier = (u: any) => (Number(u?.vip_expire) > Date.now() ? (VIP_TIERS[u?.vip_plan] || VIP_TIERS['月度会员']) : null)
@@ -402,6 +408,11 @@ app.patch('/admin/users/:id', async c => {
 app.get('/admin/orders', async c => {
   if (!await needAdmin(c)) return c.json({ error: 'forbidden' }, 403)
   const r = await c.env.DB.prepare('SELECT o.order_no AS orderNo, u.username, o.plan, o.amount, o.status, o.created_at FROM orders o JOIN users u ON u.id=o.user_id ORDER BY o.created_at DESC LIMIT 200').all<any>()
+  return c.json(r.results ?? [])
+})
+app.get('/admin/events', async c => {
+  if (!await needAdmin(c)) return c.json({ error: 'forbidden' }, 403)
+  const r = await c.env.DB.prepare('SELECT kind, detail, username, created_at FROM ops_events ORDER BY created_at DESC LIMIT 50').all<any>()
   return c.json(r.results ?? [])
 })
 app.post('/admin/redeem', async c => {

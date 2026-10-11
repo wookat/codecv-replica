@@ -22,6 +22,7 @@ export const api = {
     req<{ token: string; username: string }>('/auth/register', { method: 'POST', body: JSON.stringify({ username, password }) }),
   masters: () => req<any[]>('/master'),
   createMaster: (name: string) => req<any>('/master', { method: 'POST', body: JSON.stringify({ name }) }),
+  adminEvents: () => req<any[]>('/admin/events'),
   adminStats: () => req<any>('/admin/stats'),
   adminUsers: () => req<any[]>('/admin/users'),
   adminUpdateUser: (id: number, b: any) => req<any>(`/admin/users/${id}`, { method: 'PATCH', body: JSON.stringify(b) }),
