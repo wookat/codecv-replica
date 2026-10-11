@@ -23,8 +23,10 @@ export default function Landing({ onEnter }: { onEnter: () => void }) {
         <h2 className="text-center font-semibold mb-6">114 套中文简历模板</h2>
         <div className="grid grid-cols-3 md:grid-cols-6 gap-3 max-w-5xl mx-auto">
           {ids.map(id => (
-            <img key={id} src={`/api/v2/thumb/${id}`} loading="lazy" alt={(catalog as any)[id].name}
-              className="rounded border aspect-[3/4] object-cover bg-neutral-100" />
+            <a key={id} href={`/t/${id}`} title={(catalog as any)[id].name}>
+              <img src={`/api/v2/thumb/${id}`} loading="lazy" alt={(catalog as any)[id].name}
+                className="rounded border aspect-[3/4] object-cover bg-neutral-100 hover:shadow-md transition" />
+            </a>
           ))}
         </div>
         <p className="text-center text-xs text-neutral-400 mt-4">还有 {Object.keys(catalog).length - 12} 套…</p>
