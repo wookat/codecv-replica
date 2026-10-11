@@ -43,6 +43,7 @@ export default function MasterLibrary({ masterId, onSelect }: {
   const [jd, setJd] = useState('')
   const [jdBusy, setJdBusy] = useState(false)
   const [jdMsg, setJdMsg] = useState('')
+  const [gap, setGap] = useState('')
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -106,10 +107,16 @@ export default function MasterLibrary({ masterId, onSelect }: {
           <textarea className="w-full border rounded px-2 py-1 text-xs h-28" placeholder="粘贴目标岗位 JD…" value={jd} onChange={e => setJd(e.target.value)} />
           <div className="flex gap-2 items-center">
             <button className="bg-blue-600 text-white text-xs rounded px-3 py-1" disabled={jdBusy} onClick={applyJd}>
-              {jdBusy ? 'AI 选取中…' : 'AI 推荐并替换已选'}</button>
-            <button className="text-xs text-neutral-400" onClick={() => setJdOpen(false)}>取消</button>
+              {jdBusy ? '处理中…' : 'AI 推荐并替换已选'}</button>
+            <button className="text-xs border border-blue-300 text-blue-600 rounded px-3 py-1" disabled={jdBusy} onClick={async () => {
+              if (!jd.trim()) return; setJdBusy(true); setGap('')
+              try { setGap((await api.jdGap(masterId, jd)).report) } catch (e) { setJdMsg('分析失败：' + String(e).slice(0, 60)) }
+              setJdBusy(false)
+            }}>差距分析</button>
+            <button className="text-xs text-neutral-400" onClick={() => { setJdOpen(false); setGap('') }}>取消</button>
           </div>
           {jdMsg && <div className="text-xs text-red-500">{jdMsg}</div>}
+          {gap && <pre className="text-xs whitespace-pre-wrap bg-white border rounded p-2 max-h-56 overflow-auto">{gap}</pre>}
         </div>)}
       <div>
         <div className="font-semibold mb-1">已选（拖拽排序 = 简历顺序）</div>

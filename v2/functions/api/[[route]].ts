@@ -314,6 +314,31 @@ JD：${jd.slice(0, 2000)}
     .map((p, i) => ({ itemId: p.itemId, variantId: p.variantId, ord: i, reason: String(p.reason || '') }))
   return c.json({ selections })
 })
+// POST /jd/gap — JD 差距报告：大简历 vs JD 缺什么、怎么补
+app.post('/jd/gap', async c => {
+  const { masterId, jd } = await c.req.json() as any
+  if (!masterId || !jd) return c.json({ error: 'missing masterId/jd' }, 400)
+  const items = await db(c).select().from(s.resumeItem).where(eq(s.resumeItem.masterId, masterId)).orderBy(asc(s.resumeItem.sort))
+  const pool: any[] = []
+  for (const it of items) {
+    const vs = await db(c).select().from(s.itemVariant).where(eq(s.itemVariant.itemId, it.id))
+    pool.push({ section: it.section, title: it.title, previews: vs.map(v => v.contentMd.slice(0, 120)) })
+  }
+  const prompt = `你是求职顾问。对照候选人「大简历素材库」和目标「岗位 JD」，输出差距分析报告，markdown 格式：
+## 匹配现状
+- 已覆盖的 JD 要点（最多5条，各一行）
+## 关键缺口
+- JD 要求但素材库没有的（每条注明：缺口 + 建议补法，如「补一段xx经历」或「在xx条目里补xx细节」）
+## 改写建议
+- 现有素材如何向该 JD 靠拢表达（最多3条）
+大简历素材库：${JSON.stringify(pool).slice(0, 10000) || '（空）'}
+岗位 JD：${jd.slice(0, 2000)}`
+  const r = await fetch('https://api.aicdks.com/v1/chat/completions', {
+    method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${(c.env as any).GP_LLM_API_KEY}` },
+    body: JSON.stringify({ model: 'swe-2-medium', messages: [{ role: 'user', content: prompt }], temperature: 0.3 }) })
+  if (!r.ok) { logEvent(c, 'ai_fail', 'jdgap ' + r.status); return c.json({ error: 'LLM ' + r.status }, 502) }
+  return c.json({ report: (await r.json() as any).choices?.[0]?.message?.content || '' })
+})
 // POST /ai — 站内 AI：生成/润色/校对/翻译（aicdks swe-2-medium 中转）
 app.post('/ai', async c => {
   const { action, text, jd } = await c.req.json() as any
