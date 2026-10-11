@@ -47,6 +47,7 @@ export const api = {
   favorites: () => req<string[]>('/favorites'),
   setFavorite: (tplId: string, on: boolean) => req<any>('/favorites', { method: 'PUT', body: JSON.stringify({ tplId, on }) }),
   migrateV1: () => req<{ migrated: number; total: number }>('/migrate/v1', { method: 'POST' }),
+  masterChat: (messages: any[]) => req<any>('/master/chat', { method: 'POST', body: JSON.stringify({ messages }) }),
   jdSelect: (masterId: string, jd: string) => req<any>('/jd/select', { method: 'POST', body: JSON.stringify({ masterId, jd }) }),
   me: () => req<any>('/me'),
   ai: (action: string, text: string, jd?: string) =>

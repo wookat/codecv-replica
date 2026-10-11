@@ -9,6 +9,7 @@ import VipPage from './features/vip/VipPage'
 import AdminPage from './features/admin/AdminPage'
 import CommunityPage from './features/community/CommunityPage'
 import ProgressPage from './features/progress/ProgressPage'
+import BuilderChat from './features/builder/BuilderChat'
 
 export default function App() {
   const inv = new URLSearchParams(location.search).get('inv')
@@ -22,7 +23,7 @@ export default function App() {
   const [pass, setPass] = useState('')
   const [masters, setMasters] = useState<any[]>([])
   const [masterId, setMasterId] = useState('')
-  const [page, setPage] = useState<'templates' | 'editor' | 'resumes' | 'vip' | 'admin' | 'community' | 'progress'>('templates')
+  const [page, setPage] = useState<'templates' | 'editor' | 'resumes' | 'vip' | 'admin' | 'community' | 'progress' | 'builder'>('templates')
   const [templateId, setTemplateId] = useState(() => new URLSearchParams(location.search).get('tpl') || '')
   const [resumeId, setResumeId] = useState<string | undefined>()
   const [regMode, setRegMode] = useState(false)
@@ -89,6 +90,8 @@ export default function App() {
           const m = await api.createMaster('大简历 ' + (masters.length + 1))
           setMasters([...masters, m]); setMasterId(m.id)
         }}>+ 新建大简历</button>
+        <button className="text-sm px-2 py-1 rounded bg-blue-600 text-white"
+          onClick={() => setPage('builder')}>AI 建库</button>
         <label className="text-sm border rounded px-2 py-1 cursor-pointer">
           {importing ? '导入中…' : '导入简历建库'}
           <input type="file" accept=".pdf,.docx,.txt,.md" className="hidden" onChange={async e => {
@@ -110,7 +113,8 @@ export default function App() {
         ? <TemplateGallery onPick={id => { setResumeId(undefined); setTemplateId(id); setPage('editor') }} />
         : page === 'resumes'
         ? <ResumeList onEdit={id => { setTemplateId(''); setResumeId(id); setPage('editor') }} />
-        : page === 'vip' ? <VipPage /> : page === 'admin' ? <AdminPage /> : page === 'community' ? <CommunityPage /> : <ProgressPage />}
+        : page === 'vip' ? <VipPage /> : page === 'admin' ? <AdminPage /> : page === 'community' ? <CommunityPage /> : page === 'progress' ? <ProgressPage />
+        : <BuilderChat masterId={masterId} onDone={() => setPage('templates')} />}
     </div>
   )
 }

@@ -256,6 +256,29 @@ app.put('/resumes/:id/selections', async c => {
 })
 
 // ---- 模板补充字段 ----
+// POST /master/chat — AI 对话式建库：访谈官多轮收集→输出结构化条目
+const CHAT_SYS = `你是 CodeCV 简历建库访谈官。目标：通过对话收集用户的教育背景、实习/工作经历、项目、奖项、技能，建大简历条目库。
+规则：
+1. 每轮只问一个问题，简短友好；基于已答信息追问关键细节（时间/职责/成果数据/技术栈）；3-6 轮内完成。
+2. 信息足够（教育+至少2段经历+技能）时输出：先一行 "DONE"，再输出 JSON：
+{"items":[{"section":"education|internship|project|award|skill|selfeval","title":"条目标题","variants":[{"label":"版本名","contentMd":"## 标题\n- 要点（markdown，加粗 ** 强调）"}]}]}
+3. 同一经历若可区分侧重（偏前端/偏后端/偏算法/偏管理），给 2 个 variant，label 写明侧重。
+4. 信息不足时只输出下一个问题，不要输出 DONE。`
+app.post('/master/chat', async c => {
+  const { messages } = await c.req.json() as any
+  if (!Array.isArray(messages)) return c.json({ error: 'missing messages' }, 400)
+  const r = await fetch('https://api.aicdks.com/v1/chat/completions', {
+    method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${(c.env as any).GP_LLM_API_KEY}` },
+    body: JSON.stringify({ model: 'swe-2-medium', temperature: 0.4,
+      messages: [{ role: 'system', content: CHAT_SYS }, ...messages.slice(-20).map((m: any) => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: String(m.content).slice(0, 3000) }))] }) })
+  if (!r.ok) { logEvent(c, 'ai_fail', 'chat ' + r.status); return c.json({ error: 'LLM ' + r.status }, 502) }
+  const out = (await r.json() as any).choices?.[0]?.message?.content || ''
+  let items: any[] | null = null
+  const jm = out.match(/\{[\s\S]*"items"[\s\S]*\}/)
+  if (out.includes('DONE') && jm) { try { items = JSON.parse(jm[0]).items || null } catch { items = null } }
+  const reply = out.split('DONE')[0].trim() || (items ? '已整理完成，可一键入库。' : out)
+  return c.json({ reply, items })
+})
 // POST /jd/select — 页面端按 JD 智能选取：LLM 从大简历挑 item×variant
 app.post('/jd/select', async c => {
   const { masterId, jd } = await c.req.json() as any
