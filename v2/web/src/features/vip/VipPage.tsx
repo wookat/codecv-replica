@@ -9,7 +9,8 @@ export default function VipPage() {
   const [orders, setOrders] = useState<any[]>([])
   const [code, setCode] = useState('')
   const [msg, setMsg] = useState('')
-  const load = () => { api.me().then(setMe).catch(() => {}); api.orders().then(setOrders).catch(() => {}) }
+  const [inv, setInv] = useState<any>(null)
+  const load = () => { api.me().then(setMe).catch(() => {}); api.orders().then(setOrders).catch(() => {}); api.invites().then(setInv).catch(() => {}) }
   useEffect(() => { load() }, [])
   const buy = async (plan: string) => {
     const o = await api.createOrder(plan)
@@ -48,6 +49,30 @@ export default function VipPage() {
         }}>兑换</button>
         {msg && <span className="text-xs text-neutral-500">{msg}</span>}
       </div>
+      {me && (
+        <div className="border rounded-lg p-4 bg-white text-sm space-y-2">
+          <h3 className="font-medium">邀请好友 · 返佣 10%</h3>
+          <div className="flex gap-2 items-center">
+            <input readOnly className="border rounded px-2 py-1 text-xs flex-1 bg-neutral-50"
+              value={`${location.origin}/?inv=${me.username}`} />
+            <button className="bg-black text-white text-xs rounded px-3 py-1.5" onClick={async e => {
+              await navigator.clipboard.writeText(`${location.origin}/?inv=${me.username}`)
+              ;(e.target as HTMLElement).textContent = '已复制'
+            }}>复制邀请链接</button>
+          </div>
+          <div className="text-xs text-neutral-500">好友通过链接注册并首次付费，你获订单金额 10% 返佣{inv ? ` · 累计返佣 ¥${(inv.total / 100).toFixed(2)}` : ''}</div>
+          {inv?.records?.length > 0 && (
+            <table className="w-full text-xs border mt-2">
+              <thead><tr className="bg-neutral-50"><th className="p-1.5 text-left">被邀请人</th><th>订单号</th><th>返佣</th><th>结算</th><th>时间</th></tr></thead>
+              <tbody>{inv.records.map((r: any) => (
+                <tr key={r.orderNo} className="border-t">
+                  <td className="p-1.5">{r.invitee}</td><td>{r.orderNo}</td>
+                  <td>¥{(r.commission / 100).toFixed(2)}</td><td>{r.settleStatus}</td>
+                  <td>{new Date(r.created_at).toLocaleDateString()}</td>
+                </tr>))}
+              </tbody>
+            </table>)}
+        </div>)}
       <div>
         <h3 className="font-medium mb-2 text-sm">订单记录</h3>
         <table className="w-full text-xs border">

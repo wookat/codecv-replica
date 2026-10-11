@@ -28,13 +28,18 @@ app.post('/auth/login', async c => {
   return c.json({ token: await issueToken(c.env.UPSTASH_KV, username), username })
 })
 app.post('/auth/register', async c => {
-  const { username, password } = await c.req.json()
+  const { username, password, inviter } = await c.req.json() as any
   if (!username || !password) return c.json({ error: '用户名或密码不能为空' }, 400)
   const exist = await c.env.DB.prepare('SELECT id FROM users WHERE username=?').bind(username).first()
   if (exist) return c.json({ error: '用户名已被注册' }, 400)
   const { salt, hash } = await hashPassword(password)
-  await c.env.DB.prepare('INSERT INTO users (username, pwd_hash, salt, nickname, origin, created_at) VALUES (?,?,?,?,?,?)')
-    .bind(username, hash, salt, username, 'web', Date.now()).run()
+  let inv: string | null = null
+  if (inviter && inviter !== username) {
+    const iu = await c.env.DB.prepare('SELECT id FROM users WHERE username=?').bind(inviter).first()
+    if (iu) inv = inviter
+  }
+  await c.env.DB.prepare('INSERT INTO users (username, pwd_hash, salt, nickname, origin, inviter, created_at) VALUES (?,?,?,?,?,?,?)')
+    .bind(username, hash, salt, username, 'web', inv, Date.now()).run()
   return c.json({ token: await issueToken(c.env.UPSTASH_KV, username), username })
 })
 // GET /thumb/:tpl — 模板缩略图 PNG（KV 缓存 7d）
@@ -293,6 +298,9 @@ Top3 问题（各一行，指出具体位置）：
 简历文本：
 ${text}`,
     translate: `把下面简历内容翻译成${(jd || '英文')}（保留 markdown 格式）：\n${text}`,
+    fix: `你是简历修改专家。下面「评分意见」和「简历文本」，请按意见逐项修复，返回修复后的完整简历 markdown（保留格式）：
+评分意见：${jd || '整体提升'}
+简历文本：\n${text}`,
   }
   const prompt = prompts[action]
   if (!prompt) return c.json({ error: 'unknown action' }, 400)

@@ -11,6 +11,8 @@ import CommunityPage from './features/community/CommunityPage'
 import ProgressPage from './features/progress/ProgressPage'
 
 export default function App() {
+  const inv = new URLSearchParams(location.search).get('inv')
+  if (inv) localStorage.setItem('v2:inviter', inv)
   const pubMatch = location.pathname.match(/^\/r\/([\w-]+)/)
   const landing = location.pathname === '/' && !localStorage.getItem('v2:token') && !location.search.includes('login')
   if (pubMatch) return <PublicResume id={pubMatch[1]} />
@@ -39,12 +41,15 @@ export default function App() {
       <form className="bg-white p-8 rounded-xl shadow space-y-4 w-80" onSubmit={async e => {
         e.preventDefault()
         try {
-          const r = regMode ? await api.register(user, pass) : await api.login(user, pass)
+          const r = regMode ? await api.register(user, pass, localStorage.getItem('v2:inviter') || undefined) : await api.login(user, pass)
+          if (regMode) localStorage.removeItem('v2:inviter')
           localStorage.setItem('v2:token', r.token)
           setToken(r.token)
         } catch (ex: any) { setErr((regMode ? '注册失败' : '登录失败') + '：' + String(ex).slice(0, 80)) }
       }}>
         <h1 className="text-xl font-bold">CodeCV v2 {regMode ? '注册' : '登录'}</h1>
+        {regMode && localStorage.getItem('v2:inviter') &&
+          <p className="text-xs text-green-600">通过 {localStorage.getItem('v2:inviter')} 的邀请注册</p>}
         <input className="w-full border rounded px-3 py-2" placeholder="用户名" value={user} onChange={e => setUser(e.target.value)} />
         <input className="w-full border rounded px-3 py-2" type="password" placeholder="密码" value={pass} onChange={e => setPass(e.target.value)} />
         {err && <p className="text-red-500 text-sm">{err}</p>}
