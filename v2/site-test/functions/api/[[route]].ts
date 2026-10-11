@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { pbkdf2, issueToken, tokenUser, bearerToken } from '../_auth'
 import * as s from '../schema'
 import exportRoute from './export'
+import mcpRoute from './mcp'
 
 type Env = {
   Bindings: { DB: D1Database; UPSTASH_KV: KVNamespace }
@@ -138,6 +139,7 @@ app.put('/resumes/:id/selections', async c => {
 
 // ---- 模板补充字段 ----
 app.post('/export', exportRoute())
+app.all('/mcp', mcpRoute())
 
 app.put('/resumes/:id/extras', async c => {
   const map = z.record(z.string()).parse(await c.req.json())

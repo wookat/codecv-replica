@@ -5,40 +5,46 @@
 
 interface Env { RENDER_URL?: string; RENDER_TOKEN?: string; ASSETS?: { fetch: (r: Request) => Promise<Response> } }
 
-export default function exportRoute() {
-  return async (c: any) => {
-    const { content, style, name, type } = await c.req.json()
-    const env = c.env as Env
-    const RENDER_URL = env.RENDER_URL || 'https://cvrender.zalize.com/render'
-    const RENDER_TOKEN = env.RENDER_TOKEN || ''
-    if (!RENDER_TOKEN) return c.json({ code: 503, msg: 'RENDER_TOKEN 未配置' }, 503)
+// 共用渲染链：contentHtml + skinHref → 自包含 HTML → VPS Chrome114 → bytes（MCP 与 /export 共用）
+export async function renderSelfContained(c: any, contentHtml: string, style: string, type: 'pdf' | 'png'): Promise<Uint8Array | null> {
+  const env = c.env as Env
+  const RENDER_URL = env.RENDER_URL || 'https://cvrender.zalize.com/render'
+  const RENDER_TOKEN = env.RENDER_TOKEN || ''
+  if (!RENDER_TOKEN) return null
 
-    const origin = new URL(c.req.url).origin
-    const fetchAsset = async (u: string) => {
-      const path = new URL(u).pathname
-      if (env.ASSETS) {
-        const r = await env.ASSETS.fetch(new Request(origin + path)).catch(() => null as any)
-        if (r && r.ok) return r
-      }
-      return fetch(u)
+  const origin = new URL(c.req.url).origin
+  const fetchAsset = async (u: string) => {
+    const path = new URL(u).pathname
+    if (env.ASSETS) {
+      const r = await env.ASSETS.fetch(new Request(origin + path)).catch(() => null as any)
+      if (r && r.ok) return r
     }
-    const skinCss = await inlineCssRecursive(style || '', origin, fetchAsset)
-    const htmlDoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${name || 'resume'}</title>
+    return fetch(u)
+  }
+  const skinCss = await inlineCssRecursive(style || '', origin, fetchAsset)
+  const htmlDoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>resume</title>
 <style>${skinCss}</style>
 <style>@page{size:A4;margin:0}body{margin:0;padding:0}.markdown-transform-html{width:210mm;margin:0 auto;box-shadow:none}</style>
 </head><body>
-<div class="markdown-transform-html jufe">${content || ''}</div>
+<div class="markdown-transform-html jufe">${contentHtml || ''}</div>
 </body></html>`
 
-    let bytes: Uint8Array | null = null
-    try {
-      const r = await fetch(RENDER_URL, {
-        method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ html: htmlDoc, type: type === 'png' ? 'png' : 'pdf', token: RENDER_TOKEN }),
-      })
-      const j = await r.json() as any
-      if (j?.data) bytes = new Uint8Array(j.data)
-    } catch {}
+  try {
+    const r = await fetch(RENDER_URL, {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ html: htmlDoc, type, token: RENDER_TOKEN }),
+    })
+    const j = await r.json() as any
+    if (j?.data) return new Uint8Array(j.data)
+  } catch {}
+  return null
+}
+
+export default function exportRoute() {
+  return async (c: any) => {
+    const { content, style, name, type } = await c.req.json()
+    if (!c.env.RENDER_TOKEN) return c.json({ code: 503, msg: 'RENDER_TOKEN 未配置' }, 503)
+    const bytes = await renderSelfContained(c, content || '', style || '', type === 'png' ? 'png' : 'pdf')
     if (!bytes) return c.json({ code: 503, msg: 'render 服务无响应' }, 503)
 
     return new Response(bytes.buffer, {

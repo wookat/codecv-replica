@@ -35,6 +35,7 @@ export const resume = sqliteTable('resume', {
   templateId: text('template_id').notNull(),
   title: text('title').notNull().default(''),
   targetJd: text('target_jd').notNull().default(''),
+  contentMd: text('content_md').notNull().default(''),
   createdAt: integer('created_at').notNull(),
   updatedAt: integer('updated_at').notNull(),
 })
