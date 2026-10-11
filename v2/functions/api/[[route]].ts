@@ -101,7 +101,7 @@ app.delete('/variants/:id', async c => {
 })
 
 // ---- 简历 ----
-const ResumeBody = z.object({ masterId: z.string().optional(), templateId: z.string(), title: z.string().optional(), targetJd: z.string().optional() })
+const ResumeBody = z.object({ masterId: z.string().optional(), templateId: z.string(), title: z.string().optional(), targetJd: z.string().optional(), contentMd: z.string().optional() })
 app.get('/resumes', async c =>
   c.json(await db(c).select().from(s.resume).where(eq(s.resume.userId, c.get('userId')))))
 app.post('/resumes', async c => {

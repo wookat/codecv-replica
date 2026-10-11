@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { api } from './core/api/client'
 import TemplateGallery from './features/templates/TemplateGallery'
 import EditorPage from './features/resume/EditorPage'
+import ResumeList from './features/resume/ResumeList'
 
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem('v2:token'))
@@ -9,8 +10,9 @@ export default function App() {
   const [pass, setPass] = useState('')
   const [masters, setMasters] = useState<any[]>([])
   const [masterId, setMasterId] = useState('')
-  const [page, setPage] = useState<'templates' | 'editor'>('templates')
+  const [page, setPage] = useState<'templates' | 'editor' | 'resumes'>('templates')
   const [templateId, setTemplateId] = useState('')
+  const [resumeId, setResumeId] = useState<string | undefined>()
   const [err, setErr] = useState('')
 
   useEffect(() => {
@@ -39,13 +41,18 @@ export default function App() {
     </div>
   )
 
-  if (page === 'editor' && templateId && masterId)
-    return <EditorPage templateId={templateId} masterId={masterId} onBack={() => setPage('templates')} />
+  if (page === 'editor' && (templateId || resumeId))
+    return <EditorPage templateId={templateId || ''} masterId={masterId} resumeId={resumeId}
+      onBack={() => { setResumeId(undefined); setPage(resumeId ? 'resumes' : 'templates') }} />
 
   return (
     <div className="min-h-screen bg-neutral-50">
       <div className="border-b bg-white px-6 py-3 flex items-center gap-4">
         <span className="font-bold">CodeCV v2</span>
+        <button className={`text-sm px-2 py-1 rounded ${page === 'templates' ? 'bg-black text-white' : 'border'}`}
+          onClick={() => setPage('templates')}>模板中心</button>
+        <button className={`text-sm px-2 py-1 rounded ${page === 'resumes' ? 'bg-black text-white' : 'border'}`}
+          onClick={() => setPage('resumes')}>我的简历</button>
         <select className="border rounded px-2 py-1 text-sm" value={masterId} onChange={e => setMasterId(e.target.value)}>
           {masters.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
         </select>
@@ -54,7 +61,9 @@ export default function App() {
           setMasters([...masters, m]); setMasterId(m.id)
         }}>+ 新建大简历</button>
       </div>
-      <TemplateGallery onPick={id => { setTemplateId(id); setPage('editor') }} />
+      {page === 'templates'
+        ? <TemplateGallery onPick={id => { setResumeId(undefined); setTemplateId(id); setPage('editor') }} />
+        : <ResumeList onEdit={id => { setTemplateId(''); setResumeId(id); setPage('editor') }} />}
     </div>
   )
 }

@@ -21,8 +21,8 @@ const now = () => Date.now()
 // ---- auth ----
 app.post('/auth/login', async c => {
   const { username, password } = await c.req.json()
-  const row = await c.env.DB.prepare('SELECT username, password_hash, salt FROM users WHERE username=?').bind(username).first() as any
-  if (!row || (await pbkdf2(password, row.salt)) !== row.password_hash) return c.json({ error: 'invalid credentials' }, 401)
+  const row = await c.env.DB.prepare('SELECT username, pwd_hash, salt FROM users WHERE username=?').bind(username).first() as any
+  if (!row || (await pbkdf2(password, row.salt)) !== row.pwd_hash) return c.json({ error: 'invalid credentials' }, 401)
   return c.json({ token: await issueToken(c.env.UPSTASH_KV, username), username })
 })
 app.post('/auth/logout', async c => {
@@ -101,7 +101,7 @@ app.delete('/variants/:id', async c => {
 })
 
 // ---- 简历 ----
-const ResumeBody = z.object({ masterId: z.string().optional(), templateId: z.string(), title: z.string().optional(), targetJd: z.string().optional() })
+const ResumeBody = z.object({ masterId: z.string().optional(), templateId: z.string(), title: z.string().optional(), targetJd: z.string().optional(), contentMd: z.string().optional() })
 app.get('/resumes', async c =>
   c.json(await db(c).select().from(s.resume).where(eq(s.resume.userId, c.get('userId')))))
 app.post('/resumes', async c => {

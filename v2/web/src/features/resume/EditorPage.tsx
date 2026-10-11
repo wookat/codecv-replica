@@ -8,8 +8,8 @@ import PreviewPane from './PreviewPane'
 import ContentEditor from './ContentEditor'
 import catalog from '../templates/catalog.json'
 
-export default function EditorPage({ templateId: initTpl, masterId, onBack }: {
-  templateId: string; masterId: string; onBack: () => void
+export default function EditorPage({ templateId: initTpl, masterId, resumeId: initRid, onBack }: {
+  templateId: string; masterId: string; resumeId?: string; onBack: () => void
 }) {
   const [tplId, setTplId] = useState(initTpl)          // 快捷换肤
   const meta = templateMeta(tplId)
@@ -17,14 +17,40 @@ export default function EditorPage({ templateId: initTpl, masterId, onBack }: {
   const [sels, setSels] = useState<SelItem[]>([])
   const [exporting, setExporting] = useState('')
   const [mode, setMode] = useState<'md' | 'rich'>('md')   // md 编辑 | 内容模式
+  const [rid, setRid] = useState(initRid)
+  const dirtyRef = { current: false }
+  const saveTimer = { current: 0 as any }
+
+  // 载入已有简历（resume 模式）或新建（模板模式）
+  useEffect(() => {
+    if (initRid) {
+      api.resume(initRid).then(r => {
+        setMd(r.contentMd ?? r.content_md ?? '')
+        if (r.templateId) setTplId(r.templateId)
+      }).catch(() => {})
+    } else {
+      api.createResume({ masterId, templateId: tplId, title: meta?.name ?? tplId })
+        .then(r => setRid(r.id)).catch(() => {})
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initRid])
 
   useEffect(() => {
-    api.createResume({ masterId, templateId: tplId, title: meta?.name ?? tplId }).catch(() => {})
-  }, [tplId, masterId])
-
-  useEffect(() => {
-    setMd(composeMd({ title: meta?.name ?? '我的简历', items: sels }))
+    if (!initRid) setMd(composeMd({ title: meta?.name ?? '我的简历', items: sels }))
   }, [sels, tplId])
+
+  // md 变更自动落库（1s 防抖）
+  useEffect(() => {
+    if (!rid || !dirtyRef.current) return
+    clearTimeout(saveTimer.current)
+    saveTimer.current = setTimeout(() => {
+      api.updateResume(rid, { contentMd: md }).catch(() => {})
+      if (tplId !== meta?.slug) api.updateResume(rid, { templateId: tplId }).catch(() => {})
+      dirtyRef.current = false
+    }, 1000)
+    return () => clearTimeout(saveTimer.current)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [md])
 
   const exportPdf = async (kind: 'pdf' | 'png') => {
     setExporting(kind)
@@ -83,8 +109,8 @@ export default function EditorPage({ templateId: initTpl, masterId, onBack }: {
         <div className="md:w-[420px] w-full md:border-r border-b min-h-[300px]">
           {mode === 'md'
             ? <CodeMirror value={md} height="100%" style={{ height: '100%' }}
-                extensions={[markdown()]} onChange={v => setMd(v)} />
-            : <ContentEditor md={md} onMd={setMd} />}
+                extensions={[markdown()]} onChange={v => { dirtyRef.current = true; setMd(v) }} />
+            : <ContentEditor md={md} onMd={v => { dirtyRef.current = true; setMd(v) }} />}
         </div>
         <div className="flex-1">
           <PreviewPane md={md} skinCss={skinHref(meta?.slug ?? tplId)} primaryColor={meta?.primaryColor} font={meta?.font} />

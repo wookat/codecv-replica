@@ -30,4 +30,9 @@ export const api = {
   resume: (id: string) => req<any>(`/resumes/${id}`),
   createResume: (b: { masterId?: string; templateId: string; title?: string; targetJd?: string }) =>
     req<any>('/resumes', { method: 'POST', body: JSON.stringify(b) }),
+  updateResume: (id: string, b: { title?: string; contentMd?: string; templateId?: string; targetJd?: string }) =>
+    req<any>(`/resumes/${id}`, { method: 'PATCH', body: JSON.stringify(b) }),
+  deleteResume: (id: string) => req<any>(`/resumes/${id}`, { method: 'DELETE' }),
+  saveSelections: (id: string, list: { itemId: string; variantId?: string | null; ord: number }[]) =>
+    req<any>(`/resumes/${id}/selections`, { method: 'PUT', body: JSON.stringify(list) }),
 }
