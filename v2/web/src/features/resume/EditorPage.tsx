@@ -24,6 +24,8 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
   const extrasRef = { current: {} as Record<string, string> }
   const [rid, setRid] = useState(initRid)
   const [aiOpen, setAiOpen] = useState(false)
+  const [histOpen, setHistOpen] = useState(false)
+  const [hist, setHist] = useState<any[]>([])
   const dirtyRef = { current: false }
   const saveTimer = { current: 0 as any }
 
@@ -160,6 +162,9 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
             <input type="file" accept="image/*" className="hidden"
               onChange={e => e.target.files?.[0] && uploadPhoto(e.target.files[0])} />
           </label>)}
+        {resumeId && <button className="text-xs border rounded px-2 py-1" onClick={async () => {
+          setHist(await api.resumeVersions(resumeId).catch(() => [])); setHistOpen(true)
+        }}>历史</button>}
         <button className={`text-xs border rounded px-2 py-1 ${aiOpen ? 'bg-black text-white' : ''}`}
           onClick={() => setAiOpen(!aiOpen)}>AI</button>
         <div className="flex-1" />
@@ -171,6 +176,21 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
         <button className="text-xs border rounded px-2 py-1" disabled={!!exporting}
           onClick={() => exportPdf('docx')}>{exporting === 'docx' ? '渲染中…' : '导出 docx'}</button>
       </div>
+      {histOpen && <div className="border-b bg-white px-3 py-2 max-h-40 overflow-auto">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-xs font-semibold">版本历史（保留最近 30 次改动）</span>
+          <button className="text-xs text-neutral-400" onClick={() => setHistOpen(false)}>关闭</button>
+        </div>
+        {hist.length === 0 && <div className="text-xs text-neutral-400">暂无历史版本，编辑后会自动存快照</div>}
+        {hist.map(v => <div key={v.id} className="flex items-center gap-2 text-xs py-0.5">
+          <span className="text-neutral-400 w-32 shrink-0">{new Date(v.created_at).toLocaleString()}</span>
+          <span className="flex-1 truncate text-neutral-500">{v.preview}…</span>
+          <button className="text-blue-600" onClick={async () => {
+            const r = await api.restoreVersion(resumeId!, v.id)
+            setMd(r.contentMd); setHistOpen(false)
+          }}>恢复此版本</button>
+        </div>)}
+      </div>}
       <div className="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden">
         <div className="md:w-80 w-full md:border-r border-b bg-neutral-50 md:overflow-y-auto">
           <MasterPick masterId={masterId} onSelect={setSels} templateId={tplId} />

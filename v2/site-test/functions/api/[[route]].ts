@@ -245,8 +245,26 @@ app.get('/resumes/:id', async c => {
 })
 app.patch('/resumes/:id', async c => {
   const b = ResumeBody.partial().parse(await c.req.json())
-  await db(c).update(s.resume).set({ ...b, updatedAt: now() }).where(and(eq(s.resume.id, c.req.param('id')), eq(s.resume.userId, c.get('userId'))))
+  const rid = c.req.param('id')
+  if (b.contentMd !== undefined) {
+    const cur = await db(c).select().from(s.resume).where(and(eq(s.resume.id, rid), eq(s.resume.userId, c.get('userId')))).limit(1)
+    if (cur.length && cur[0].contentMd && cur[0].contentMd !== b.contentMd) {
+      await c.env.DB.prepare('INSERT INTO resume_version(id,resume_id,content_md,created_at) VALUES(?,?,?,?)')
+        .bind(crypto.randomUUID(), rid, cur[0].contentMd, Date.now()).run()
+      await c.env.DB.prepare(`DELETE FROM resume_version WHERE resume_id=? AND id NOT IN
+        (SELECT id FROM resume_version WHERE resume_id=? ORDER BY created_at DESC LIMIT 30)`).bind(rid, rid).run()
+    }
+  }
+  await db(c).update(s.resume).set({ ...b, updatedAt: now() }).where(and(eq(s.resume.id, rid), eq(s.resume.userId, c.get('userId'))))
   return c.json({ ok: true })
+})
+app.get('/resumes/:id/versions', async c =>
+  c.json(await c.env.DB.prepare('SELECT id, substr(content_md,1,60) preview, created_at FROM resume_version WHERE resume_id=? ORDER BY created_at DESC').bind(c.req.param('id')).all().then(r => r.results)))
+app.post('/resumes/:id/versions/:vid/restore', async c => {
+  const v = await c.env.DB.prepare('SELECT content_md FROM resume_version WHERE id=? AND resume_id=?').bind(c.req.param('vid'), c.req.param('id')).first<any>()
+  if (!v) return c.json({ error: 'not found' }, 404)
+  await db(c).update(s.resume).set({ contentMd: v.content_md, updatedAt: now() }).where(and(eq(s.resume.id, c.req.param('id')), eq(s.resume.userId, c.get('userId'))))
+  return c.json({ ok: true, contentMd: v.content_md })
 })
 app.delete('/resumes/:id', async c => {
   await db(c).delete(s.resume).where(and(eq(s.resume.id, c.req.param('id')), eq(s.resume.userId, c.get('userId'))))
