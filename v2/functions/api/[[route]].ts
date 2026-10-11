@@ -137,9 +137,9 @@ app.post('/master/import', async c => {
   // LLM 结构化 → 条目+版本 JSON
   const prompt = `把下面简历文本结构化成 JSON：{"items":[{"section":"education|internship|project|award|skill|selfeval|other","title":"条目标题","variants":[{"label":"默认","contentMd":"markdown 内容，小节用 ## 开头、列表用 -、加粗 **"}]}]}。section 只能取上述枚举值；同一条目如果明显可区分前后端侧重点可给两个版本。只返回 JSON。简历文本：\n` + text.slice(0, 12000)
   const r = await fetch('https://api.aicdks.com/v1/chat/completions', {
-    method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${(c.env as any).GP_LLM_API_KEY}` },
+    method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${(c.env as any).GP_LLM_API_KEY}` }, signal: AbortSignal.timeout(60000),
     body: JSON.stringify({ model: 'swe-2-medium', messages: [{ role: 'user', content: prompt }], temperature: 0.2 }) })
-  if (!r.ok) return c.json({ error: 'LLM 失败 ' + r.status }, 502)
+  
   const aiText = (await r.json() as any).choices?.[0]?.message?.content || ''
   const jm = aiText.match(/\{[\s\S]*\}/)
   if (!jm) return c.json({ error: 'LLM 未返回 JSON', raw: aiText.slice(0, 200) }, 502)
@@ -340,7 +340,7 @@ app.post('/master/chat', async c => {
   const { messages } = await c.req.json() as any
   if (!Array.isArray(messages)) return c.json({ error: 'missing messages' }, 400)
   const r = await fetch('https://api.aicdks.com/v1/chat/completions', {
-    method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${(c.env as any).GP_LLM_API_KEY}` },
+    method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${(c.env as any).GP_LLM_API_KEY}` }, signal: AbortSignal.timeout(60000),
     body: JSON.stringify({ model: 'swe-2-medium', temperature: 0.4,
       messages: [{ role: 'system', content: CHAT_SYS }, ...messages.slice(-20).map((m: any) => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: String(m.content).slice(0, 3000) }))] }) })
   if (!r.ok) { logEvent(c, 'ai_fail', 'chat ' + r.status); return c.json({ error: 'LLM ' + r.status }, 502) }
@@ -368,7 +368,7 @@ app.post('/jd/select', async c => {
 JD：${jd.slice(0, 2000)}
 条目池：${JSON.stringify(pool).slice(0, 14000)}`
   const r = await fetch('https://api.aicdks.com/v1/chat/completions', {
-    method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${(c.env as any).GP_LLM_API_KEY}` },
+    method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${(c.env as any).GP_LLM_API_KEY}` }, signal: AbortSignal.timeout(60000),
     body: JSON.stringify({ model: 'swe-2-medium', messages: [{ role: 'user', content: prompt }], temperature: 0.2 }) })
   if (!r.ok) { logEvent(c, 'ai_fail', 'jdselect ' + r.status); return c.json({ error: 'LLM ' + r.status }, 502) }
   const out = (await r.json() as any).choices?.[0]?.message?.content || ''
@@ -407,7 +407,7 @@ async function genResume(c: any, masterId: string, jd: string, templateId: strin
 JD：${jd.slice(0, 2000)}
 条目池：${JSON.stringify(pool).slice(0, 14000)}`
   const r = await fetch('https://api.aicdks.com/v1/chat/completions', {
-    method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${(c.env as any).GP_LLM_API_KEY}` },
+    method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${(c.env as any).GP_LLM_API_KEY}` }, signal: AbortSignal.timeout(60000),
     body: JSON.stringify({ model: 'swe-2-medium', messages: [{ role: 'user', content: prompt }], temperature: 0.3 }) })
   if (!r.ok) { logEvent(c, 'ai_fail', 'jdgen ' + r.status); throw Object.assign(new Error('LLM ' + r.status), { llm: true }) }
   const out = (await r.json() as any).choices?.[0]?.message?.content || ''
@@ -483,7 +483,7 @@ app.post('/jd/gap', async c => {
 大简历素材库：${JSON.stringify(pool).slice(0, 10000) || '（空）'}
 岗位 JD：${jd.slice(0, 2000)}`
   const r = await fetch('https://api.aicdks.com/v1/chat/completions', {
-    method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${(c.env as any).GP_LLM_API_KEY}` },
+    method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${(c.env as any).GP_LLM_API_KEY}` }, signal: AbortSignal.timeout(60000),
     body: JSON.stringify({ model: 'swe-2-medium', messages: [{ role: 'user', content: prompt }], temperature: 0.3 }) })
   if (!r.ok) { logEvent(c, 'ai_fail', 'jdgap ' + r.status); return c.json({ error: 'LLM ' + r.status }, 502) }
   return c.json({ report: (await r.json() as any).choices?.[0]?.message?.content || '' })
@@ -523,7 +523,7 @@ ${text}`,
     }
   }
   const r = await fetch('https://api.aicdks.com/v1/chat/completions', {
-    method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${(c.env as any).GP_LLM_API_KEY}` },
+    method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${(c.env as any).GP_LLM_API_KEY}` }, signal: AbortSignal.timeout(60000),
     body: JSON.stringify({ model: 'swe-2-medium', messages: [{ role: 'user', content: prompt }], temperature: 0.3 }) })
   if (!r.ok) { logEvent(c, 'ai_fail', 'LLM ' + r.status); return c.json({ error: 'LLM ' + r.status }, 502) }
   const out = (await r.json() as any).choices?.[0]?.message?.content || ''
@@ -807,6 +807,10 @@ app.put('/resumes/:id/extras', async c => {
   return c.json({ ok: true })
 })
 
+app.onError((err, c) => {
+  const timeout = err?.name === 'TimeoutError' || /abort|timeout/i.test(String(err?.message))
+  return c.json({ error: timeout ? 'AI 服务超时，请稍后重试' : '服务内部错误', code: timeout ? 'timeout' : 'internal' }, timeout ? 504 : 500)
+})
 export default app
 
 // Pages Functions 入口：所有方法都交给 Hono app
