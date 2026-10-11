@@ -39,6 +39,10 @@ export default function MasterLibrary({ masterId, onSelect }: {
   const [variants, setVariants] = useState<Record<string, any[]>>({})
   const [sels, setSels] = useState<Sel[]>([])   // 有序已选清单
   const [newItem, setNewItem] = useState({ section: 'project', title: '' })
+  const [jdOpen, setJdOpen] = useState(false)
+  const [jd, setJd] = useState('')
+  const [jdBusy, setJdBusy] = useState(false)
+  const [jdMsg, setJdMsg] = useState('')
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -75,8 +79,38 @@ export default function MasterLibrary({ masterId, onSelect }: {
     emit(arrayMove(sels, oldIdx, newIdx))
   }
 
+  const applyJd = async () => {
+    if (!jd.trim()) return
+    setJdBusy(true); setJdMsg('')
+    try {
+      const { selections } = await api.jdSelect(masterId, jd)
+      if (!selections?.length) { setJdMsg('AI 没选出条目，请补充 JD 或先充实大简历'); return }
+      const next: Sel[] = []
+      for (const p of selections) {
+        const it = items.find(x => x.id === p.itemId); if (!it) continue
+        let vs = variants[it.id]
+        if (!vs) { vs = await api.variants(it.id); variantCache[it.id] = vs; setVariants(s => ({ ...s, [it.id]: vs })) }
+        const v = (vs ?? []).find((x: any) => x.id === p.variantId) ?? (vs ?? [])[0]
+        next.push({ itemId: it.id, variantId: v?.id ?? null, ord: next.length, contentMd: v?.contentMd ?? '', section: it.section, title: it.title })
+      }
+      emit(next); setJdOpen(false)
+    } catch (e) { setJdMsg('选取失败：' + String(e).slice(0, 80)) }
+    setJdBusy(false)
+  }
   return (
     <div className="h-full overflow-auto p-3 space-y-3 text-sm">
+      <button className="w-full text-xs border rounded py-1.5 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+        onClick={() => setJdOpen(true)}>✨ 按 JD 一键选取</button>
+      {jdOpen && (
+        <div className="border rounded-lg p-2 bg-blue-50/50 space-y-2">
+          <textarea className="w-full border rounded px-2 py-1 text-xs h-28" placeholder="粘贴目标岗位 JD…" value={jd} onChange={e => setJd(e.target.value)} />
+          <div className="flex gap-2 items-center">
+            <button className="bg-blue-600 text-white text-xs rounded px-3 py-1" disabled={jdBusy} onClick={applyJd}>
+              {jdBusy ? 'AI 选取中…' : 'AI 推荐并替换已选'}</button>
+            <button className="text-xs text-neutral-400" onClick={() => setJdOpen(false)}>取消</button>
+          </div>
+          {jdMsg && <div className="text-xs text-red-500">{jdMsg}</div>}
+        </div>)}
       <div>
         <div className="font-semibold mb-1">已选（拖拽排序 = 简历顺序）</div>
         <DndContext sensors={sensors} collisionDetection={pointerWithin} onDragEnd={onDragEnd}>

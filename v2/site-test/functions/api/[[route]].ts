@@ -251,6 +251,34 @@ app.put('/resumes/:id/selections', async c => {
 })
 
 // ---- 模板补充字段 ----
+// POST /jd/select — 页面端按 JD 智能选取：LLM 从大简历挑 item×variant
+app.post('/jd/select', async c => {
+  const { masterId, jd } = await c.req.json() as any
+  if (!masterId || !jd) return c.json({ error: 'missing masterId/jd' }, 400)
+  const items = await db(c).select().from(s.resumeItem).where(eq(s.resumeItem.masterId, masterId)).orderBy(asc(s.resumeItem.sort))
+  if (!items.length) return c.json({ error: '大简历为空，先建条目' }, 400)
+  const pool: any[] = []
+  for (const it of items) {
+    const vs = await db(c).select().from(s.itemVariant).where(eq(s.itemVariant.itemId, it.id))
+    pool.push({ itemId: it.id, section: it.section, title: it.title, variants: vs.map(v => ({ variantId: v.id, label: v.label, preview: v.contentMd.slice(0, 200) })) })
+  }
+  const prompt = `你是求职简历顾问。下面是一个候选人的大简历条目池（每条含多个版本写法）和目标岗位 JD。
+请为该岗位挑选最合适的条目与版本，输出严格 JSON：{"selections":[{"itemId":"...","variantId":"...","reason":"一句话理由"}]}，按简历出现顺序排列，只从给出的 id 中选，最多 10 条。
+JD：${jd.slice(0, 2000)}
+条目池：${JSON.stringify(pool).slice(0, 14000)}`
+  const r = await fetch('https://api.aicdks.com/v1/chat/completions', {
+    method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${(c.env as any).GP_LLM_API_KEY}` },
+    body: JSON.stringify({ model: 'swe-2-medium', messages: [{ role: 'user', content: prompt }], temperature: 0.2 }) })
+  if (!r.ok) { logEvent(c, 'ai_fail', 'jdselect ' + r.status); return c.json({ error: 'LLM ' + r.status }, 502) }
+  const out = (await r.json() as any).choices?.[0]?.message?.content || ''
+  const jm = out.match(/\{[\s\S]*\}/)
+  let picks: any[] = []
+  try { picks = JSON.parse(jm?.[0] || '{}').selections || [] } catch { return c.json({ error: 'LLM JSON 解析失败' }, 502) }
+  const vIds = new Map(pool.flatMap(p => p.variants.map((v: any) => [v.variantId, p.itemId])))
+  const selections = picks.filter(p => vIds.get(p.variantId) === p.itemId)
+    .map((p, i) => ({ itemId: p.itemId, variantId: p.variantId, ord: i, reason: String(p.reason || '') }))
+  return c.json({ selections })
+})
 // POST /ai — 站内 AI：生成/润色/校对/翻译（aicdks swe-2-medium 中转）
 app.post('/ai', async c => {
   const { action, text, jd } = await c.req.json() as any
