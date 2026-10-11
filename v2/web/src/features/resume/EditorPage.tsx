@@ -102,13 +102,16 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
     setExporting('')
   }
 
-  const printPdf = () => {
+  const printPdf = async () => {
     const body = document.querySelector('.markdown-transform-html.jufe')?.innerHTML ?? ''
+    let brand = true
+    try { const me: any = await api.me(); brand = !me?.member } catch {}
     const w = window.open('', '_blank')!
     w.document.write(`<!DOCTYPE html><html><head><meta charset=utf-8><title>${meta?.name}</title>
       <link rel="stylesheet" href="${skinHref(meta?.slug ?? tplId)}">
       <style>@page{size:A4;margin:0}body{margin:0}.markdown-transform-html{width:210mm;margin:0 auto}</style>
       </head><body><div class="markdown-transform-html jufe">${body}</div>
+      ${brand ? `<div style="position:fixed;bottom:6mm;right:10mm;font-size:9px;color:#b0b0b0;letter-spacing:.5px">由 CodeCV 制作 · codecv.zalize.com</div>` : ''}
       <script>onload=()=>setTimeout(()=>print(),400)<\/script></body></html>`)
     w.document.close()
   }

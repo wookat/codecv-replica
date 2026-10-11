@@ -6,7 +6,7 @@
 interface Env { RENDER_URL?: string; RENDER_TOKEN?: string; ASSETS?: { fetch: (r: Request) => Promise<Response> } }
 
 // 共用渲染链：contentHtml + skinHref → 自包含 HTML → VPS Chrome114 → bytes（MCP 与 /export 共用）
-export async function renderSelfContained(c: any, contentHtml: string, style: string, type: 'pdf' | 'png' | 'docx'): Promise<Uint8Array | null> {
+export async function renderSelfContained(c: any, contentHtml: string, style: string, type: 'pdf' | 'png' | 'docx', brand = false): Promise<Uint8Array | null> {
   const env = c.env as Env
   const RENDER_URL = env.RENDER_URL || 'https://cvrender.zalize.com/render'
   const RENDER_TOKEN = env.RENDER_TOKEN || ''
@@ -27,6 +27,7 @@ export async function renderSelfContained(c: any, contentHtml: string, style: st
 <style>@page{size:A4;margin:0}body{margin:0;padding:0}.markdown-transform-html{width:210mm;margin:0 auto;box-shadow:none}</style>
 </head><body>
 <div class="markdown-transform-html jufe">${contentHtml || ''}</div>
+${brand ? `<div style="position:fixed;bottom:6mm;right:10mm;font-size:9px;color:#b0b0b0;font-family:'Noto Sans SC',sans-serif;letter-spacing:.5px">由 CodeCV 制作 · codecv.zalize.com</div>` : ''}
 </body></html>`
 
   try {
@@ -45,7 +46,13 @@ export default function exportRoute() {
   return async (c: any) => {
     const { content, style, name, type } = await c.req.json()
     if (!c.env.RENDER_TOKEN) return c.json({ code: 503, msg: 'RENDER_TOKEN 未配置' }, 503)
-    const bytes = await renderSelfContained(c, content || '', style || '', type === 'docx' ? 'docx' : type === 'png' ? 'png' : 'pdf')
+    // 免费用户导出件带品牌角标，会员（vip_expire 未过期）自动去除
+    let brand = true
+    try {
+      const u: any = await c.env.DB.prepare('SELECT vip_expire FROM users WHERE username=?').bind(c.get('userId')).first()
+      if (u && Number(u.vip_expire || 0) > Date.now()) brand = false
+    } catch {}
+    const bytes = await renderSelfContained(c, content || '', style || '', type === 'docx' ? 'docx' : type === 'png' ? 'png' : 'pdf', brand)
     if (!bytes) return c.json({ code: 503, msg: 'render 服务无响应' }, 503)
 
     return new Response(bytes.buffer, {
