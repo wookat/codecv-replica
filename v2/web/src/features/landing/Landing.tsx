@@ -45,7 +45,15 @@ export default function Landing({ onEnter }: { onEnter: () => void }) {
         <div className="cv-card cv-card-hover cv-elev p-5"><b style={{color:"var(--cv-brand)"}}>多格式导出</b><p className="cv-sub mt-1">PDF / PNG / docx，中文排版与字体全真还原，还能生成公开分享链接。</p></div>
       </section>
       </main>
-      <footer className="text-center text-xs cv-sub py-6 border-t" style={{borderColor:"var(--cv-line)"}}>CodeCV · zalize.com</footer>
+      <footer className="text-xs cv-sub py-6 border-t" style={{borderColor:"var(--cv-line)"}}>
+        <nav aria-label="按职业找简历" className="flex flex-wrap justify-center gap-x-4 gap-y-1 mb-3">
+          <a href="/jianli" className="hover:underline">按职业找简历</a>
+          {[['qianduan','前端工程师简历模板'],['java-houduan','Java简历模板'],['shuju-fenxi','数据分析师简历模板'],['xinmeiti-yunying','新媒体运营简历模板'],['hushi','护士简历模板']].map(([s,n]) => <a key={s} href={`/jianli/${s}`} className="hover:underline">{n}</a>)}
+          <a href="/jianli/hushi/zenmexie" className="hover:underline">护士简历怎么写</a>
+          <a href="/jianli/qianduan/fanwen" className="hover:underline">前端简历范文</a>
+        </nav>
+        <div className="text-center">CodeCV · zalize.com</div>
+      </footer>
     </div>
   )
 }

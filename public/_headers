@@ -9,5 +9,9 @@
   Content-Security-Policy: default-src 'self'; style-src 'unsafe-inline' 'self'; img-src 'self' data:
 /p/*
   Content-Security-Policy: default-src 'self'; style-src 'unsafe-inline' 'self'; img-src 'self' data:
+/jianli
+  Content-Security-Policy: default-src 'self'; style-src 'unsafe-inline' 'self'; img-src 'self' data:
+/jianli/*
+  Content-Security-Policy: default-src 'self'; style-src 'unsafe-inline' 'self'; img-src 'self' data:
 /gallery
   Content-Security-Policy: default-src 'self'; style-src 'unsafe-inline' 'self'; img-src 'self' data:

@@ -34,6 +34,7 @@ export default function App() {
     localStorage.setItem('v2:theme', dark ? 'dark' : 'light')
   }, [dark])
   const [templateId, setTemplateId] = useState(() => new URLSearchParams(location.search).get('tpl') || '')
+  const exampleId = new URLSearchParams(location.search).get('ex') || ''
   const sp = new URLSearchParams(location.search)
   const [resumeId, setResumeId] = useState<string | undefined>(sp.get('r') || undefined)
   const [regMode, setRegMode] = useState(false)
@@ -73,7 +74,7 @@ export default function App() {
   )
 
   if (page === 'editor' && (templateId || resumeId))
-    return <Suspense fallback={L}><EditorPage templateId={templateId || ''} masterId={masterId} resumeId={resumeId}
+    return <Suspense fallback={L}><EditorPage templateId={templateId || ''} exampleId={exampleId} masterId={masterId} resumeId={resumeId}
       onBack={() => { setResumeId(undefined); setPage(resumeId ? 'resumes' : 'templates') }} /></Suspense>
 
   return (

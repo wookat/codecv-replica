@@ -9,8 +9,8 @@ import ContentEditor from './ContentEditor'
 import AiPanel from './AiPanel'
 import catalog from '../templates/catalog.json'
 
-export default function EditorPage({ templateId: initTpl, masterId, resumeId: initRid, onBack }: {
-  templateId: string; masterId: string; resumeId?: string; onBack: () => void
+export default function EditorPage({ templateId: initTpl, exampleId, masterId, resumeId: initRid, onBack }: {
+  templateId: string; exampleId?: string; masterId: string; resumeId?: string; onBack: () => void
 }) {
   const [tplId, setTplId] = useState(initTpl)          // 快捷换肤
   const meta = templateMeta(tplId)
@@ -46,9 +46,20 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initRid])
 
+  // 范文模式（/?tpl=X&ex=nurse 或 ex=tpl:10front_end）：把真实示例稿载入编辑器，选取条目后再切回组稿
+  const [exampleMd, setExampleMd] = useState('')
   useEffect(() => {
-    if (!initRid) setMd(composeMd({ title: meta?.name ?? '我的简历', items: sels }))
-  }, [sels, tplId])
+    if (initRid || !exampleId) return
+    const url = exampleId.startsWith('tpl:') ? `/seeds/tpl/${exampleId.slice(4)}.json` : `/seeds/ex/${exampleId}.json`
+    fetch(url).then(r => r.ok ? r.json() : null).then(d => {
+      if (d?.content) { setExampleMd(d.content); dirtyRef.current = true }
+    }).catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [exampleId])
+  useEffect(() => {
+    if (initRid) return
+    setMd(!sels.length && exampleMd ? exampleMd : composeMd({ title: meta?.name ?? '我的简历', items: sels }))
+  }, [sels, tplId, exampleMd])
 
   // 模板头像位配置（种子 json 的 avatar 字段）
   useEffect(() => {

@@ -1,12 +1,14 @@
 // sitemap.xml：模板详情页 + 帖子页全量
 import { TPL_IDS } from './_catalog'
+import { OCCUPATIONS } from './_seo/data'
 
 export const onRequestGet: PagesFunction = async (context) => {
   const env: any = context.env
   const origin = new URL(context.request.url).origin
   const posts = await env.DB.prepare('SELECT _id FROM posts WHERE deleted=0 LIMIT 500').all<any>()
   const shared = await env.DB.prepare("SELECT resume_id FROM resume_extra WHERE field_key='share_on' AND value_md='1' LIMIT 200").all<any>()
-  const urls = ['', '/?login', '/gallery',
+  const urls = ['', '/?login', '/gallery', '/jianli',
+    ...OCCUPATIONS.flatMap(o => [`/jianli/${o.slug}`, `/jianli/${o.slug}/zenmexie`, `/jianli/${o.slug}/fanwen`]),
     ...(shared.results ?? []).map((r: any) => `/r/${r.resume_id}`),
     ...TPL_IDS.map(id => `/t/${id}`),
     ...(posts.results ?? []).map((p: any) => `/p/${p._id}`)]
