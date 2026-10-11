@@ -72,3 +72,5 @@ html.cv-dark .cv-light-zone input, html.cv-dark .cv-light-zone select, html.cv-d
 html.cv-dark .bg-neutral-100 { background: #232a35 !important; color: var(--cv-text); }
 html.cv-dark .bg-green-50 { background: #14251c !important; color: var(--cv-text); }
 html.cv-dark .border-green-200 { border-color: #1f4630 !important; }
+:root { --cv-brand-text: #1d4fd7; }
+html.cv-dark { --cv-brand-text: #7da2ff; }

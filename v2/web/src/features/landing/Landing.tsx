@@ -12,8 +12,9 @@ export default function Landing({ onEnter }: { onEnter: () => void }) {
           <button className="cv-btn cv-btn-primary" onClick={onEnter}>进入工作台</button>
         </div>
       </nav>
+      <main>
       <section className="text-center pt-20 pb-14 px-6">
-        <div className="inline-block cv-chip mb-5" style={{background:"var(--cv-brand-soft)",color:"var(--cv-brand)",fontWeight:600}}>
+        <div className="inline-block cv-chip mb-5" style={{background:"var(--cv-brand-soft)",color:"var(--cv-brand-text)",fontWeight:600}}>
           AI 优先 · MCP 直连 Codex / Cursor
         </div>
         <h1 className="text-5xl font-extrabold mb-5 tracking-tight">一份大简历库，<br /><span className="cv-grad">生成所有岗位</span>的简历</h1>
@@ -43,6 +44,7 @@ export default function Landing({ onEnter }: { onEnter: () => void }) {
         <div className="cv-card cv-card-hover cv-elev p-5"><b style={{color:"var(--cv-brand)"}}>AI 优先（MCP）</b><p className="cv-sub mt-1">Codex/Cursor 直连：读库→按 JD 选取→成稿→视觉自查→导出，一句话完成。</p></div>
         <div className="cv-card cv-card-hover cv-elev p-5"><b style={{color:"var(--cv-brand)"}}>多格式导出</b><p className="cv-sub mt-1">PDF / PNG / docx，中文排版与字体全真还原，还能生成公开分享链接。</p></div>
       </section>
+      </main>
       <footer className="text-center text-xs cv-sub py-6 border-t" style={{borderColor:"var(--cv-line)"}}>CodeCV · zalize.com</footer>
     </div>
   )
