@@ -363,6 +363,59 @@ app.post('/redeem', async c => {
     .bind(base + rc.days * 86400e3, rc.days >= 36500 ? '终身会员' : rc.days >= 365 ? '年度会员' : rc.days >= 90 ? '季度会员' : '月度会员', u.id).run()
   return c.json({ ok: true, days: rc.days })
 })
+// ---- admin 后台（is_admin=1 鉴权）----
+const needAdmin = async (c: any) => {
+  const u = await c.env.DB.prepare('SELECT id, is_admin FROM users WHERE username=?').bind(c.get('userId')).first<any>()
+  return u?.is_admin === 1 ? u : null
+}
+app.get('/admin/stats', async c => {
+  if (!await needAdmin(c)) return c.json({ error: 'forbidden' }, 403)
+  const q = (sql: string) => c.env.DB.prepare(sql).first<any>()
+  const [users, members, orders, paid, revenue, resumes, masters] = await Promise.all([
+    q('SELECT COUNT(*) c FROM users'),
+    q("SELECT COUNT(*) c FROM users WHERE vip_expire > " + Date.now()),
+    q('SELECT COUNT(*) c FROM orders'),
+    q("SELECT COUNT(*) c FROM orders WHERE status='paid'"),
+    q("SELECT COALESCE(SUM(amount),0) s FROM orders WHERE status='paid'"),
+    q('SELECT COUNT(*) c FROM resume'),
+    q('SELECT COUNT(*) c FROM master_resume'),
+  ])
+  return c.json({ users: users.c, members: members.c, orders: orders.c, paid: paid.c,
+    revenue: revenue.s, resumes: resumes.c, masters: masters.c })
+})
+app.get('/admin/users', async c => {
+  if (!await needAdmin(c)) return c.json({ error: 'forbidden' }, 403)
+  const r = await c.env.DB.prepare('SELECT id, username, nickname, vip_expire, vip_plan, ai, is_admin, banned, created_at FROM users ORDER BY created_at DESC LIMIT 200').all<any>()
+  return c.json(r.results ?? [])
+})
+app.patch('/admin/users/:id', async c => {
+  if (!await needAdmin(c)) return c.json({ error: 'forbidden' }, 403)
+  const b = await c.req.json() as any
+  const fields: string[] = []; const vals: any[] = []
+  for (const k of ['vip_expire', 'vip_plan', 'ai', 'banned', 'is_admin'])
+    if (b[k] !== undefined) { fields.push(`${k}=?`); vals.push(b[k]) }
+  if (!fields.length) return c.json({ error: 'nothing' }, 400)
+  vals.push(c.req.param('id'))
+  await c.env.DB.prepare(`UPDATE users SET ${fields.join(',')} WHERE id=?`).bind(...vals).run()
+  return c.json({ ok: true })
+})
+app.get('/admin/orders', async c => {
+  if (!await needAdmin(c)) return c.json({ error: 'forbidden' }, 403)
+  const r = await c.env.DB.prepare('SELECT o.order_no AS orderNo, u.username, o.plan, o.amount, o.status, o.created_at FROM orders o JOIN users u ON u.id=o.user_id ORDER BY o.created_at DESC LIMIT 200').all<any>()
+  return c.json(r.results ?? [])
+})
+app.post('/admin/redeem', async c => {
+  if (!await needAdmin(c)) return c.json({ error: 'forbidden' }, 403)
+  const { days, count = 1 } = await c.req.json() as any
+  if (!days || days <= 0) return c.json({ error: 'days required' }, 400)
+  const codes: string[] = []
+  for (let i = 0; i < Math.min(count, 100); i++) {
+    const code = 'CV' + [...crypto.getRandomValues(new Uint8Array(6))].map(b => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[b % 32]).join('')
+    await c.env.DB.prepare('INSERT INTO redeem_codes (code, days) VALUES (?,?)').bind(code, days).run()
+    codes.push(code)
+  }
+  return c.json({ codes })
+})
 app.post('/export', exportRoute())
 app.all('/mcp', mcpRoute())
 
