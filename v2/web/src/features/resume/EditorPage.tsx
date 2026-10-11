@@ -123,19 +123,19 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
     <div className="h-screen flex flex-col">
       <div className="border-b px-4 py-2 flex items-center gap-3 flex-wrap">
         <button onClick={onBack} className="text-sm text-neutral-500 hover:text-black">← 模板中心</button>
-        <select aria-label="换肤" className="text-sm border rounded px-2 py-0.5" value={tplId} onChange={e => setTplId(e.target.value)}>
+        <select aria-label="换肤" className="cv-input" value={tplId} onChange={e => setTplId(e.target.value)}>
           {Object.entries(catalog as Record<string, any>).map(([id, t]) => <option key={id} value={id}>{t.name}</option>)}
         </select>
         <span className="text-xs text-neutral-400">{meta?.font}</span>
-        <div className="flex border rounded overflow-hidden text-xs">
-          <button className={mode === 'md' ? 'bg-black text-white px-2 py-1' : 'px-2 py-1'} onClick={() => setMode('md')}>md</button>
-          <button className={mode === 'rich' ? 'bg-black text-white px-2 py-1' : 'px-2 py-1'} onClick={() => setMode('rich')}>内容模式</button>
+        <div className="flex cv-card overflow-hidden text-xs p-0.5 gap-0.5">
+          <button className={mode === 'md' ? 'cv-nav cv-nav-on px-2 py-0.5' : 'cv-nav px-2 py-0.5'} onClick={() => setMode('md')}>md</button>
+          <button className={mode === 'rich' ? 'cv-nav cv-nav-on px-2 py-0.5' : 'cv-nav px-2 py-0.5'} onClick={() => setMode('rich')}>内容模式</button>
         </div>
         <label className="text-xs text-neutral-500">字号
-          <input type="number" min={10} max={20} step={0.5} className="w-12 border rounded px-1 py-0.5 ml-1" value={opts.fontSize}
+          <input type="number" min={10} max={20} step={0.5} className="cv-input w-14 ml-1" value={opts.fontSize}
             onChange={e => setOpts({ ...opts, fontSize: +e.target.value })} /></label>
         <label className="text-xs text-neutral-500">行距
-          <select aria-label="行距" className="border rounded px-1 py-0.5 ml-1" value={opts.lineHeight}
+          <select aria-label="行距" className="cv-input ml-1" value={opts.lineHeight}
             onChange={e => setOpts({ ...opts, lineHeight: +e.target.value })}>
             {[1.2,1.4,1.6,1.8,2.0].map(v => <option key={v} value={v}>{v}</option>)}
           </select></label>
@@ -143,12 +143,12 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
           <input type="color" className="w-7 h-6 ml-1 align-middle" value={opts.color || meta?.primaryColor || '#333333'}
             onChange={e => setOpts({ ...opts, color: e.target.value })} /></label>
         <label className="text-xs text-neutral-500">缩放
-          <select aria-label="缩放" className="border rounded px-1 py-0.5 ml-1" value={opts.zoom}
+          <select aria-label="缩放" className="cv-input ml-1" value={opts.zoom}
             onChange={e => setOpts({ ...opts, zoom: +e.target.value })}>
             {[0.5,0.7,0.85,1,1.25,1.5].map(v => <option key={v} value={v}>{v}</option>)}
           </select></label>
         <label className="text-xs">字体
-          <select aria-label="字体" className="border rounded px-1 py-0.5 ml-1" value={opts.fontFamily || ''}
+          <select aria-label="字体" className="cv-input ml-1" value={opts.fontFamily || ''}
             onChange={e => setOpts({ ...opts, fontFamily: e.target.value || undefined })}>
             <option value="">模板默认</option>
             <option value="'Noto Sans SC', sans-serif">黑体</option>
@@ -158,25 +158,25 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
             <option value="Georgia, 'Times New Roman', serif">英文衬线</option>
           </select></label>
         {avatar && (
-          <label className="text-xs border rounded px-2 py-1 cursor-pointer">
+          <label className="cv-btn cv-btn-ghost text-xs cursor-pointer">
             {photo ? '更换照片' : '上传照片'}
             <input type="file" accept="image/*" className="hidden"
               onChange={e => e.target.files?.[0] && uploadPhoto(e.target.files[0])} />
           </label>)}
-        {initRid && <button className="text-xs border rounded px-2 py-1" onClick={async () => {
+        {initRid && <button className="cv-btn cv-btn-ghost text-xs" onClick={async () => {
           setHist(await api.resumeVersions(initRid).catch(() => [])); setHistOpen(true)
         }}>历史</button>}
-        <button className={`text-xs border rounded px-2 py-1 ${aiOpen ? 'bg-black text-white' : ''}`}
+        <button className={`cv-btn cv-btn-ghost text-xs ${aiOpen ? 'cv-nav-on' : ''}`}
           onClick={() => setAiOpen(!aiOpen)}>AI</button>
         <div className="flex-1" />
         {saveErr && <span className="text-xs text-red-500" role="alert">{saveErr}</span>}
         {!saveErr && initRid && <span className="text-[10px] text-neutral-400">已自动保存</span>}
-        <button className="text-xs border rounded px-2 py-1" onClick={printPdf}>打印 PDF</button>
-        <button className="text-xs bg-black text-white rounded px-2 py-1" disabled={!!exporting}
+        <button className="cv-btn cv-btn-ghost text-xs" onClick={printPdf}>打印 PDF</button>
+        <button className="cv-btn cv-btn-primary text-xs" disabled={!!exporting}
           onClick={() => exportPdf('pdf')}>{exporting === 'pdf' ? '渲染中…' : 'VPS 导出 PDF'}</button>
-        <button className="text-xs border rounded px-2 py-1" disabled={!!exporting}
+        <button className="cv-btn cv-btn-ghost text-xs" disabled={!!exporting}
           onClick={() => exportPdf('png')}>{exporting === 'png' ? '渲染中…' : 'VPS PNG'}</button>
-        <button className="text-xs border rounded px-2 py-1" disabled={!!exporting}
+        <button className="cv-btn cv-btn-ghost text-xs" disabled={!!exporting}
           onClick={() => exportPdf('docx')}>{exporting === 'docx' ? '渲染中…' : '导出 docx'}</button>
       </div>
       {histOpen && <div className="border-b bg-white px-3 py-2 max-h-40 overflow-auto">
