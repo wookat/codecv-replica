@@ -1,3 +1,5 @@
+import { getLocalStorage } from '@/common/localstorage'
+
 export interface IResumeConfig {
   content: string
   style: string
@@ -7,12 +9,12 @@ export interface IResumeConfig {
 }
 
 export async function resumeExport(data: IResumeConfig) {
+  const token = getLocalStorage('TOKEN')
   const res = await fetch(import.meta.env.VITE_EXPORT_URL as string, {
     method: 'POST',
-    body: JSON.stringify(data)
-    // headers: {
-    //   'Content-Type': 'application/json'
-    // }
+    body: JSON.stringify(data),
+    // 「移除水印」会员权益依赖服务端凭 Bearer 识别身份
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined
   })
   return await res.json()
 }
