@@ -7,13 +7,25 @@
     "gate": "node scripts/gate.mjs"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "drizzle-orm": "^0.45.4",
+    "hono": "^4.13.13",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "remark-parse": "^11.0.0",
     "remark-stringify": "^11.0.0",
-    "unified": "^11.0.5"
+    "tailwindcss": "^4.3.3",
+    "unified": "^11.0.5",
+    "vite": "^8.3.4",
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "esbuild": "^0.28.2",
     "typescript": "^5.6.0",
-    "vitest": "^3.0.0"
+    "vitest": "^3.0.0",
+    "wrangler": "^4.149.0"
   }
 }
