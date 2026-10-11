@@ -29,6 +29,7 @@ app.post('/auth/login', async c => {
   return c.json({ token: await issueToken(c.env.UPSTASH_KV, username), username })
 })
 app.post('/auth/register', async c => {
+  if (!await rateLimit(c, 'reg', 5)) return rl429(c)
   const { username, password, inviter } = await c.req.json() as any
   if (!username || !password) return c.json({ error: '用户名或密码不能为空' }, 400)
   const exist = await c.env.DB.prepare('SELECT id FROM users WHERE username=?').bind(username).first()
@@ -171,6 +172,15 @@ app.patch('/master/:id', async c => {
     .where(and(eq(s.masterResume.id, c.req.param('id')), eq(s.masterResume.userId, c.get('userId'))))
   return c.json({ ok: true })
 })
+
+// ---- 速率限制：KV 计数器 ----
+async function rateLimit(c: any, bucket: string, limit: number, winSec = 60): Promise<boolean> {
+  const key = `rl:${bucket}:${c.get('userId') || c.req.header('cf-connecting-ip') || 'anon'}`
+  const n = Number(await c.env.UPSTASH_KV.get(key) || 0) + 1
+  await c.env.UPSTASH_KV.put(key, String(n), { expirationTtl: winSec })
+  return n <= limit
+}
+const rl429 = (c: any) => c.json({ error: '操作太频繁，请稍后再试', code: 'rate' }, 429)
 
 // ---- 归属校验 ----
 async function ownResume(c: any, rid: string) {
@@ -428,6 +438,7 @@ JD：${jd.slice(0, 2000)}
   return { id: rid, title: resumeTitle, count: picks.length }
 }
 app.post('/jd/generate', async c => {
+  if (!await rateLimit(c, 'gen', 5)) return rl429(c)
   const { masterId, jd, templateId, title } = await c.req.json() as any
   if (!masterId || !jd || !templateId) return c.json({ error: 'missing masterId/jd/templateId' }, 400)
   try { const r = await genResume(c, masterId, jd, templateId, title); return c.json(r, 201) }
@@ -440,6 +451,7 @@ app.post('/jd/generate', async c => {
 })
 // POST /jd/batch — 批量定制：贴多个 JD（最多5个）→ 每家一份定制简历
 app.post('/jd/batch', async c => {
+  if (!await rateLimit(c, 'gen', 5)) return rl429(c)
   const { masterId, templateId, jds } = await c.req.json() as any
   if (!masterId || !templateId || !Array.isArray(jds) || !jds.length) return c.json({ error: 'missing params' }, 400)
   const list = jds.slice(0, 5).map(x => String(x).trim()).filter(Boolean)
@@ -479,6 +491,7 @@ app.post('/jd/gap', async c => {
 // POST /ai — 站内 AI：生成/润色/校对/翻译（aicdks swe-2-medium 中转）
 app.post('/ai', async c => {
   const { action, text, jd } = await c.req.json() as any
+  if (!await rateLimit(c, 'ai', 20)) return rl429(c)
   const prompts: Record<string, string> = {
     perf: `润色下面这段简历内容，使其更专业、有结果导向（保留 markdown 格式，只返回润色后文本）：\n${text}`,
     gen: `根据下面信息写一段简历 markdown（小节 ##、要点 -、加粗 **）：\n${text}${jd ? `\n目标岗位：${jd}` : ''}`,

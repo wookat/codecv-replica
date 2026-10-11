@@ -45,6 +45,10 @@ ${brand ? `<div style="position:fixed;bottom:6mm;right:10mm;font-size:9px;color:
 export default function exportRoute() {
   return async (c: any) => {
     const { content, style, name, type } = await c.req.json()
+    const k = `rl:exp:${c.get('userId') || c.req.header('cf-connecting-ip') || 'anon'}`
+    const n = Number(await c.env.UPSTASH_KV.get(k) || 0) + 1
+    await c.env.UPSTASH_KV.put(k, String(n), { expirationTtl: 60 })
+    if (n > 10) return c.json({ error: '操作太频繁，请稍后再试', code: 'rate' }, 429)
     if (!c.env.RENDER_TOKEN) return c.json({ code: 503, msg: 'RENDER_TOKEN 未配置' }, 503)
     // 免费用户导出件带品牌角标，会员（vip_expire 未过期）自动去除
     let brand = true
