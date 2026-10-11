@@ -16,7 +16,8 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
   const [md, setMd] = useState('')
   const [sels, setSels] = useState<SelItem[]>([])
   const [exporting, setExporting] = useState('')
-  const [mode, setMode] = useState<'md' | 'rich'>('md')   // md 编辑 | 内容模式
+  const [mode, setMode] = useState<'md' | 'rich'>('md')   // 排版控件状态：字号/行距/主题色/缩放
+  const [opts, setOpts] = useState({ zoom: 1, fontSize: 14, lineHeight: 1.6, color: '' })
   const [rid, setRid] = useState(initRid)
   const dirtyRef = { current: false }
   const saveTimer = { current: 0 as any }
@@ -56,10 +57,11 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
     setExporting(kind)
     try {
       const body = document.querySelector('.markdown-transform-html.jufe')?.innerHTML ?? ''
+      const optsCss = `<style>.markdown-transform-html{font-size:${opts.fontSize}px;line-height:${opts.lineHeight};${opts.color ? `--markdown-primary-bg-color:${opts.color}` : ''}}</style>`
       const r = await fetch('/api/v2/export', {
         method: 'POST', headers: { 'content-type': 'application/json', 'authorization': `Bearer ${localStorage.getItem('v2:token') ?? ''}` },
         body: JSON.stringify({
-          content: body, style: skinHref(meta?.slug ?? tplId), name: meta?.name ?? 'resume', type: kind,
+          content: optsCss + body, style: skinHref(meta?.slug ?? tplId), name: meta?.name ?? 'resume', type: kind,
         }),
       })
       if (!r.ok) throw new Error(await r.text())
@@ -95,6 +97,22 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
           <button className={mode === 'md' ? 'bg-black text-white px-2 py-1' : 'px-2 py-1'} onClick={() => setMode('md')}>md</button>
           <button className={mode === 'rich' ? 'bg-black text-white px-2 py-1' : 'px-2 py-1'} onClick={() => setMode('rich')}>内容模式</button>
         </div>
+        <label className="text-xs text-neutral-500">字号
+          <input type="number" min={10} max={20} step={0.5} className="w-12 border rounded px-1 py-0.5 ml-1" value={opts.fontSize}
+            onChange={e => setOpts({ ...opts, fontSize: +e.target.value })} /></label>
+        <label className="text-xs text-neutral-500">行距
+          <select className="border rounded px-1 py-0.5 ml-1" value={opts.lineHeight}
+            onChange={e => setOpts({ ...opts, lineHeight: +e.target.value })}>
+            {[1.2,1.4,1.6,1.8,2.0].map(v => <option key={v} value={v}>{v}</option>)}
+          </select></label>
+        <label className="text-xs text-neutral-500">主题色
+          <input type="color" className="w-7 h-6 ml-1 align-middle" value={opts.color || meta?.primaryColor || '#333333'}
+            onChange={e => setOpts({ ...opts, color: e.target.value })} /></label>
+        <label className="text-xs text-neutral-500">缩放
+          <select className="border rounded px-1 py-0.5 ml-1" value={opts.zoom}
+            onChange={e => setOpts({ ...opts, zoom: +e.target.value })}>
+            {[0.5,0.7,0.85,1,1.25,1.5].map(v => <option key={v} value={v}>{v}</option>)}
+          </select></label>
         <div className="flex-1" />
         <button className="text-xs border rounded px-2 py-1" onClick={printPdf}>打印 PDF</button>
         <button className="text-xs bg-black text-white rounded px-2 py-1" disabled={!!exporting}
@@ -113,7 +131,7 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
             : <ContentEditor md={md} onMd={v => { dirtyRef.current = true; setMd(v) }} />}
         </div>
         <div className="flex-1">
-          <PreviewPane md={md} skinCss={skinHref(meta?.slug ?? tplId)} primaryColor={meta?.primaryColor} font={meta?.font} />
+          <PreviewPane md={md} skinCss={skinHref(meta?.slug ?? tplId)} primaryColor={meta?.primaryColor} font={meta?.font} opts={opts} />
         </div>
       </div>
     </div>
