@@ -20,12 +20,12 @@ export const onRequestGet: PagesFunction = async (context) => {
 <link rel="canonical" href="${origin}/p/${id}">
 <style>body{font-family:system-ui,sans-serif;max-width:760px;margin:0 auto;padding:32px 16px;color:#222;line-height:1.8}
 h1{font-size:24px}h2{font-size:18px;margin-top:24px}h3{font-size:16px}
-.meta{color:#888;font-size:13px;margin-bottom:16px}
+.meta{color:#595959;font-size:13px;margin-bottom:16px}
 article{border-top:1px solid #eee;padding-top:16px}</style></head><body>
 <a href="/" style="color:#666;font-size:13px">← CodeCV 简历工具</a>
 <h1>${esc(p.title)}</h1>
 <div class="meta">${esc(p.author || '')} · ${esc(p.tag || '')} · ${new Date(p.created_at).toLocaleDateString('zh-CN')} · ${p.views || 0} 阅读</div>
-<article><p>${mdLite(p.content || '')}</p></article>
+<main><article><p>${mdLite(p.content || '')}</p></article></main>
 </body></html>`
     return new Response(html, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=600' } })
   } catch (e) {

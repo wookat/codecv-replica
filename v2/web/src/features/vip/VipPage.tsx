@@ -49,7 +49,7 @@ export default function VipPage() {
         ))}
       </div>
       <div className="flex gap-2 items-center text-sm">
-        <input className="border rounded px-2 py-1" placeholder="兑换码" value={code} onChange={e => setCode(e.target.value)} />
+        <input aria-label="兑换码" className="border rounded px-2 py-1" placeholder="兑换码" value={code} onChange={e => setCode(e.target.value)} />
         <button className="border rounded px-3 py-1" onClick={async () => {
           const r = await api.redeem(code).catch((e: any) => ({ error: String(e) }))
           setMsg(r.error ? '兑换失败' : `兑换成功 +${r.days} 天`); load()
@@ -60,7 +60,7 @@ export default function VipPage() {
         <div className="border rounded-lg p-4 bg-white text-sm space-y-2">
           <h3 className="font-medium">邀请好友 · 返佣 10%</h3>
           <div className="flex gap-2 items-center">
-            <input readOnly className="border rounded px-2 py-1 text-xs flex-1 bg-neutral-50"
+            <input readOnly aria-label="邀请链接" className="border rounded px-2 py-1 text-xs flex-1 bg-neutral-50"
               value={`${location.origin}/?inv=${me.username}`} />
             <button className="bg-black text-white text-xs rounded px-3 py-1.5" onClick={async e => {
               await navigator.clipboard.writeText(`${location.origin}/?inv=${me.username}`)

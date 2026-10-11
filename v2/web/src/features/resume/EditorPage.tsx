@@ -122,7 +122,7 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
     <div className="h-screen flex flex-col">
       <div className="border-b px-4 py-2 flex items-center gap-3 flex-wrap">
         <button onClick={onBack} className="text-sm text-neutral-500 hover:text-black">← 模板中心</button>
-        <select className="text-sm border rounded px-2 py-0.5" value={tplId} onChange={e => setTplId(e.target.value)}>
+        <select aria-label="换肤" className="text-sm border rounded px-2 py-0.5" value={tplId} onChange={e => setTplId(e.target.value)}>
           {Object.entries(catalog as Record<string, any>).map(([id, t]) => <option key={id} value={id}>{t.name}</option>)}
         </select>
         <span className="text-xs text-neutral-400">{meta?.font}</span>
@@ -134,7 +134,7 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
           <input type="number" min={10} max={20} step={0.5} className="w-12 border rounded px-1 py-0.5 ml-1" value={opts.fontSize}
             onChange={e => setOpts({ ...opts, fontSize: +e.target.value })} /></label>
         <label className="text-xs text-neutral-500">行距
-          <select className="border rounded px-1 py-0.5 ml-1" value={opts.lineHeight}
+          <select aria-label="行距" className="border rounded px-1 py-0.5 ml-1" value={opts.lineHeight}
             onChange={e => setOpts({ ...opts, lineHeight: +e.target.value })}>
             {[1.2,1.4,1.6,1.8,2.0].map(v => <option key={v} value={v}>{v}</option>)}
           </select></label>
@@ -142,12 +142,12 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
           <input type="color" className="w-7 h-6 ml-1 align-middle" value={opts.color || meta?.primaryColor || '#333333'}
             onChange={e => setOpts({ ...opts, color: e.target.value })} /></label>
         <label className="text-xs text-neutral-500">缩放
-          <select className="border rounded px-1 py-0.5 ml-1" value={opts.zoom}
+          <select aria-label="缩放" className="border rounded px-1 py-0.5 ml-1" value={opts.zoom}
             onChange={e => setOpts({ ...opts, zoom: +e.target.value })}>
             {[0.5,0.7,0.85,1,1.25,1.5].map(v => <option key={v} value={v}>{v}</option>)}
           </select></label>
         <label className="text-xs">字体
-          <select className="border rounded px-1 py-0.5 ml-1" value={opts.fontFamily || ''}
+          <select aria-label="字体" className="border rounded px-1 py-0.5 ml-1" value={opts.fontFamily || ''}
             onChange={e => setOpts({ ...opts, fontFamily: e.target.value || undefined })}>
             <option value="">模板默认</option>
             <option value="'Noto Sans SC', sans-serif">黑体</option>

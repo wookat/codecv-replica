@@ -62,7 +62,7 @@ export default function ResumeList({ onEdit }: { onEdit: (resumeId: string) => v
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {list.map(r => (
           <div key={r.id} className="border rounded-lg p-4 bg-white hover:shadow relative">
-            <input type="checkbox" className="absolute top-3 right-3" checked={sel.has(r.id)} onChange={() => tog(r.id)} />
+            <input type="checkbox" aria-label="选择这份简历" className="absolute top-3 right-3" checked={sel.has(r.id)} onChange={() => tog(r.id)} />
             <div className="font-medium truncate pr-5">{r.title || r.templateId}</div>
             <div className="text-xs text-neutral-400 mt-1">{r.templateId} · {new Date(r.updatedAt || r.updated_at || 0).toLocaleString()}</div>
             <div className="flex gap-2 mt-3 text-xs">

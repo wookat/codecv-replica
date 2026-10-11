@@ -17,12 +17,12 @@ export const onRequestGet: PagesFunction = async (context) => {
 h1{font-size:26px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-top:20px}
 .card{border:1px solid #eee;border-radius:10px;padding:10px;text-decoration:none;color:#222;display:block}
 .card img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:6px;background:#f5f5f5}
-.card b{display:block;font-size:13px;margin-top:8px}.card span{font-size:11px;color:#999}
+.card b{display:block;font-size:13px;margin-top:8px}.card span{font-size:11px;color:#595959}
 </style></head><body>
 <a href="/" style="color:#666;font-size:13px">← CodeCV 简历工具</a>
 <h1>简历广场</h1>
 <p style="color:#666;font-size:14px">用户公开分享的真实简历案例，点开即可查看正文并套用同款模板。</p>
-<div class="grid">${items || '<p>暂无分享，来做第一份公开的简历吧。</p>'}</div>
+<main><div class="grid">${items || '<p>暂无分享，来做第一份公开的简历吧。</p>'}</div></main>
 </body></html>`
   return new Response(html, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=300' } })
 }

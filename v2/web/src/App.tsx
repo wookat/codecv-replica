@@ -74,7 +74,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-neutral-50">
       <div className="border-b bg-white px-6 py-3 flex items-center gap-4">
-        <span className="font-bold">CodeCV v2</span>
+        <h1 className="font-bold text-base">CodeCV</h1>
         <button className={`text-sm px-2 py-1 rounded ${page === 'templates' ? 'bg-black text-white' : 'border'}`}
           onClick={() => setPage('templates')}>模板中心</button>
         <button className={`text-sm px-2 py-1 rounded ${page === 'resumes' ? 'bg-black text-white' : 'border'}`}
@@ -89,7 +89,7 @@ export default function App() {
           onClick={() => setPage('progress')}>投递</button>
         {templateId && page !== 'editor' && <button className="text-sm px-2 py-1 rounded border border-blue-400 text-blue-600"
           onClick={() => setPage('editor')}>继续编辑模板 {templateId}</button>}
-        <select className="border rounded px-2 py-1 text-sm" value={masterId} onChange={e => setMasterId(e.target.value)}>
+        <select aria-label="选择大简历" className="border rounded px-2 py-1 text-sm" value={masterId} onChange={e => setMasterId(e.target.value)}>
           {masters.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
         </select>
         <button className="text-sm border rounded px-2 py-1" onClick={async () => {
@@ -115,12 +115,14 @@ export default function App() {
         </label>
         {err && <span className="text-xs text-red-500">{err}</span>}
       </div>
+      <main aria-label="主要内容">
       {page === 'templates'
         ? <TemplateGallery onPick={id => { setResumeId(undefined); setTemplateId(id); setPage('editor') }} />
         : page === 'resumes'
         ? <ResumeList onEdit={id => { setTemplateId(''); setResumeId(id); setPage('editor') }} />
         : page === 'vip' ? <Suspense fallback={L}><VipPage /></Suspense> : page === 'admin' ? <Suspense fallback={L}><AdminPage /></Suspense> : page === 'community' ? <Suspense fallback={L}><CommunityPage /></Suspense> : page === 'progress' ? <Suspense fallback={L}><ProgressPage /></Suspense>
         : <Suspense fallback={L}><BuilderChat masterId={masterId} onDone={() => setPage('templates')} /></Suspense>}
+      </main>
     </div>
   )
 }

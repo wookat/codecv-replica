@@ -26,7 +26,7 @@ const variantCache: Record<string, any[]> = {}
 function VariantSelect({ itemId, value, onChange }: { itemId: string; value: string | null; onChange: (v: string) => void }) {
   const [vs, setVs] = useState<any[]>(variantCache[itemId] ?? [])
   useEffect(() => { if (!variantCache[itemId]) api.variants(itemId).then(v => { variantCache[itemId] = v; setVs(v) }) }, [itemId])
-  return <select className="text-xs border rounded px-0.5" value={value ?? ''} onChange={e => onChange(e.target.value)}>
+  return <select aria-label="条目版本" className="text-xs border rounded px-0.5" value={value ?? ''} onChange={e => onChange(e.target.value)}>
     {vs.map(v => <option key={v.id} value={v.id}>{v.label}</option>)}
   </select>
 }
@@ -173,7 +173,7 @@ export default function MasterLibrary({ masterId, onSelect, templateId }: {
       <div className="pt-2 border-t">
         <div className="text-xs font-semibold mb-1">+ 新条目</div>
         <div className="flex gap-1">
-          <select className="border rounded px-1 text-xs" value={newItem.section} onChange={e => setNewItem({ ...newItem, section: e.target.value })}>
+          <select aria-label="新条目类别" className="border rounded px-1 text-xs" value={newItem.section} onChange={e => setNewItem({ ...newItem, section: e.target.value })}>
             {SECTIONS.map(s2 => <option key={s2} value={s2}>{SEC_LABEL[s2]}</option>)}
           </select>
           <input className="border rounded px-1.5 py-0.5 text-xs flex-1 min-w-0" placeholder="条目标题" value={newItem.title}

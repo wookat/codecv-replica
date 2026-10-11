@@ -26,7 +26,7 @@ img{width:320px;max-width:100%;border:1px solid #eee;border-radius:8px}
 h1{font-size:22px;margin:0 0 12px}
 .tag{display:inline-block;background:#eef;border-radius:4px;padding:2px 8px;font-size:12px;margin-right:6px;color:#55c}
 .cta{display:inline-block;background:#000;color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;margin-top:16px}
-p{color:#555;line-height:1.7}</style></head><body><div class="wrap">
+p{color:#555;line-height:1.7}</style></head><body><main><div class="wrap">
 <a href="/" style="color:#666;font-size:13px">← CodeCV 简历工具</a>
 <div class="card" style="margin-top:12px">
 <img src="/api/v2/thumb/${id}" alt="${esc(name)}简历模板预览图" loading="lazy">
@@ -36,6 +36,6 @@ p{color:#555;line-height:1.7}</style></head><body><div class="wrap">
 <p>${esc(desc)}</p>
 <p>使用 CodeCV 在线编辑此模板：内容用 Markdown 编写，AI 按目标岗位自动生成，支持导出 PDF / PNG / Word。</p>
 <a class="cta" href="/?tpl=${id}">免费使用此模板 →</a>
-</div></div></div></body></html>`
+</div></div></div></main></body></html>`
   return new Response(html, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=3600' } })
 }
