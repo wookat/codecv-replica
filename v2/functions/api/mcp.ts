@@ -141,7 +141,7 @@ export default function mcpRoute() {
         if (r) contentMd = r.contentMd || await composeFor(db, resumeId, r.title)
       }
       const png = await renderPng(c, contentMd, templateId)
-      if (!png) return text(JSON.stringify({ error: 'render 失败' }))
+      if (!png) return text(JSON.stringify({ error: 'render 失败', detail: (c as any).__render_err }))
       return { content: [{ type: 'image' as const, data: b64(png), mimeType: 'image/png' }] }
     })
 
@@ -153,7 +153,7 @@ export default function mcpRoute() {
       if (!r) return text(JSON.stringify({ error: 'not found' }))
       const contentMd = r.contentMd || await composeFor(db, resumeId, r.title)
       const pdf = await renderKind(c, contentMd, r.templateId, 'pdf')
-      if (!pdf) return text(JSON.stringify({ error: 'render 失败' }))
+      if (!pdf) return text(JSON.stringify({ error: 'render 失败', detail: (c as any).__render_err }))
       return { content: [{ type: 'resource' as const, resource: { uri: `file:///${encodeURIComponent(filename || r.title || 'resume')}.pdf`, mimeType: 'application/pdf', blob: b64(pdf) } }] }
     })
 

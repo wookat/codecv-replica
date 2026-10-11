@@ -10,7 +10,7 @@ export async function renderSelfContained(c: any, contentHtml: string, style: st
   const env = c.env as Env
   const RENDER_URL = env.RENDER_URL || 'https://cvrender.zalize.com/render'
   const RENDER_TOKEN = env.RENDER_TOKEN || ''
-  if (!RENDER_TOKEN) return null
+  if (!RENDER_TOKEN) { (c as any).__render_err='no token'; return null }
 
   const origin = new URL(c.req.url).origin
   const fetchAsset = async (u: string) => {
@@ -36,7 +36,8 @@ export async function renderSelfContained(c: any, contentHtml: string, style: st
     })
     const j = await r.json() as any
     if (j?.data) return new Uint8Array(j.data)
-  } catch {}
+    ;(c as any).__render_err = 'status ' + r.status + ' ' + JSON.stringify(j).slice(0, 200)
+  } catch (e: any) { (c as any).__render_err = String(e && e.stack || e).slice(0, 300) }
   return null
 }
 
