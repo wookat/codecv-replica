@@ -59,7 +59,7 @@ export default function EditorPage({ templateId: initTpl, masterId, onBack }: {
 
   return (
     <div className="h-screen flex flex-col">
-      <div className="border-b px-4 py-2 flex items-center gap-3">
+      <div className="border-b px-4 py-2 flex items-center gap-3 flex-wrap">
         <button onClick={onBack} className="text-sm text-neutral-500 hover:text-black">← 模板中心</button>
         <select className="text-sm border rounded px-2 py-0.5" value={tplId} onChange={e => setTplId(e.target.value)}>
           {Object.entries(catalog as Record<string, any>).map(([id, t]) => <option key={id} value={id}>{t.name}</option>)}
@@ -76,11 +76,11 @@ export default function EditorPage({ templateId: initTpl, masterId, onBack }: {
         <button className="text-xs border rounded px-2 py-1" disabled={!!exporting}
           onClick={() => exportPdf('png')}>{exporting === 'png' ? '渲染中…' : 'VPS PNG'}</button>
       </div>
-      <div className="flex-1 flex overflow-hidden">
-        <div className="w-80 border-r bg-neutral-50">
+      <div className="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden">
+        <div className="md:w-80 w-full md:border-r border-b bg-neutral-50 md:overflow-y-auto">
           <MasterPick masterId={masterId} onSelect={setSels} />
         </div>
-        <div className="w-[420px] border-r">
+        <div className="md:w-[420px] w-full md:border-r border-b min-h-[300px]">
           {mode === 'md'
             ? <CodeMirror value={md} height="100%" style={{ height: '100%' }}
                 extensions={[markdown()]} onChange={v => setMd(v)} />
