@@ -4,10 +4,11 @@ import pinia from '@/store'
 import { getLocalStorage, setLocalStorage } from '@/common/localstorage'
 import { showMessageVN } from '@/common/message'
 import { loadTemplateContent } from '@/templates/config'
-import { cloudPush } from '@/api/modules/cloudResume'
+import { cloudList, cloudPush } from '@/api/modules/cloudResume'
 
 const MARKDOWN_CONTENT = 'markdown-content'
 const WRITABLE = 'writable'
+const TOKEN_KEY = 'TOKEN'
 
 export const getCurrentTypeContent = async (type: string): Promise<string> => {
   const base = type.split('~')[0] // 副本实例键回落到母版模板内容
@@ -34,6 +35,21 @@ const useEditorStore = defineStore('editorStore', {
     // 初始化编辑器内容（默认为Markdown模式）
     async initMDContent(resumeType: string) {
       const cacheKey = MARKDOWN_CONTENT + '-' + resumeType
+      // 登录用户云端优先：简历是云文档。冷启动或本地缓存过期时若以模板默认初始化，
+      // 随后的自动保存会把云端已存内容覆盖回退
+      if (getLocalStorage(TOKEN_KEY)) {
+        try {
+          const cloud = await cloudList()
+          const hit = cloud.find(r => r.type === resumeType)
+          if (hit?.content) {
+            this.MDContent = hit.content
+            setLocalStorage(cacheKey, hit.content)
+            return
+          }
+        } catch {
+          /* 云端不可达时回落本地缓存 */
+        }
+      }
       this.MDContent = getLocalStorage(cacheKey)
         ? (getLocalStorage(cacheKey) as string)
         : await getCurrentTypeContent(resumeType)
