@@ -69,7 +69,7 @@ export default function VipPage() {
           </div>
           <div className="text-xs text-neutral-500">好友通过链接注册并首次付费，你获订单金额 10% 返佣{inv ? ` · 累计返佣 ¥${(inv.total / 100).toFixed(2)}` : ''}</div>
           {inv?.records?.length > 0 && (
-            <table className="w-full text-xs border mt-2">
+            <div className="overflow-x-auto"><table className="w-full text-xs border mt-2">
               <thead><tr className="bg-neutral-50"><th className="p-1.5 text-left">被邀请人</th><th>订单号</th><th>返佣</th><th>结算</th><th>时间</th></tr></thead>
               <tbody>{inv.records.map((r: any) => (
                 <tr key={r.orderNo} className="border-t">
@@ -78,11 +78,11 @@ export default function VipPage() {
                   <td>{new Date(r.created_at).toLocaleDateString()}</td>
                 </tr>))}
               </tbody>
-            </table>)}
+            </table></div>)}
         </div>)}
       <div>
         <h3 className="font-medium mb-2 text-sm">订单记录</h3>
-        <table className="w-full text-xs border">
+        <div className="overflow-x-auto"><table className="w-full text-xs border">
           <thead><tr className="bg-neutral-50"><th className="p-2 text-left">订单号</th><th>档位</th><th>金额</th><th>状态</th><th>时间</th></tr></thead>
           <tbody>{orders.map(o => (
             <tr key={o.orderNo} className="border-t">
@@ -92,7 +92,7 @@ export default function VipPage() {
               <td className="text-center">{new Date(o.created_at).toLocaleDateString()}</td>
             </tr>))}
           </tbody>
-        </table>
+        </table></div>
       </div>
     </div>
   )

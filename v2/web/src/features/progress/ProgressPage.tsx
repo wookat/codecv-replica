@@ -15,11 +15,11 @@ export default function ProgressPage() {
     <div className="p-6 max-w-5xl mx-auto">
       <h2 className="text-lg font-semibold mb-4">投递进度（{list.length}）</h2>
       <div className="flex gap-2 mb-4 text-xs flex-wrap">
-        <input className="cv-btn cv-btn-ghost" aria-label="公司" placeholder="公司" onChange={e => setF({ ...f, name: e.target.value })} />
-        <input className="cv-btn cv-btn-ghost" aria-label="岗位" placeholder="岗位" onChange={e => setF({ ...f, post: e.target.value })} />
-        <input className="cv-btn cv-btn-ghost" aria-label="工作地点" placeholder="工作地点" onChange={e => setF({ ...f, workLocation: e.target.value })} />
-        <input className="cv-btn cv-btn-ghost" aria-label="渠道" placeholder="渠道" onChange={e => setF({ ...f, channel: e.target.value })} />
-        <select aria-label="绑定简历" className="cv-btn cv-btn-ghost" value={f.resumeId || ''} onChange={e => setF({ ...f, resumeId: e.target.value })}>
+        <input className="cv-input flex-1 min-w-[140px]" aria-label="公司" placeholder="公司" onChange={e => setF({ ...f, name: e.target.value })} />
+        <input className="cv-input flex-1 min-w-[140px]" aria-label="岗位" placeholder="岗位" onChange={e => setF({ ...f, post: e.target.value })} />
+        <input className="cv-input flex-1 min-w-[140px]" aria-label="工作地点" placeholder="工作地点" onChange={e => setF({ ...f, workLocation: e.target.value })} />
+        <input className="cv-input flex-1 min-w-[140px]" aria-label="渠道" placeholder="渠道" onChange={e => setF({ ...f, channel: e.target.value })} />
+        <select aria-label="绑定简历" className="cv-input flex-1 min-w-[140px]" value={f.resumeId || ''} onChange={e => setF({ ...f, resumeId: e.target.value })}>
           <option value="">绑定简历…</option>
           {resumes.map(r => <option key={r.id} value={r.id}>{r.title}</option>)}
         </select>
