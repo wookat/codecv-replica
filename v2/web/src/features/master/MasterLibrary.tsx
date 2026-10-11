@@ -45,6 +45,8 @@ export default function MasterLibrary({ masterId, onSelect, templateId }: {
   const [jdBusy, setJdBusy] = useState(false)
   const [jdMsg, setJdMsg] = useState('')
   const [gap, setGap] = useState('')
+  const [batchMode, setBatchMode] = useState(false)
+  const [batchOut, setBatchOut] = useState<any[] | null>(null)
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -105,16 +107,29 @@ export default function MasterLibrary({ masterId, onSelect, templateId }: {
         onClick={() => setJdOpen(true)}>✨ 按 JD 一键选取</button>
       {jdOpen && (
         <div className="border rounded-lg p-2 bg-blue-50/50 space-y-2">
-          <textarea className="w-full border rounded px-2 py-1 text-xs h-28" placeholder="粘贴目标岗位 JD…" value={jd} onChange={e => setJd(e.target.value)} />
+          <div className="flex gap-2 text-xs">
+            <button className={batchMode ? 'text-neutral-400' : 'font-semibold'} onClick={() => setBatchMode(false)}>单 JD</button>
+            <button className={batchMode ? 'font-semibold' : 'text-neutral-400'} onClick={() => setBatchMode(true)}>批量海投</button>
+          </div>
+          <textarea className="w-full border rounded px-2 py-1 text-xs h-28"
+            placeholder={batchMode ? '每段 JD 之间用单独一行 --- 分隔（最多5个）' : '粘贴目标岗位 JD…'}
+            value={jd} onChange={e => setJd(e.target.value)} />
           <div className="flex gap-2 items-center">
             <button className="bg-blue-600 text-white text-xs rounded px-3 py-1" disabled={jdBusy} onClick={applyJd}>
               {jdBusy ? '处理中…' : 'AI 推荐并替换已选'}</button>
-            {templateId && <button className="text-xs bg-green-600 text-white rounded px-3 py-1" disabled={jdBusy} onClick={async () => {
+            {templateId && !batchMode && <button className="text-xs bg-green-600 text-white rounded px-3 py-1" disabled={jdBusy} onClick={async () => {
               if (!jd.trim()) return; setJdBusy(true); setJdMsg('')
               try { const r = await api.jdGenerate(masterId, jd, templateId); location.href = `/?r=${r.id}` }
               catch (e: any) { setJdMsg(e?.code === 'quota' ? '简历份数达上限，升级会员可建更多' : '成稿失败：' + String(e).slice(0, 60)) }
               setJdBusy(false)
             }}>一键成稿</button>}
+            {templateId && batchMode && <button className="text-xs bg-green-600 text-white rounded px-3 py-1" disabled={jdBusy} onClick={async () => {
+              const jds = jd.split(/\n\s*---\s*\n/).map(x => x.trim()).filter(Boolean)
+              if (!jds.length) return; setJdBusy(true); setJdMsg(''); setBatchOut(null)
+              try { setBatchOut((await api.jdBatch(masterId, templateId, jds)).results) }
+              catch (e) { setJdMsg('批量失败：' + String(e).slice(0, 60)) }
+              setJdBusy(false)
+            }}>{jdBusy ? '生成中…' : '批量生成 N 份'}</button>}
             <button className="text-xs border border-blue-300 text-blue-600 rounded px-3 py-1" disabled={jdBusy} onClick={async () => {
               if (!jd.trim()) return; setJdBusy(true); setGap('')
               try { setGap((await api.jdGap(masterId, jd)).report) } catch (e) { setJdMsg('分析失败：' + String(e).slice(0, 60)) }
@@ -124,6 +139,11 @@ export default function MasterLibrary({ masterId, onSelect, templateId }: {
           </div>
           {jdMsg && <div className="text-xs text-red-500">{jdMsg}</div>}
           {gap && <pre className="text-xs whitespace-pre-wrap bg-white border rounded p-2 max-h-56 overflow-auto">{gap}</pre>}
+          {batchOut && <div className="text-xs space-y-1 bg-white border rounded p-2 max-h-40 overflow-auto">
+            {batchOut.map((r, i) => r.ok
+              ? <div key={i}><a className="text-blue-600 underline" href={`/?r=${r.id}`}>{r.title}</a> <span className="text-neutral-400">({r.count} 条目)</span></div>
+              : <div key={i} className="text-red-500">{r.jd}… — {r.error}</div>)}
+          </div>}
         </div>)}
       <div>
         <div className="font-semibold mb-1">已选（拖拽排序 = 简历顺序）</div>

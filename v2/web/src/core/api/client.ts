@@ -50,6 +50,8 @@ export const api = {
   setFavorite: (tplId: string, on: boolean) => req<any>('/favorites', { method: 'PUT', body: JSON.stringify({ tplId, on }) }),
   migrateV1: () => req<{ migrated: number; total: number }>('/migrate/v1', { method: 'POST' }),
   masterChat: (messages: any[]) => req<any>('/master/chat', { method: 'POST', body: JSON.stringify({ messages }) }),
+  jdBatch: (masterId: string, templateId: string, jds: string[]) =>
+    req<any>('/jd/batch', { method: 'POST', body: JSON.stringify({ masterId, templateId, jds }) }),
   jdGenerate: (masterId: string, jd: string, templateId: string) =>
     req<any>('/jd/generate', { method: 'POST', body: JSON.stringify({ masterId, jd, templateId }) }),
   jdGap: (masterId: string, jd: string) => req<any>('/jd/gap', { method: 'POST', body: JSON.stringify({ masterId, jd }) }),

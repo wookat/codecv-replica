@@ -315,21 +315,19 @@ JD：${jd.slice(0, 2000)}
     .map((p, i) => ({ itemId: p.itemId, variantId: p.variantId, ord: i, reason: String(p.reason || '') }))
   return c.json({ selections })
 })
-// POST /jd/generate — 一句话成稿：选条目×版本 + 按 JD 改写 → 直接建可导出简历
-app.post('/jd/generate', async c => {
-  const { masterId, jd, templateId, title } = await c.req.json() as any
-  if (!masterId || !jd || !templateId) return c.json({ error: 'missing masterId/jd/templateId' }, 400)
+// 一键成稿公共逻辑：选条目×版本 + 按 JD 改写 → 建简历落库
+async function genResume(c: any, masterId: string, jd: string, templateId: string, title?: string) {
   {
     const u = await meRow(c)
     const t = u ? tier(u) : null
     const quota = t ? t.cv : 1
     if (quota !== -1) {
       const cnt = await c.env.DB.prepare('SELECT COUNT(*) c FROM resume WHERE user_id=?').bind(c.get('userId')).first<any>()
-      if ((cnt?.c ?? 0) >= quota) return c.json({ error: `简历份数已达上限（${quota}），升级会员可建更多`, code: 'quota' }, 403)
+      if ((cnt?.c ?? 0) >= quota) throw Object.assign(new Error('quota'), { quota: true })
     }
   }
   const items = await db(c).select().from(s.resumeItem).where(eq(s.resumeItem.masterId, masterId)).orderBy(asc(s.resumeItem.sort))
-  if (!items.length) return c.json({ error: '大简历为空，先用 AI 建库或导入简历' }, 400)
+  if (!items.length) throw Object.assign(new Error('empty'), { empty: true })
   const pool: any[] = []; const vMap = new Map<string, any>()
   for (const it of items) {
     const vs = await db(c).select().from(s.itemVariant).where(eq(s.itemVariant.itemId, it.id))
@@ -351,9 +349,8 @@ JD：${jd.slice(0, 2000)}
   let j: any = {}
   try { j = JSON.parse(jm?.[0] || '{}') } catch { return c.json({ error: 'LLM JSON 解析失败' }, 502) }
   const picks = (j.selections || []).filter((p: any) => vMap.get(p.variantId)?.itemId === p.itemId)
-  if (!picks.length) return c.json({ error: 'AI 未产出有效选取' }, 502)
-  const uid = () => crypto.randomUUID()
-  const rid = uid(); const nowT = Date.now(); const uidNum = (await meRow(c))?.id ?? 0
+  if (!picks.length) throw new Error('AI 未产出有效选取')
+  const rid = crypto.randomUUID(); const nowT = Date.now()
   const resumeTitle = title || j.title || `定制简历-${jd.slice(0, 12)}`
   await db(c).insert(s.resume).values({ id: rid, userId: c.get('userId'), masterId, templateId, title: resumeTitle, targetJd: jd.slice(0, 500), contentMd: '', createdAt: nowT, updatedAt: nowT })
   const composeItems: any[] = []
@@ -365,8 +362,29 @@ JD：${jd.slice(0, 2000)}
   }
   const contentMd = composeResumeMd({ title: resumeTitle, items: composeItems })
   await db(c).update(s.resume).set({ contentMd }).where(eq(s.resume.id, rid))
-  void uidNum
-  return c.json({ id: rid, title: resumeTitle, count: picks.length }, 201)
+  return { id: rid, title: resumeTitle, count: picks.length }
+}
+app.post('/jd/generate', async c => {
+  const { masterId, jd, templateId, title } = await c.req.json() as any
+  if (!masterId || !jd || !templateId) return c.json({ error: 'missing masterId/jd/templateId' }, 400)
+  try { const r = await genResume(c, masterId, jd, templateId, title); return c.json(r, 201) }
+  catch (e: any) {
+    if (e?.quota) return c.json({ error: '简历份数已达上限，升级会员可建更多', code: 'quota' }, 403)
+    if (e?.empty) return c.json({ error: '大简历为空，先用 AI 建库或导入简历' }, 400)
+    return c.json({ error: String(e?.message || e) }, 502)
+  }
+})
+// POST /jd/batch — 批量定制：贴多个 JD（最多5个）→ 每家一份定制简历
+app.post('/jd/batch', async c => {
+  const { masterId, templateId, jds } = await c.req.json() as any
+  if (!masterId || !templateId || !Array.isArray(jds) || !jds.length) return c.json({ error: 'missing params' }, 400)
+  const list = jds.slice(0, 5).map(x => String(x).trim()).filter(Boolean)
+  const results: any[] = []
+  for (const jd of list) {
+    try { results.push({ jd: jd.slice(0, 40), ok: true, ...(await genResume(c, masterId, jd, templateId)) }) }
+    catch (e: any) { results.push({ jd: jd.slice(0, 40), ok: false, error: e?.quota ? '份数达上限' : String(e?.message || e).slice(0, 80) }) }
+  }
+  return c.json({ results })
 })
 // POST /jd/gap — JD 差距报告：大简历 vs JD 缺什么、怎么补
 app.post('/jd/gap', async c => {
