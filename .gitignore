@@ -26,3 +26,4 @@ dist-ssr
 src/templates/modules/[0-9]*
 dist/
 .wrangler/
+v2/site-test/.dev.vars
