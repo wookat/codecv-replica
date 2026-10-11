@@ -2,7 +2,7 @@
 // Pages Functions: /api/v2/* 全部进这一个 Hono app
 import { Hono } from 'hono'
 import { drizzle } from 'drizzle-orm/d1'
-import { eq, and, asc } from 'drizzle-orm'
+import { eq, and, asc, inArray } from 'drizzle-orm'
 import { z } from 'zod'
 import { pbkdf2, hashPassword, issueToken, tokenUser, bearerToken } from '../_auth'
 import { markdownToHTML } from '../_mth'
@@ -359,8 +359,11 @@ app.post('/jd/select', async c => {
   const items = await db(c).select().from(s.resumeItem).where(eq(s.resumeItem.masterId, masterId)).orderBy(asc(s.resumeItem.sort))
   if (!items.length) return c.json({ error: '大简历为空，先建条目' }, 400)
   const pool: any[] = []
+  const allVs = await db(c).select().from(s.itemVariant).where(inArray(s.itemVariant.itemId, items.map(x => x.id)))
+  const vsByItem = new Map<string, any[]>()
+  for (const v of allVs) { const a = vsByItem.get(v.itemId) ?? []; a.push(v); vsByItem.set(v.itemId, a) }
   for (const it of items) {
-    const vs = await db(c).select().from(s.itemVariant).where(eq(s.itemVariant.itemId, it.id))
+    const vs = vsByItem.get(it.id) ?? []
     pool.push({ itemId: it.id, section: it.section, title: it.title, variants: vs.map(v => ({ variantId: v.id, label: v.label, preview: v.contentMd.slice(0, 200) })) })
   }
   const prompt = `你是求职简历顾问。下面是一个候选人的大简历条目池（每条含多个版本写法）和目标岗位 JD。
@@ -395,9 +398,11 @@ async function genResume(c: any, masterId: string, jd: string, templateId: strin
   const items = await db(c).select().from(s.resumeItem).where(eq(s.resumeItem.masterId, masterId)).orderBy(asc(s.resumeItem.sort))
   if (!items.length) throw Object.assign(new Error('empty'), { empty: true })
   const pool: any[] = []; const vMap = new Map<string, any>()
+  const allVs = await db(c).select().from(s.itemVariant).where(inArray(s.itemVariant.itemId, items.map(x => x.id)))
+  const vsByItem = new Map<string, any[]>()
+  for (const v of allVs) { const a = vsByItem.get(v.itemId) ?? []; a.push(v); vsByItem.set(v.itemId, a); vMap.set(v.id, v) }
   for (const it of items) {
-    const vs = await db(c).select().from(s.itemVariant).where(eq(s.itemVariant.itemId, it.id))
-    for (const v of vs) vMap.set(v.id, v)
+    const vs = vsByItem.get(it.id) ?? []
     pool.push({ itemId: it.id, section: it.section, title: it.title,
       variants: vs.map(v => ({ variantId: v.id, label: v.label, contentMd: v.contentMd.slice(0, 500) })) })
   }
@@ -469,8 +474,11 @@ app.post('/jd/gap', async c => {
   if (!await ownMaster(c, masterId)) return forbid(c)
   const items = await db(c).select().from(s.resumeItem).where(eq(s.resumeItem.masterId, masterId)).orderBy(asc(s.resumeItem.sort))
   const pool: any[] = []
+  const allVs = await db(c).select().from(s.itemVariant).where(inArray(s.itemVariant.itemId, items.map(x => x.id)))
+  const vsByItem = new Map<string, any[]>()
+  for (const v of allVs) { const a = vsByItem.get(v.itemId) ?? []; a.push(v); vsByItem.set(v.itemId, a) }
   for (const it of items) {
-    const vs = await db(c).select().from(s.itemVariant).where(eq(s.itemVariant.itemId, it.id))
+    const vs = vsByItem.get(it.id) ?? []
     pool.push({ section: it.section, title: it.title, previews: vs.map(v => v.contentMd.slice(0, 120)) })
   }
   const prompt = `你是求职顾问。对照候选人「大简历素材库」和目标「岗位 JD」，输出差距分析报告，markdown 格式：

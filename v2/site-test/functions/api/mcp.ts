@@ -6,7 +6,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js'
 import { z } from 'zod'
 import { drizzle } from 'drizzle-orm/d1'
-import { eq, and, asc } from 'drizzle-orm'
+import { eq, and, asc, inArray } from 'drizzle-orm'
 import { tokenUser, bearerToken } from '../_auth'
 import * as s from '../schema'
 import { composeResumeMd, SECTION_TITLE } from '../_compose'
@@ -186,17 +186,16 @@ export default function mcpRoute() {
 // 合成 resume md：selections → variant.contentMd（复刻 web composer 逻辑，保持同构）
 async function composeFor(db: any, resumeId: string, title: string): Promise<string> {
   const sel = await db.select().from(s.resumeSelection).where(eq(s.resumeSelection.resumeId, resumeId)).orderBy(asc(s.resumeSelection.ord))
-  const items = []
-  for (const it of sel) {
-    const [item] = await db.select().from(s.resumeItem).where(eq(s.resumeItem.id, it.itemId))
-    let body = ''
-    if (it.variantId) {
-      const [v] = await db.select().from(s.itemVariant).where(eq(s.itemVariant.id, it.variantId))
-      body = v?.contentMd ?? ''
-    }
-    items.push({ section: item?.section ?? 'other', title: item?.title ?? '', contentMd: body })
-  }
-  return composeResumeMd({ title, items })
+  const iIds = sel.map((x: any) => x.itemId).filter(Boolean)
+  const vIds = sel.map((x: any) => x.variantId).filter(Boolean)
+  const items = iIds.length ? await db.select().from(s.resumeItem).where(inArray(s.resumeItem.id, iIds)) : []
+  const vars = vIds.length ? await db.select().from(s.itemVariant).where(inArray(s.itemVariant.id, vIds)) : []
+  const iMap = new Map(items.map((x: any) => [x.id, x])); const vMap = new Map(vars.map((x: any) => [x.id, x]))
+  const out = sel.map((it: any) => {
+    const item = iMap.get(it.itemId)
+    return { section: item?.section ?? 'other', title: item?.title ?? '', contentMd: it.variantId ? vMap.get(it.variantId)?.contentMd ?? '' : '' }
+  })
+  return composeResumeMd({ title, items: out })
 }
 
 async function renderKind(c: any, md: string, templateId: string, kind: 'pdf' | 'png'): Promise<Uint8Array | null> {
