@@ -68,6 +68,54 @@ app.use('*', async (c, next) => {
 // ---- 大简历 ----
 app.get('/master', async c =>
   c.json(await db(c).select().from(s.masterResume).where(eq(s.masterResume.userId, c.get('userId')))))
+// POST /master/import — 扔一份简历（pdf/docx/md/txt）→ cv-render /extract 抽文本 → LLM 结构化建库
+app.post('/master/import', async c => {
+  const { name, filename, data } = await c.req.json() as any
+  if (!data) return c.json({ error: 'no file' }, 400)
+  const extName = (filename || '').toLowerCase().split('.').pop() || ''
+  let text = ''
+  if (['pdf', 'docx'].includes(extName)) {
+    const RENDER_URL = (c.env as any).RENDER_URL || 'https://cvrender.zalize.com/render'
+    const extractUrl = RENDER_URL.replace(/\/render$/, '') + '/extract'
+    const ext = await fetch(extractUrl, { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ token: (c.env as any).RENDER_TOKEN, name: filename, data }) })
+    if (!ext.ok) return c.json({ error: 'extract 失败 ' + ext.status }, 502)
+    text = (await ext.json() as any).text || ''
+  } else {
+    // txt/md 直接解码
+    const bin = atob(data)
+    const bytes = new Uint8Array(bin.length)
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i)
+    text = new TextDecoder().decode(bytes)
+  }
+  if (!text || text.length < 20) return c.json({ error: '提取不到文本' }, 422)
+
+  // LLM 结构化 → 条目+版本 JSON
+  const prompt = `把下面简历文本结构化成 JSON：{"items":[{"section":"education|internship|project|award|skill|selfeval|other","title":"条目标题","variants":[{"label":"默认","contentMd":"markdown 内容，小节用 ## 开头、列表用 -、加粗 **"}]}]}。section 只能取上述枚举值；同一条目如果明显可区分前后端侧重点可给两个版本。只返回 JSON。简历文本：\n` + text.slice(0, 12000)
+  const r = await fetch('https://api.aicdks.com/v1/chat/completions', {
+    method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${(c.env as any).GP_LLM_API_KEY}` },
+    body: JSON.stringify({ model: 'swe-2-medium', messages: [{ role: 'user', content: prompt }], temperature: 0.2 }) })
+  if (!r.ok) return c.json({ error: 'LLM 失败 ' + r.status }, 502)
+  const aiText = (await r.json() as any).choices?.[0]?.message?.content || ''
+  const jm = aiText.match(/\{[\s\S]*\}/)
+  if (!jm) return c.json({ error: 'LLM 未返回 JSON', raw: aiText.slice(0, 200) }, 502)
+  let items: any[] = []
+  try { items = JSON.parse(jm[0]).items || [] } catch { return c.json({ error: 'LLM JSON 解析失败' }, 502) }
+
+  const now = () => Date.now()
+  const mid = uid()
+  await db(c).insert(s.masterResume).values({ id: mid, userId: c.get('userId'), name: name || filename || '导入简历', createdAt: now(), updatedAt: now() })
+  let n = 0
+  for (const [i, it] of items.entries()) {
+    const iid = uid()
+    await db(c).insert(s.resumeItem).values({ id: iid, masterId: mid, section: it.section || 'other', title: it.title || '条目', sort: i, createdAt: now(), updatedAt: now() })
+    for (const v of (it.variants || []))
+      await db(c).insert(s.itemVariant).values({ id: uid(), itemId: iid, label: v.label || '默认', contentMd: v.contentMd || '', createdAt: now() })
+    n++
+  }
+  return c.json({ id: mid, items: n })
+})
+
 app.post('/master', async c => {
   const { name = '我的大简历' } = await c.req.json()
   const row = { id: uid(), userId: c.get('userId'), name, createdAt: now(), updatedAt: now() }

@@ -14,6 +14,7 @@ export default function App() {
   const [templateId, setTemplateId] = useState('')
   const [resumeId, setResumeId] = useState<string | undefined>()
   const [regMode, setRegMode] = useState(false)
+  const [importing, setImporting] = useState(false)
   const [err, setErr] = useState('')
 
   useEffect(() => {
@@ -63,6 +64,22 @@ export default function App() {
           const m = await api.createMaster('大简历 ' + (masters.length + 1))
           setMasters([...masters, m]); setMasterId(m.id)
         }}>+ 新建大简历</button>
+        <label className="text-sm border rounded px-2 py-1 cursor-pointer">
+          {importing ? '导入中…' : '导入简历建库'}
+          <input type="file" accept=".pdf,.docx,.txt,.md" className="hidden" onChange={async e => {
+            const f = e.target.files?.[0]; if (!f) return
+            setImporting(true)
+            try {
+              const buf = new Uint8Array(await f.arrayBuffer())
+              let bin = ''; for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000))
+              const m = await api.importMaster({ filename: f.name, data: btoa(bin) })
+              const ms = await api.masters(); setMasters(ms); setMasterId(m.id)
+              setErr('')
+            } catch (ex) { setErr('导入失败：' + String(ex).slice(0, 120)) }
+            setImporting(false); e.target.value = ''
+          }} />
+        </label>
+        {err && <span className="text-xs text-red-500">{err}</span>}
       </div>
       {page === 'templates'
         ? <TemplateGallery onPick={id => { setResumeId(undefined); setTemplateId(id); setPage('editor') }} />
