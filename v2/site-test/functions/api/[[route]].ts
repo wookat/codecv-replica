@@ -364,7 +364,7 @@ app.post('/jd/select', async c => {
     pool.push({ itemId: it.id, section: it.section, title: it.title, variants: vs.map(v => ({ variantId: v.id, label: v.label, preview: v.contentMd.slice(0, 200) })) })
   }
   const prompt = `你是求职简历顾问。下面是一个候选人的大简历条目池（每条含多个版本写法）和目标岗位 JD。
-请为该岗位挑选最合适的条目与版本，输出严格 JSON：{"selections":[{"itemId":"...","variantId":"...","reason":"一句话理由"}]}，按简历出现顺序排列，只从给出的 id 中选，最多 10 条。
+请为该岗位挑选最合适的条目与版本。要求：覆盖池中存在的每一种 section（education/internship/project/award/skill/selfeval 有几类就至少各选一条，不能只选同类条目），典型 4-8 条。输出严格 JSON：{"selections":[{"itemId":"...","variantId":"...","reason":"一句话理由"}]}，按简历出现顺序排列，只从给出的 id 中选，最多 10 条。
 JD：${jd.slice(0, 2000)}
 条目池：${JSON.stringify(pool).slice(0, 14000)}`
   const r = await fetch('https://api.aicdks.com/v1/chat/completions', {
@@ -402,7 +402,7 @@ async function genResume(c: any, masterId: string, jd: string, templateId: strin
       variants: vs.map(v => ({ variantId: v.id, label: v.label, contentMd: v.contentMd.slice(0, 500) })) })
   }
   const prompt = `你是顶级简历写手。下面候选人的「大简历条目池」（每条含多版本写法）和目标「岗位 JD」。
-请完成：1) 选最合适的条目与版本（最多 9 条，按简历顺序）；2) 把每段内容按 JD 改写成最终简历文本（突出 JD 关键词、量化成果、删无关）；3) 起简历标题。
+请完成：1) 选最合适的条目与版本（覆盖池中存在的每一种 section——教育/实习/项目/奖项/技能/自我评价有几类至少各选一条，典型 4-8 条，最多 9 条，按简历顺序）；2) 把每段内容按 JD 改写成最终简历文本（突出 JD 关键词、量化成果、删无关）；3) 起简历标题。
 输出严格 JSON：{"title":"...","selections":[{"itemId":"...","variantId":"...","section":"...","contentMd":"改写后的 markdown（列表用 -，加粗 **）","reason":"一句"}]}。itemId/variantId 只能取自给定 id；contentMd 是给模板的正文，不要再写 ## 小节标题。
 JD：${jd.slice(0, 2000)}
 条目池：${JSON.stringify(pool).slice(0, 14000)}`
