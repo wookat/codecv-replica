@@ -28,6 +28,11 @@ export default function App() {
   const [masters, setMasters] = useState<any[]>([])
   const [masterId, setMasterId] = useState('')
   const [page, setPage] = useState<'templates' | 'editor' | 'resumes' | 'vip' | 'admin' | 'community' | 'progress' | 'builder'>('templates')
+  const [dark, setDark] = useState(localStorage.getItem('v2:theme') === 'dark')
+  useEffect(() => {
+    document.documentElement.classList.toggle('cv-dark', dark)
+    localStorage.setItem('v2:theme', dark ? 'dark' : 'light')
+  }, [dark])
   const [templateId, setTemplateId] = useState(() => new URLSearchParams(location.search).get('tpl') || '')
   const sp = new URLSearchParams(location.search)
   const [resumeId, setResumeId] = useState<string | undefined>(sp.get('r') || undefined)
@@ -97,6 +102,7 @@ export default function App() {
         }}>+ 新建大简历</button>
         <button className="cv-btn cv-btn-primary"
           onClick={() => setPage('builder')}>AI 建库</button>
+        <button className="cv-btn cv-btn-ghost" title="切换深色模式" onClick={() => setDark(!dark)}>{dark ? '☀️' : '🌙'}</button>
         <label className="cv-btn cv-btn-ghost cursor-pointer">
           {importing ? '导入中…' : '导入简历建库'}
           <input type="file" accept=".pdf,.docx,.txt,.md" className="hidden" onChange={async e => {

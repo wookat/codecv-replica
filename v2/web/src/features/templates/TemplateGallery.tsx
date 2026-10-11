@@ -72,12 +72,23 @@ export default function TemplateGallery({ onPick }: { onPick: (id: string) => vo
             <button className="cv-btn cv-btn-primary ml-auto" onClick={() => { onPick(pv.id); setPv(null) }}>使用此模板</button>
             <button className="cv-btn cv-btn-ghost" onClick={() => setPv(null)}>关闭</button>
           </div>
-          <div className="cv-modal-body">
-            <Suspense fallback={<div className="p-10 text-center cv-sub">渲染中…</div>}>
-              <PreviewPane md={pv.seed.content ?? ''} skinCss={skinHref(pv.seed.slug ?? `cv-${pv.id}`)}
-                primaryColor={pv.seed.primaryColor ?? meta?.primaryColor ?? '#333'} font={pv.seed.font ?? meta?.font}
-                avatar={pv.seed.avatar ?? null} />
-            </Suspense>
+          <div className="flex flex-1 min-h-0">
+            <div className="w-44 shrink-0 overflow-y-auto border-r p-2 space-y-1" style={{ borderColor: 'var(--cv-line)' }}>
+              {entries.map(([id, t]) => (
+                <button key={id} onClick={() => openPreview(id)}
+                  className={`w-full text-left px-2 py-1.5 rounded-md text-xs transition ${id === pv.id ? 'cv-nav-on' : 'hover:bg-black/5'}`}>
+                  <div className="font-medium truncate">{t.name}</div>
+                  <div className="text-[10px] cv-sub truncate">{(t.tags || []).slice(0, 3).join(' · ')}</div>
+                </button>
+              ))}
+            </div>
+            <div className="cv-modal-body flex-1">
+              <Suspense fallback={<div className="p-10 text-center cv-sub">渲染中…</div>}>
+                <PreviewPane md={pv.seed.content ?? ''} skinCss={skinHref(pv.seed.slug ?? `cv-${pv.id}`)}
+                  primaryColor={pv.seed.primaryColor ?? meta?.primaryColor ?? '#333'} font={pv.seed.font ?? meta?.font}
+                  avatar={pv.seed.avatar ?? null} />
+              </Suspense>
+            </div>
           </div>
         </div>
       </div>}

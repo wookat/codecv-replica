@@ -42,3 +42,17 @@ body { background: var(--cv-bg); color: var(--cv-text); }
 .cv-card-hover { transition: transform .18s ease, box-shadow .18s ease; }
 .cv-card-hover:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(15,23,42,.12); }
 .cv-glass { background: rgba(255,255,255,.72); backdrop-filter: blur(10px); }
+html.cv-dark { --cv-bg:#0e1116; --cv-card:#171c23; --cv-line:#262d38; --cv-text:#e7eaf0; --cv-sub:#98a2b3; --cv-faint:#667085; --cv-brand-soft:#1b2b52; }
+html.cv-dark .bg-white { background: var(--cv-card) !important; }
+html.cv-dark .bg-neutral-200 { background: #232a35 !important; }
+html.cv-dark .text-neutral-500, html.cv-dark .text-neutral-400 { color: var(--cv-sub) !important; }
+html.cv-dark .border, html.cv-dark .border-b, html.cv-dark .border-t { border-color: var(--cv-line) !important; }
+html.cv-dark .markdown-transform-html, html.cv-dark .re-render { background: #fff; }
+html.cv-dark .cv-modal { background: var(--cv-card); }
+html.cv-dark .cv-modal-body { background: var(--cv-bg); }
+html.cv-dark .cv-input { background: #10151c; color: var(--cv-text); }
+html.cv-dark .cv-btn { background: var(--cv-card); }
+html.cv-dark .cv-btn:hover { background: #1d232c; }
+html.cv-dark .cv-pill, html.cv-dark .cv-chip { background: #10151c; }
+.cv-modal { width: min(1180px, 96vw); }
+html.cv-dark .hover\:bg-black\/5:hover { background: rgba(255,255,255,.06); }
