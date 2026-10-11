@@ -168,7 +168,7 @@ onMounted(load)
   </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .iv-page {
   max-width: var(--max-width);
   margin: 0 auto;

@@ -25,7 +25,7 @@
   </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .as-page {
   min-height: 60vh;
   display: flex;

@@ -415,7 +415,7 @@ onMounted(() => {
                     v-if="!progress[row._id] || progress[row._id].status === '待投递'"
                     class="star"
                     :title="progress[row._id] ? '取消收藏' : '先收藏，简历准备好后一起投递'"
-                    @click="toggleStar(row)"
+                    @click="toggleStar(row as JobItem)"
                   >
                     <svg
                       class="star-icon"
@@ -440,7 +440,7 @@ onMounted(() => {
                         ? `最近更新：${fmtDay(progress[row._id].update_time)}`
                         : '选择更新投递状态'
                     "
-                    @change="(s: ProgressStatus) => setStatus(row, s)"
+                    @change="(s: ProgressStatus) => setStatus(row as JobItem, s)"
                   >
                     <el-option
                       v-for="s in progress[row._id].status === '待投递'
@@ -470,7 +470,9 @@ onMounted(() => {
             </el-table-column>
             <el-table-column label="操作" width="75" fixed="right">
               <template #default="{ row }">
-                <el-button type="primary" size="small" @click="applyJob(row)"> 投递 </el-button>
+                <el-button type="primary" size="small" @click="applyJob(row as JobItem)">
+                  投递
+                </el-button>
               </template>
             </el-table-column>
           </el-table>

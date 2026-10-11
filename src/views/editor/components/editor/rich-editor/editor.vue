@@ -110,6 +110,7 @@ onBeforeUnmount(() => clearInterval(undoTimer))
 </template>
 
 <style lang="scss">
+/* 刻意全局：跨组件隐藏 richTool 根元素的规则 */
 /* richTool 的按钮行在编辑模式下隐藏（生产编辑栏无格式按钮），其弹窗不受影响 */
 .content-mode-tool-bar {
   display: none !important;

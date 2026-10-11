@@ -8,7 +8,12 @@ const { rows, total, page, keyword, loading, load, search, changePage } = useAdm
 )
 const fmt = fmtTime
 
-async function del(row: { id: number }) {
+interface MjCommentRow {
+  id: number
+  created_at: string
+}
+
+async function del(row: MjCommentRow) {
   await ElMessageBox.confirm('删除该评论及其回复？', '删除评论', { type: 'warning' })
   const res = await admin.commentDelete(row.id)
   if (res?.code === 200) {
@@ -42,7 +47,9 @@ async function del(row: { id: number }) {
       </el-table-column>
       <el-table-column label="操作" width="90" fixed="right">
         <template #default="{ row }">
-          <el-button type="danger" link size="small" @click="del(row)">删除</el-button>
+          <el-button type="danger" link size="small" @click="del(row as MjCommentRow)"
+            >删除</el-button
+          >
         </template>
       </el-table-column>
     </el-table>

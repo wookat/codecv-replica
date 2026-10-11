@@ -92,7 +92,7 @@ watch(
   </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .logo {
   position: fixed;
   top: -15px;

@@ -72,7 +72,7 @@ onMounted(async () => {
   </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .cvv-page {
   max-width: 900px;
   margin: 0 auto;

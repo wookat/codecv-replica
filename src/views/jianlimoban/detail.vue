@@ -312,7 +312,7 @@ async function toggleFav() {
 export default { name: 'jianlimoban-detail' }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .jld-page {
   max-width: 1128px;
   margin: 16px auto;

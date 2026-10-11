@@ -267,7 +267,7 @@ async function upgrade(t: Tier) {
   </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .mb-page {
   /* 生产会员页内容宽 1352（x=44 起） */
   max-width: 1352px;

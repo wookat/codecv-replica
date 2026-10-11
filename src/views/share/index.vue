@@ -160,7 +160,7 @@ const tpl = computed(() => templates.value.find(t => t.type === type.value))
   </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .sh-page {
   max-width: 900px;
   margin: 0 auto;

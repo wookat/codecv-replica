@@ -150,7 +150,7 @@ async function submit() {
   </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .fb-page {
   max-width: var(--max-width);
   margin: 0 auto;

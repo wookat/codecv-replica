@@ -129,7 +129,7 @@ onMounted(load)
   </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .od-page {
   max-width: var(--max-width);
   margin: 0 auto;

@@ -95,7 +95,7 @@ async function submit() {
   </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .ap-page {
   max-width: 860px;
   margin: 0 auto;

@@ -53,7 +53,7 @@ function printPdf() {
   </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .ex-page {
   max-width: 900px;
   margin: 0 auto;

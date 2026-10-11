@@ -14,7 +14,7 @@ onMounted(() => {
   <div class="mp-loading">加载编辑器…</div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .mp-loading {
   min-height: 60vh;
   display: flex;

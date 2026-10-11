@@ -105,7 +105,7 @@ onMounted(async () => {
   </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .pd-page {
   max-width: var(--max-width);
   margin: 0 auto;

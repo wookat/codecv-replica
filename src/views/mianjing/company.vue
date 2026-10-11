@@ -405,7 +405,7 @@ onMounted(async () => {
   </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import './mianjing.scss';
 
 .mj-company {

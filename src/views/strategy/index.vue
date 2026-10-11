@@ -97,7 +97,7 @@ onMounted(load)
   </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .st-page {
   max-width: 1280px;
   margin: 0 auto;

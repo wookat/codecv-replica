@@ -368,7 +368,7 @@ async function submit() {
         <p class="mw-d-sub">公司 / 岗位 / 轮次为必填，其余将按所选自动生成标题</p>
         <div class="mw-grid">
           <label class="f">
-            <span>公司 <i style="color:#f56c6c">*</i></span>
+            <span>公司 <i style="color: #f56c6c">*</i></span>
             <el-select v-model="form.companySlug" placeholder="选择公司" filterable clearable>
               <el-option v-for="c in companies" :key="c.slug" :label="c.name" :value="c.slug">
                 <span class="opt">
@@ -387,7 +387,7 @@ async function submit() {
             </el-select>
           </label>
           <label class="f">
-            <span>岗位方向 <i style="color:#f56c6c">*</i></span>
+            <span>岗位方向 <i style="color: #f56c6c">*</i></span>
             <el-select v-model="form.positionSlug" placeholder="选择岗位" filterable clearable>
               <el-option v-for="p in positions" :key="p.slug" :label="p.name" :value="p.slug" />
             </el-select>
@@ -405,7 +405,7 @@ async function submit() {
             </el-select>
           </label>
           <label class="f">
-            <span>轮次 <i style="color:#f56c6c">*</i></span>
+            <span>轮次 <i style="color: #f56c6c">*</i></span>
             <el-select v-model="form.round" placeholder="选择轮次" clearable>
               <el-option v-for="r in roundOptions" :key="r" :label="r" :value="r" />
             </el-select>
@@ -434,7 +434,7 @@ async function submit() {
   </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import './mianjing.scss';
 
 .mw-page {

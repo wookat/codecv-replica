@@ -52,6 +52,7 @@ useHead({
 onMounted(() => AOS.init({ once: true }))
 </script>
 <style lang="scss">
+/* 刻意全局：html/body/根级变量，勿加 scoped */
 * {
   box-sizing: border-box;
   padding: 0;

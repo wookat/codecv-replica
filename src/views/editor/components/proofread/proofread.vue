@@ -868,6 +868,7 @@ onBeforeUnmount(() => {
 </template>
 
 <style lang="scss">
+/* 刻意全局：.proofread-mark/tool-btn 动态注入预览 DOM、drawer 与 message-box append-to-body，scoped 够不到 */
 /* 编辑器内波浪线标注 + 闪烁反馈（全局：作用于 .writable-edit-mode / .reference-dom） */
 .proofread-mark {
   background-color: #f56c6f24;

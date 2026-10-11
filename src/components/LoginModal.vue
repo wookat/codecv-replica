@@ -92,7 +92,7 @@ if (getLocalStorage(TOKEN)) emit('close')
   </teleport>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .lm-mask {
   position: fixed;
   inset: 0;

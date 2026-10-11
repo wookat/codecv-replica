@@ -67,7 +67,7 @@ const hotRank = [
   </aside>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .rail-aside {
   width: 220px;
   flex-shrink: 0;

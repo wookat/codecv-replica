@@ -356,7 +356,7 @@ watch(
   </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .jl-page {
   /* 生产 max-w-screen-xl(1280) + p-1：内容 x84 w1272 */
   max-width: 1280px;

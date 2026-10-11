@@ -22,9 +22,9 @@ interface MineItem {
 
 const router = useRouter()
 const batchName = (b?: string) =>
-  ({ qiuzhao: '秋招', chunzhao: '春招', shuqi: '暑期实习', richang: '日常实习', shezhao: '社招' })[
+  ({ qiuzhao: '秋招', chunzhao: '春招', shuqi: '暑期实习', richang: '日常实习', shezhao: '社招' }[
     b || ''
-  ] || b
+  ] || b)
 const MINE_KEY = 'mianjing-mine'
 const localMine = () => JSON.parse(localStorage.getItem(MINE_KEY) || '[]') as MineItem[]
 const mine = ref<MineItem[]>(localMine())
@@ -169,7 +169,9 @@ async function remove(id: string) {
               </div>
               <div class="item-chips">
                 <span class="mj-chip mj-chip--gray">{{ m.companyName }}</span>
-                <span class="mj-chip mj-chip--gray">{{ m.grade }}届 · {{ batchName(m.batch) }}</span>
+                <span class="mj-chip mj-chip--gray"
+                  >{{ m.grade }}届 · {{ batchName(m.batch) }}</span
+                >
                 <span class="mj-chip mj-chip--gray">{{ m.round }}</span>
                 <span
                   class="mj-chip"
@@ -222,7 +224,7 @@ async function remove(id: string) {
   </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import './mianjing.scss';
 
 .mj-mine {

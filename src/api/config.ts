@@ -20,7 +20,9 @@ const service = ofetch.create({
     const d = response._data
     // 后端错误体形如 {code,message}——只弹一次服务端文案，不能 [object Object]
     errorMessage(
-      typeof d === 'object' && d !== null ? d.message || response.statusText : d || response.statusText
+      typeof d === 'object' && d !== null
+        ? d.message || response.statusText
+        : d || response.statusText
     )
   }
 })

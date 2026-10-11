@@ -684,7 +684,7 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
   </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import './mianjing.scss';
 
 .mtoc {

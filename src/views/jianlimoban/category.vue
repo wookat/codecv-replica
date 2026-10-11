@@ -363,7 +363,7 @@ const shown = computed(() => {
   </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .cat-page {
   max-width: 1280px;
   margin: 0 auto;
