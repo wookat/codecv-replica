@@ -65,6 +65,22 @@ app.get('/health', async c => {
   try { await c.env.DB.prepare('SELECT 1').first(); db = true } catch {}
   return c.json({ ok: db, service: 'cv-v2', ts: Date.now() }, db ? 200 : 503)
 })
+// ---- 社区内容生态（公开读）----
+app.get('/posts', async c => {
+  const r = await c.env.DB.prepare("SELECT _id AS id, title, category, tags, summary, author, created_at FROM posts WHERE deleted=0 AND status='published' ORDER BY created_at DESC LIMIT 50").all<any>()
+  return c.json(r.results ?? [])
+})
+app.get('/posts/:id', async c => {
+  const p = await c.env.DB.prepare('SELECT _id AS id, title, content_md, category, tags, author, created_at FROM posts WHERE _id=? AND deleted=0').bind(c.req.param('id')).first<any>()
+  if (!p) return c.json({ error: 'not found' }, 404)
+  const cmts = await c.env.DB.prepare('SELECT c.id, c.nickname, c.content, c.created_at FROM comments c WHERE c.doc_id=? ORDER BY c.created_at').bind(p.id).all<any>()
+  const likes = await c.env.DB.prepare("SELECT COUNT(*) c FROM reactions WHERE target_type='post' AND target_id=? AND kind='like'").bind(p.id).first<any>()
+  return c.json({ ...p, comments: cmts.results ?? [], likes: likes?.c ?? 0 })
+})
+app.get('/mianjing', async c => {
+  const r = await c.env.DB.prepare('SELECT id, title, company_name, grade, batch, round, result, school, major, created_at FROM mianjing_submissions ORDER BY created_at DESC LIMIT 50').all<any>()
+  return c.json(r.results ?? [])
+})
 app.post('/auth/logout', async c => {
   const t = bearerToken(c.req.raw)
   if (t) await c.env.UPSTASH_KV.delete(`sess:${t}`)
@@ -426,6 +442,34 @@ app.post('/admin/redeem', async c => {
     codes.push(code)
   }
   return c.json({ codes })
+})
+app.post('/posts/:id/comments', async c => {
+  const { content } = await c.req.json() as any
+  if (!content?.trim()) return c.json({ error: 'empty' }, 400)
+  const u = await meRow(c)
+  await c.env.DB.prepare('INSERT INTO comments (doc_id, user_id, nickname, content, created_at) VALUES (?,?,?,?,?)')
+    .bind(c.req.param('id'), u.id, c.get('userId'), content.trim(), Date.now()).run()
+  return c.json({ ok: true }, 201)
+})
+app.post('/posts/:id/like', async c => {
+  const u = await meRow(c)
+  const pid = c.req.param('id')
+  const ex = await c.env.DB.prepare("SELECT id FROM reactions WHERE user_id=? AND target_type='post' AND target_id=? AND kind='like'").bind(u.id, pid).first<any>()
+  if (ex) {
+    await c.env.DB.prepare('DELETE FROM reactions WHERE id=?').bind(ex.id).run()
+    return c.json({ liked: false })
+  }
+  await c.env.DB.prepare('INSERT INTO reactions (user_id, target_type, target_id, kind, created_at) VALUES (?,?,?,?,?)')
+    .bind(u.id, 'post', pid, 'like', Date.now()).run()
+  return c.json({ liked: true })
+})
+app.post('/mianjing', async c => {
+  const u = await meRow(c)
+  const b = await c.req.json() as any
+  await c.env.DB.prepare(`INSERT INTO mianjing_submissions (user_id, title, company_name, grade, batch, round, result, school, major, anonymous, content_md, created_at)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`)
+    .bind(u.id, b.title || '', b.company_name || '', b.grade || '', b.batch || '', b.round || '', b.result || '', b.school || '', b.major || '', b.anonymous ? 1 : 0, b.content_md || b.content || '', Date.now()).run()
+  return c.json({ ok: true }, 201)
 })
 app.post('/export', exportRoute())
 app.all('/mcp', mcpRoute())
