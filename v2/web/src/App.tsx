@@ -10,6 +10,7 @@ import AdminPage from './features/admin/AdminPage'
 import CommunityPage from './features/community/CommunityPage'
 import ProgressPage from './features/progress/ProgressPage'
 import BuilderChat from './features/builder/BuilderChat'
+import GalleryPage from './features/gallery/GalleryPage'
 
 export default function App() {
   const inv = new URLSearchParams(location.search).get('inv')
@@ -17,6 +18,7 @@ export default function App() {
   const pubMatch = location.pathname.match(/^\/r\/([\w-]+)/)
   const landing = location.pathname === '/' && !localStorage.getItem('v2:token') && !location.search.includes('login')
   if (pubMatch) return <PublicResume id={pubMatch[1]} />
+  if (location.pathname === '/gallery') return <GalleryPage />
   if (landing) return <Landing onEnter={() => { location.href = '/?login' }} />
   const [token, setToken] = useState(localStorage.getItem('v2:token'))
   const [user, setUser] = useState('')

@@ -64,6 +64,13 @@ app.get('/share/:id', async c => {
   if (!ex.find(e => e.fieldKey === 'share_on' && e.valueMd === '1')) return c.json({ error: 'not shared' }, 404)
   return c.json({ title: r.title, templateId: r.templateId, contentMd: r.contentMd })
 })
+// GET /gallery — 简历广场：已分享简历公开列表（share_on='1'）
+app.get('/gallery', async c => {
+  const r = await c.env.DB.prepare(`SELECT r.id, r.title, r.template_id AS templateId, r.updated_at
+    FROM resume r JOIN resume_extra e ON e.resume_id=r.id
+    WHERE e.field_key='share_on' AND e.value_md='1' ORDER BY r.updated_at DESC LIMIT 60`).all<any>()
+  return c.json(r.results ?? [])
+})
 // GET /health — 监控探针（公开）
 app.get('/health', async c => {
   let db = false

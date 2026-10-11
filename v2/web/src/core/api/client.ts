@@ -27,6 +27,7 @@ export const api = {
   addProgress: (b: any) => req<any>('/progress', { method: 'POST', body: JSON.stringify(b) }),
   updateProgress: (id: number, b: any) => req<any>(`/progress/${id}`, { method: 'PATCH', body: JSON.stringify(b) }),
   delProgress: (id: number) => req<any>(`/progress/${id}`, { method: 'DELETE' }),
+  gallery: () => req<any[]>('/gallery'),
   posts: () => req<any[]>('/posts'),
   post: (id: string) => req<any>(`/posts/${id}`),
   commentPost: (id: string, content: string) => req<any>(`/posts/${id}/comments`, { method: 'POST', body: JSON.stringify({ content }) }),

@@ -8,6 +8,7 @@ export default function Landing({ onEnter }: { onEnter: () => void }) {
       <nav className="flex items-center justify-between px-8 py-4 border-b">
         <span className="font-bold text-lg">CodeCV</span>
         <button className="bg-black text-white rounded-lg px-4 py-2 text-sm" onClick={onEnter}>进入工作台</button>
+        <a href="/gallery" className="text-sm border rounded-lg px-4 py-2">简历广场</a>
       </nav>
       <section className="text-center py-16 px-6">
         <h1 className="text-4xl font-bold mb-4">一份大简历库，生成所有岗位的简历</h1>
