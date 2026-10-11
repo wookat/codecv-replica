@@ -22,6 +22,8 @@ export const api = {
     req<{ token: string; username: string }>('/auth/register', { method: 'POST', body: JSON.stringify({ username, password }) }),
   masters: () => req<any[]>('/master'),
   createMaster: (name: string) => req<any>('/master', { method: 'POST', body: JSON.stringify({ name }) }),
+  favorites: () => req<string[]>('/favorites'),
+  setFavorite: (tplId: string, on: boolean) => req<any>('/favorites', { method: 'PUT', body: JSON.stringify({ tplId, on }) }),
   migrateV1: () => req<{ migrated: number; total: number }>('/migrate/v1', { method: 'POST' }),
   ai: (action: string, text: string, jd?: string) =>
     req<{ text: string }>('/ai', { method: 'POST', body: JSON.stringify({ action, text, jd }) }),

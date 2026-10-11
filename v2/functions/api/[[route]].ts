@@ -59,6 +59,12 @@ app.get('/share/:id', async c => {
   if (!ex.find(e => e.fieldKey === 'share_on' && e.valueMd === '1')) return c.json({ error: 'not shared' }, 404)
   return c.json({ title: r.title, templateId: r.templateId, contentMd: r.contentMd })
 })
+// GET /health — 监控探针（公开）
+app.get('/health', async c => {
+  let db = false
+  try { await c.env.DB.prepare('SELECT 1').first(); db = true } catch {}
+  return c.json({ ok: db, service: 'cv-v2', ts: Date.now() }, db ? 200 : 503)
+})
 app.post('/auth/logout', async c => {
   const t = bearerToken(c.req.raw)
   if (t) await c.env.UPSTASH_KV.delete(`sess:${t}`)
@@ -240,6 +246,21 @@ app.post('/ai', async c => {
 })
 
 // POST /migrate/v1 — 把当前用户在 v1 老站的简历（resumes 表）搬入 v2 resume
+// 模板收藏：GET /favorites → [tplId]，PUT /favorites {tplId,on}
+app.get('/favorites', async c => {
+  const u = await c.env.DB.prepare('SELECT id FROM users WHERE username=?').bind(c.get('userId')).first<any>()
+  const r = await c.env.DB.prepare('SELECT tpl_type AS template_id FROM tpl_favorites WHERE user_id=?').bind(u?.id ?? -1).all<any>()
+  return c.json((r.results ?? []).map(x => x.template_id))
+})
+app.put('/favorites', async c => {
+  const { tplId, on } = await c.req.json() as any
+  const u = await c.env.DB.prepare('SELECT id FROM users WHERE username=?').bind(c.get('userId')).first<any>()
+  if (!u) return c.json({ error: 'no user' }, 404)
+  if (on) await c.env.DB.prepare('INSERT OR IGNORE INTO tpl_favorites (user_id, tpl_type, created_at) VALUES (?,?,?)').bind(u.id, tplId, Date.now()).run()
+  else await c.env.DB.prepare('DELETE FROM tpl_favorites WHERE user_id=? AND tpl_type=?').bind(u.id, tplId).run()
+  return c.json({ ok: true })
+})
+
 app.post('/migrate/v1', async c => {
   const uname = c.get('userId')
   const u = await c.env.DB.prepare('SELECT id FROM users WHERE username=?').bind(uname).first<any>()

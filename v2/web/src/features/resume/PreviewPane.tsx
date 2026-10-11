@@ -4,7 +4,7 @@ import { markdownToHTML } from '../../../../../src/lib/mth/index'
 
 export default function PreviewPane({ md, skinCss, primaryColor = '#333', font = '', opts = {}, avatar, photo }: {
   md: string; skinCss: string; primaryColor?: string; font?: string
-  opts?: { zoom?: number; fontSize?: number; lineHeight?: number; color?: string }
+  opts?: { zoom?: number; fontSize?: number; lineHeight?: number; color?: string; showPages?: boolean }
   avatar?: { top: number; left: number; type?: string } | null
   photo?: string
 }) {
@@ -28,6 +28,12 @@ export default function PreviewPane({ md, skinCss, primaryColor = '#333', font =
       {err && <div className="text-red-500 text-sm mb-2">渲染错误: {err}</div>}
       <div className="re-render mx-auto relative" style={{ width: 794, zoom: opts.zoom ?? 1 }}>
         <div ref={ref} className="markdown-transform-html jufe" />
+        {opts.showPages !== false && (
+          <div className="absolute inset-0 pointer-events-none">
+            {[1123, 2246, 3369, 4492].map(y => (
+              <div key={y} className="absolute left-0 right-0 border-t-2 border-dashed border-blue-300/60" style={{ top: y }} />
+            ))}
+          </div>)}
         {avatar && photo && (
           <img src={photo} alt="photo" className="absolute object-cover"
             style={{ top: avatar.top, left: avatar.left, width: 96, height: 120,
