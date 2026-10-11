@@ -1,16 +1,18 @@
-import { useEffect, useState } from 'react'
+import { Suspense, lazy, useEffect, useState } from 'react'
 import { api } from './core/api/client'
 import TemplateGallery from './features/templates/TemplateGallery'
-import EditorPage from './features/resume/EditorPage'
 import ResumeList from './features/resume/ResumeList'
 import PublicResume from './features/resume/PublicResume'
 import Landing from './features/landing/Landing'
-import VipPage from './features/vip/VipPage'
-import AdminPage from './features/admin/AdminPage'
-import CommunityPage from './features/community/CommunityPage'
-import ProgressPage from './features/progress/ProgressPage'
-import BuilderChat from './features/builder/BuilderChat'
 import GalleryPage from './features/gallery/GalleryPage'
+
+const EditorPage = lazy(() => import('./features/resume/EditorPage'))
+const VipPage = lazy(() => import('./features/vip/VipPage'))
+const AdminPage = lazy(() => import('./features/admin/AdminPage'))
+const CommunityPage = lazy(() => import('./features/community/CommunityPage'))
+const ProgressPage = lazy(() => import('./features/progress/ProgressPage'))
+const BuilderChat = lazy(() => import('./features/builder/BuilderChat'))
+const L = <div className="p-10 text-center text-neutral-400 text-sm">加载中…</div>
 
 export default function App() {
   const inv = new URLSearchParams(location.search).get('inv')
@@ -66,8 +68,8 @@ export default function App() {
   )
 
   if (page === 'editor' && (templateId || resumeId))
-    return <EditorPage templateId={templateId || ''} masterId={masterId} resumeId={resumeId}
-      onBack={() => { setResumeId(undefined); setPage(resumeId ? 'resumes' : 'templates') }} />
+    return <Suspense fallback={L}><EditorPage templateId={templateId || ''} masterId={masterId} resumeId={resumeId}
+      onBack={() => { setResumeId(undefined); setPage(resumeId ? 'resumes' : 'templates') }} /></Suspense>
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -117,8 +119,8 @@ export default function App() {
         ? <TemplateGallery onPick={id => { setResumeId(undefined); setTemplateId(id); setPage('editor') }} />
         : page === 'resumes'
         ? <ResumeList onEdit={id => { setTemplateId(''); setResumeId(id); setPage('editor') }} />
-        : page === 'vip' ? <VipPage /> : page === 'admin' ? <AdminPage /> : page === 'community' ? <CommunityPage /> : page === 'progress' ? <ProgressPage />
-        : <BuilderChat masterId={masterId} onDone={() => setPage('templates')} />}
+        : page === 'vip' ? <Suspense fallback={L}><VipPage /></Suspense> : page === 'admin' ? <Suspense fallback={L}><AdminPage /></Suspense> : page === 'community' ? <Suspense fallback={L}><CommunityPage /></Suspense> : page === 'progress' ? <Suspense fallback={L}><ProgressPage /></Suspense>
+        : <Suspense fallback={L}><BuilderChat masterId={masterId} onDone={() => setPage('templates')} /></Suspense>}
     </div>
   )
 }
