@@ -29,7 +29,7 @@ export default function AiPanel({ md, onApply, onClose }: {
           onClick={() => { setJd(cmd); run('edit') }}>{busy === 'edit' ? '…' : '改稿'}</button>
       </div>
       <div className="flex gap-2 flex-wrap">
-        {[['gen', '生成'], ['perf', '润色'], ['proof', '校对'], ['score', '评分'], ['fix', '按评分修复'], ['translate', '翻译']].map(([a, l]) => (
+        {[['gen', '生成'], ['perf', '润色'], ['proof', '校对'], ['score', '评分'], ['fix', '按评分修复'], ['fill', '补缺'], ['translate', '翻译']].map(([a, l]) => (
           <button key={a} className="border rounded px-2 py-1 text-xs" disabled={!!busy} onClick={() => run(a)}>
             {busy === a ? '…' : l}
           </button>
