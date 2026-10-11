@@ -32,7 +32,7 @@ export default function ResumeList({ onEdit }: { onEdit: (resumeId: string) => v
     <div className="p-6 max-w-5xl mx-auto">
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         <h2 className="text-lg font-semibold">我的简历（{list.length}）</h2>
-        <button className="text-xs border rounded px-2 py-1" onClick={async () => {
+        <button className="cv-btn cv-btn-ghost text-xs" onClick={async () => {
           const r = await api.migrateV1().catch(e => ({ error: String(e) }) as any)
           alert(r.error ? '迁移失败：' + r.error : `迁移完成：新增 ${r.migrated} 份（v1 共 ${r.total} 份）`)
           load()

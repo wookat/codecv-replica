@@ -1,1 +1,32 @@
 @import "tailwindcss";
+
+/* ---- 扁平化设计 token（竞品范式：灰底白卡弱影、圆角胶囊、单品牌蓝） ---- */
+:root {
+  --cv-bg: #f5f6f8;
+  --cv-card: #ffffff;
+  --cv-line: #e8eaed;
+  --cv-text: #1f2329;
+  --cv-sub: #6b7280;
+  --cv-faint: #9ca3af;
+  --cv-brand: #2f6bfe;
+  --cv-brand-hover: #1f5bf0;
+  --cv-brand-soft: #eaf1ff;
+  --cv-radius: 10px;
+}
+body { background: var(--cv-bg); color: var(--cv-text); }
+.cv-card { background: var(--cv-card); border: 1px solid var(--cv-line); border-radius: var(--cv-radius); box-shadow: 0 1px 2px rgba(16,24,40,.04); }
+.cv-card-hover:hover { box-shadow: 0 6px 16px rgba(16,24,40,.08); transform: translateY(-1px); }
+.cv-btn { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; line-height: 1; padding: 7px 12px; border-radius: 8px; border: 1px solid transparent; cursor: pointer; background: var(--cv-card); color: var(--cv-text); transition: all .15s; }
+.cv-btn:hover { border-color: var(--cv-line); background: #fafbfc; }
+.cv-btn-primary { background: var(--cv-brand); color: #fff; }
+.cv-btn-primary:hover { background: var(--cv-brand-hover); border-color: transparent; }
+.cv-btn-ghost { border-color: var(--cv-line); }
+.cv-pill { font-size: 12px; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--cv-line); background: var(--cv-card); color: var(--cv-sub); cursor: pointer; transition: all .15s; }
+.cv-pill:hover { color: var(--cv-brand); border-color: var(--cv-brand); }
+.cv-pill-on { background: var(--cv-brand); color: #fff; border-color: var(--cv-brand); }
+.cv-chip { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #f0f2f5; color: var(--cv-sub); }
+.cv-nav { font-size: 13px; padding: 6px 12px; border-radius: 8px; color: var(--cv-sub); cursor: pointer; border: 1px solid transparent; background: none; }
+.cv-nav:hover { color: var(--cv-text); background: #f0f2f5; }
+.cv-nav-on { background: var(--cv-brand-soft); color: var(--cv-brand); font-weight: 600; }
+.cv-input { font-size: 13px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--cv-line); background: #fff; color: var(--cv-text); }
+.cv-input:focus { outline: none; border-color: var(--cv-brand); box-shadow: 0 0 0 3px var(--cv-brand-soft); }

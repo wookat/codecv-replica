@@ -75,7 +75,7 @@ export default function AdminPage() {
         <div className="space-y-2 text-sm">
           <div className="flex gap-2 items-center">
             <input type="number" className="border rounded px-2 py-1 w-24" value={days} onChange={e => setDays(+e.target.value)} /> 天
-            <button className="bg-black text-white rounded px-3 py-1" onClick={async () => {
+            <button className="cv-btn cv-btn-primary" onClick={async () => {
               setCodes((await api.adminMakeRedeem(days, 5)).codes)
             }}>生成 5 个</button>
           </div>

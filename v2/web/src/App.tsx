@@ -44,7 +44,7 @@ export default function App() {
   }, [token])
 
   if (!token) return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral-50">
+    <div className="min-h-screen flex items-center justify-center" style={{background:"var(--cv-bg)"}}>
       <form className="bg-white p-8 rounded-xl shadow space-y-4 w-80" onSubmit={async e => {
         e.preventDefault()
         try {
@@ -60,7 +60,7 @@ export default function App() {
         <input className="w-full border rounded px-3 py-2" placeholder="用户名" value={user} onChange={e => setUser(e.target.value)} />
         <input className="w-full border rounded px-3 py-2" type="password" placeholder="密码" value={pass} onChange={e => setPass(e.target.value)} />
         {err && <p className="text-red-500 text-sm">{err}</p>}
-        <button className="w-full bg-black text-white rounded py-2">{regMode ? '注册并登录' : '登录'}</button>
+        <button className="w-full cv-btn cv-btn-primary justify-center py-2.5">{regMode ? '注册并登录' : '登录'}</button>
         <button type="button" className="w-full text-xs text-neutral-500"
           onClick={() => { setRegMode(!regMode); setErr('') }}>{regMode ? '已有账号？去登录' : '没有账号？注册'}</button>
       </form>
@@ -72,33 +72,32 @@ export default function App() {
       onBack={() => { setResumeId(undefined); setPage(resumeId ? 'resumes' : 'templates') }} /></Suspense>
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <div className="border-b bg-white px-3 sm:px-6 py-3 flex items-center gap-2 sm:gap-4 flex-wrap">
-        <h1 className="font-bold text-base">CodeCV</h1>
-        <button className={`text-sm px-2 py-1 rounded ${page === 'templates' ? 'bg-black text-white' : 'border'}`}
+    <div className="min-h-screen" style={{background:"var(--cv-bg)"}}>
+      <div className="border-b border-[var(--cv-line)] bg-white px-3 sm:px-6 py-2.5 flex items-center gap-1 sm:gap-2 flex-wrap sticky top-0 z-30">
+        <h1 className="font-bold text-base mr-2">CodeCV</h1>
+        <button className={`cv-nav ${page === 'templates' ? 'cv-nav-on' : ''}`}
           onClick={() => setPage('templates')}>模板中心</button>
-        <button className={`text-sm px-2 py-1 rounded ${page === 'resumes' ? 'bg-black text-white' : 'border'}`}
+        <button className={`cv-nav ${page === 'resumes' ? 'cv-nav-on' : ''}`}
           onClick={() => setPage('resumes')}>我的简历</button>
-        <button className={`text-sm px-2 py-1 rounded ${page === 'vip' ? 'bg-black text-white' : 'border'}`}
+        <button className={`cv-nav ${page === 'vip' ? 'cv-nav-on' : ''}`}
           onClick={() => setPage('vip')}>会员</button>
-        <button className={`text-sm px-2 py-1 rounded ${page === 'admin' ? 'bg-black text-white' : 'border'}`}
+        <button className={`cv-nav ${page === 'admin' ? 'cv-nav-on' : ''}`}
           onClick={() => setPage('admin')}>后台</button>
-        <button className={`text-sm px-2 py-1 rounded ${page === 'community' ? 'bg-black text-white' : 'border'}`}
+        <button className={`cv-nav ${page === 'community' ? 'cv-nav-on' : ''}`}
           onClick={() => setPage('community')}>社区</button>
-        <button className={`text-sm px-2 py-1 rounded ${page === 'progress' ? 'bg-black text-white' : 'border'}`}
+        <button className={`cv-nav ${page === 'progress' ? 'cv-nav-on' : ''}`}
           onClick={() => setPage('progress')}>投递</button>
-        {templateId && page !== 'editor' && <button className="text-sm px-2 py-1 rounded border border-blue-400 text-blue-600"
-          onClick={() => setPage('editor')}>继续编辑模板 {templateId}</button>}
-        <select aria-label="选择大简历" className="border rounded px-2 py-1 text-sm" value={masterId} onChange={e => setMasterId(e.target.value)}>
+        {templateId && page !== 'editor' && <button className="cv-nav cv-nav-on" onClick={() => setPage('editor')}>继续编辑</button>}
+        <select aria-label="选择大简历" className="cv-input" value={masterId} onChange={e => setMasterId(e.target.value)}>
           {masters.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
         </select>
-        <button className="text-sm border rounded px-2 py-1" onClick={async () => {
+        <button className="cv-btn cv-btn-ghost" onClick={async () => {
           const m = await api.createMaster('大简历 ' + (masters.length + 1))
           setMasters([...masters, m]); setMasterId(m.id)
         }}>+ 新建大简历</button>
-        <button className="text-sm px-2 py-1 rounded bg-blue-600 text-white"
+        <button className="cv-btn cv-btn-primary"
           onClick={() => setPage('builder')}>AI 建库</button>
-        <label className="text-sm border rounded px-2 py-1 cursor-pointer">
+        <label className="cv-btn cv-btn-ghost cursor-pointer">
           {importing ? '导入中…' : '导入简历建库'}
           <input type="file" accept=".pdf,.docx,.txt,.md" className="hidden" onChange={async e => {
             const f = e.target.files?.[0]; if (!f) return

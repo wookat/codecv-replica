@@ -44,7 +44,7 @@ export default function VipPage() {
           <div key={p} className="border rounded-lg p-4 bg-white text-center">
             <div className="font-semibold">{p}</div>
             <div className="text-xl my-2">{price}</div>
-            <button className="bg-black text-white rounded px-3 py-1 text-sm" onClick={() => buy(p)}>开通</button>
+            <button className="cv-btn cv-btn-primary text-sm" onClick={() => buy(p)}>开通</button>
           </div>
         ))}
       </div>

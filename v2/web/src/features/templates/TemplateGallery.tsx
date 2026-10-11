@@ -16,31 +16,31 @@ export default function TemplateGallery({ onPick }: { onPick: (id: string) => vo
     (!tag || (t.tags || []).includes(tag)) &&
     (!q || t.name?.includes(q) || id.includes(q) || (t.tags || []).some((x: string) => x.includes(q))))
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto">
       <div className="flex items-center gap-3 mb-4">
         <h2 className="text-xl font-bold">模板中心（{shown.length} 套）</h2>
-        <button className={`text-xs border rounded px-2 py-1 ${onlyFav ? 'bg-black text-white' : ''}`}
+        <button className={`cv-pill ${onlyFav ? 'cv-pill-on' : ''}`}
           onClick={() => setOnlyFav(!onlyFav)}>只看收藏</button>
-        <input className="ml-auto border rounded px-2 py-1 text-xs w-44" placeholder="搜索名称/标签/编号…"
+        <input className="ml-auto cv-input w-44" placeholder="搜索名称/标签/编号…"
           value={q} onChange={e => setQ(e.target.value)} />
       </div>
       <div className="flex flex-wrap gap-1.5 mb-4">
         {allTags.map(t => <button key={t} onClick={() => setTag(tag === t ? '' : t)}
-          className={`text-[10px] border rounded-full px-2 py-0.5 ${tag === t ? 'bg-black text-white border-black' : 'text-neutral-500'}`}>{t}</button>)}
+          className={`cv-pill ${tag === t ? 'cv-pill-on' : ''}`}>{t}</button>)}
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
         {shown.map(([id, t]) => (
           <div key={id} className="relative">
           <button onClick={() => onPick(id)}
-            className="w-full bg-white border rounded-lg overflow-hidden text-left hover:border-black hover:shadow transition">
+            className="cv-card cv-card-hover w-full overflow-hidden text-left transition">
             <img src={`/api/v2/thumb/${id}`} alt={t.name} loading="lazy"
-              className="w-full aspect-[3/4] object-cover bg-neutral-100" />
+              className="w-full aspect-[3/4] object-cover" />
             <div className="p-2">
               <div className="font-medium text-xs truncate">{t.name}</div>
               <div className="text-[10px] text-neutral-400 truncate">{(t.tags || []).join(' · ')}</div>
             </div>
           </button>
-          <button className="absolute top-1 right-1 text-sm bg-white/80 rounded px-1"
+          <button className="absolute top-1.5 right-1.5 text-xs bg-white/90 rounded-md px-1.5 py-0.5 shadow-sm"
             onClick={async e => {
               e.stopPropagation()
               const on = !favs.includes(id)
