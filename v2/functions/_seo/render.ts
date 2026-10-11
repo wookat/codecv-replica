@@ -7,7 +7,7 @@ export const ldScript = (obj: unknown) => `<script type="application/ld+json">${
 export type Crumb = { name: string; url: string }
 export const SITE = 'CodeCV'
 // Pages 的 _headers 不作用于 Functions 响应，SSR 页的 CSP 必须在这里显式下发
-export const CSP_HEADER = "default-src 'self'; style-src 'unsafe-inline' 'self'; img-src 'self' data:; font-src 'self' data:; script-src 'none'; frame-ancestors 'self'"
+export const CSP_HEADER = "default-src 'self'; style-src 'unsafe-inline' 'self'; img-src 'self' data:; font-src 'self' data:; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; frame-ancestors 'self'"
 
 export const tplName = (id: string) => (catalog as any)[id]?.name || `简历模板 ${id}`
 export const tplTags = (id: string): string[] => (catalog as any)[id]?.tags || []
@@ -51,15 +51,15 @@ const footer = () => `<footer class="foot"><div class="wrap">
 <p class="copy">CodeCV · zalize.com · 114 套免费简历模板，Markdown 编辑，PDF/Word 导出</p></div></footer>`
 
 const CSS = `*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:#f5f6f8;color:#1b1f24;font:15px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif}
-a{color:#2f6bfe}.wrap{max-width:1000px;margin:0 auto;padding:0 16px}
+a{color:#1d4fd7}.wrap{max-width:1000px;margin:0 auto;padding:0 16px}
 .top{position:sticky;top:0;z-index:5;backdrop-filter:blur(12px);background:rgba(255,255,255,.75);border-bottom:1px solid #e6e8ee}.top .wrap{display:flex;align-items:center;gap:18px;height:56px}
 .top .logo{font-weight:800;font-size:18px;color:#1b1f24;text-decoration:none;background:linear-gradient(90deg,#2f6bfe,#8b5cf6,#ec4899);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .top nav a{color:#4b5563;text-decoration:none;margin-right:14px;font-size:14px}.top .sp{flex:1}
 .btn{display:inline-block;background:#2f6bfe;color:#fff;padding:9px 18px;border-radius:999px;text-decoration:none;font-weight:600;font-size:14px;white-space:nowrap}.btn:hover{background:#1f56e0}
-.btn.lg{padding:12px 26px;font-size:16px}.btn.ghost{background:#fff;color:#2f6bfe;border:1px solid #c7d4ff}.lnk{font-size:14px;margin-left:12px}
-.crumbs{font-size:13px;color:#6b7280;margin:16px 0}.crumbs ol{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:6px}.crumbs li+li:before{content:"›";margin-right:6px;color:#6b7280}.crumbs a{color:#6b7280;text-decoration:none}
+.btn.lg{padding:12px 26px;font-size:16px}.btn.ghost{background:#fff;color:#1d4fd7;border:1px solid #c7d4ff}.lnk{font-size:14px;margin-left:12px}
+.crumbs{font-size:13px;color:#596273;margin:16px 0}.crumbs ol{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:6px}.crumbs li+li:before{content:"›";margin-right:6px;color:#596273}.crumbs a{color:#596273;text-decoration:none}
 h1{font-size:30px;line-height:1.3;margin:8px 0 10px;letter-spacing:-.01em}h2{font-size:20px;margin:0 0 12px}h3{font-size:16px;margin:0 0 6px}
-.hero{padding:8px 0 20px}.hero p.lead{font-size:16px;color:#4b5563;margin:0 0 16px;max-width:760px}.hero .meta{font-size:13px;color:#6b7280}
+.hero{padding:8px 0 20px}.hero p.lead{font-size:16px;color:#4b5563;margin:0 0 16px;max-width:760px}.hero .meta{font-size:13px;color:#596273}
 .card{background:#fff;border-radius:14px;padding:22px 24px;margin:0 0 18px;box-shadow:0 1px 2px rgba(16,24,40,.04),0 4px 16px rgba(16,24,40,.05)}
 .card ul{padding-left:20px;margin:6px 0}.card li{margin:4px 0}.card p{margin:8px 0}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}
@@ -72,8 +72,8 @@ h1{font-size:30px;line-height:1.3;margin:8px 0 10px;letter-spacing:-.01em}h2{fon
 .toc a{display:inline-block;margin:2px 12px 2px 0;font-size:14px}
 .paper-wrap{background:#e9ebf0;border-radius:14px;padding:20px;overflow:auto;margin-bottom:18px}.paper{width:794px;min-height:1000px;margin:0 auto;background:#fff;box-shadow:0 8px 30px rgba(0,0,0,.12);padding:28px 36px;position:relative}
 .cta-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0 22px}
-.chips a{display:inline-block;background:#fff;border:1px solid #e6e8ee;border-radius:999px;padding:6px 14px;margin:0 8px 8px 0;text-decoration:none;color:#1b1f24;font-size:14px}.chips a:hover{border-color:#2f6bfe;color:#2f6bfe}
-.foot{margin-top:40px;border-top:1px solid #e6e8ee;background:#fff;padding:28px 0 20px;font-size:13px}.foot .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px}.foot h3{margin:0 0 8px;font-size:13px;color:#1b1f24}.foot a{display:block;color:#6b7280;text-decoration:none;margin:3px 0}.foot .copy{color:#6b7280;margin-top:20px;text-align:center}
+.chips a{display:inline-block;background:#fff;border:1px solid #e6e8ee;border-radius:999px;padding:6px 14px;margin:0 8px 8px 0;text-decoration:none;color:#1b1f24;font-size:14px}.chips a:hover{border-color:#2f6bfe;color:#1d4fd7}
+.foot{margin-top:40px;border-top:1px solid #e6e8ee;background:#fff;padding:28px 0 20px;font-size:13px}.foot .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px}.foot h3{margin:0 0 8px;font-size:13px;color:#1b1f24}.foot a{display:block;color:#596273;text-decoration:none;margin:3px 0}.foot .copy{color:#596273;margin-top:20px;text-align:center}
 @media(max-width:860px){h1{font-size:24px}.card{padding:16px}.cmp{grid-template-columns:1fr}.top nav{display:none}.paper-wrap{padding:8px}.paper{zoom:.44;padding:20px}}`
 
 export function page(o: { origin: string; path: string; title: string; desc: string; crumbs: Crumb[]; body: string; ld: unknown[]; ogImage?: string; extraHead?: string; status?: number }) {
