@@ -14,11 +14,19 @@ import { normalizeMd } from '../../core/serial/normalize'
 
 const norm = (s: string) => s.replace(/\s+/g, ' ').trim()
 
+// ::: 指令行的原子壳：入编辑器前包成 ```cvdir 围栏（PM 里是独立 code 节点，不能被段落吞并），
+// 序列化后剥回 ::: 行。根治「打字污染指令行/指令被并进相邻段落」。
+const CV_DIR = 'cvdir'
+const wrapDirectives = (md: string) =>
+  md.split('\n').map(l => (/^\s*:::/.test(l) ? `\n\`\`\`${CV_DIR}\n${l.trim()}\n\`\`\`\n` : l)).join('\n')
+const unwrapDirectives = (ser: string) =>
+  ser.replace(/^```cvdir\n([\s\S]*?)\n```$/gm, (_m, body: string) => body.trim())
+
 // 外科回写：PM doc → 逐节点序列化 → normalizeMd → 按 ::: 切块与源块顺序比对
 // 内容相等的块回写源原文（surgical 不变量）；不等的（真编辑过）保留序列化结果。
 // 不依赖索引对齐——插入/删除/合并节点都不会漂。
 function writeback(source: string, serializeAll: () => string): string {
-  const ser = normalizeMd(serializeAll())
+  const ser = normalizeMd(unwrapDirectives(serializeAll()))
   const serBlocks = splitBlocks(ser)
   const srcBlocks = splitBlocks(source)
   const out: string[] = []
@@ -48,7 +56,7 @@ export default function ContentEditor({ md, onMd }: { md: string; onMd: (md: str
     Editor.make()
       .config(ctx => {
         ctx.set(rootCtx, host.current!)
-        ctx.set(defaultValueCtx, md)
+        ctx.set(defaultValueCtx, wrapDirectives(md))
         ctx.get(listenerCtx).updated((ctx2, doc) => {
           if (destroyed) return
           const schema = doc.type.schema

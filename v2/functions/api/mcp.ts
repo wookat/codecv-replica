@@ -76,6 +76,32 @@ export default function mcpRoute() {
       return text(JSON.stringify({ ok: true }))
     })
 
+    // ---- ①.5 建库：AI 把「扔进来的一份现有简历」结构化成条目+版本，一次写入 ----
+    server.tool('master_ingest', '扔一份现有简历进来建大简历：一次写入条目+各版本（内容已结构化）', {
+      name: z.string(),
+      items: z.array(z.object({
+        section: z.enum(['education', 'internship', 'project', 'award', 'skill', 'selfeval', 'other']),
+        title: z.string(), sort: z.number().optional(),
+        variants: z.array(z.object({ label: z.string(), contentMd: z.string() })),
+      })),
+    }, async ({ name, items }) => {
+      const master = { id: uid(), userId, name, createdAt: now(), updatedAt: now() }
+      await db.insert(s.masterResume).values(master)
+      const out = []
+      for (const [i, it] of items.entries()) {
+        const item = { id: uid(), masterId: master.id, section: it.section, title: it.title, sort: it.sort ?? i, metaJson: '{}', createdAt: now(), updatedAt: now() }
+        await db.insert(s.resumeItem).values(item)
+        const vars = []
+        for (const v of it.variants) {
+          const vr = { id: uid(), itemId: item.id, label: v.label, contentMd: v.contentMd, createdAt: now() }
+          await db.insert(s.itemVariant).values(vr)
+          vars.push(vr)
+        }
+        out.push({ ...item, variants: vars })
+      }
+      return text(JSON.stringify({ masterId: master.id, items: out.length }))
+    })
+
     // ---- ② 按 JD 选取建简历：AI 自己读大简历→决定选取→此工具落库并合成 md ----
     server.tool('resume_select', '为大简历按 JD 建一份岗位简历：写选取清单并返回合成 md', {
       masterId: z.string(), templateId: z.string(), title: z.string().optional(), targetJd: z.string(),
