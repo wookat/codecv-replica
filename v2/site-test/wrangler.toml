@@ -2,3 +2,7 @@ name = "v2-test"
 compatibility_date = "2024-09-01"
 d1_databases = [{binding = "DB", database_name = "DB", database_id = "v2-local-dev-db"}]
 kv_namespaces = [{binding = "UPSTASH_KV", id = "v2-local-kv"}]
+
+[vars]
+RENDER_URL="https://cvrender.zalize.com/render"
+RENDER_TOKEN="cvr-a2422cedad51bf796f8d862bbe0b6df6"

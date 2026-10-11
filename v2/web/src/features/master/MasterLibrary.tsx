@@ -1,70 +1,116 @@
-// 大简历库 + 选取面板：条目按 section 分组，挑版本、勾选进简历
+// 大简历库 + 选取面板：条目按 section 分组、勾选进简历、dnd-kit 拖拽排序
 import { useEffect, useState } from 'react'
 import { api } from '../../core/api/client'
+import { DndContext, pointerWithin, PointerSensor, KeyboardSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 const SECTIONS = ['education', 'internship', 'project', 'award', 'skill', 'selfeval', 'other']
 const SEC_LABEL: Record<string, string> = { education: '教育', internship: '实习', project: '项目', award: '奖项', skill: '技能', selfeval: '自评', other: '其他' }
 
+interface Sel { itemId: string; variantId: string | null; ord: number; contentMd: string; section: string; title: string }
+
+function SortableRow({ sel, onVariant, onRemove }: { sel: Sel; onVariant: (v: string) => void; onRemove: () => void }) {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: sel.itemId })
+  return (
+    <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }}
+      className="flex items-center gap-1 bg-white rounded px-2 py-1.5 mb-1 border">
+      <span {...attributes} {...listeners} className="cursor-grab text-neutral-400 select-none">⠿</span>
+      <span className="flex-1 text-xs truncate">{sel.title}</span>
+      <VariantSelect itemId={sel.itemId} value={sel.variantId} onChange={onVariant} />
+      <button className="text-neutral-300 hover:text-red-500 text-xs" onClick={onRemove}>×</button>
+    </div>
+  )
+}
+const variantCache: Record<string, any[]> = {}
+function VariantSelect({ itemId, value, onChange }: { itemId: string; value: string | null; onChange: (v: string) => void }) {
+  const [vs, setVs] = useState<any[]>(variantCache[itemId] ?? [])
+  useEffect(() => { if (!variantCache[itemId]) api.variants(itemId).then(v => { variantCache[itemId] = v; setVs(v) }) }, [itemId])
+  return <select className="text-xs border rounded px-0.5" value={value ?? ''} onChange={e => onChange(e.target.value)}>
+    {vs.map(v => <option key={v.id} value={v.id}>{v.label}</option>)}
+  </select>
+}
+
 export default function MasterLibrary({ masterId, onSelect }: {
   masterId: string
-  onSelect: (sel: { itemId: string; variantId: string | null; ord: number; contentMd: string; section: string; title: string }[]) => void
+  onSelect: (sel: Sel[]) => void
 }) {
   const [items, setItems] = useState<any[]>([])
   const [variants, setVariants] = useState<Record<string, any[]>>({})
-  const [picked, setPicked] = useState<Record<string, string | null>>({})  // itemId -> variantId
+  const [sels, setSels] = useState<Sel[]>([])   // 有序已选清单
   const [newItem, setNewItem] = useState({ section: 'project', title: '' })
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  )
 
   useEffect(() => { api.items(masterId).then(setItems).catch(() => {}) }, [masterId])
   useEffect(() => {
     for (const it of items) if (!variants[it.id])
-      api.variants(it.id).then(v => setVariants(s => ({ ...s, [it.id]: v }))).catch(() => {})
+      api.variants(it.id).then(v => { variantCache[it.id] = v; setVariants(s => ({ ...s, [it.id]: v })) }).catch(() => {})
   }, [items])
 
-  const emit = (p: typeof picked) => {
-    const sel = Object.entries(p).filter(([, v]) => v !== null).map(([itemId, variantId], i) => {
-      const it = items.find(x => x.id === itemId)!
+  const emit = (list: Sel[]) => { const re = list.map((s, i) => ({ ...s, ord: i })); setSels(re); onSelect(re) }
+
+  const toggle = (it: any, on: boolean) => {
+    if (on) {
+      const v = (variants[it.id] ?? [])[0]
+      emit([...sels, { itemId: it.id, variantId: v?.id ?? null, ord: sels.length, contentMd: v?.contentMd ?? '', section: it.section, title: it.title }])
+    } else emit(sels.filter(s => s.itemId !== it.id))
+  }
+
+  const setVariant = (itemId: string, variantId: string) => {
+    emit(sels.map(s => {
+      if (s.itemId !== itemId) return s
       const v = (variants[itemId] ?? []).find(x => x.id === variantId)
-      return { itemId, variantId, ord: i, contentMd: v?.contentMd ?? '', section: it.section, title: it.title }
-    })
-    onSelect(sel)
+      return { ...s, variantId, contentMd: v?.contentMd ?? s.contentMd }
+    }))
+  }
+
+  const onDragEnd = (e: any) => {
+    const { active, over } = e
+    if (!over || active.id === over.id) return
+    const oldIdx = sels.findIndex(s => s.itemId === active.id)
+    const newIdx = sels.findIndex(s => s.itemId === over.id)
+    emit(arrayMove(sels, oldIdx, newIdx))
   }
 
   return (
-    <div className="h-full overflow-auto p-4 space-y-4">
-      <h3 className="font-bold">大简历条目（勾选进简历）</h3>
+    <div className="h-full overflow-auto p-3 space-y-3 text-sm">
+      <div>
+        <div className="font-semibold mb-1">已选（拖拽排序 = 简历顺序）</div>
+        <DndContext sensors={sensors} collisionDetection={pointerWithin} onDragEnd={onDragEnd}>
+          <SortableContext items={sels.map(s => s.itemId)} strategy={verticalListSortingStrategy}>
+            {sels.length === 0 && <div className="text-xs text-neutral-400">从下方勾选条目</div>}
+            {sels.map(s => <SortableRow key={s.itemId} sel={s}
+              onVariant={v => setVariant(s.itemId, v)} onRemove={() => toggle({ id: s.itemId }, false)} />)}
+          </SortableContext>
+        </DndContext>
+      </div>
       {SECTIONS.map(sec => {
         const list = items.filter(i => i.section === sec)
         if (!list.length) return null
         return (
           <div key={sec}>
-            <div className="text-sm font-semibold text-neutral-500 mb-1">{SEC_LABEL[sec]}</div>
+            <div className="text-xs font-semibold text-neutral-500 mb-1">{SEC_LABEL[sec]}</div>
             {list.map(it => (
-              <div key={it.id} className="flex items-center gap-2 bg-white rounded px-3 py-2 mb-1 border">
-                <input type="checkbox" checked={picked[it.id] !== undefined && picked[it.id] !== null}
-                  onChange={e => {
-                    const v = variants[it.id] ?? []
-                    const p = { ...picked, [it.id]: e.target.checked ? (v[0]?.id ?? 'default') : null }
-                    setPicked(p); emit(p)
-                  }} />
-                <span className="flex-1 text-sm">{it.title}</span>
-                <select className="text-xs border rounded px-1" value={picked[it.id] ?? ''} disabled={picked[it.id] == null}
-                  onChange={e => { const p = { ...picked, [it.id]: e.target.value }; setPicked(p); emit(p) }}>
-                  {(variants[it.id] ?? []).map(v => <option key={v.id} value={v.id}>{v.label}</option>)}
-                </select>
-              </div>
+              <label key={it.id} className="flex items-center gap-2 px-2 py-1 hover:bg-neutral-100 rounded cursor-pointer">
+                <input type="checkbox" checked={sels.some(s => s.itemId === it.id)} onChange={e => toggle(it, e.target.checked)} />
+                <span className="text-xs">{it.title}</span>
+              </label>
             ))}
           </div>
         )
       })}
       <div className="pt-2 border-t">
-        <div className="text-sm font-semibold mb-1">+ 新条目</div>
-        <div className="flex gap-2">
-          <select className="border rounded px-2 text-sm" value={newItem.section} onChange={e => setNewItem({ ...newItem, section: e.target.value })}>
+        <div className="text-xs font-semibold mb-1">+ 新条目</div>
+        <div className="flex gap-1">
+          <select className="border rounded px-1 text-xs" value={newItem.section} onChange={e => setNewItem({ ...newItem, section: e.target.value })}>
             {SECTIONS.map(s2 => <option key={s2} value={s2}>{SEC_LABEL[s2]}</option>)}
           </select>
-          <input className="border rounded px-2 py-1 text-sm flex-1" placeholder="条目标题" value={newItem.title}
+          <input className="border rounded px-1.5 py-0.5 text-xs flex-1 min-w-0" placeholder="条目标题" value={newItem.title}
             onChange={e => setNewItem({ ...newItem, title: e.target.value })} />
-          <button className="bg-black text-white text-sm rounded px-3" onClick={async () => {
+          <button className="bg-black text-white text-xs rounded px-2" onClick={async () => {
             const it = await api.createItem(masterId, newItem)
             await api.createVariant(it.id, { label: '默认', contentMd: '- 内容…' })
             setItems([...items, it]); setVariants(s => ({ ...s, [it.id]: undefined as any }))

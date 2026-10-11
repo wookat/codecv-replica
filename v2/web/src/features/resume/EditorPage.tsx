@@ -1,33 +1,74 @@
-// 编辑器页：左=选取面板+md 编辑，右=mth 预览（皮肤实时挂载）
+// 编辑器页：左=选取面板+md 编辑，右=mth 预览；顶栏换肤+导出双链
 import { useEffect, useState } from 'react'
 import CodeMirror from '@uiw/react-codemirror'
 import { markdown } from '@codemirror/lang-markdown'
 import { api } from '../../core/api/client'
 import { composeMd, skinHref, templateMeta, type SelItem } from './composer'
 import PreviewPane from './PreviewPane'
+import catalog from '../templates/catalog.json'
 
-export default function EditorPage({ templateId, masterId, onBack }: {
+export default function EditorPage({ templateId: initTpl, masterId, onBack }: {
   templateId: string; masterId: string; onBack: () => void
 }) {
-  const meta = templateMeta(templateId)
+  const [tplId, setTplId] = useState(initTpl)          // 快捷换肤
+  const meta = templateMeta(tplId)
   const [md, setMd] = useState('')
-  const [resumeId, setResumeId] = useState('')
   const [sels, setSels] = useState<SelItem[]>([])
+  const [exporting, setExporting] = useState('')
 
   useEffect(() => {
-    api.createResume({ masterId, templateId, title: meta?.name ?? templateId }).then(r => setResumeId(r.id))
-  }, [templateId, masterId])
+    api.createResume({ masterId, templateId: tplId, title: meta?.name ?? tplId }).catch(() => {})
+  }, [tplId, masterId])
 
   useEffect(() => {
     setMd(composeMd({ title: meta?.name ?? '我的简历', items: sels }))
-  }, [sels])
+  }, [sels, tplId])
+
+  const exportPdf = async (kind: 'pdf' | 'png') => {
+    setExporting(kind)
+    try {
+      const body = document.querySelector('.markdown-transform-html.jufe')?.innerHTML ?? ''
+      const r = await fetch('/api/v2/export', {
+        method: 'POST', headers: { 'content-type': 'application/json', 'authorization': `Bearer ${localStorage.getItem('v2:token') ?? ''}` },
+        body: JSON.stringify({
+          content: body, style: skinHref(meta?.slug ?? tplId), name: meta?.name ?? 'resume', type: kind,
+        }),
+      })
+      if (!r.ok) throw new Error(await r.text())
+      const blob = await r.blob()
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = `${meta?.name ?? 'resume'}.${kind}`
+      a.click()
+    } catch (e: any) { alert('导出失败: ' + e.message) }
+    setExporting('')
+  }
+
+  const printPdf = () => {
+    const body = document.querySelector('.markdown-transform-html.jufe')?.innerHTML ?? ''
+    const w = window.open('', '_blank')!
+    w.document.write(`<!DOCTYPE html><html><head><meta charset=utf-8><title>${meta?.name}</title>
+      <link rel="stylesheet" href="${skinHref(meta?.slug ?? tplId)}">
+      <style>@page{size:A4;margin:0}body{margin:0}.markdown-transform-html{width:210mm;margin:0 auto}</style>
+      </head><body><div class="markdown-transform-html jufe">${body}</div>
+      <script>onload=()=>setTimeout(()=>print(),400)<\/script></body></html>`)
+    w.document.close()
+  }
 
   return (
     <div className="h-screen flex flex-col">
       <div className="border-b px-4 py-2 flex items-center gap-3">
         <button onClick={onBack} className="text-sm text-neutral-500 hover:text-black">← 模板中心</button>
-        <span className="font-medium">{meta?.name ?? templateId}</span>
+        <select className="text-sm border rounded px-2 py-0.5" value={tplId} onChange={e => setTplId(e.target.value)}>
+          {Object.entries(catalog as Record<string, any>).map(([id, t]) => <option key={id} value={id}>{t.name}</option>)}
+        </select>
         <span className="text-xs text-neutral-400">{meta?.font}</span>
+        <div className="flex-1" />
+        <button className="text-xs border rounded px-2 py-1" onClick={printPdf}>打印 PDF</button>
+        <button className="text-xs bg-black text-white rounded px-2 py-1" disabled={!!exporting}
+          onClick={() => exportPdf('pdf')}>{exporting === 'pdf' ? '渲染中…' : 'VPS 导出 PDF'}</button>
+        <button className="text-xs border rounded px-2 py-1" disabled={!!exporting}
+          onClick={() => exportPdf('png')}>{exporting === 'png' ? '渲染中…' : 'VPS PNG'}</button>
       </div>
       <div className="flex-1 flex overflow-hidden">
         <div className="w-80 border-r bg-neutral-50">
@@ -38,7 +79,7 @@ export default function EditorPage({ templateId, masterId, onBack }: {
             extensions={[markdown()]} onChange={v => setMd(v)} />
         </div>
         <div className="flex-1">
-          <PreviewPane md={md} skinCss={skinHref(meta?.slug ?? templateId)} primaryColor={meta?.primaryColor} font={meta?.font} />
+          <PreviewPane md={md} skinCss={skinHref(meta?.slug ?? tplId)} primaryColor={meta?.primaryColor} font={meta?.font} />
         </div>
       </div>
     </div>
