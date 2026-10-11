@@ -30,3 +30,15 @@ body { background: var(--cv-bg); color: var(--cv-text); }
 .cv-nav-on { background: var(--cv-brand-soft); color: var(--cv-brand); font-weight: 600; }
 .cv-input { font-size: 13px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--cv-line); background: #fff; color: var(--cv-text); }
 .cv-input:focus { outline: none; border-color: var(--cv-brand); box-shadow: 0 0 0 3px var(--cv-brand-soft); }
+.cv-sub { color: var(--cv-sub); }
+.cv-modal-mask { position: fixed; inset: 0; z-index: 60; background: rgba(15,23,42,.55); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; animation: cvFade .18s ease; }
+.cv-modal { background: #fff; border-radius: 14px; width: min(960px, 94vw); height: min(860px, 92vh); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 24px 64px rgba(15,23,42,.28); animation: cvPop .22s cubic-bezier(.2,.9,.3,1.2); }
+.cv-modal-body { flex: 1; overflow: auto; background: var(--cv-bg); padding: 20px; display: flex; justify-content: center; }
+@keyframes cvFade { from { opacity: 0 } }
+@keyframes cvPop { from { opacity: 0; transform: translateY(14px) scale(.97) } }
+.cv-grad { background: linear-gradient(120deg, var(--cv-brand) 0%, #7c3aed 55%, #ec4899 110%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.cv-hero { background: radial-gradient(1000px 480px at 15% -10%, rgba(47,107,254,.14), transparent 60%), radial-gradient(800px 400px at 85% 0%, rgba(124,58,237,.10), transparent 60%), var(--cv-bg); }
+.cv-elev { box-shadow: 0 8px 30px rgba(15,23,42,.08), 0 2px 6px rgba(15,23,42,.04); }
+.cv-card-hover { transition: transform .18s ease, box-shadow .18s ease; }
+.cv-card-hover:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(15,23,42,.12); }
+.cv-glass { background: rgba(255,255,255,.72); backdrop-filter: blur(10px); }
