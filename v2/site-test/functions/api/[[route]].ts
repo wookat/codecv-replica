@@ -10,6 +10,7 @@ import { renderSelfContained } from './export'
 import * as s from '../schema'
 import exportRoute from './export'
 import mcpRoute from './mcp'
+import { composeResumeMd } from '../_compose'
 
 type Env = {
   Bindings: { DB: D1Database; UPSTASH_KV: KVNamespace }
@@ -313,6 +314,59 @@ JD：${jd.slice(0, 2000)}
   const selections = picks.filter(p => vIds.get(p.variantId) === p.itemId)
     .map((p, i) => ({ itemId: p.itemId, variantId: p.variantId, ord: i, reason: String(p.reason || '') }))
   return c.json({ selections })
+})
+// POST /jd/generate — 一句话成稿：选条目×版本 + 按 JD 改写 → 直接建可导出简历
+app.post('/jd/generate', async c => {
+  const { masterId, jd, templateId, title } = await c.req.json() as any
+  if (!masterId || !jd || !templateId) return c.json({ error: 'missing masterId/jd/templateId' }, 400)
+  {
+    const u = await meRow(c)
+    const t = u ? tier(u) : null
+    const quota = t ? t.cv : 1
+    if (quota !== -1) {
+      const cnt = await c.env.DB.prepare('SELECT COUNT(*) c FROM resume WHERE user_id=?').bind(c.get('userId')).first<any>()
+      if ((cnt?.c ?? 0) >= quota) return c.json({ error: `简历份数已达上限（${quota}），升级会员可建更多`, code: 'quota' }, 403)
+    }
+  }
+  const items = await db(c).select().from(s.resumeItem).where(eq(s.resumeItem.masterId, masterId)).orderBy(asc(s.resumeItem.sort))
+  if (!items.length) return c.json({ error: '大简历为空，先用 AI 建库或导入简历' }, 400)
+  const pool: any[] = []; const vMap = new Map<string, any>()
+  for (const it of items) {
+    const vs = await db(c).select().from(s.itemVariant).where(eq(s.itemVariant.itemId, it.id))
+    for (const v of vs) vMap.set(v.id, v)
+    pool.push({ itemId: it.id, section: it.section, title: it.title,
+      variants: vs.map(v => ({ variantId: v.id, label: v.label, contentMd: v.contentMd.slice(0, 500) })) })
+  }
+  const prompt = `你是顶级简历写手。下面候选人的「大简历条目池」（每条含多版本写法）和目标「岗位 JD」。
+请完成：1) 选最合适的条目与版本（最多 9 条，按简历顺序）；2) 把每段内容按 JD 改写成最终简历文本（突出 JD 关键词、量化成果、删无关）；3) 起简历标题。
+输出严格 JSON：{"title":"...","selections":[{"itemId":"...","variantId":"...","section":"...","contentMd":"改写后的 markdown（列表用 -，加粗 **）","reason":"一句"}]}。itemId/variantId 只能取自给定 id；contentMd 是给模板的正文，不要再写 ## 小节标题。
+JD：${jd.slice(0, 2000)}
+条目池：${JSON.stringify(pool).slice(0, 14000)}`
+  const r = await fetch('https://api.aicdks.com/v1/chat/completions', {
+    method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${(c.env as any).GP_LLM_API_KEY}` },
+    body: JSON.stringify({ model: 'swe-2-medium', messages: [{ role: 'user', content: prompt }], temperature: 0.3 }) })
+  if (!r.ok) { logEvent(c, 'ai_fail', 'jdgen ' + r.status); return c.json({ error: 'LLM ' + r.status }, 502) }
+  const out = (await r.json() as any).choices?.[0]?.message?.content || ''
+  const jm = out.match(/\{[\s\S]*\}/)
+  let j: any = {}
+  try { j = JSON.parse(jm?.[0] || '{}') } catch { return c.json({ error: 'LLM JSON 解析失败' }, 502) }
+  const picks = (j.selections || []).filter((p: any) => vMap.get(p.variantId)?.itemId === p.itemId)
+  if (!picks.length) return c.json({ error: 'AI 未产出有效选取' }, 502)
+  const uid = () => crypto.randomUUID()
+  const rid = uid(); const nowT = Date.now(); const uidNum = (await meRow(c))?.id ?? 0
+  const resumeTitle = title || j.title || `定制简历-${jd.slice(0, 12)}`
+  await db(c).insert(s.resume).values({ id: rid, userId: c.get('userId'), masterId, templateId, title: resumeTitle, targetJd: jd.slice(0, 500), contentMd: '', createdAt: nowT, updatedAt: nowT })
+  const composeItems: any[] = []
+  for (const [i, p] of picks.entries()) {
+    const it = items.find(x => x.id === p.itemId)!
+    const v = vMap.get(p.variantId)
+    await db(c).insert(s.resumeSelection).values({ resumeId: rid, itemId: p.itemId, variantId: p.variantId, ord: i, overridesJson: '{}' })
+    composeItems.push({ section: p.section || it.section, title: it.title, contentMd: p.contentMd || v?.contentMd || '' })
+  }
+  const contentMd = composeResumeMd({ title: resumeTitle, items: composeItems })
+  await db(c).update(s.resume).set({ contentMd }).where(eq(s.resume.id, rid))
+  void uidNum
+  return c.json({ id: rid, title: resumeTitle, count: picks.length }, 201)
 })
 // POST /jd/gap — JD 差距报告：大简历 vs JD 缺什么、怎么补
 app.post('/jd/gap', async c => {

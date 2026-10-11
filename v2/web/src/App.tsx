@@ -27,9 +27,11 @@ export default function App() {
   const [masterId, setMasterId] = useState('')
   const [page, setPage] = useState<'templates' | 'editor' | 'resumes' | 'vip' | 'admin' | 'community' | 'progress' | 'builder'>('templates')
   const [templateId, setTemplateId] = useState(() => new URLSearchParams(location.search).get('tpl') || '')
-  const [resumeId, setResumeId] = useState<string | undefined>()
+  const sp = new URLSearchParams(location.search)
+  const [resumeId, setResumeId] = useState<string | undefined>(sp.get('r') || undefined)
   const [regMode, setRegMode] = useState(false)
   const [importing, setImporting] = useState(false)
+  useEffect(() => { if (resumeId) setPage('editor') }, [])
   const [err, setErr] = useState('')
 
   useEffect(() => {

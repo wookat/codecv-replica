@@ -31,9 +31,10 @@ function VariantSelect({ itemId, value, onChange }: { itemId: string; value: str
   </select>
 }
 
-export default function MasterLibrary({ masterId, onSelect }: {
+export default function MasterLibrary({ masterId, onSelect, templateId }: {
   masterId: string
   onSelect: (sel: Sel[]) => void
+  templateId?: string
 }) {
   const [items, setItems] = useState<any[]>([])
   const [variants, setVariants] = useState<Record<string, any[]>>({})
@@ -108,6 +109,12 @@ export default function MasterLibrary({ masterId, onSelect }: {
           <div className="flex gap-2 items-center">
             <button className="bg-blue-600 text-white text-xs rounded px-3 py-1" disabled={jdBusy} onClick={applyJd}>
               {jdBusy ? '处理中…' : 'AI 推荐并替换已选'}</button>
+            {templateId && <button className="text-xs bg-green-600 text-white rounded px-3 py-1" disabled={jdBusy} onClick={async () => {
+              if (!jd.trim()) return; setJdBusy(true); setJdMsg('')
+              try { const r = await api.jdGenerate(masterId, jd, templateId); location.href = `/?r=${r.id}` }
+              catch (e: any) { setJdMsg(e?.code === 'quota' ? '简历份数达上限，升级会员可建更多' : '成稿失败：' + String(e).slice(0, 60)) }
+              setJdBusy(false)
+            }}>一键成稿</button>}
             <button className="text-xs border border-blue-300 text-blue-600 rounded px-3 py-1" disabled={jdBusy} onClick={async () => {
               if (!jd.trim()) return; setJdBusy(true); setGap('')
               try { setGap((await api.jdGap(masterId, jd)).report) } catch (e) { setJdMsg('分析失败：' + String(e).slice(0, 60)) }

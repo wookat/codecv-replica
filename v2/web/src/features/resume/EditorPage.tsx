@@ -173,7 +173,7 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
       </div>
       <div className="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden">
         <div className="md:w-80 w-full md:border-r border-b bg-neutral-50 md:overflow-y-auto">
-          <MasterPick masterId={masterId} onSelect={setSels} />
+          <MasterPick masterId={masterId} onSelect={setSels} templateId={tplId} />
         </div>
         <div className="md:w-[420px] w-full md:border-r border-b min-h-[300px]">
           {mode === 'md'
@@ -192,6 +192,6 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
 }
 
 import MasterLibrary from '../master/MasterLibrary'
-function MasterPick(props: { masterId: string; onSelect: (s: SelItem[]) => void }) {
+function MasterPick(props: { masterId: string; onSelect: (s: SelItem[]) => void; templateId?: string }) {
   return <MasterLibrary {...props} />
 }
