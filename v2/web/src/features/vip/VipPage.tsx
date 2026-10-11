@@ -1,0 +1,67 @@
+// 会员中心：档位购买/订单/兑换码/配额展示
+import { useEffect, useState } from 'react'
+import { api } from '../../core/api/client'
+
+const PLANS = [['月度会员', '¥19.9'], ['季度会员', '¥39.9'], ['年度会员', '¥99.9'], ['终身会员', '¥199']]
+
+export default function VipPage() {
+  const [me, setMe] = useState<any>(null)
+  const [orders, setOrders] = useState<any[]>([])
+  const [code, setCode] = useState('')
+  const [msg, setMsg] = useState('')
+  const load = () => { api.me().then(setMe).catch(() => {}); api.orders().then(setOrders).catch(() => {}) }
+  useEffect(() => { load() }, [])
+  const buy = async (plan: string) => {
+    const o = await api.createOrder(plan)
+    if (confirm(`订单 ${o.orderNo}（${plan}）— 模拟支付确认？`)) {
+      await api.payOrder(o.orderNo); setMsg('已开通会员'); load()
+    }
+  }
+  return (
+    <div className="p-6 max-w-4xl mx-auto space-y-6">
+      <h2 className="text-lg font-semibold">会员中心</h2>
+      {me && (
+        <div className="border rounded-lg p-4 bg-white text-sm">
+          <b>{me.username}</b>
+          {me.member
+            ? <span className="ml-2 text-green-600">{me.vipPlan} · 至 {new Date(me.vipExpire).toLocaleDateString()}</span>
+            : <span className="ml-2 text-neutral-400">免费版</span>}
+          <div className="text-xs text-neutral-500 mt-1">
+            简历 {me.resumeCount}/{me.cvQuota === -1 ? '∞' : me.cvQuota} · AI 次数 {me.member ? '∞' : me.ai}
+          </div>
+        </div>
+      )}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {PLANS.map(([p, price]) => (
+          <div key={p} className="border rounded-lg p-4 bg-white text-center">
+            <div className="font-semibold">{p}</div>
+            <div className="text-xl my-2">{price}</div>
+            <button className="bg-black text-white rounded px-3 py-1 text-sm" onClick={() => buy(p)}>开通</button>
+          </div>
+        ))}
+      </div>
+      <div className="flex gap-2 items-center text-sm">
+        <input className="border rounded px-2 py-1" placeholder="兑换码" value={code} onChange={e => setCode(e.target.value)} />
+        <button className="border rounded px-3 py-1" onClick={async () => {
+          const r = await api.redeem(code).catch((e: any) => ({ error: String(e) }))
+          setMsg(r.error ? '兑换失败' : `兑换成功 +${r.days} 天`); load()
+        }}>兑换</button>
+        {msg && <span className="text-xs text-neutral-500">{msg}</span>}
+      </div>
+      <div>
+        <h3 className="font-medium mb-2 text-sm">订单记录</h3>
+        <table className="w-full text-xs border">
+          <thead><tr className="bg-neutral-50"><th className="p-2 text-left">订单号</th><th>档位</th><th>金额</th><th>状态</th><th>时间</th></tr></thead>
+          <tbody>{orders.map(o => (
+            <tr key={o.orderNo} className="border-t">
+              <td className="p-2">{o.orderNo}</td><td className="text-center">{o.plan}</td>
+              <td className="text-center">¥{(o.amount / 100).toFixed(2)}</td>
+              <td className="text-center">{o.status === 'paid' ? '已支付' : '待支付'}</td>
+              <td className="text-center">{new Date(o.created_at).toLocaleDateString()}</td>
+            </tr>))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}

@@ -193,6 +193,15 @@ const ResumeBody = z.object({ masterId: z.string().optional(), templateId: z.str
 app.get('/resumes', async c =>
   c.json(await db(c).select().from(s.resume).where(eq(s.resume.userId, c.get('userId')))))
 app.post('/resumes', async c => {
+  {
+    const u = await meRow(c)
+    const t = u ? tier(u) : null
+    const quota = t ? t.cv : 1
+    if (quota !== -1) {
+      const cnt = await c.env.DB.prepare('SELECT COUNT(*) c FROM resume WHERE user_id=?').bind(c.get('userId')).first<any>()
+      if ((cnt?.c ?? 0) >= quota) return c.json({ error: `简历份数已达上限（${quota}），升级会员可建更多`, code: 'quota' }, 403)
+    }
+  }
   const b = ResumeBody.parse(await c.req.json())
   const row = { id: uid(), userId: c.get('userId'), masterId: b.masterId ?? null, templateId: b.templateId, title: b.title ?? '', targetJd: b.targetJd ?? '', createdAt: now(), updatedAt: now() }
   await db(c).insert(s.resume).values(row)
@@ -237,6 +246,13 @@ app.post('/ai', async c => {
   }
   const prompt = prompts[action]
   if (!prompt) return c.json({ error: 'unknown action' }, 400)
+  {
+    const u = await meRow(c)
+    if (!tier(u)) {
+      if (!u || Number(u.ai) <= 0) return c.json({ error: 'AI 次数已用完，开通会员无限使用', code: 'quota' }, 403)
+      await c.env.DB.prepare('UPDATE users SET ai=ai-1 WHERE id=?').bind(u.id).run()
+    }
+  }
   const r = await fetch('https://api.aicdks.com/v1/chat/completions', {
     method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${(c.env as any).GP_LLM_API_KEY}` },
     body: JSON.stringify({ model: 'swe-2-medium', messages: [{ role: 'user', content: prompt }], temperature: 0.3 }) })
@@ -280,6 +296,73 @@ app.post('/migrate/v1', async c => {
   return c.json({ migrated: n, total: (rows.results ?? []).length })
 })
 
+// ---- 会员/订单（v1 语义对齐：档位配额 + 模拟支付 + 兑换码 + 邀请 10% 返佣）----
+const VIP_TIERS: Record<string, { days: number; cv: number; uploadMB: number }> = {
+  '月度会员': { days: 30, cv: 4, uploadMB: 2 },
+  '季度会员': { days: 90, cv: 5, uploadMB: 2 },
+  '年度会员': { days: 365, cv: 15, uploadMB: 2 },
+  '终身会员': { days: 36500, cv: -1, uploadMB: 10 },
+}
+const PLANS: Record<string, number> = { '月度会员': 1990, '季度会员': 3990, '年度会员': 9990, '终身会员': 19900 } // 分
+const meRow = async (c: any) =>
+  c.env.DB.prepare('SELECT id, vip_expire, vip_plan, ai, inviter FROM users WHERE username=?').bind(c.get('userId')).first<any>()
+const tier = (u: any) => (Number(u?.vip_expire) > Date.now() ? (VIP_TIERS[u?.vip_plan] || VIP_TIERS['月度会员']) : null)
+
+app.get('/me', async c => {
+  const u = await meRow(c)
+  if (!u) return c.json({ error: 'no user' }, 404)
+  const t = tier(u)
+  const cnt = await c.env.DB.prepare('SELECT COUNT(*) c FROM resume WHERE user_id=?').bind(c.get('userId')).first<any>()
+  return c.json({ username: c.get('userId'), vipExpire: u.vip_expire, vipPlan: u.vip_plan, ai: u.ai,
+    member: t ? { ...t, plan: u.vip_plan } : null, resumeCount: cnt?.c ?? 0, cvQuota: t ? t.cv : 1 })
+})
+app.get('/orders', async c => {
+  const u = await meRow(c)
+  const r = await c.env.DB.prepare('SELECT order_no AS orderNo, plan, amount, status, created_at, paid_at FROM orders WHERE user_id=? ORDER BY created_at DESC LIMIT 100').bind(u.id).all<any>()
+  return c.json(r.results ?? [])
+})
+app.post('/orders', async c => {
+  const u = await meRow(c)
+  const { plan } = await c.req.json() as any
+  if (!PLANS[plan]) return c.json({ error: '档位不存在' }, 400)
+  const orderNo = `CV${Date.now()}${Math.floor(Math.random() * 9000 + 1000)}`
+  await c.env.DB.prepare('INSERT INTO orders (user_id, order_no, plan, amount, status, created_at) VALUES (?,?,?,?,?,?)')
+    .bind(u.id, orderNo, plan, PLANS[plan], 'pending', Date.now()).run()
+  return c.json({ orderNo, plan, amount: PLANS[plan] }, 201)
+})
+app.post('/orders/:no/pay', async c => {
+  const u = await meRow(c)
+  const no = c.req.param('no')
+  const r = await c.env.DB.prepare("UPDATE orders SET status='paid', paid_at=? WHERE order_no=? AND user_id=? AND status='pending'")
+    .bind(Date.now(), no, u.id).run()
+  if (!r.meta.changes) return c.json({ error: '订单不存在或已支付' }, 400)
+  const t = VIP_TIERS[(await c.env.DB.prepare('SELECT plan FROM orders WHERE order_no=?').bind(no).first<any>())?.plan] 
+  if (t) {
+    const base = Math.max(Date.now(), Number(u.vip_expire) || 0)
+    await c.env.DB.prepare('UPDATE users SET vip_expire=?, vip_plan=? WHERE id=?')
+      .bind(base + t.days * 86400e3, (await c.env.DB.prepare('SELECT plan FROM orders WHERE order_no=?').bind(no).first<any>()).plan, u.id).run()
+  }
+  // 邀请返佣：首笔已支付订单给邀请人 10%
+  const paidCount = await c.env.DB.prepare("SELECT COUNT(*) c FROM orders WHERE user_id=? AND status='paid'").bind(u.id).first<any>()
+  if (paidCount?.c === 1 && u.inviter) {
+    const inv = await c.env.DB.prepare('SELECT id FROM users WHERE username=?').bind(u.inviter).first<any>()
+    const ord = await c.env.DB.prepare('SELECT amount FROM orders WHERE order_no=?').bind(no).first<any>()
+    if (inv && ord) await c.env.DB.prepare('INSERT INTO invites (inviter_id, invitee_id, order_no, commission, created_at) VALUES (?,?,?,?,?)')
+      .bind(inv.id, u.id, no, Math.round(ord.amount * 0.1), Date.now()).run()
+  }
+  return c.json({ ok: true })
+})
+app.post('/redeem', async c => {
+  const u = await meRow(c)
+  const { code } = await c.req.json() as any
+  const rc = await c.env.DB.prepare('SELECT code, days, used_by FROM redeem_codes WHERE code=?').bind(code).first<any>()
+  if (!rc || rc.used_by) return c.json({ error: '兑换码无效或已使用' }, 400)
+  await c.env.DB.prepare('UPDATE redeem_codes SET used_by=?, used_at=? WHERE code=?').bind(u.id, Date.now(), code).run()
+  const base = Math.max(Date.now(), Number(u.vip_expire) || 0)
+  await c.env.DB.prepare('UPDATE users SET vip_expire=?, vip_plan=? WHERE id=?')
+    .bind(base + rc.days * 86400e3, rc.days >= 36500 ? '终身会员' : rc.days >= 365 ? '年度会员' : rc.days >= 90 ? '季度会员' : '月度会员', u.id).run()
+  return c.json({ ok: true, days: rc.days })
+})
 app.post('/export', exportRoute())
 app.all('/mcp', mcpRoute())
 
