@@ -18,7 +18,7 @@ export default function App() {
   const inv = new URLSearchParams(location.search).get('inv')
   if (inv) localStorage.setItem('v2:inviter', inv)
   const pubMatch = location.pathname.match(/^\/r\/([\w-]+)/)
-  const landing = location.pathname === '/' && !localStorage.getItem('v2:token') && !location.search.includes('login')
+  const landing = location.pathname === '/' && !localStorage.getItem('v2:token') && !location.search.includes('login') && !location.search.includes('tpl=')
   if (pubMatch) return <PublicResume id={pubMatch[1]} />
   if (location.pathname === '/gallery') return <GalleryPage />
   if (landing) return <Landing onEnter={() => { location.href = '/?login' }} />
@@ -39,7 +39,7 @@ export default function App() {
   const [resumeId, setResumeId] = useState<string | undefined>(sp.get('r') || undefined)
   const [regMode, setRegMode] = useState(false)
   const [importing, setImporting] = useState(false)
-  useEffect(() => { if (resumeId) setPage('editor') }, [])
+  useEffect(() => { if (resumeId || templateId) setPage('editor') }, [])
   const [err, setErr] = useState('')
 
   useEffect(() => {
