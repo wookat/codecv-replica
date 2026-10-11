@@ -71,7 +71,9 @@ export default function TemplateGallery({ onPick }: { onPick: (id: string) => vo
           </div>
         ))}
       </div>
-      {pv && <div className="cv-modal-mask" onClick={() => setPv(null)}>
+      {pv && <div className="cv-modal-mask" role="dialog" aria-modal="true" aria-label={meta?.name ?? '模板预览'}
+        onClick={() => setPv(null)} onKeyDown={e => e.key === 'Escape' && setPv(null)} tabIndex={-1}
+        ref={el => el?.focus()}>
         <div className="cv-modal" onClick={e => e.stopPropagation()}>
           <div className="flex items-center gap-3 px-5 py-3 border-b" style={{ borderColor: 'var(--cv-line)' }}>
             <div className="min-w-0">
