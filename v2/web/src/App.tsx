@@ -1,15 +1,23 @@
 import { useEffect, useState } from 'react'
 import { api } from './core/api/client'
+import TemplateGallery from './features/templates/TemplateGallery'
+import EditorPage from './features/resume/EditorPage'
 
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem('v2:token'))
   const [user, setUser] = useState('')
   const [pass, setPass] = useState('')
   const [masters, setMasters] = useState<any[]>([])
+  const [masterId, setMasterId] = useState('')
+  const [page, setPage] = useState<'templates' | 'editor'>('templates')
+  const [templateId, setTemplateId] = useState('')
   const [err, setErr] = useState('')
 
   useEffect(() => {
-    if (token) api.masters().then(setMasters).catch(e => setErr(String(e)))
+    if (token) api.masters().then(ms => {
+      setMasters(ms)
+      if (ms.length && !masterId) setMasterId(ms[0].id)
+    }).catch(e => setErr(String(e)))
   }, [token])
 
   if (!token) return (
@@ -20,7 +28,7 @@ export default function App() {
           const r = await api.login(user, pass)
           localStorage.setItem('v2:token', r.token)
           setToken(r.token)
-        } catch (e: any) { setErr('登录失败') }
+        } catch { setErr('登录失败') }
       }}>
         <h1 className="text-xl font-bold">CodeCV v2 登录</h1>
         <input className="w-full border rounded px-3 py-2" placeholder="用户名" value={user} onChange={e => setUser(e.target.value)} />
@@ -31,17 +39,22 @@ export default function App() {
     </div>
   )
 
+  if (page === 'editor' && templateId && masterId)
+    return <EditorPage templateId={templateId} masterId={masterId} onBack={() => setPage('templates')} />
+
   return (
-    <div className="min-h-screen bg-neutral-50 p-8">
-      <h1 className="text-2xl font-bold mb-4">我的大简历</h1>
-      {err && <p className="text-red-500">{err}</p>}
-      <button className="mb-4 bg-black text-white rounded px-4 py-2" onClick={async () => {
-        const m = await api.createMaster('大简历 ' + (masters.length + 1))
-        setMasters([...masters, m])
-      }}>+ 新建大简历</button>
-      <ul className="space-y-2">
-        {masters.map(m => <li key={m.id} className="bg-white rounded p-4 shadow">{m.name} <span className="text-neutral-400 text-sm">{m.id.slice(0, 8)}</span></li>)}
-      </ul>
+    <div className="min-h-screen bg-neutral-50">
+      <div className="border-b bg-white px-6 py-3 flex items-center gap-4">
+        <span className="font-bold">CodeCV v2</span>
+        <select className="border rounded px-2 py-1 text-sm" value={masterId} onChange={e => setMasterId(e.target.value)}>
+          {masters.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+        </select>
+        <button className="text-sm border rounded px-2 py-1" onClick={async () => {
+          const m = await api.createMaster('大简历 ' + (masters.length + 1))
+          setMasters([...masters, m]); setMasterId(m.id)
+        }}>+ 新建大简历</button>
+      </div>
+      <TemplateGallery onPick={id => { setTemplateId(id); setPage('editor') }} />
     </div>
   )
 }
