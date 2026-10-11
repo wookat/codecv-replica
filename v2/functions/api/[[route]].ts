@@ -21,8 +21,8 @@ const now = () => Date.now()
 // ---- auth ----
 app.post('/auth/login', async c => {
   const { username, password } = await c.req.json()
-  const row = await c.env.DB.prepare('SELECT username, password_hash, salt FROM users WHERE username=?').bind(username).first() as any
-  if (!row || (await pbkdf2(password, row.salt)) !== row.password_hash) return c.json({ error: 'invalid credentials' }, 401)
+  const row = await c.env.DB.prepare('SELECT username, pwd_hash, salt FROM users WHERE username=?').bind(username).first() as any
+  if (!row || (await pbkdf2(password, row.salt)) !== row.pwd_hash) return c.json({ error: 'invalid credentials' }, 401)
   return c.json({ token: await issueToken(c.env.UPSTASH_KV, username), username })
 })
 app.post('/auth/logout', async c => {
