@@ -7,12 +7,13 @@ const mdLite = (md: string) => esc(md)
   .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(/\n{2,}/g, '</p><p>').replace(/\n/g, '<br>')
 
 export const onRequestGet: PagesFunction = async (context) => {
-  const id = context.params.id as string
   const env: any = context.env
-  const origin = new URL(context.request.url).origin
-  const p: any = await env.DB.prepare('SELECT _id, title, content, author, tag, likes, views, created_at FROM posts WHERE _id=? AND deleted=0').bind(id).first()
-  if (!p) return new Response('帖子不存在', { status: 404 })
-  const html = `<!doctype html><html lang="zh-CN"><head>
+  const id = context.params.id as string
+  try {
+    const p: any = await env.DB.prepare("SELECT _id, title, content_md AS content, author, category AS tag, view_count AS views, created_at FROM posts WHERE _id=? AND deleted=0 AND status='published'").bind(id).first()
+    if (!p) return new Response('帖子不存在', { status: 404 })
+    const origin = new URL(context.request.url).origin
+    const html = `<!doctype html><html lang="zh-CN"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(p.title)} | CodeCV 社区</title>
 <meta name="description" content="${esc((p.content || '').slice(0, 150))}">
@@ -26,5 +27,8 @@ article{border-top:1px solid #eee;padding-top:16px}</style></head><body>
 <div class="meta">${esc(p.author || '')} · ${esc(p.tag || '')} · ${new Date(p.created_at).toLocaleDateString('zh-CN')} · ${p.views || 0} 阅读</div>
 <article><p>${mdLite(p.content || '')}</p></article>
 </body></html>`
-  return new Response(html, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=600' } })
+    return new Response(html, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=600' } })
+  } catch (e) {
+    return new Response('ERR:' + String(e && (e as any).stack || e), { status: 500 })
+  }
 }
