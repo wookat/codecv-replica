@@ -9,7 +9,7 @@ async function view(r: any) {
   const res = await admin.historyGet(r.id)
   if (res?.code === 200) {
     await ElMessageBox.alert(
-      `<pre style="max-height:50vh;overflow:auto;white-space:pre-wrap">${String(res.data.md || '')
+      `<pre style="max-height:50vh;overflow:auto;white-space:pre-wrap">${String(res.data.content || '')
         .replace(/</g, '&lt;')
         .slice(0, 4000)}</pre>`,
       `版本 #${r.id} 内容预览`,

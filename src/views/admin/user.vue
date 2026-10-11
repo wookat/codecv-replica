@@ -15,7 +15,8 @@ function openEdit(u: any) {
   editOpen.value = true
 }
 async function saveEdit() {
-  const res = await admin.userEdit(editing.value)
+  // 行内字段名是 uid，后端 user/edit 读 id——提交前映射，否则 WHERE id = NaN → 404
+  const res = await admin.userEdit({ ...editing.value, id: editing.value.uid })
   if (res?.code === 200) {
     ElMessage.success('已保存')
     editOpen.value = false

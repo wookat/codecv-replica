@@ -270,7 +270,8 @@ export async function onRequest(context) {
   if (route === 'history/page') {
     const { results } = await db
       .prepare(
-        `SELECT v.id, v.resume_type AS resumeType, r.name,
+        `SELECT v.id, v.resume_type AS resumeType,
+                COALESCE(NULLIF(r.name, ''), v.resume_type) AS name,
                 u.username, u.nickname, v.created_at AS createdAt
          FROM resume_versions v
          LEFT JOIN resumes r ON r.resume_type = v.resume_type AND r.user_id = v.user_id
