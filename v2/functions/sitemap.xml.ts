@@ -5,7 +5,9 @@ export const onRequestGet: PagesFunction = async (context) => {
   const env: any = context.env
   const origin = new URL(context.request.url).origin
   const posts = await env.DB.prepare('SELECT _id FROM posts WHERE deleted=0 LIMIT 500').all<any>()
-  const urls = ['', '/?login',
+  const shared = await env.DB.prepare("SELECT resume_id FROM resume_extra WHERE field_key='share_on' AND value_md='1' LIMIT 200").all<any>()
+  const urls = ['', '/?login', '/gallery',
+    ...(shared.results ?? []).map((r: any) => `/r/${r.resume_id}`),
     ...TPL_IDS.map(id => `/t/${id}`),
     ...(posts.results ?? []).map((p: any) => `/p/${p._id}`)]
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
