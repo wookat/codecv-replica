@@ -22,7 +22,7 @@ export default function VipPage() {
     <div className="p-6 max-w-4xl mx-auto space-y-6">
       <h2 className="text-lg font-semibold">会员中心</h2>
       {me && (
-        <div className="border rounded-lg p-4 bg-white text-sm">
+        <div className="cv-card p-4 text-sm">
           <b>{me.username}</b>
           {me.member
             ? <span className="ml-2 text-green-600">{me.vipPlan} · 至 {new Date(me.vipExpire).toLocaleDateString()}</span>
@@ -41,7 +41,7 @@ export default function VipPage() {
       )}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {PLANS.map(([p, price]) => (
-          <div key={p} className="border rounded-lg p-4 bg-white text-center">
+          <div key={p} className="cv-card p-4 text-center">
             <div className="font-semibold">{p}</div>
             <div className="text-xl my-2">{price}</div>
             <button className="cv-btn cv-btn-primary text-sm" onClick={() => buy(p)}>开通</button>
@@ -49,7 +49,7 @@ export default function VipPage() {
         ))}
       </div>
       <div className="flex gap-2 items-center text-sm">
-        <input aria-label="兑换码" className="border rounded px-2 py-1" placeholder="兑换码" value={code} onChange={e => setCode(e.target.value)} />
+        <input aria-label="兑换码" className="cv-btn cv-btn-ghost" placeholder="兑换码" value={code} onChange={e => setCode(e.target.value)} />
         <button className="border rounded px-3 py-1" onClick={async () => {
           const r = await api.redeem(code).catch((e: any) => ({ error: String(e) }))
           setMsg(r.error ? '兑换失败' : `兑换成功 +${r.days} 天`); load()
@@ -57,10 +57,10 @@ export default function VipPage() {
         {msg && <span className="text-xs text-neutral-500">{msg}</span>}
       </div>
       {me && (
-        <div className="border rounded-lg p-4 bg-white text-sm space-y-2">
+        <div className="cv-card p-4 text-sm space-y-2">
           <h3 className="font-medium">邀请好友 · 返佣 10%</h3>
           <div className="flex gap-2 items-center">
-            <input readOnly aria-label="邀请链接" className="border rounded px-2 py-1 text-xs flex-1 bg-neutral-50"
+            <input readOnly aria-label="邀请链接" className="cv-input text-xs flex-1"
               value={`${location.origin}/?inv=${me.username}`} />
             <button className="bg-black text-white text-xs rounded px-3 py-1.5" onClick={async e => {
               await navigator.clipboard.writeText(`${location.origin}/?inv=${me.username}`)

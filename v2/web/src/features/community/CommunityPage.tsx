@@ -22,16 +22,16 @@ export default function CommunityPage() {
       <button className="text-sm text-neutral-500 mb-3" onClick={() => setCur(null)}>← 返回列表</button>
       <h2 className="text-xl font-bold">{cur.title}</h2>
       <div className="text-xs text-neutral-400 my-2">{cur.author} · {new Date(cur.created_at).toLocaleDateString()}</div>
-      <article className="prose prose-sm max-w-none whitespace-pre-wrap border rounded-lg bg-white p-4">{cur.content_md}</article>
-      <button className="mt-3 text-sm border rounded px-3 py-1" onClick={like}>♥ {cur.likes}</button>
+      <article className="prose prose-sm max-w-none whitespace-pre-wrap cv-card p-4">{cur.content_md}</article>
+      <button className="cv-btn cv-btn-ghost mt-3 text-sm" onClick={like}>♥ {cur.likes}</button>
       <div className="mt-6 space-y-3">
         <h3 className="font-medium text-sm">评论 {cur.comments.length}</h3>
         {cur.comments.map((x: any) => (
           <div key={x.id} className="text-sm border-b pb-2"><b className="text-xs">{x.nickname}</b> {x.content}
             <span className="text-[10px] text-neutral-400 ml-2">{new Date(x.created_at).toLocaleDateString()}</span></div>))}
         <div className="flex gap-2">
-          <input className="border rounded px-2 py-1 flex-1 text-sm" placeholder="写评论…" value={cmt} onChange={e => setCmt(e.target.value)} />
-          <button className="bg-black text-white rounded px-3 text-sm" onClick={comment}>发表</button>
+          <input className="cv-input flex-1" placeholder="写评论…" value={cmt} onChange={e => setCmt(e.target.value)} />
+          <button className="cv-btn cv-btn-primary" onClick={comment}>发表</button>
         </div>
       </div>
     </div>
@@ -40,11 +40,11 @@ export default function CommunityPage() {
     <div className="p-6 max-w-4xl mx-auto">
       <div className="flex gap-2 mb-4 text-sm">
         {[['posts', '社区帖子'], ['mj', '面经'], ['submit', '投递面经']].map(([k, l]) => (
-          <button key={k} className={`px-3 py-1 rounded ${tab === k ? 'bg-black text-white' : 'border'}`} onClick={() => setTab(k)}>{l}</button>))}
+          <button key={k} className={`cv-nav ${tab === k ? 'cv-nav-on' : ''}`} onClick={() => setTab(k)}>{l}</button>))}
       </div>
       {tab === 'posts' && (
         <div className="grid gap-3">{posts.map(p => (
-          <button key={p.id} className="border rounded-lg p-4 bg-white text-left hover:shadow" onClick={() => open(p.id)}>
+          <button key={p.id} className="cv-card cv-card-hover p-4 text-left" onClick={() => open(p.id)}>
             <div className="font-medium">{p.title}</div>
             <div className="text-xs text-neutral-400 mt-1">{p.summary || p.category} · {p.author}</div>
           </button>))}
@@ -61,12 +61,12 @@ export default function CommunityPage() {
       {tab === 'submit' && (
         <div className="space-y-2 max-w-md text-sm">
           {[['title', '标题'], ['company_name', '公司'], ['grade', '年级'], ['batch', '批次(如 2024秋招)'], ['round', '轮次'], ['result', '结果'], ['school', '学校'], ['major', '专业']].map(([k, l]) => (
-            <input key={k} className="w-full border rounded px-2 py-1" placeholder={l}
+            <input key={k} className="cv-input w-full" placeholder={l}
               onChange={e => setForm({ ...form, [k]: e.target.value })} />))}
-          <textarea className="w-full border rounded px-2 py-1 h-32" placeholder="面经内容…"
+          <textarea className="cv-input w-full h-32" placeholder="面经内容…"
             onChange={e => setForm({ ...form, content: e.target.value })} />
           <label className="text-xs"><input type="checkbox" checked={form.anonymous} onChange={e => setForm({ ...form, anonymous: e.target.checked })} /> 匿名</label>
-          <button className="bg-black text-white rounded px-4 py-1" onClick={async () => {
+          <button className="cv-btn cv-btn-primary" onClick={async () => {
             await api.submitMianjing(form); alert('投递成功'); api.mianjing().then(setMj); setTab('mj')
           }}>投递</button>
         </div>)}

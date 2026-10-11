@@ -26,7 +26,7 @@ const variantCache: Record<string, any[]> = {}
 function VariantSelect({ itemId, value, onChange }: { itemId: string; value: string | null; onChange: (v: string) => void }) {
   const [vs, setVs] = useState<any[]>(variantCache[itemId] ?? [])
   useEffect(() => { if (!variantCache[itemId]) api.variants(itemId).then(v => { variantCache[itemId] = v; setVs(v) }) }, [itemId])
-  return <select aria-label="条目版本" className="text-xs border rounded px-0.5" value={value ?? ''} onChange={e => onChange(e.target.value)}>
+  return <select aria-label="条目版本" className="cv-input text-xs px-1 py-0.5" value={value ?? ''} onChange={e => onChange(e.target.value)}>
     {vs.map(v => <option key={v.id} value={v.id}>{v.label}</option>)}
   </select>
 }
@@ -111,7 +111,7 @@ export default function MasterLibrary({ masterId, onSelect, templateId }: {
             <button className={batchMode ? 'text-neutral-400' : 'font-semibold'} onClick={() => setBatchMode(false)}>单 JD</button>
             <button className={batchMode ? 'font-semibold' : 'text-neutral-400'} onClick={() => setBatchMode(true)}>批量海投</button>
           </div>
-          <textarea className="w-full border rounded px-2 py-1 text-xs h-28"
+          <textarea className="cv-input w-full text-xs h-28"
             placeholder={batchMode ? '每段 JD 之间用单独一行 --- 分隔（最多5个）' : '粘贴目标岗位 JD…'}
             value={jd} onChange={e => setJd(e.target.value)} />
           <div className="flex gap-2 items-center flex-wrap">
@@ -138,8 +138,8 @@ export default function MasterLibrary({ masterId, onSelect, templateId }: {
             <button className="text-xs text-neutral-400" onClick={() => { setJdOpen(false); setGap('') }}>取消</button>
           </div>
           {jdMsg && <div className="text-xs text-red-500">{jdMsg}</div>}
-          {gap && <pre className="text-xs whitespace-pre-wrap bg-white border rounded p-2 max-h-56 overflow-auto">{gap}</pre>}
-          {batchOut && <div className="text-xs space-y-1 bg-white border rounded p-2 max-h-40 overflow-auto">
+          {gap && <pre className="text-xs whitespace-pre-wrap cv-card p-2 max-h-56 overflow-auto">{gap}</pre>}
+          {batchOut && <div className="text-xs space-y-1 cv-card p-2 max-h-40 overflow-auto">
             {batchOut.map((r, i) => r.ok
               ? <div key={i}><a className="text-blue-600 underline" href={`/?r=${r.id}`}>{r.title}</a> <span className="text-neutral-400">({r.count} 条目)</span></div>
               : <div key={i} className="text-red-500">{r.jd}… — {r.error}</div>)}
@@ -173,10 +173,10 @@ export default function MasterLibrary({ masterId, onSelect, templateId }: {
       <div className="pt-2 border-t">
         <div className="text-xs font-semibold mb-1">+ 新条目</div>
         <div className="flex gap-1 flex-wrap">
-          <select aria-label="新条目类别" className="border rounded px-1 text-xs" value={newItem.section} onChange={e => setNewItem({ ...newItem, section: e.target.value })}>
+          <select aria-label="新条目类别" className="cv-input text-xs px-1 py-0.5" value={newItem.section} onChange={e => setNewItem({ ...newItem, section: e.target.value })}>
             {SECTIONS.map(s2 => <option key={s2} value={s2}>{SEC_LABEL[s2]}</option>)}
           </select>
-          <input className="border rounded px-1.5 py-0.5 text-xs flex-1 min-w-0" placeholder="条目标题" value={newItem.title}
+          <input className="cv-input text-xs flex-1 min-w-0" placeholder="条目标题" value={newItem.title}
             onChange={e => setNewItem({ ...newItem, title: e.target.value })} />
           <button className="bg-black text-white text-xs rounded px-2" onClick={async () => {
             const it = await api.createItem(masterId, newItem)
