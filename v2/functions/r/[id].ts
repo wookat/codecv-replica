@@ -19,7 +19,7 @@ export const onRequestGet: PagesFunction = async (context) => {
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(r.title)} | CodeCV 简历分享</title>
 <meta name="description" content="${esc((r.content_md || '').replace(/[#*:`\n]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 150))}">
-<link rel="canonical" href="${origin}/r/${id}">
+<link rel="canonical" href="${origin}/r/${esc(id)}">
 <meta property="og:title" content="${esc(r.title)} | CodeCV">
 <meta property="og:type" content="article">
 <style>body{font-family:system-ui,sans-serif;max-width:760px;margin:0 auto;padding:32px 16px;color:#222;line-height:1.8}

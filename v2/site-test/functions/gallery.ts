@@ -7,7 +7,7 @@ export const onRequestGet: PagesFunction = async (context) => {
     JOIN resume_extra e ON e.resume_id=r.id WHERE e.field_key='share_on' AND e.value_md='1'
     ORDER BY r.updated_at DESC LIMIT 60`).all<any>()
   const items = (rows.results ?? []).map((r: any) =>
-    `<a class="card" href="/r/${r.id}"><img src="/api/v2/thumb/${r.tpl}" loading="lazy" alt=""><b>${esc(r.title)}</b><span>${new Date(r.updated_at).toLocaleDateString('zh-CN')}</span></a>`).join('\n')
+    `<a class="card" href="/r/${esc(r.id)}"><img src="/api/v2/thumb/${esc(r.tpl)}" loading="lazy" alt=""><b>${esc(r.title)}</b><span>${new Date(r.updated_at).toLocaleDateString('zh-CN')}</span></a>`).join('\n')
   const html = `<!doctype html><html lang="zh-CN"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>简历广场 | CodeCV——用户真实简历案例库</title>

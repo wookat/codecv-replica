@@ -17,7 +17,7 @@ export const onRequestGet: PagesFunction = async (context) => {
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(desc || name + '免费在线简历模板，markdown 编辑，AI 辅助生成，支持 PDF/Word 导出。')}">
 <meta property="og:title" content="${esc(title)}">
-<meta property="og:image" content="${origin}/api/v2/thumb/${id}">
+<meta property="og:image" content="${origin}/api/v2/thumb/${esc(id)}">
 <link rel="canonical" href="${origin}/t/${id}">
 <style>body{font-family:system-ui,sans-serif;margin:0;background:#f5f5f5;color:#222}
 .wrap{max-width:860px;margin:0 auto;padding:32px 16px}
@@ -35,7 +35,7 @@ p{color:#555;line-height:1.7}</style></head><body><main><div class="wrap">
 <div>${tags.map(t => `<span class="tag">${esc(String(t))}</span>`).join('')}</div>
 <p>${esc(desc)}</p>
 <p>使用 CodeCV 在线编辑此模板：内容用 Markdown 编写，AI 按目标岗位自动生成，支持导出 PDF / PNG / Word。</p>
-<a class="cta" href="/?tpl=${id}">免费使用此模板 →</a>
+<a class="cta" href="/?tpl=${esc(id)}">免费使用此模板 →</a>
 </div></div></div></main></body></html>`
   return new Response(html, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=3600' } })
 }

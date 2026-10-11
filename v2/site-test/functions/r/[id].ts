@@ -19,18 +19,18 @@ export const onRequestGet: PagesFunction = async (context) => {
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(r.title)} | CodeCV 简历分享</title>
 <meta name="description" content="${esc((r.content_md || '').replace(/[#*:`\n]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 150))}">
-<link rel="canonical" href="${origin}/r/${id}">
+<link rel="canonical" href="${origin}/r/${esc(id)}">
 <meta property="og:title" content="${esc(r.title)} | CodeCV">
 <meta property="og:type" content="article">
 <style>body{font-family:system-ui,sans-serif;max-width:760px;margin:0 auto;padding:32px 16px;color:#222;line-height:1.8}
 h1{font-size:26px}h2{font-size:18px;margin-top:22px;border-left:4px solid #111;padding-left:8px}
-li{margin:4px 0;list-style:inside disc}.meta{color:#888;font-size:13px}
+li{margin:4px 0;list-style:inside disc}.meta{color:#595959;font-size:13px}
 .cta{display:inline-block;margin-top:28px;background:#111;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;font-size:14px}
 </style></head><body>
 <a href="/" style="color:#666;font-size:13px">← CodeCV 简历工具</a>
 <h1>${esc(r.title)}</h1>
 <div class="meta">更新于 ${new Date(r.updated_at).toLocaleDateString('zh-CN')} · 由 CodeCV 制作</div>
-<article><p>${mdLite(r.content_md || '')}</p></article>
+<main><article><p>${mdLite(r.content_md || '')}</p></article></main>
 <a class="cta" href="/?tpl=${esc(r.template_id)}">用这个模板做我的简历 →</a>
 </body></html>`
   return new Response(html, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=600' } })
