@@ -58,6 +58,8 @@ async function confirmRollback() {
   const data = await cloudHistoryGet(item._id)
   if (!data) return warningMessage('版本读取失败')
   editorStore.setMDContent(data.content, props.resumeType)
+  // md 正向只写存储，画布不会因 store 变化重灌——显式通知 PM 端刷新
+  window.dispatchEvent(new Event('md-refresh'))
   cloudPush(props.resumeType, data.content)
   successMessage('已回滚至该版本')
   visible.value = false

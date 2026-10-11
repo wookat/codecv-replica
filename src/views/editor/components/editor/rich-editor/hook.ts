@@ -254,6 +254,7 @@ export function useToggleEditorMode(resumeType: string) {
     host.addEventListener('paste', onPaste)
     document.addEventListener('selectionchange', onSelectionChange)
     window.addEventListener('module-op', onModuleOp)
+    window.addEventListener('md-refresh', onMdRefresh)
     modChannel = new BroadcastChannel('resume-module-scroll')
     modChannel.addEventListener('message', onChannelMsg)
   })
@@ -264,6 +265,7 @@ export function useToggleEditorMode(resumeType: string) {
     modChannel?.close()
     DOMTree.value?.removeEventListener('paste', onPaste)
     window.removeEventListener('module-op', onModuleOp)
+    window.removeEventListener('md-refresh', onMdRefresh)
     stopMdWatch?.()
     stopMdWatch = null
     editor?.destroy()
@@ -272,6 +274,13 @@ export function useToggleEditorMode(resumeType: string) {
   })
 
   onMounted(fillContent)
+
+  // 外部 md 变更（历史回滚等）：重灌画布并记入撤销栈，Ctrl+Z 可回到回滚前
+  const onMdRefresh = () => {
+    const md = editorStore.MDContent
+    if (!editor || !md?.trim()) return
+    editor.commands.setContent(fontMark(markdownToHTML(md)))
+  }
 
   // 撤销/重做：PM history 原生（生产同款）
   const undo = () => {

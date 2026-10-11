@@ -21,6 +21,10 @@ interface MineItem {
 }
 
 const router = useRouter()
+const batchName = (b?: string) =>
+  ({ qiuzhao: '秋招', chunzhao: '春招', shuqi: '暑期实习', richang: '日常实习', shezhao: '社招' })[
+    b || ''
+  ] || b
 const MINE_KEY = 'mianjing-mine'
 const localMine = () => JSON.parse(localStorage.getItem(MINE_KEY) || '[]') as MineItem[]
 const mine = ref<MineItem[]>(localMine())
@@ -165,7 +169,7 @@ async function remove(id: string) {
               </div>
               <div class="item-chips">
                 <span class="mj-chip mj-chip--gray">{{ m.companyName }}</span>
-                <span class="mj-chip mj-chip--gray">{{ m.grade }}届 · {{ m.batch }}</span>
+                <span class="mj-chip mj-chip--gray">{{ m.grade }}届 · {{ batchName(m.batch) }}</span>
                 <span class="mj-chip mj-chip--gray">{{ m.round }}</span>
                 <span
                   class="mj-chip"
@@ -202,7 +206,7 @@ async function remove(id: string) {
                   f.company_name
                 }}</span>
                 <span v-if="f.grade" class="mj-chip mj-chip--gray"
-                  >{{ f.grade }}届 · {{ f.batch }}</span
+                  >{{ f.grade }}届 · {{ batchName(f.batch) }}</span
                 >
                 <span v-if="f.round" class="mj-chip mj-chip--gray">{{ f.round }}</span>
               </div>
