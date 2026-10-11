@@ -6,12 +6,13 @@ export default function AiPanel({ md, onApply, onClose }: {
   md: string; onApply: (md: string, mode: 'replace' | 'append') => void; onClose: () => void
 }) {
   const [jd, setJd] = useState('')
+  const [cmd, setCmd] = useState('')
   const [busy, setBusy] = useState('')
   const [out, setOut] = useState('')
   const [lastAction, setLastAction] = useState('')
   const run = async (a: string) => {
     setBusy(a); setOut('')
-    try { const j = a === 'fix' ? (lastAction === 'score' && out ? out.slice(0, 2000) : jd) : jd; setOut((await api.ai(a, md, j)).text); setLastAction(a) } catch (e) { setOut('失败：' + String(e).slice(0, 100)) }
+    try { const j = a === 'edit' ? cmd : (a === 'fix' ? (lastAction === 'score' && out ? out.slice(0, 2000) : jd) : jd); setOut((await api.ai(a, md, j)).text); setLastAction(a) } catch (e) { setOut('失败：' + String(e).slice(0, 100)) }
     setBusy('')
   }
   return (
@@ -21,6 +22,12 @@ export default function AiPanel({ md, onApply, onClose }: {
         <button className="text-xs text-neutral-400 ml-auto" onClick={onClose}>收起</button>
       </div>
       <input className="w-full border rounded px-2 py-1 text-xs" placeholder="目标岗位 JD（生成/翻译语言可选）" value={jd} onChange={e => setJd(e.target.value)} />
+      <div className="flex gap-2">
+        <input className="flex-1 border rounded px-2 py-1 text-xs" placeholder="说句话就改：如「项目改成突出高并发」"
+          value={cmd} onChange={e => setCmd(e.target.value)} />
+        <button className="bg-green-600 text-white rounded px-2 py-1 text-xs" disabled={!!busy || !cmd.trim()}
+          onClick={() => { setJd(cmd); run('edit') }}>{busy === 'edit' ? '…' : '改稿'}</button>
+      </div>
       <div className="flex gap-2 flex-wrap">
         {[['gen', '生成'], ['perf', '润色'], ['proof', '校对'], ['score', '评分'], ['fix', '按评分修复'], ['translate', '翻译']].map(([a, l]) => (
           <button key={a} className="border rounded px-2 py-1 text-xs" disabled={!!busy} onClick={() => run(a)}>
