@@ -5,4 +5,4 @@ kv_namespaces = [{binding = "UPSTASH_KV", id = "v2-local-kv"}]
 
 [vars]
 RENDER_URL="https://cvrender.zalize.com/render"
-RENDER_TOKEN="cvr-a2422cedad51bf796f8d862bbe0b6df6"
+RENDER_TOKEN="cvr-16d30c2c1f18e9350ede0768f209b3c9"

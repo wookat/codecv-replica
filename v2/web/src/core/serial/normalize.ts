@@ -16,6 +16,8 @@ function normalizeLineOnce(line: string): string {
   line = line.replace(/<(https?:\/\/[^>\s]+)>/g, '[$1]($1)')
   // `* ` 无序列表项 mth 不识别（渲染为字面星号）→ `- `（渲染修复）
   line = line.replace(/^(\s*)\* +/, '$1- ')
+  // `:::` 指令永远顶格（114 模板全量验证）；PM 序列化可能把它缩进进列表项——拉回顶格
+  line = line.replace(/^\s+(:::.*)$/, '$1')
   return line
 }
 
