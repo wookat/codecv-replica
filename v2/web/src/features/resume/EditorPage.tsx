@@ -18,6 +18,9 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
   const [exporting, setExporting] = useState('')
   const [mode, setMode] = useState<'md' | 'rich'>('md')   // 排版控件状态：字号/行距/主题色/缩放
   const [opts, setOpts] = useState({ zoom: 1, fontSize: 14, lineHeight: 1.6, color: '' })
+  const [avatar, setAvatar] = useState<any>(null)
+  const [photo, setPhoto] = useState('')
+  const extrasRef = { current: {} as Record<string, string> }
   const [rid, setRid] = useState(initRid)
   const dirtyRef = { current: false }
   const saveTimer = { current: 0 as any }
@@ -28,6 +31,8 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
       api.resume(initRid).then(r => {
         setMd(r.contentMd ?? r.content_md ?? '')
         if (r.templateId) setTplId(r.templateId)
+        for (const e of r.extras ?? []) extrasRef.current[e.fieldKey] = e.valueMd
+        if (extrasRef.current.photo) setPhoto(extrasRef.current.photo)
       }).catch(() => {})
     } else {
       api.createResume({ masterId, templateId: tplId, title: meta?.name ?? tplId })
@@ -39,6 +44,27 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
   useEffect(() => {
     if (!initRid) setMd(composeMd({ title: meta?.name ?? '我的简历', items: sels }))
   }, [sels, tplId])
+
+  // 模板头像位配置（种子 json 的 avatar 字段）
+  useEffect(() => {
+    fetch(`/seeds/tpl/${tplId}.json`).then(r => r.ok ? r.json() : null)
+      .then(d => setAvatar(d?.avatar ?? null)).catch(() => setAvatar(null))
+  }, [tplId])
+
+  const uploadPhoto = (f: File) => {
+    const img = new Image()
+    img.onload = () => {
+      const cv = document.createElement('canvas')
+      const scale = Math.min(1, 360 / img.width)
+      cv.width = img.width * scale; cv.height = img.height * scale
+      cv.getContext('2d')!.drawImage(img, 0, 0, cv.width, cv.height)
+      const url = cv.toDataURL('image/jpeg', 0.85)
+      setPhoto(url)
+      extrasRef.current.photo = url
+      if (rid) api.saveExtras(rid, extrasRef.current).catch(() => {})
+    }
+    img.src = URL.createObjectURL(f)
+  }
 
   // md 变更自动落库（1s 防抖）
   useEffect(() => {
@@ -113,6 +139,12 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
             onChange={e => setOpts({ ...opts, zoom: +e.target.value })}>
             {[0.5,0.7,0.85,1,1.25,1.5].map(v => <option key={v} value={v}>{v}</option>)}
           </select></label>
+        {avatar && (
+          <label className="text-xs border rounded px-2 py-1 cursor-pointer">
+            {photo ? '更换照片' : '上传照片'}
+            <input type="file" accept="image/*" className="hidden"
+              onChange={e => e.target.files?.[0] && uploadPhoto(e.target.files[0])} />
+          </label>)}
         <div className="flex-1" />
         <button className="text-xs border rounded px-2 py-1" onClick={printPdf}>打印 PDF</button>
         <button className="text-xs bg-black text-white rounded px-2 py-1" disabled={!!exporting}
@@ -131,7 +163,7 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
             : <ContentEditor md={md} onMd={v => { dirtyRef.current = true; setMd(v) }} />}
         </div>
         <div className="flex-1">
-          <PreviewPane md={md} skinCss={skinHref(meta?.slug ?? tplId)} primaryColor={meta?.primaryColor} font={meta?.font} opts={opts} />
+          <PreviewPane md={md} skinCss={skinHref(meta?.slug ?? tplId)} primaryColor={meta?.primaryColor} font={meta?.font} opts={opts} avatar={avatar} photo={photo} />
         </div>
       </div>
     </div>
