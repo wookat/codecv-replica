@@ -361,12 +361,19 @@ JD：${jd.slice(0, 2000)}
   const r = await fetch('https://api.aicdks.com/v1/chat/completions', {
     method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${(c.env as any).GP_LLM_API_KEY}` },
     body: JSON.stringify({ model: 'swe-2-medium', messages: [{ role: 'user', content: prompt }], temperature: 0.3 }) })
-  if (!r.ok) { logEvent(c, 'ai_fail', 'jdgen ' + r.status); return c.json({ error: 'LLM ' + r.status }, 502) }
+  if (!r.ok) { logEvent(c, 'ai_fail', 'jdgen ' + r.status); throw Object.assign(new Error('LLM ' + r.status), { llm: true }) }
   const out = (await r.json() as any).choices?.[0]?.message?.content || ''
   const jm = out.match(/\{[\s\S]*\}/)
   let j: any = {}
-  try { j = JSON.parse(jm?.[0] || '{}') } catch { return c.json({ error: 'LLM JSON 解析失败' }, 502) }
-  const picks = (j.selections || []).filter((p: any) => vMap.get(p.variantId)?.itemId === p.itemId)
+  try { j = JSON.parse(jm?.[0] || '{}') } catch { throw Object.assign(new Error('LLM JSON 解析失败'), { llm: true }) }
+  const byItem = new Map(items.map(x => [x.id, x]))
+  const firstVar = new Map<string, any>()
+  for (const it of items) for (const v of (pool.find(p => p.itemId === it.id)?.variants || [])) { if (!firstVar.has(it.id)) firstVar.set(it.id, v) }
+  let picks = (j.selections || []).map((p: any) => {
+    if (vMap.get(p.variantId)?.itemId === p.itemId) return p
+    if (byItem.has(p.itemId)) { const v = firstVar.get(p.itemId); return v ? { ...p, variantId: v.variantId } : null }
+    return null
+  }).filter(Boolean)
   if (!picks.length) throw new Error('AI 未产出有效选取')
   const rid = crypto.randomUUID(); const nowT = Date.now()
   const resumeTitle = title || j.title || `定制简历-${jd.slice(0, 12)}`
