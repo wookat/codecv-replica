@@ -64,3 +64,8 @@ html.cv-dark .cv-light-zone .text-neutral-500 { color:#6b7280 !important; }
 html.cv-dark .cv-light-zone .text-neutral-400 { color:#9ca3af !important; }
 html.cv-dark .cv-light-zone .border, html.cv-dark .cv-light-zone .border-b, html.cv-dark .cv-light-zone .border-r { border-color:#e8eaed !important; }
 html.cv-dark .cv-light-zone .cm-editor { background:#fff; color:#1f2329; }
+html.cv-dark .bg-neutral-50 { background: #10151c !important; }
+html.cv-dark input, html.cv-dark select, html.cv-dark textarea { background: #10151c; color: var(--cv-text); border-color: var(--cv-line); }
+html.cv-dark table { color: var(--cv-text); }
+html.cv-dark thead, html.cv-dark th { color: var(--cv-sub); }
+html.cv-dark .cv-light-zone input, html.cv-dark .cv-light-zone select, html.cv-dark .cv-light-zone textarea { background: #fff; color: #1f2329; }
