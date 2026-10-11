@@ -26,6 +26,7 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
   const [aiOpen, setAiOpen] = useState(false)
   const [histOpen, setHistOpen] = useState(false)
   const [hist, setHist] = useState<any[]>([])
+  const [saveErr, setSaveErr] = useState('')
   const dirtyRef = { current: false }
   const saveTimer = { current: 0 as any }
 
@@ -75,8 +76,8 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
     if (!rid || !dirtyRef.current) return
     clearTimeout(saveTimer.current)
     saveTimer.current = setTimeout(() => {
-      api.updateResume(rid, { contentMd: md }).catch(() => {})
-      if (tplId !== meta?.slug) api.updateResume(rid, { templateId: tplId }).catch(() => {})
+      api.updateResume(rid, { contentMd: md }).then(() => setSaveErr('')).catch(() => setSaveErr('保存失败，编辑未落库'))
+      if (tplId !== meta?.slug) api.updateResume(rid, { templateId: tplId }).catch(() => setSaveErr('换肤保存失败'))
       dirtyRef.current = false
     }, 1000)
     return () => clearTimeout(saveTimer.current)
@@ -168,6 +169,8 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
         <button className={`text-xs border rounded px-2 py-1 ${aiOpen ? 'bg-black text-white' : ''}`}
           onClick={() => setAiOpen(!aiOpen)}>AI</button>
         <div className="flex-1" />
+        {saveErr && <span className="text-xs text-red-500" role="alert">{saveErr}</span>}
+        {!saveErr && resumeId && <span className="text-[10px] text-neutral-400">已自动保存</span>}
         <button className="text-xs border rounded px-2 py-1" onClick={printPdf}>打印 PDF</button>
         <button className="text-xs bg-black text-white rounded px-2 py-1" disabled={!!exporting}
           onClick={() => exportPdf('pdf')}>{exporting === 'pdf' ? '渲染中…' : 'VPS 导出 PDF'}</button>

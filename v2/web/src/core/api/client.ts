@@ -11,7 +11,17 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
       ...init?.headers,
     },
   })
-  if (!res.ok) throw new Error(`${res.status} ${await res.text()}`)
+  if (!res.ok) {
+    if (res.status === 401 && !path.includes('/auth/')) {
+      localStorage.removeItem('v2:token')
+      if (!location.search.includes('login')) location.href = '/?login'
+    }
+    let msg = `${res.status}`
+    try { msg = (await res.json()).error || msg } catch { msg = `${res.status} ${(await res.text()).slice(0, 120)}` }
+    const e: any = new Error(msg)
+    e.status = res.status
+    throw e
+  }
   return res.json()
 }
 
