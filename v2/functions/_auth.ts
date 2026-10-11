@@ -12,6 +12,11 @@ export async function pbkdf2(password: string, saltHex: string): Promise<string>
   return toHex(bits)
 }
 
+export async function hashPassword(password: string): Promise<{ salt: string; hash: string }> {
+  const salt = toHex(crypto.getRandomValues(new Uint8Array(16)).buffer)
+  return { salt, hash: await pbkdf2(password, salt) }
+}
+
 export async function issueToken(kv: KVNamespace, username: string): Promise<string> {
   const token = toHex(crypto.getRandomValues(new Uint8Array(32)).buffer)
   await kv.put(`sess:${token}`, username, { expirationTtl: 30 * 24 * 3600 })

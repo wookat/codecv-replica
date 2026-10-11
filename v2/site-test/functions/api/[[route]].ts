@@ -4,7 +4,7 @@ import { Hono } from 'hono'
 import { drizzle } from 'drizzle-orm/d1'
 import { eq, and, asc } from 'drizzle-orm'
 import { z } from 'zod'
-import { pbkdf2, issueToken, tokenUser, bearerToken } from '../_auth'
+import { pbkdf2, hashPassword, issueToken, tokenUser, bearerToken } from '../_auth'
 import * as s from '../schema'
 import exportRoute from './export'
 import mcpRoute from './mcp'
@@ -23,6 +23,16 @@ app.post('/auth/login', async c => {
   const { username, password } = await c.req.json()
   const row = await c.env.DB.prepare('SELECT username, pwd_hash, salt FROM users WHERE username=?').bind(username).first() as any
   if (!row || (await pbkdf2(password, row.salt)) !== row.pwd_hash) return c.json({ error: 'invalid credentials' }, 401)
+  return c.json({ token: await issueToken(c.env.UPSTASH_KV, username), username })
+})
+app.post('/auth/register', async c => {
+  const { username, password } = await c.req.json()
+  if (!username || !password) return c.json({ error: '用户名或密码不能为空' }, 400)
+  const exist = await c.env.DB.prepare('SELECT id FROM users WHERE username=?').bind(username).first()
+  if (exist) return c.json({ error: '用户名已被注册' }, 400)
+  const { salt, hash } = await hashPassword(password)
+  await c.env.DB.prepare('INSERT INTO users (username, pwd_hash, salt, nickname, origin, created_at) VALUES (?,?,?,?,?,?)')
+    .bind(username, hash, salt, username, 'web', Date.now()).run()
   return c.json({ token: await issueToken(c.env.UPSTASH_KV, username), username })
 })
 app.post('/auth/logout', async c => {

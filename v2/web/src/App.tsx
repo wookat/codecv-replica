@@ -13,6 +13,7 @@ export default function App() {
   const [page, setPage] = useState<'templates' | 'editor' | 'resumes'>('templates')
   const [templateId, setTemplateId] = useState('')
   const [resumeId, setResumeId] = useState<string | undefined>()
+  const [regMode, setRegMode] = useState(false)
   const [err, setErr] = useState('')
 
   useEffect(() => {
@@ -27,16 +28,18 @@ export default function App() {
       <form className="bg-white p-8 rounded-xl shadow space-y-4 w-80" onSubmit={async e => {
         e.preventDefault()
         try {
-          const r = await api.login(user, pass)
+          const r = regMode ? await api.register(user, pass) : await api.login(user, pass)
           localStorage.setItem('v2:token', r.token)
           setToken(r.token)
-        } catch { setErr('登录失败') }
+        } catch (ex: any) { setErr((regMode ? '注册失败' : '登录失败') + '：' + String(ex).slice(0, 80)) }
       }}>
-        <h1 className="text-xl font-bold">CodeCV v2 登录</h1>
+        <h1 className="text-xl font-bold">CodeCV v2 {regMode ? '注册' : '登录'}</h1>
         <input className="w-full border rounded px-3 py-2" placeholder="用户名" value={user} onChange={e => setUser(e.target.value)} />
         <input className="w-full border rounded px-3 py-2" type="password" placeholder="密码" value={pass} onChange={e => setPass(e.target.value)} />
         {err && <p className="text-red-500 text-sm">{err}</p>}
-        <button className="w-full bg-black text-white rounded py-2">登录</button>
+        <button className="w-full bg-black text-white rounded py-2">{regMode ? '注册并登录' : '登录'}</button>
+        <button type="button" className="w-full text-xs text-neutral-500"
+          onClick={() => { setRegMode(!regMode); setErr('') }}>{regMode ? '已有账号？去登录' : '没有账号？注册'}</button>
       </form>
     </div>
   )

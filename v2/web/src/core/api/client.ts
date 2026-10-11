@@ -18,6 +18,8 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
 export const api = {
   login: (username: string, password: string) =>
     req<{ token: string; username: string }>('/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }),
+  register: (username: string, password: string) =>
+    req<{ token: string; username: string }>('/auth/register', { method: 'POST', body: JSON.stringify({ username, password }) }),
   masters: () => req<any[]>('/master'),
   createMaster: (name: string) => req<any>('/master', { method: 'POST', body: JSON.stringify({ name }) }),
   items: (masterId: string) => req<any[]>(`/master/${masterId}/items`),
