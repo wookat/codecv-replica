@@ -2,8 +2,8 @@
 import TabBar from '../tabbar/tabbar.vue'
 import { useRenderHTML, useResumeType } from '../../hook'
 import { useThemeConfig } from '@/common/global'
-import { step, pageSize, fitStepToWidth } from '../tabbar/hook'
-import { onMounted, onUnmounted, ref } from 'vue'
+import { step, pageSize, fitStepToWidth, stepTouched } from '../tabbar/hook'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { pickAndUploadImage } from '@/utils/uploader'
 import { getLocalStorage, setLocalStorage, removeLocalStorage } from '@/common/localstorage'
 import { refreshOverlays } from '@/utils/moduleCombine'
@@ -17,6 +17,11 @@ const { renderDOM } = useRenderHTML(resumeType)
 
 const outerEl = ref<HTMLElement>()
 let ro: ResizeObserver | undefined
+// 缩放只对手动调节的那一份简历生效：切类型时释放 stepTouched，让新简历重新按窗格自适应
+watch(resumeType, () => {
+  stepTouched.value = false
+  if (outerEl.value) fitStepToWidth(outerEl.value.clientWidth)
+})
 onMounted(() => {
   if (!outerEl.value) return
   fitStepToWidth(outerEl.value.clientWidth)

@@ -49,6 +49,7 @@ const { isDark } = useThemeConfig()
 .markdown-mode {
   position: relative;
   padding-left: 37px;
+  padding-right: 90px; // 右端给 .toggle-edit-mode 胶囊让位，否则压住末尾图标
   &::before {
     position: absolute;
     content: 'MD';
