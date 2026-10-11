@@ -79,7 +79,7 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [md])
 
-  const exportPdf = async (kind: 'pdf' | 'png') => {
+  const exportPdf = async (kind: 'pdf' | 'png' | 'docx') => {
     setExporting(kind)
     try {
       const body = document.querySelector('.markdown-transform-html.jufe')?.innerHTML ?? ''
@@ -151,6 +151,8 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
           onClick={() => exportPdf('pdf')}>{exporting === 'pdf' ? '渲染中…' : 'VPS 导出 PDF'}</button>
         <button className="text-xs border rounded px-2 py-1" disabled={!!exporting}
           onClick={() => exportPdf('png')}>{exporting === 'png' ? '渲染中…' : 'VPS PNG'}</button>
+        <button className="text-xs border rounded px-2 py-1" disabled={!!exporting}
+          onClick={() => exportPdf('docx')}>{exporting === 'docx' ? '渲染中…' : '导出 docx'}</button>
       </div>
       <div className="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden">
         <div className="md:w-80 w-full md:border-r border-b bg-neutral-50 md:overflow-y-auto">

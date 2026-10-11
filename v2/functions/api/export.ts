@@ -6,7 +6,7 @@
 interface Env { RENDER_URL?: string; RENDER_TOKEN?: string; ASSETS?: { fetch: (r: Request) => Promise<Response> } }
 
 // 共用渲染链：contentHtml + skinHref → 自包含 HTML → VPS Chrome114 → bytes（MCP 与 /export 共用）
-export async function renderSelfContained(c: any, contentHtml: string, style: string, type: 'pdf' | 'png'): Promise<Uint8Array | null> {
+export async function renderSelfContained(c: any, contentHtml: string, style: string, type: 'pdf' | 'png' | 'docx'): Promise<Uint8Array | null> {
   const env = c.env as Env
   const RENDER_URL = env.RENDER_URL || 'https://cvrender.zalize.com/render'
   const RENDER_TOKEN = env.RENDER_TOKEN || ''
@@ -45,13 +45,13 @@ export default function exportRoute() {
   return async (c: any) => {
     const { content, style, name, type } = await c.req.json()
     if (!c.env.RENDER_TOKEN) return c.json({ code: 503, msg: 'RENDER_TOKEN 未配置' }, 503)
-    const bytes = await renderSelfContained(c, content || '', style || '', type === 'png' ? 'png' : 'pdf')
+    const bytes = await renderSelfContained(c, content || '', style || '', type === 'docx' ? 'docx' : type === 'png' ? 'png' : 'pdf')
     if (!bytes) return c.json({ code: 503, msg: 'render 服务无响应' }, 503)
 
     return new Response(bytes.buffer, {
       headers: {
-        'content-type': type === 'png' ? 'image/png' : 'application/pdf',
-        'content-disposition': `attachment; filename="${encodeURIComponent(name || 'resume')}.${type === 'png' ? 'png' : 'pdf'}"`,
+        'content-type': type === 'docx' ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' : type === 'png' ? 'image/png' : 'application/pdf',
+        'content-disposition': `attachment; filename="${encodeURIComponent(name || 'resume')}.${type === 'docx' ? 'docx' : type === 'png' ? 'png' : 'pdf'}"`,
       },
     })
   }
