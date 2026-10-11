@@ -9,10 +9,13 @@ export default function TemplateGallery({ onPick }: { onPick: (id: string) => vo
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
         {entries.map(([id, t]) => (
           <button key={id} onClick={() => onPick(id)}
-            className="bg-white border rounded-lg p-3 text-left hover:border-black transition">
-            <div className="font-medium text-sm">{t.name}</div>
-            <div className="text-xs text-neutral-400 mt-1">{(t.tags || []).join(' · ')}</div>
-            <div className="mt-2 h-2 rounded" style={{ background: t.primaryColor }} />
+            className="bg-white border rounded-lg overflow-hidden text-left hover:border-black hover:shadow transition">
+            <img src={`/api/v2/thumb/${id}`} alt={t.name} loading="lazy"
+              className="w-full aspect-[3/4] object-cover bg-neutral-100" />
+            <div className="p-2">
+              <div className="font-medium text-xs truncate">{t.name}</div>
+              <div className="text-[10px] text-neutral-400 truncate">{(t.tags || []).join(' · ')}</div>
+            </div>
           </button>
         ))}
       </div>
