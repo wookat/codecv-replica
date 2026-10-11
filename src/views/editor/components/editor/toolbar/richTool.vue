@@ -55,7 +55,7 @@ useToolBarConfig(emit)
   </toast-modal>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .editor-toolbar {
   width: 100%;
   height: 40px;

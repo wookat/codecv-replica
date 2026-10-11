@@ -46,10 +46,35 @@ const { isDark } = useThemeConfig()
 </template>
 
 <style lang="scss" scoped>
+/* 基础样式原靠 richTool 未 scoped 的 .editor-toolbar 全局泄漏；收编成自有规则解耦 */
+.editor-toolbar {
+  width: 100%;
+  height: 40px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  padding: 10px 0;
+  background: var(--background);
+  position: sticky;
+  top: 0;
+  z-index: 3;
+
+  button {
+    background: transparent;
+    outline: none;
+    border: 0;
+
+    i {
+      font-size: 16px;
+      color: var(--font-color);
+      color: var(--writable-font-color);
+    }
+  }
+}
+
 .markdown-mode {
   position: relative;
   padding-left: 37px;
-  padding-right: 90px; // 右端给 .toggle-edit-mode 胶囊让位，否则压住末尾图标
+  text-align: left;
   &::before {
     position: absolute;
     content: 'MD';

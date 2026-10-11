@@ -104,8 +104,9 @@ function setMode(m: 'edit' | 'md') {
     }
   }
 }
+/* md 模式工具栏占满顶行：胶囊移到工具栏下方，避免压住末尾图标 */
 .markdown-edit.mode-md .toggle-edit-mode {
-  top: 8px;
+  top: 48px;
 }
 .move {
   width: 10px;
