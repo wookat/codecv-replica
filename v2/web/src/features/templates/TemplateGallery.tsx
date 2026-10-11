@@ -1,5 +1,5 @@
 // 模板中心：114 套皮肤卡片，点击出真渲染预览弹层
-import { Suspense, lazy, useEffect, useState } from 'react'
+import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import catalog from './catalog.json'
 import { api } from '../../core/api/client'
 import { skinHref } from '../resume/composer'
@@ -13,6 +13,15 @@ export default function TemplateGallery({ onPick }: { onPick: (id: string) => vo
   const [q, setQ] = useState('')
   const [tag, setTag] = useState('')
   const [pv, setPv] = useState<{ id: string; seed: any } | null>(null)
+  const bodyRef = useRef<HTMLDivElement>(null)
+  const [zoom, setZoom] = useState(1)
+  useEffect(() => {
+    if (!pv) return
+    const el = bodyRef.current
+    const fit = () => setZoom(Math.min(1, ((el?.clientWidth ?? 800) - 24) / 794))
+    fit(); const ro = new ResizeObserver(fit); el && ro.observe(el)
+    return () => ro.disconnect()
+  }, [pv])
   useEffect(() => { api.favorites().then(setFavs).catch(() => {}) }, [])
   const allTags = [...new Set(entries.flatMap(([, t]) => (t.tags || []) as string[]))].slice(0, 24)
   const shown = entries.filter(([id, t]) =>
@@ -73,7 +82,7 @@ export default function TemplateGallery({ onPick }: { onPick: (id: string) => vo
             <button className="cv-btn cv-btn-ghost" onClick={() => setPv(null)}>关闭</button>
           </div>
           <div className="flex flex-1 min-h-0">
-            <div className="w-44 shrink-0 overflow-y-auto border-r p-2 space-y-1" style={{ borderColor: 'var(--cv-line)' }}>
+            <div className="cv-pv-list w-44 shrink-0 overflow-y-auto border-r p-2 space-y-1" style={{ borderColor: 'var(--cv-line)' }}>
               {entries.map(([id, t]) => (
                 <button key={id} onClick={() => openPreview(id)}
                   className={`w-full text-left px-2 py-1.5 rounded-md text-xs transition ${id === pv.id ? 'cv-nav-on' : 'hover:bg-black/5'}`}>
@@ -82,7 +91,7 @@ export default function TemplateGallery({ onPick }: { onPick: (id: string) => vo
                 </button>
               ))}
             </div>
-            <div className="cv-modal-body flex-1">
+            <div className="cv-modal-body flex-1" ref={bodyRef}>
               <Suspense fallback={<div className="p-10 text-center cv-sub">渲染中…</div>}>
                 <PreviewPane md={pv.seed.content ?? ''} skinCss={skinHref(pv.seed.slug ?? `cv-${pv.id}`)}
                   primaryColor={pv.seed.primaryColor ?? meta?.primaryColor ?? '#333'} font={pv.seed.font ?? meta?.font}

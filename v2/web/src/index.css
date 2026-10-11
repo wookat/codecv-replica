@@ -56,3 +56,4 @@ html.cv-dark .cv-btn:hover { background: #1d232c; }
 html.cv-dark .cv-pill, html.cv-dark .cv-chip { background: #10151c; }
 .cv-modal { width: min(1180px, 96vw); }
 html.cv-dark .hover\:bg-black\/5:hover { background: rgba(255,255,255,.06); }
+@media (max-width: 640px) { .cv-pv-list { display: none; } }
