@@ -432,8 +432,16 @@ app.get('/me', async c => {
   if (!u) return c.json({ error: 'no user' }, 404)
   const t = tier(u)
   const cnt = await c.env.DB.prepare('SELECT COUNT(*) c FROM resume WHERE user_id=?').bind(c.get('userId')).first<any>()
+  const today = new Date().toISOString().slice(0, 10)
+  const ck = await c.env.DB.prepare('SELECT day FROM checkins WHERE user_id=? ORDER BY day DESC LIMIT 60').bind(u.id).all<any>()
+  let streak = 0
+  for (let i = 0; ; i++) {
+    const d = new Date(Date.now() - i * 864e5).toISOString().slice(0, 10)
+    if ((ck.results ?? []).some(x => x.day === d)) streak++; else break
+  }
   return c.json({ username: c.get('userId'), vipExpire: u.vip_expire, vipPlan: u.vip_plan, ai: u.ai,
-    member: t ? { ...t, plan: u.vip_plan } : null, resumeCount: cnt?.c ?? 0, cvQuota: t ? t.cv : 1 })
+    member: t ? { ...t, plan: u.vip_plan } : null, resumeCount: cnt?.c ?? 0, cvQuota: t ? t.cv : 1,
+    checkedToday: (ck.results ?? []).some(x => x.day === today), streak })
 })
 app.get('/orders', async c => {
   const u = await meRow(c)
@@ -572,6 +580,23 @@ app.post('/mianjing', async c => {
 app.get('/schools', async c => {
   const r = await c.env.ASSETS.fetch(new URL('/seeds/schools.json', c.req.url))
   return new Response(r.body, { headers: { 'content-type': 'application/json' } })
+})
+// POST /checkin — 每日签到：免费用户 +3 AI 次数，连签记录 streak
+app.post('/checkin', async c => {
+  const u = await meRow(c)
+  const day = new Date().toISOString().slice(0, 10)
+  const r = await c.env.DB.prepare('INSERT OR IGNORE INTO checkins (user_id, day, created_at) VALUES (?,?,?)').bind(u.id, day, Date.now()).run()
+  const first = (r.meta?.changes ?? 0) > 0
+  if (first && !tier(u)) await c.env.DB.prepare('UPDATE users SET ai=ai+3 WHERE id=?').bind(u.id).run()
+  const days = await c.env.DB.prepare('SELECT day FROM checkins WHERE user_id=? ORDER BY day DESC LIMIT 60').bind(u.id).all<any>()
+  let streak = 0
+  for (let i = 0; ; i++) {
+    const d = new Date(Date.now() - i * 864e5).toISOString().slice(0, 10)
+    if ((days.results ?? []).some(x => x.day === d)) streak++
+    else break
+  }
+  const me = await meRow(c)
+  return c.json({ ok: true, first, ai: me?.ai ?? 0, streak })
 })
 app.get('/invites', async c => {
   const u = await meRow(c)

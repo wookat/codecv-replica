@@ -29,7 +29,14 @@ export default function VipPage() {
             : <span className="ml-2 text-neutral-400">免费版</span>}
           <div className="text-xs text-neutral-500 mt-1">
             简历 {me.resumeCount}/{me.cvQuota === -1 ? '∞' : me.cvQuota} · AI 次数 {me.member ? '∞' : me.ai}
+            {me.streak > 0 && <span className="ml-2 text-orange-500">🔥 连签 {me.streak} 天</span>}
           </div>
+          {!me.member && (
+            <button className={`mt-2 text-xs rounded px-3 py-1.5 ${me.checkedToday ? 'bg-neutral-200 text-neutral-500' : 'bg-orange-500 text-white'}`}
+              disabled={me.checkedToday} onClick={async () => {
+                const r = await api.checkin(); setMsg(r.first ? `签到成功 +3 AI 次数（连签 ${r.streak} 天）` : '今天已签过')
+                load()
+              }}>{me.checkedToday ? '今日已签到' : '签到 +3 AI 次数'}</button>)}
         </div>
       )}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

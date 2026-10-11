@@ -22,6 +22,7 @@ export const api = {
     req<{ token: string; username: string }>('/auth/register', { method: 'POST', body: JSON.stringify({ username, password, inviter }) }),
   masters: () => req<any[]>('/master'),
   createMaster: (name: string) => req<any>('/master', { method: 'POST', body: JSON.stringify({ name }) }),
+  checkin: () => req<any>('/checkin', { method: 'POST', body: '{}' }),
   invites: () => req<any>('/invites'),
   progressList: () => req<any[]>('/progress'),
   addProgress: (b: any) => req<any>('/progress', { method: 'POST', body: JSON.stringify(b) }),
