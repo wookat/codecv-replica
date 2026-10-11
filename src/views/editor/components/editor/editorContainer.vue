@@ -104,9 +104,9 @@ function setMode(m: 'edit' | 'md') {
     }
   }
 }
-/* md 模式工具栏占满顶行：胶囊移到工具栏下方，避免压住末尾图标 */
+/* md 模式工具栏末位的 toContentMode ✎ 已是切换开关，浮动胶囊是重复控件——隐藏 */
 .markdown-edit.mode-md .toggle-edit-mode {
-  top: 48px;
+  display: none;
 }
 .move {
   width: 10px;
