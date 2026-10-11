@@ -163,14 +163,14 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
             <input type="file" accept="image/*" className="hidden"
               onChange={e => e.target.files?.[0] && uploadPhoto(e.target.files[0])} />
           </label>)}
-        {resumeId && <button className="text-xs border rounded px-2 py-1" onClick={async () => {
-          setHist(await api.resumeVersions(resumeId).catch(() => [])); setHistOpen(true)
+        {initRid && <button className="text-xs border rounded px-2 py-1" onClick={async () => {
+          setHist(await api.resumeVersions(initRid).catch(() => [])); setHistOpen(true)
         }}>历史</button>}
         <button className={`text-xs border rounded px-2 py-1 ${aiOpen ? 'bg-black text-white' : ''}`}
           onClick={() => setAiOpen(!aiOpen)}>AI</button>
         <div className="flex-1" />
         {saveErr && <span className="text-xs text-red-500" role="alert">{saveErr}</span>}
-        {!saveErr && resumeId && <span className="text-[10px] text-neutral-400">已自动保存</span>}
+        {!saveErr && initRid && <span className="text-[10px] text-neutral-400">已自动保存</span>}
         <button className="text-xs border rounded px-2 py-1" onClick={printPdf}>打印 PDF</button>
         <button className="text-xs bg-black text-white rounded px-2 py-1" disabled={!!exporting}
           onClick={() => exportPdf('pdf')}>{exporting === 'pdf' ? '渲染中…' : 'VPS 导出 PDF'}</button>
@@ -189,7 +189,7 @@ export default function EditorPage({ templateId: initTpl, masterId, resumeId: in
           <span className="text-neutral-400 w-32 shrink-0">{new Date(v.created_at).toLocaleString()}</span>
           <span className="flex-1 truncate text-neutral-500">{v.preview}…</span>
           <button className="text-blue-600" onClick={async () => {
-            const r = await api.restoreVersion(resumeId!, v.id)
+            const r = await api.restoreVersion(initRid!, v.id)
             setMd(r.contentMd); setHistOpen(false)
           }}>恢复此版本</button>
         </div>)}
