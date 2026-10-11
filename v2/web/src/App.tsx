@@ -4,10 +4,13 @@ import TemplateGallery from './features/templates/TemplateGallery'
 import EditorPage from './features/resume/EditorPage'
 import ResumeList from './features/resume/ResumeList'
 import PublicResume from './features/resume/PublicResume'
+import Landing from './features/landing/Landing'
 
 export default function App() {
   const pubMatch = location.pathname.match(/^\/r\/([\w-]+)/)
+  const landing = location.pathname === '/' && !localStorage.getItem('v2:token') && !location.search.includes('login')
   if (pubMatch) return <PublicResume id={pubMatch[1]} />
+  if (landing) return <Landing onEnter={() => { location.href = '/?login' }} />
   const [token, setToken] = useState(localStorage.getItem('v2:token'))
   const [user, setUser] = useState('')
   const [pass, setPass] = useState('')
