@@ -6,6 +6,8 @@ export const esc = (s: string) => String(s ?? '').replace(/&/g, '&amp;').replace
 export const ldScript = (obj: unknown) => `<script type="application/ld+json">${JSON.stringify(obj).replace(/</g, '\\u003c')}</script>`
 export type Crumb = { name: string; url: string }
 export const SITE = 'CodeCV'
+// Pages 的 _headers 不作用于 Functions 响应，SSR 页的 CSP 必须在这里显式下发
+export const CSP_HEADER = "default-src 'self'; style-src 'unsafe-inline' 'self'; img-src 'self' data:; font-src 'self' data:; script-src 'none'; frame-ancestors 'self'"
 
 export const tplName = (id: string) => (catalog as any)[id]?.name || `简历模板 ${id}`
 export const tplTags = (id: string): string[] => (catalog as any)[id]?.tags || []
@@ -42,10 +44,10 @@ export const crumbsHtml = (crumbs: Crumb[]) => `<nav class="crumbs" aria-label="
   i === crumbs.length - 1 ? `<li aria-current="page">${esc(c.name)}</li>` : `<li><a href="${esc(c.url)}">${esc(c.name)}</a></li>`).join('')}</ol></nav>`
 
 const footer = () => `<footer class="foot"><div class="wrap">
-<div class="cols"><div><h4>按职业找简历</h4>${OCCUPATIONS.map(o => `<a href="/jianli/${o.slug}">${esc(o.name)}简历模板</a>`).join('')}</div>
-<div><h4>简历怎么写</h4>${OCCUPATIONS.map(o => `<a href="/jianli/${o.slug}/zenmexie">${esc(o.name)}简历怎么写</a>`).join('')}</div>
-<div><h4>简历范文</h4>${OCCUPATIONS.map(o => `<a href="/jianli/${o.slug}/fanwen">${esc(o.name)}简历范文</a>`).join('')}</div>
-<div><h4>CodeCV</h4><a href="/">免费在线简历编辑器</a><a href="/jianli">职业简历导航</a><a href="/gallery">简历广场</a><a href="/t/10front_end">全部简历模板</a></div></div>
+<div class="cols"><div><h3>按职业找简历</h3>${OCCUPATIONS.map(o => `<a href="/jianli/${o.slug}">${esc(o.name)}简历模板</a>`).join('')}</div>
+<div><h3>简历怎么写</h3>${OCCUPATIONS.map(o => `<a href="/jianli/${o.slug}/zenmexie">${esc(o.name)}简历怎么写</a>`).join('')}</div>
+<div><h3>简历范文</h3>${OCCUPATIONS.map(o => `<a href="/jianli/${o.slug}/fanwen">${esc(o.name)}简历范文</a>`).join('')}</div>
+<div><h3>CodeCV</h3><a href="/">免费在线简历编辑器</a><a href="/jianli">职业简历导航</a><a href="/gallery">简历广场</a><a href="/t/10front_end">全部简历模板</a></div></div>
 <p class="copy">CodeCV · zalize.com · 114 套免费简历模板，Markdown 编辑，PDF/Word 导出</p></div></footer>`
 
 const CSS = `*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;background:#f5f6f8;color:#1b1f24;font:15px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif}
@@ -55,7 +57,7 @@ a{color:#2f6bfe}.wrap{max-width:1000px;margin:0 auto;padding:0 16px}
 .top nav a{color:#4b5563;text-decoration:none;margin-right:14px;font-size:14px}.top .sp{flex:1}
 .btn{display:inline-block;background:#2f6bfe;color:#fff;padding:9px 18px;border-radius:999px;text-decoration:none;font-weight:600;font-size:14px;white-space:nowrap}.btn:hover{background:#1f56e0}
 .btn.lg{padding:12px 26px;font-size:16px}.btn.ghost{background:#fff;color:#2f6bfe;border:1px solid #c7d4ff}.lnk{font-size:14px;margin-left:12px}
-.crumbs{font-size:13px;color:#6b7280;margin:16px 0}.crumbs ol{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:6px}.crumbs li+li:before{content:"›";margin-right:6px;color:#9ca3af}.crumbs a{color:#6b7280;text-decoration:none}
+.crumbs{font-size:13px;color:#6b7280;margin:16px 0}.crumbs ol{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:6px}.crumbs li+li:before{content:"›";margin-right:6px;color:#6b7280}.crumbs a{color:#6b7280;text-decoration:none}
 h1{font-size:30px;line-height:1.3;margin:8px 0 10px;letter-spacing:-.01em}h2{font-size:20px;margin:0 0 12px}h3{font-size:16px;margin:0 0 6px}
 .hero{padding:8px 0 20px}.hero p.lead{font-size:16px;color:#4b5563;margin:0 0 16px;max-width:760px}.hero .meta{font-size:13px;color:#6b7280}
 .card{background:#fff;border-radius:14px;padding:22px 24px;margin:0 0 18px;box-shadow:0 1px 2px rgba(16,24,40,.04),0 4px 16px rgba(16,24,40,.05)}
@@ -63,15 +65,15 @@ h1{font-size:30px;line-height:1.3;margin:8px 0 10px;letter-spacing:-.01em}h2{fon
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}
 .tpl{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 2px rgba(16,24,40,.04),0 4px 16px rgba(16,24,40,.05);display:flex;flex-direction:column}
 .tpl .thumb{display:block;background:#eef0f4;aspect-ratio:3/4;overflow:hidden}.tpl img{width:100%;height:100%;object-fit:cover;object-position:top;display:block;transition:transform .3s}.tpl:hover img{transform:scale(1.03)}
-.tpl-b{padding:12px 14px 14px}.tpl h3 a{color:#1b1f24;text-decoration:none}.badge{display:inline-block;margin-left:8px;font-size:11px;background:#eaf0ff;color:#2f6bfe;border-radius:999px;padding:1px 8px;vertical-align:middle}
+.tpl-b{padding:12px 14px 14px}.tpl h3 a{color:#1b1f24;text-decoration:none}.badge{display:inline-block;margin-left:8px;font-size:11px;background:#e3ebff;color:#1d4fd7;border-radius:999px;padding:1px 8px;vertical-align:middle}
 .tags span{display:inline-block;font-size:12px;background:#f1f3f7;color:#4b5563;border-radius:999px;padding:1px 9px;margin:4px 6px 0 0}.row{margin-top:12px;display:flex;align-items:center;flex-wrap:wrap;gap:6px}
 .faq{border-top:1px solid #eef0f4;padding:10px 0}.faq summary{font-weight:600;cursor:pointer}.faq p{margin:6px 0 0;color:#374151}
-.cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}.cmp div{border-radius:10px;padding:12px 14px;font-size:14px}.cmp .bad{background:#fff1f2;color:#9f1239}.cmp .good{background:#ecfdf5;color:#065f46}.cmp b{display:block;font-size:12px;margin-bottom:4px;opacity:.8}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}.cmp div{border-radius:10px;padding:12px 14px;font-size:14px}.cmp .bad{background:#fff1f2;color:#9f1239}.cmp .good{background:#ecfdf5;color:#065f46}.cmp b{display:block;font-size:12px;margin-bottom:4px}
 .toc a{display:inline-block;margin:2px 12px 2px 0;font-size:14px}
 .paper-wrap{background:#e9ebf0;border-radius:14px;padding:20px;overflow:auto;margin-bottom:18px}.paper{width:794px;min-height:1000px;margin:0 auto;background:#fff;box-shadow:0 8px 30px rgba(0,0,0,.12);padding:28px 36px;position:relative}
 .cta-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0 22px}
 .chips a{display:inline-block;background:#fff;border:1px solid #e6e8ee;border-radius:999px;padding:6px 14px;margin:0 8px 8px 0;text-decoration:none;color:#1b1f24;font-size:14px}.chips a:hover{border-color:#2f6bfe;color:#2f6bfe}
-.foot{margin-top:40px;border-top:1px solid #e6e8ee;background:#fff;padding:28px 0 20px;font-size:13px}.foot .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px}.foot h4{margin:0 0 8px;font-size:13px;color:#1b1f24}.foot a{display:block;color:#6b7280;text-decoration:none;margin:3px 0}.foot .copy{color:#9ca3af;margin-top:20px;text-align:center}
+.foot{margin-top:40px;border-top:1px solid #e6e8ee;background:#fff;padding:28px 0 20px;font-size:13px}.foot .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px}.foot h3{margin:0 0 8px;font-size:13px;color:#1b1f24}.foot a{display:block;color:#6b7280;text-decoration:none;margin:3px 0}.foot .copy{color:#6b7280;margin-top:20px;text-align:center}
 @media(max-width:860px){h1{font-size:24px}.card{padding:16px}.cmp{grid-template-columns:1fr}.top nav{display:none}.paper-wrap{padding:8px}.paper{zoom:.44;padding:20px}}`
 
 export function page(o: { origin: string; path: string; title: string; desc: string; crumbs: Crumb[]; body: string; ld: unknown[]; ogImage?: string; extraHead?: string; status?: number }) {
@@ -83,7 +85,7 @@ export function page(o: { origin: string; path: string; title: string; desc: str
 ${o.extraHead || ''}<style>${CSS}</style>${o.ld.map(ldScript).join('')}</head><body>
 <header class="top"><div class="wrap"><a class="logo" href="/">CodeCV</a><nav><a href="/jianli">职业简历</a><a href="/gallery">简历广场</a><a href="/t/10front_end">模板</a></nav><span class="sp"></span><a class="btn" href="/">免费制作简历</a></div></header>
 <main class="wrap">${crumbsHtml(o.crumbs)}${o.body}</main>${footer()}</body></html>`
-  return new Response(html, { status: o.status || 200, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=600, s-maxage=3600' } })
+  return new Response(html, { status: o.status || 200, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=600, s-maxage=3600', 'content-security-policy': CSP_HEADER, 'x-content-type-options': 'nosniff', 'referrer-policy': 'strict-origin-when-cross-origin' } })
 }
 
 export const notFound = (origin: string) => page({ origin, path: '/jianli', title: '页面不存在 | CodeCV', desc: '该职业简历页不存在', crumbs: [{ name: '首页', url: '/' }, { name: '职业简历', url: '/jianli' }], ld: [], status: 404,

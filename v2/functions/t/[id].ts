@@ -1,5 +1,6 @@
 // /t/:id 模板详情 SEO 页：可被收录的静态 HTML（名称/预览图/适用人群/CTA）
 import { occupationsForTemplate } from '../_seo/data'
+import { CSP_HEADER } from '../_seo/render'
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
@@ -41,5 +42,5 @@ p{color:#555;line-height:1.7}</style></head><body><main><div class="wrap">
 <p>使用 CodeCV 在线编辑此模板：内容用 Markdown 编写，AI 按目标岗位自动生成，支持导出 PDF / PNG / Word。</p>
 <a class="cta" href="/?tpl=${esc(id)}">免费使用此模板 →</a>${rel.length ? `<p style="margin-top:18px;font-size:14px;color:#555">相关职业：${rel.map(o => `<a href="/jianli/${o.slug}">${esc(o.name)}简历模板</a> · <a href="/jianli/${o.slug}/zenmexie">${esc(o.name)}简历怎么写</a>`).join('　')}</p>` : ''}
 </div></div></div></main></body></html>`
-  return new Response(html, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=3600' } })
+  return new Response(html, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=3600', 'content-security-policy': CSP_HEADER, 'x-content-type-options': 'nosniff' } })
 }
