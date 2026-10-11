@@ -52,7 +52,10 @@ export default function EditorPage({ templateId: initTpl, exampleId, masterId, r
     if (initRid || !exampleId) return
     const url = exampleId.startsWith('tpl:') ? `/seeds/tpl/${exampleId.slice(4)}.json` : `/seeds/ex/${exampleId}.json`
     fetch(url).then(r => r.ok ? r.json() : null).then(d => {
-      if (d?.content) { setExampleMd(d.content); dirtyRef.current = true }
+      if (d?.content) {
+        setExampleMd(d.content); dirtyRef.current = true
+        if (typeof d.primaryColor === 'string' && /^#[0-9a-f]{6}$/i.test(d.primaryColor)) setOpts(o => ({ ...o, color: d.primaryColor }))
+      }
     }).catch(() => {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exampleId])
