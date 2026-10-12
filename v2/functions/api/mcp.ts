@@ -10,7 +10,7 @@ import { eq, and, asc, inArray } from 'drizzle-orm'
 import { tokenUser, bearerToken } from '../_auth'
 import * as s from '../schema'
 import { composeResumeMd, SECTION_TITLE } from '../_compose'
-import { markdownToHTML } from '../_mth/index'
+import { renderPaper, templateSeed } from '../_paper'
 import { renderSelfContained } from './export'
 
 const uid = () => crypto.randomUUID()
@@ -199,9 +199,9 @@ async function composeFor(db: any, resumeId: string, title: string): Promise<str
 }
 
 async function renderKind(c: any, md: string, templateId: string, kind: 'pdf' | 'png'): Promise<Uint8Array | null> {
-  const html = markdownToHTML(md)
+  const html = renderPaper(md, await templateSeed(c.env, c.req.url, templateId))
   const skin = skinHref(templateId)
-  return renderSelfContained(c, html, skin, kind)
+  return renderSelfContained(c, html, skin, kind, false, true)
 }
 
 async function renderPng(c: any, md: string, templateId: string) {
