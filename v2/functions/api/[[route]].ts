@@ -5,7 +5,7 @@ import { drizzle } from 'drizzle-orm/d1'
 import { eq, and, asc, inArray } from 'drizzle-orm'
 import { z } from 'zod'
 import { pbkdf2, hashPassword, issueToken, tokenUser, bearerToken } from '../_auth'
-import { markdownToHTML } from '../_mth'
+import { renderPaper, templateSeed } from '../_paper'
 import { renderSelfContained } from './export'
 import * as s from '../schema'
 import exportRoute from './export'
@@ -47,13 +47,12 @@ app.post('/auth/register', async c => {
 // GET /thumb/:tpl — 模板缩略图 PNG（KV 缓存 7d）
 app.get('/thumb/:tpl', async c => {
   const tpl = c.req.param('tpl')
-  const key = 'thumb:' + tpl
+  const key = 'thumb:render-v2:' + tpl
   const hit = await c.env.UPSTASH_KV.get(key, 'arrayBuffer')
   if (hit) return new Response(hit, { headers: { 'content-type': 'image/png', 'cache-control': 'public, max-age=86400' } })
-  const seed = await c.env.ASSETS.fetch(new URL(`/seeds/tpl/${tpl.replace(/^cv-/,'')}.json`, c.req.url))
-  const md = seed.ok ? (await seed.json<any>()).content : ''
-  const html = markdownToHTML(md || '## 模板预览')
-  const png = await renderSelfContained(c, html, `/css/style_${tpl.replace(/^cv-/, '')}.css`, 'png')
+  const seed = await templateSeed(c.env, c.req.url, tpl)
+  const html = renderPaper(seed.content || '## 模板预览', seed)
+  const png = await renderSelfContained(c, html, `/css/style_${tpl.replace(/^cv-/, '')}.css`, 'png', false, true)
   if (!png) return c.json({ error: 'render 失败', detail: (c as any).__render_err }, 502)
   c.executionCtx.waitUntil(c.env.UPSTASH_KV.put(key, png, { expirationTtl: 7 * 24 * 3600 }))
   return new Response(png.buffer as ArrayBuffer, { headers: { 'content-type': 'image/png', 'cache-control': 'public, max-age=86400' } })

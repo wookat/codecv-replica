@@ -9,7 +9,7 @@ const { normalizeMd } = await import(NORM)
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-const DIR = '/home/ubuntu/repos/codecv-replica/public/seeds/tpl'
+const DIR = decodeURIComponent(new URL('../../public/seeds/tpl', import.meta.url).pathname).replace(/^\/([A-Za-z]:)/, '$1')
 const only = process.argv[2]
 const files = readdirSync(DIR).filter(f => f.endsWith('.json') && (!only || f === only))
 const norm = h => String(h).replace(/\s+/g, '').replace(/&nbsp;/g, '')

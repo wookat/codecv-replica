@@ -1,10 +1,12 @@
 // 编辑器页：左=选取面板+md 编辑，右=mth 预览；顶栏换肤+导出双链
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import CodeMirror from '@uiw/react-codemirror'
 import { markdown } from '@codemirror/lang-markdown'
 import { api } from '../../core/api/client'
 import { composeMd, skinHref, templateMeta, type SelItem } from './composer'
-import PreviewPane from './PreviewPane'
+import PreviewPane, { type PreviewHandle } from './PreviewPane'
+import { FONT_STYLESHEETS, PAPER_RESET, type PaperOptions } from './renderContract'
+import { useTemplateSeed } from './useTemplateSeed'
 import ContentEditor from './ContentEditor'
 import AiPanel from './AiPanel'
 import catalog from '../templates/catalog.json'
@@ -18,17 +20,19 @@ export default function EditorPage({ templateId: initTpl, exampleId, masterId, r
   const [sels, setSels] = useState<SelItem[]>([])
   const [exporting, setExporting] = useState('')
   const [mode, setMode] = useState<'md' | 'rich'>('md')   // 排版控件状态：字号/行距/主题色/缩放
-  const [opts, setOpts] = useState({ zoom: 1, fontSize: 14, lineHeight: 1.6, color: '' })
-  const [avatar, setAvatar] = useState<any>(null)
+  const [opts, setOpts] = useState<PaperOptions>({ zoom: 1, color: '' })
+  const { seed, error: seedError } = useTemplateSeed(tplId)
+  const avatar = seed?.avatar
+  const preview = useRef<PreviewHandle>(null)
   const [photo, setPhoto] = useState('')
-  const extrasRef = { current: {} as Record<string, string> }
+  const extrasRef = useRef<Record<string, string>>({})
   const [rid, setRid] = useState(initRid)
   const [aiOpen, setAiOpen] = useState(false)
   const [histOpen, setHistOpen] = useState(false)
   const [hist, setHist] = useState<any[]>([])
   const [saveErr, setSaveErr] = useState('')
-  const dirtyRef = { current: false }
-  const saveTimer = { current: 0 as any }
+  const dirtyRef = useRef(false)
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   // 载入已有简历（resume 模式）或新建（模板模式）
   useEffect(() => {
@@ -54,21 +58,29 @@ export default function EditorPage({ templateId: initTpl, exampleId, masterId, r
     fetch(url).then(r => r.ok ? r.json() : null).then(d => {
       if (d?.content) {
         setExampleMd(d.content); dirtyRef.current = true
-        if (typeof d.primaryColor === 'string' && /^#[0-9a-f]{6}$/i.test(d.primaryColor)) setOpts(o => ({ ...o, color: d.primaryColor }))
+        const pc = String(d.primaryColor || '')
+        const m = pc.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i)
+        if (m) setOpts(o => ({ ...o, color: m[1].length === 3 ? '#' + [...m[1]].map(x => x + x).join('') : pc }))
       }
     }).catch(() => {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exampleId])
   useEffect(() => {
     if (initRid) return
-    setMd(!sels.length && exampleMd ? exampleMd : composeMd({ title: meta?.name ?? '我的简历', items: sels }))
-  }, [sels, tplId, exampleMd])
+    if (exampleMd && !sels.length) { setMd(exampleMd); return }
+    if (sels.length) {
+      dirtyRef.current = true
+      setMd(composeMd({ title: meta?.name ?? '我的简历', items: sels }))
+    }
+  }, [sels, exampleMd])
 
   // 模板头像位配置（种子 json 的 avatar 字段）
   useEffect(() => {
-    fetch(`/seeds/tpl/${tplId}.json`).then(r => r.ok ? r.json() : null)
-      .then(d => setAvatar(d?.avatar ?? null)).catch(() => setAvatar(null))
-  }, [tplId])
+    if (!initRid && seed?.content) {
+      setMd(current => current || seed.content || '')
+      dirtyRef.current = true
+    }
+  }, [seed, initRid])
 
   const uploadPhoto = (f: File) => {
     const img = new Image()
@@ -96,17 +108,17 @@ export default function EditorPage({ templateId: initTpl, exampleId, masterId, r
     }, 1000)
     return () => clearTimeout(saveTimer.current)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [md])
+  }, [md, rid])
 
   const exportPdf = async (kind: 'pdf' | 'png' | 'docx') => {
     setExporting(kind)
     try {
-      const body = document.querySelector('.markdown-transform-html.jufe')?.innerHTML ?? ''
-      const optsCss = `<style>.markdown-transform-html{font-size:${opts.fontSize}px;line-height:${opts.lineHeight};${opts.color ? `--markdown-primary-bg-color:${opts.color}` : ''}}</style>`
+      const body = preview.current?.paperHTML()
+      if (!body) throw new Error('简历尚未渲染，请稍后再试')
       const r = await fetch('/api/v2/export', {
         method: 'POST', headers: { 'content-type': 'application/json', 'authorization': `Bearer ${localStorage.getItem('v2:token') ?? ''}` },
         body: JSON.stringify({
-          content: optsCss + body, style: skinHref(meta?.slug ?? tplId), name: meta?.name ?? 'resume', type: kind,
+          content: body, fullPaper: true, style: skinHref(meta?.slug ?? tplId), name: meta?.name ?? 'resume', type: kind,
         }),
       })
       if (!r.ok) throw new Error(await r.text())
@@ -120,16 +132,18 @@ export default function EditorPage({ templateId: initTpl, exampleId, masterId, r
   }
 
   const printPdf = async () => {
-    const body = document.querySelector('.markdown-transform-html.jufe')?.innerHTML ?? ''
+    const body = preview.current?.paperHTML()
+    if (!body) return
     let brand = true
     try { const me: any = await api.me(); brand = !me?.member } catch {}
     const w = window.open('', '_blank')!
     w.document.write(`<!DOCTYPE html><html><head><meta charset=utf-8><title>${meta?.name}</title>
       <link rel="stylesheet" href="${skinHref(meta?.slug ?? tplId)}">
-      <style>@page{size:A4;margin:0}body{margin:0}.markdown-transform-html{width:210mm;margin:0 auto}</style>
-      </head><body><div class="markdown-transform-html jufe">${body}</div>
+      ${FONT_STYLESHEETS.map(href => `<link rel="stylesheet" href="${href}">`).join('')}
+      <style>${PAPER_RESET}@page{size:A4;margin:0}body{margin:0}.markdown-transform-html{width:210mm;margin:0 auto}</style>
+      </head><body>${body}
       ${brand ? `<div style="position:fixed;bottom:6mm;right:10mm;font-size:9px;color:#b0b0b0;letter-spacing:.5px">由 CodeCV 制作 · codecv.zalize.com</div>` : ''}
-      <script>onload=()=>setTimeout(()=>print(),400)<\/script></body></html>`)
+      <script>onload=async()=>{await document.fonts.ready;print()}<\/script></body></html>`)
     w.document.close()
   }
 
@@ -146,15 +160,16 @@ export default function EditorPage({ templateId: initTpl, exampleId, masterId, r
           <button className={mode === 'rich' ? 'cv-nav cv-nav-on px-2 py-0.5' : 'cv-nav px-2 py-0.5'} onClick={() => setMode('rich')}>内容模式</button>
         </div>
         <label className="text-xs text-neutral-500">字号
-          <input type="number" min={10} max={20} step={0.5} className="cv-input w-14 ml-1" value={opts.fontSize}
+          <input type="number" min={10} max={20} step={0.5} className="cv-input w-14 ml-1" value={opts.fontSize ?? 14}
             onChange={e => setOpts({ ...opts, fontSize: +e.target.value })} /></label>
         <label className="text-xs text-neutral-500">行距
-          <select aria-label="行距" className="cv-input ml-1" value={opts.lineHeight}
-            onChange={e => setOpts({ ...opts, lineHeight: +e.target.value })}>
+          <select aria-label="行距" className="cv-input ml-1" value={opts.lineHeight ?? ''}
+            onChange={e => setOpts({ ...opts, lineHeight: e.target.value ? +e.target.value : undefined })}>
+            <option value="">模板默认（{seed?.lineHeight ?? 25}px）</option>
             {[1.2,1.4,1.6,1.8,2.0].map(v => <option key={v} value={v}>{v}</option>)}
           </select></label>
         <label className="text-xs text-neutral-500">主题色
-          <input type="color" className="w-7 h-6 ml-1 align-middle" value={(() => { const c = opts.color || meta?.primaryColor || ''; const m = c.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i); return m ? (m[1].length===3 ? '#'+[...m[1]].map(x=>x+x).join('') : c) : '#333333' })()}
+          <input type="color" className="w-7 h-6 ml-1 align-middle" value={(() => { const c = opts.color || seed?.primaryBgColor || ''; const m = c.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i); return m ? (m[1].length===3 ? '#' + [...m[1]].map(x => x + x).join('') : c) : '#333333' })()}
             onChange={e => setOpts({ ...opts, color: e.target.value })} /></label>
         <label className="text-xs text-neutral-500">缩放
           <select aria-label="缩放" className="cv-input ml-1" value={opts.zoom}
@@ -219,7 +234,8 @@ export default function EditorPage({ templateId: initTpl, exampleId, masterId, r
             : <ContentEditor md={md} onMd={v => { dirtyRef.current = true; setMd(v) }} />}
         </div>
         <div className="flex-1">
-          <PreviewPane md={md} skinCss={skinHref(meta?.slug ?? tplId)} primaryColor={meta?.primaryColor} font={meta?.font} opts={opts} avatar={avatar} photo={photo} />
+          {seedError && <p role="alert">{seedError}</p>}
+          <PreviewPane ref={preview} md={md} skinCss={skinHref(meta?.slug ?? tplId)} seed={seed} opts={opts} photo={photo} />
         </div>
         {aiOpen && <AiPanel md={md} onClose={() => setAiOpen(false)}
           onApply={(t, m) => { dirtyRef.current = true; setMd(m === 'replace' ? t : md + '\n' + t); setAiOpen(false) }} />}
