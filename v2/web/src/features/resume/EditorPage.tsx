@@ -40,7 +40,7 @@ export default function EditorPage({ templateId: initTpl, exampleId, masterId, r
         if (extrasRef.current.photo) setPhoto(extrasRef.current.photo)
       }).catch(() => {})
     } else {
-      api.createResume({ masterId, templateId: tplId, title: meta?.name ?? tplId })
+      api.createResume({ ...(masterId ? { masterId } : {}), templateId: tplId, title: meta?.name ?? tplId })
         .then(r => setRid(r.id)).catch(() => {})
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -154,7 +154,7 @@ export default function EditorPage({ templateId: initTpl, exampleId, masterId, r
             {[1.2,1.4,1.6,1.8,2.0].map(v => <option key={v} value={v}>{v}</option>)}
           </select></label>
         <label className="text-xs text-neutral-500">主题色
-          <input type="color" className="w-7 h-6 ml-1 align-middle" value={opts.color || meta?.primaryColor || '#333333'}
+          <input type="color" className="w-7 h-6 ml-1 align-middle" value={(() => { const c = opts.color || meta?.primaryColor || ''; const m = c.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i); return m ? (m[1].length===3 ? '#'+[...m[1]].map(x=>x+x).join('') : c) : '#333333' })()}
             onChange={e => setOpts({ ...opts, color: e.target.value })} /></label>
         <label className="text-xs text-neutral-500">缩放
           <select aria-label="缩放" className="cv-input ml-1" value={opts.zoom}

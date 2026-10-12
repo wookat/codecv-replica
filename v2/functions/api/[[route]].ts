@@ -273,7 +273,7 @@ app.post('/resumes', async c => {
     }
   }
   const b = ResumeBody.parse(await c.req.json())
-  const row = { id: uid(), userId: c.get('userId'), masterId: b.masterId ?? null, templateId: b.templateId, title: b.title ?? '', targetJd: b.targetJd ?? '', createdAt: now(), updatedAt: now() }
+  const row = { id: uid(), userId: c.get('userId'), masterId: b.masterId || null, templateId: b.templateId, title: b.title ?? '', targetJd: b.targetJd ?? '', createdAt: now(), updatedAt: now() }
   await db(c).insert(s.resume).values(row)
   return c.json(row, 201)
 })
