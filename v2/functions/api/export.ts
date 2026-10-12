@@ -6,7 +6,7 @@
 interface Env { RENDER_URL?: string; RENDER_TOKEN?: string; ASSETS?: { fetch: (r: Request) => Promise<Response> } }
 
 // 共用渲染链：contentHtml + skinHref → 自包含 HTML → VPS Chrome114 → bytes（MCP 与 /export 共用）
-export async function renderSelfContained(c: any, contentHtml: string, style: string, type: 'pdf' | 'png' | 'docx', brand = false): Promise<Uint8Array | null> {
+export async function renderSelfContained(c: any, contentHtml: string, style: string, type: 'pdf' | 'png' | 'docx', brand = false, fullPaper = false): Promise<Uint8Array | null> {
   const env = c.env as Env
   const RENDER_URL = env.RENDER_URL || 'https://cvrender.zalize.com/render'
   const RENDER_TOKEN = env.RENDER_TOKEN || ''
@@ -22,11 +22,14 @@ export async function renderSelfContained(c: any, contentHtml: string, style: st
     return fetch(u)
   }
   const skinCss = await inlineCssRecursive(style || '', origin, fetchAsset)
+  const fontCss = await inlineCssRecursive('/fonts/export-fonts.css', origin, fetchAsset)
+  const iconCss = await inlineCssRecursive('/fonts/iconfont.css', origin, fetchAsset)
   const htmlDoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>resume</title>
-<style>${skinCss}</style>
-<style>@page{size:A4;margin:0}body{margin:0;padding:0}.markdown-transform-html{width:210mm;margin:0 auto;box-shadow:none}</style>
+<style>*{margin:0;padding:0;box-sizing:border-box}</style>
+<style>${fontCss}${iconCss}${skinCss}</style>
+<style>@page{size:A4;margin:0}body{margin:0;padding:0;font-size:16px}.markdown-transform-html{width:210mm;min-height:297mm;margin:0 auto;box-shadow:none}</style>
 </head><body>
-<div class="markdown-transform-html jufe">${contentHtml || ''}</div>
+${fullPaper ? contentHtml : `<div class="markdown-transform-html jufe">${contentHtml || ''}</div>`}
 ${brand ? `<div style="position:fixed;bottom:6mm;right:10mm;font-size:9px;color:#b0b0b0;font-family:'Noto Sans SC',sans-serif;letter-spacing:.5px">由 CodeCV 制作 · codecv.zalize.com</div>` : ''}
 </body></html>`
 
@@ -44,7 +47,7 @@ ${brand ? `<div style="position:fixed;bottom:6mm;right:10mm;font-size:9px;color:
 
 export default function exportRoute() {
   return async (c: any) => {
-    const { content, style, name, type } = await c.req.json()
+    const { content, style, name, type, fullPaper } = await c.req.json()
     const k = `rl:exp:${c.get('userId') || c.req.header('cf-connecting-ip') || 'anon'}`
     const n = Number(await c.env.UPSTASH_KV.get(k) || 0) + 1
     await c.env.UPSTASH_KV.put(k, String(n), { expirationTtl: 60 })
@@ -56,7 +59,7 @@ export default function exportRoute() {
       const u: any = await c.env.DB.prepare('SELECT vip_expire FROM users WHERE username=?').bind(c.get('userId')).first()
       if (u && Number(u.vip_expire || 0) > Date.now()) brand = false
     } catch {}
-    const bytes = await renderSelfContained(c, content || '', style || '', type === 'docx' ? 'docx' : type === 'png' ? 'png' : 'pdf', brand)
+    const bytes = await renderSelfContained(c, content || '', style || '', type === 'docx' ? 'docx' : type === 'png' ? 'png' : 'pdf', brand, fullPaper === true)
     if (!bytes) return c.json({ code: 503, msg: 'render 服务无响应' }, 503)
 
     return new Response(bytes.buffer, {

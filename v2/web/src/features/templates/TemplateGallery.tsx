@@ -96,8 +96,7 @@ export default function TemplateGallery({ onPick }: { onPick: (id: string) => vo
             <div className="cv-modal-body flex-1" ref={bodyRef}>
               <Suspense fallback={<div className="p-10 text-center cv-sub">渲染中…</div>}>
                 <PreviewPane md={pv.seed.content ?? ''} skinCss={skinHref(pv.seed.slug ?? `cv-${pv.id}`)}
-                  primaryColor={pv.seed.primaryColor ?? meta?.primaryColor ?? '#333'} font={pv.seed.font ?? meta?.font}
-                  avatar={pv.seed.avatar ?? null} />
+                  seed={pv.seed} />
               </Suspense>
             </div>
           </div>
