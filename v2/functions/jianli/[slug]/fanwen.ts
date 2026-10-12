@@ -16,16 +16,16 @@ export const onRequestGet: PagesFunction = async (context) => {
   const md: string = String(d.content || '')
   // 与编辑器/导出同一纸面：renderPaper=convertResumeDOM(resume-module)+fontMark+种子样式；
   // ex 种子只带部分样式字段，缺失项（avatar/primaryBgColor/lineHeight）回退到它挂的模板 seed
+  // 与编辑器同一套注入规则：样式种子一律取所挂模板（含 avatar/色板），
+  // 范文自身的 primaryColor 是主题点缀色→进 opts.color（bg 变量），绝不进 fg 变量
   let styleSeed: any = d
   if (ex.src === 'ex') {
-    try {
-      const tplSeed: any = await templateSeed(env, context.request.url, ex.tpl)
-      styleSeed = { ...tplSeed }
-      for (const k of ['primaryColor', 'primaryBgColor', 'font', 'lineHeight', 'avatar'])
-        if (d[k] !== undefined) styleSeed[k] = d[k]
-    } catch {}
+    try { styleSeed = await templateSeed(env, context.request.url, ex.tpl) } catch {}
   }
-  const paper = renderPaper(md, styleSeed)
+  const pc = String(d.primaryColor || '')
+  const m = pc.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i)
+  const opts = m ? { color: m[1].length === 3 ? '#' + [...m[1]].map(x => x + x).join('') : pc } : {}
+  const paper = renderPaper(md, styleSeed, opts)
   const path = `/jianli/${o.slug}/fanwen`
   const crumbs = [{ name: '首页', url: '/' }, { name: '职业简历', url: '/jianli' }, { name: `${o.name}简历模板`, url: `/jianli/${o.slug}` }, { name: `${o.name}简历范文`, url: path }]
   const editHref = `/?tpl=${esc(ex.tpl)}&ex=${esc(ex.src === 'ex' ? ex.seed : 'tpl:' + ex.seed)}`

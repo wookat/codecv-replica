@@ -8,7 +8,7 @@ export async function templateSeed(env: { ASSETS: { fetch: (r: Request) => Promi
   return r.json() as Promise<TemplateSeed>
 }
 
-export function renderPaper(markdown: string, seed: TemplateSeed, photo = ''): string {
+export function renderPaper(markdown: string, seed: TemplateSeed, opts: { color?: string } = {}, photo = ''): string {
   const { document } = parseHTML('<!doctype html><html><body></body></html>')
-  return createResumePaper(markdown, seed, {}, photo, document as unknown as Document).outerHTML
+  return createResumePaper(markdown, seed, opts, photo, document as unknown as Document).outerHTML
 }
